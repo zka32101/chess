@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 
 /// Severity levels for errors
@@ -177,14 +178,3 @@ class ErrorHandlerService {
 
 /// Singleton accessor
 final errorHandlerService = ErrorHandlerService.instance;
-
-// Firebase exception placeholder for type checking
-class FirebaseException implements Exception {
-  final String code;
-  final String message;
-
-  FirebaseException({required this.code, required this.message});
-
-  @override
-  String toString() => 'FirebaseException($code): $message';
-}

@@ -1,8 +1,10 @@
 import 'package:chess/chess.dart' as chess_lib;
+import 'draw_detection_service.dart';
 
 /// Service for chess game logic and move validation
 class ChessEngineService {
   late chess_lib.Chess _chess;
+  final List<Map<String, dynamic>> _moveHistory = [];
 
   ChessEngineService() {
     _chess = chess_lib.Chess();
@@ -57,7 +59,16 @@ class ChessEngineService {
         toAlgebraic: to,
         promotion: promotion,
       );
-      return _chess.move(move);
+      final result = _chess.move(move);
+      if (result) {
+        // Track move in history for draw detection
+        _moveHistory.add({
+          'from': from,
+          'to': to,
+          'promotion': promotion,
+        });
+      }
+      return result;
     } catch (e) {
       return false;
     }
@@ -82,6 +93,9 @@ class ChessEngineService {
       final moves = _chess.moves() as List<chess_lib.Move>;
       if (moves.isEmpty) return false;
       _chess.undo_move();
+      if (_moveHistory.isNotEmpty) {
+        _moveHistory.removeLast();
+      }
       return true;
     } catch (e) {
       return false;
@@ -106,10 +120,20 @@ class ChessEngineService {
 
     if (isCheckmate()) {
       return _chess.turn == chess_lib.Color.WHITE ? 'black_win' : 'white_win';
-    } else if (isStalemate()) {
+    } else if (DrawDetectionService.canClaimDraw(_chess, _chess.fen, _moveHistory)) {
       return 'draw';
     }
     return null;
+  }
+
+  /// Get draw reasons if game is a draw
+  List<String> getDrawReasons() {
+    return DrawDetectionService.getDrawReasons(_chess, _chess.fen, _moveHistory);
+  }
+
+  /// Check if player can claim draw
+  bool canClaimDraw() {
+    return DrawDetectionService.canClaimDraw(_chess, _chess.fen, _moveHistory);
   }
 
   /// Get whose turn it is (true = white, false = black)
@@ -187,12 +211,43 @@ class ChessEngineService {
   /// Reset the game
   void reset() {
     _chess = chess_lib.Chess();
+    _moveHistory.clear();
   }
 
   /// Load position from FEN
   bool loadFromFen(String fen) {
     try {
       _chess = chess_lib.Chess.fromFEN(fen);
+      _moveHistory.clear();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// Load position from FEN and move history
+  bool loadFromFenAndMoves(String startingFen, List<Map<String, dynamic>> moves) {
+    try {
+      _chess = chess_lib.Chess.fromFEN(startingFen);
+      _moveHistory.clear();
+
+      for (final moveData in moves) {
+        final from = moveData['from'] as String;
+        final to = moveData['to'] as String;
+        final promotion = moveData['promotion'] as String?;
+
+        final move = chess_lib.Move(
+          fromAlgebraic: from,
+          toAlgebraic: to,
+          promotion: promotion,
+        );
+
+        if (!_chess.move(move)) {
+          return false;
+        }
+        _moveHistory.add(moveData);
+      }
+
       return true;
     } catch (e) {
       return false;
