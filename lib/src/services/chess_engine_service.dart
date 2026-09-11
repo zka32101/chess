@@ -1,5 +1,6 @@
 import 'package:chess/chess.dart' as chess_lib;
 import 'draw_detection_service.dart';
+import 'move_validation_service.dart';
 
 /// Service for chess game logic and move validation
 class ChessEngineService {
@@ -28,6 +29,11 @@ class ChessEngineService {
   /// Get all legal moves for current position
   List<chess_lib.Move> getLegalMoves() => _chess.moves() as List<chess_lib.Move>;
 
+  /// Get legal moves for a specific square with detailed information
+  List<LegalMove> getLegalMovesForSquareDetailed(String square) {
+    return MoveValidationService.getLegalMovesFromSquare(_chess, square);
+  }
+
   /// Get legal moves for a specific square (e.g., "e2")
   List<chess_lib.Move> getLegalMovesForSquare(String square) {
     return getLegalMoves()
@@ -35,20 +41,20 @@ class ChessEngineService {
         .toList();
   }
 
-  /// Validate if a move is legal
+  /// Analyze current position for tactical patterns and material balance
+  PositionAnalysis analyzePosition() {
+    return MoveValidationService.analyzePosition(_chess);
+  }
+
+  /// Validate if a move is legal with detailed error reporting
   bool isLegalMove(String from, String to, {String? promotion}) {
-    try {
-      final move = chess_lib.Move(
-        fromAlgebraic: from,
-        toAlgebraic: to,
-        promotion: promotion,
-      );
-      return getLegalMoves().any((m) =>
-          m.fromAlgebraic == move.fromAlgebraic &&
-          m.toAlgebraic == move.toAlgebraic);
-    } catch (e) {
-      return false;
-    }
+    final result = MoveValidationService.validateMove(_chess, from, to, promotion: promotion);
+    return result.isValid;
+  }
+
+  /// Validate move and get detailed error information
+  MoveValidationResult validateMoveDetailed(String from, String to, {String? promotion}) {
+    return MoveValidationService.validateMove(_chess, from, to, promotion: promotion);
   }
 
   /// Make a move (returns true if successful)
