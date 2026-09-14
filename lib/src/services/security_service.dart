@@ -79,7 +79,7 @@ class SecurityService {
     Map<String, dynamic> details,
   ) async {
     // 機密情報のマスキング
-    final sanitizedDetails = _sanitizeDetails(details);
+    final sanitizedDetails = sanitizeDetails(details);
 
     await _firestore.collection('security_audit').add({
       'userId': userId,
@@ -156,8 +156,8 @@ class SecurityService {
     }
   }
 
-  /// ✅ 機密情報マスキング
-  Map<String, dynamic> _sanitizeDetails(Map<String, dynamic> details) {
+  /// ✅ 機密情報マスキング (public for testing)
+  Map<String, dynamic> sanitizeDetails(Map<String, dynamic> details) {
     return details.map((key, value) {
       final lowerKey = key.toLowerCase();
 
