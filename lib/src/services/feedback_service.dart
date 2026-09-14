@@ -1,273 +1,257 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/feedback.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/analytics_service.dart';
 
-/// Feedback Service for user feedback collection and management
+/// Service for managing user feedback and beta testing
 class FeedbackService {
-  static final FeedbackService _instance = FeedbackService._internal();
+  static final FeedbackService _instance = FeedbackService._();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AnalyticsService _analytics;
 
-  final FirebaseFirestore _firestore;
+  FeedbackService._(this._analytics);
 
-  factory FeedbackService({FirebaseFirestore? firestore}) {
-    if (firestore != null) {
-      _instance._firestore = firestore;
-    }
-    return _instance;
-  }
-
-  FeedbackService._internal() : _firestore = FirebaseFirestore.instance;
+  static FeedbackService get instance => _instance;
 
   /// Submit user feedback
   Future<void> submitFeedback({
-    required String userId,
-    required FeedbackCategory category,
-    required String message,
-    required int rating,
-    required String deviceInfo,
-    required String appVersion,
-    required Map<String, dynamic> metadata,
+    required String category,
+    required String title,
+    required String description,
+    double? rating,
+    String? screenshotPath,
+    Map<String, dynamic>? metadata,
   }) async {
-    try {
-      final feedback = UserFeedback(
-        id: _firestore.collection('feedback').doc().id,
-        userId: userId,
-        category: category,
-        message: message,
-        rating: rating,
-        deviceInfo: deviceInfo,
-        appVersion: appVersion,
-        timestamp: DateTime.now(),
-        metadata: metadata,
-      );
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User must be authenticated to submit feedback');
+    }
 
-      await _firestore.collection('feedback').doc(feedback.id).set(feedback.toJson());
+    try {
+      final feedbackDoc = {
+        'userId': user.uid,
+        'category': category,
+        'title': title,
+        'description': description,
+        'rating': rating,
+        'timestamp': FieldValue.serverTimestamp(),
+        'appVersion': '1.0.0',
+        'status': 'new',
+        'metadata': metadata ?? {},
+      };
+
+      await _firestore.collection('beta_feedback').add(feedbackDoc);
+
+      // Track in analytics
+      await _analytics.logEvent(
+        'feedback_submitted',
+        parameters: {
+          'category': category,
+          'rating': rating?.toInt() ?? 0,
+        },
+      );
     } catch (e) {
-      print('Feedback error: $e');
+      print('Error submitting feedback: $e');
       rethrow;
     }
   }
 
-  /// Report a bug
-  Future<void> reportBug({
-    required String userId,
+  /// Submit a bug report
+  Future<void> submitBugReport({
     required String title,
     required String description,
-    String? stackTrace,
-    required BugSeverity severity,
-    required String deviceInfo,
-    required String appVersion,
-    required bool reproducible,
-    required List<String> steps,
+    required String severity,
+    String? screenshotPath,
+    Map<String, dynamic>? gameState,
   }) async {
-    try {
-      final bugReport = BugReport(
-        id: _firestore.collection('bug_reports').doc().id,
-        userId: userId,
-        title: title,
-        description: description,
-        stackTrace: stackTrace,
-        severity: severity,
-        deviceInfo: deviceInfo,
-        appVersion: appVersion,
-        reproducible: reproducible,
-        steps: steps,
-        status: BugStatus.new_,
-        timestamp: DateTime.now(),
-      );
+    await submitFeedback(
+      category: 'bug_report',
+      title: title,
+      description: description,
+      metadata: {
+        'severity': severity,
+        'gameState': gameState,
+        'screenshotPath': screenshotPath,
+      },
+    );
 
-      await _firestore.collection('bug_reports').doc(bugReport.id).set(bugReport.toJson());
-    } catch (e) {
-      print('Bug report error: $e');
-      rethrow;
-    }
+    // Log to analytics for tracking
+    await _analytics.logEvent(
+      'bug_reported',
+      parameters: {
+        'severity': severity,
+        'title': title,
+      },
+    );
   }
 
   /// Submit a feature request
   Future<void> submitFeatureRequest({
-    required String userId,
     required String title,
     required String description,
-    required String category,
+    int? priority,
   }) async {
-    try {
-      final request = FeatureRequest(
-        id: _firestore.collection('feature_requests').doc().id,
-        userId: userId,
-        title: title,
-        description: description,
-        votesCount: 1,
-        category: category,
-        priority: 0,
-        status: RequestStatus.new_,
-        timestamp: DateTime.now(),
-      );
+    await submitFeedback(
+      category: 'feature_request',
+      title: title,
+      description: description,
+      metadata: {
+        'priority': priority ?? 3,
+      },
+    );
 
-      await _firestore.collection('feature_requests').doc(request.id).set(request.toJson());
+    await _analytics.logEvent(
+      'feature_requested',
+      parameters: {
+        'title': title,
+      },
+    );
+  }
+
+  /// Rate the app
+  Future<void> rateApp({
+    required int stars,
+    String? comment,
+  }) async {
+    await submitFeedback(
+      category: 'app_rating',
+      title: 'App Rating',
+      description: comment ?? 'User rated the app',
+      rating: stars.toDouble(),
+    );
+
+    await _analytics.logEvent(
+      'app_rated',
+      parameters: {
+        'stars': stars,
+        'hasComment': comment != null,
+      },
+    );
+  }
+
+  /// Get user's feedback history
+  Future<List<Map<String, dynamic>>> getUserFeedback() async {
+    final user = _auth.currentUser;
+    if (user == null) return [];
+
+    try {
+      final snapshot = await _firestore
+          .collection('beta_feedback')
+          .where('userId', isEqualTo: user.uid)
+          .orderBy('timestamp', descending: true)
+          .limit(50)
+          .get();
+
+      return snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
-      print('Feature request error: $e');
-      rethrow;
+      print('Error fetching user feedback: $e');
+      return [];
     }
   }
 
-  /// Get all feedback
-  Future<List<UserFeedback>> getAllFeedback({int limit = 50, String? cursor}) async {
-    try {
-      Query query = _firestore
-          .collection('feedback')
-          .orderBy('timestamp', descending: true)
-          .limit(limit);
+  /// Check if user should see rating prompt
+  bool shouldShowRatingPrompt({
+    required int gameCount,
+    required DateTime lastPromptDate,
+  }) {
+    // Show after every 3 games, with minimum 7 day gap
+    final daysSinceLastPrompt = DateTime.now().difference(lastPromptDate).inDays;
+    return gameCount % 3 == 0 && daysSinceLastPrompt >= 7;
+  }
 
-      if (cursor != null) {
-        final docSnapshot =
-            await _firestore.collection('feedback').doc(cursor).get();
-        query = query.startAfterDocument(docSnapshot);
+  /// Track beta participation
+  Future<void> trackBetaParticipation({
+    required String trackingId,
+    String? betaChannel,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore
+          .collection('beta_participants')
+          .doc(user.uid)
+          .set({
+            'trackingId': trackingId,
+            'betaChannel': betaChannel,
+            'joinedAt': FieldValue.serverTimestamp(),
+            'metadata': metadata ?? {},
+          }, SetOptions(merge: true));
+
+      await _analytics.setUserProperty(
+        name: 'beta_participant',
+        value: 'true',
+      );
+    } catch (e) {
+      print('Error tracking beta participation: $e');
+    }
+  }
+
+  /// Get beta tester status
+  Future<Map<String, dynamic>?> getBetaTesterStatus() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    try {
+      final doc = await _firestore
+          .collection('beta_participants')
+          .doc(user.uid)
+          .get();
+
+      return doc.data();
+    } catch (e) {
+      print('Error fetching beta tester status: $e');
+      return null;
+    }
+  }
+
+  /// Report performance issue
+  Future<void> reportPerformanceIssue({
+    required String description,
+    required double startupTime,
+    required double navigationTime,
+    required int memoryUsageMB,
+  }) async {
+    await submitFeedback(
+      category: 'performance_issue',
+      title: 'Performance Report',
+      description: description,
+      metadata: {
+        'startupTime': startupTime,
+        'navigationTime': navigationTime,
+        'memoryUsageMB': memoryUsageMB,
+      },
+    );
+
+    await _analytics.logEvent(
+      'performance_issue_reported',
+      parameters: {
+        'startupTime': startupTime.toInt(),
+        'memoryUsageMB': memoryUsageMB,
+      },
+    );
+  }
+
+  /// Get feedback summary for dashboard
+  Future<Map<String, int>> getFeedbackSummary() async {
+    try {
+      final snapshot = await _firestore
+          .collection('beta_feedback')
+          .snapshots()
+          .first;
+
+      final summary = <String, int>{};
+      
+      for (final doc in snapshot.docs) {
+        final category = doc['category'] as String? ?? 'unknown';
+        summary[category] = (summary[category] ?? 0) + 1;
       }
 
-      final querySnapshot = await query.get();
-      return querySnapshot.docs
-          .map((doc) => UserFeedback.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
+      return summary;
     } catch (e) {
-      print('Error fetching feedback: $e');
-      return [];
-    }
-  }
-
-  /// Get feedback by category
-  Future<List<UserFeedback>> getFeedbackByCategory(FeedbackCategory category) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('feedback')
-          .where('category', isEqualTo: category.name)
-          .orderBy('timestamp', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => UserFeedback.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      print('Error fetching feedback by category: $e');
-      return [];
-    }
-  }
-
-  /// Get all bug reports
-  Future<List<BugReport>> getAllBugReports({int limit = 50}) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('bug_reports')
-          .orderBy('timestamp', descending: true)
-          .limit(limit)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => BugReport.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      print('Error fetching bug reports: $e');
-      return [];
-    }
-  }
-
-  /// Get bug reports by severity
-  Future<List<BugReport>> getBugReportsBySeverity(BugSeverity severity) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('bug_reports')
-          .where('severity', isEqualTo: severity.name)
-          .orderBy('timestamp', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => BugReport.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      print('Error fetching bug reports by severity: $e');
-      return [];
-    }
-  }
-
-  /// Get feature requests
-  Future<List<FeatureRequest>> getFeatureRequests({int limit = 50}) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('feature_requests')
-          .orderBy('votesCount', descending: true)
-          .limit(limit)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => FeatureRequest.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      print('Error fetching feature requests: $e');
-      return [];
-    }
-  }
-
-  /// Upvote a feature request
-  Future<void> upvoteFeatureRequest(String requestId) async {
-    try {
-      await _firestore.collection('feature_requests').doc(requestId).update({
-        'votesCount': FieldValue.increment(1),
-      });
-    } catch (e) {
-      print('Error upvoting feature request: $e');
-      rethrow;
-    }
-  }
-
-  /// Get feedback statistics
-  Future<Map<String, dynamic>> getFeedbackStats() async {
-    try {
-      final totalFeedback = await _firestore.collection('feedback').count().get();
-      final totalBugs = await _firestore.collection('bug_reports').count().get();
-      final totalRequests = await _firestore.collection('feature_requests').count().get();
-
-      final averageRating = await _firestore
-          .collection('feedback')
-          .get()
-          .then((snapshot) {
-        if (snapshot.docs.isEmpty) return 0.0;
-        final sum =
-            snapshot.docs.fold<int>(0, (acc, doc) => acc + (doc['rating'] as int? ?? 0));
-        return sum / snapshot.docs.length;
-      });
-
-      return {
-        'totalFeedback': totalFeedback.count,
-        'totalBugReports': totalBugs.count,
-        'totalFeatureRequests': totalRequests.count,
-        'averageRating': averageRating,
-        'timestamp': DateTime.now().toIso8601String(),
-      };
-    } catch (e) {
-      print('Error getting feedback statistics: $e');
+      print('Error fetching feedback summary: $e');
       return {};
-    }
-  }
-
-  /// Update bug report status
-  Future<void> updateBugReportStatus(String bugId, BugStatus status) async {
-    try {
-      await _firestore.collection('bug_reports').doc(bugId).update({
-        'status': status.name,
-      });
-    } catch (e) {
-      print('Error updating bug report status: $e');
-      rethrow;
-    }
-  }
-
-  /// Update feature request status
-  Future<void> updateFeatureRequestStatus(
-      String requestId, RequestStatus status) async {
-    try {
-      await _firestore.collection('feature_requests').doc(requestId).update({
-        'status': status.name,
-      });
-    } catch (e) {
-      print('Error updating feature request status: $e');
-      rethrow;
     }
   }
 }
