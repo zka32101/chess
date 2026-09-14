@@ -1,274 +1,254 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:riverpod/riverpod.dart';
-
-import '../models/lesson.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/chess_lessons_service.dart';
 
-part 'phase_i_providers.g.dart';
+// ========== Service Provider ==========
 
-// ============================================================================
-// Service Providers
-// ============================================================================
+final chessLessonsServiceProvider = Provider((ref) {
+  return ChessLessonsService.instance;
+});
 
-@riverpod
-ChessLessonsService chessLessonsService(ChessLessonsServiceRef ref) {
-  return ChessLessonsService();
-}
+// ========== Lesson Query Providers ==========
 
-// ============================================================================
-// Lesson Retrieval Providers
-// ============================================================================
-
-@riverpod
-Future<List<ChessLesson>> openingLessons(
-  OpeningLessonsRef ref, {
-  DifficultyLevel? difficulty,
-}) async {
+/// Get all lessons by type and difficulty
+final lessonsByTypeProvider = FutureProvider.family<List<ChessLesson>, (String, int)>((ref, args) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getLessonsByType(
-    ContentType.opening,
-    difficulty: difficulty,
-  );
-}
+  return service.getLessonsByType(args.$1, args.$2);
+});
 
-@riverpod
-Future<List<ChessLesson>> tacticLessons(
-  TacticLessonsRef ref, {
-  DifficultyLevel? difficulty,
-}) async {
+/// Get opening lessons by difficulty
+final openingLessonsProvider = FutureProvider.family<List<ChessLesson>, int>((ref, difficulty) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getLessonsByType(
-    ContentType.tactic,
-    difficulty: difficulty,
-  );
-}
+  return service.getLessonsByType('opening', difficulty);
+});
 
-@riverpod
-Future<List<ChessLesson>> strategyLessons(
-  StrategyLessonsRef ref, {
-  DifficultyLevel? difficulty,
-}) async {
+/// Get all openings (aggregated across difficulties)
+final allOpeningsProvider = FutureProvider<List<ChessLesson>>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getLessonsByType(
-    ContentType.strategy,
-    difficulty: difficulty,
-  );
-}
+  final results = <ChessLesson>[];
 
-@riverpod
-Future<List<OpeningExplanation>> allOpenings(AllOpeningsRef ref) async {
+  for (int difficulty = 1; difficulty <= 5; difficulty++) {
+    final lessons = await service.getLessonsByType('opening', difficulty);
+    results.addAll(lessons);
+  }
+
+  return results;
+});
+
+/// Get tactic lessons by difficulty
+final tacticLessonsProvider = FutureProvider.family<List<ChessLesson>, int>((ref, difficulty) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getAllOpenings();
-}
+  return service.getLessonsByType('tactics', difficulty);
+});
 
-@riverpod
-Future<OpeningExplanation?> openingByEco(
-  OpeningByEcoRef ref,
-  String ecoCode,
-) async {
+/// Get all tactics patterns
+final allTacticsProvider = FutureProvider<List<ChessLesson>>((ref) async {
+  final service = ref.watch(chessLessonsServiceProvider);
+  final results = <ChessLesson>[];
+
+  for (int difficulty = 1; difficulty <= 5; difficulty++) {
+    final lessons = await service.getLessonsByType('tactics', difficulty);
+    results.addAll(lessons);
+  }
+
+  return results;
+});
+
+/// Get strategy lessons (all difficulties)
+final strategyLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async {
+  final service = ref.watch(chessLessonsServiceProvider);
+  return service.getLessonsByType('strategy', 0);
+});
+
+/// Get specific opening by ECO code
+final openingByEcoProvider = FutureProvider.family<OpeningExplanation?, String>((ref, ecoCode) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getOpeningByEco(ecoCode);
-}
+});
 
-@riverpod
-Future<List<TacticsPattern>> tacticsByDifficulty(
-  TacticsByDifficultyRef ref,
-  DifficultyLevel difficulty,
-) async {
+/// Get tactics patterns by difficulty
+final tacticsByDifficultyProvider = FutureProvider.family<List<TacticsPattern>, int>((ref, difficulty) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getTacticsByDifficulty(difficulty);
-}
+});
 
-@riverpod
-Future<List<TacticsPattern>> allTactics(AllTacticsRef ref) async {
+/// Get recommended lessons for current user
+final recommendedLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getAllTactics();
-}
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
 
-@riverpod
-Future<List<StrategyGuide>> strategyGuides(StrategyGuidesRef ref) async {
+  if (userId == null) return [];
+
+  return service.getRecommendedLessons(userId, 10);
+});
+
+// ========== Progress Tracking Providers ==========
+
+/// Get user's complete lesson progress
+final userLessonProgressProvider = FutureProvider<List<UserLessonProgress>>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getStrategyGuides();
-}
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
 
-@riverpod
-Future<List<LessonCollection>> lessonCollections(
-  LessonCollectionsRef ref, {
-  DifficultyLevel? difficulty,
-}) async {
-  final service = ref.watch(chessLessonsServiceProvider);
-  return service.getLessonCollections(difficulty: difficulty);
-}
+  if (userId == null) return [];
 
-// ============================================================================
-// User Progress Providers
-// ============================================================================
-
-@riverpod
-Future<List<UserLessonProgress>> userLessonProgress(
-  UserLessonProgressRef ref,
-  String userId,
-) async {
-  final service = ref.watch(chessLessonsServiceProvider);
   return service.getUserProgress(userId);
-}
+});
 
-@riverpod
-Future<UserLessonProgress?> lessonProgress(
-  LessonProgressRef ref,
-  String userId,
-  String lessonId,
-) async {
+/// Get progress for specific lesson
+final lessonProgressProvider = FutureProvider.family<UserLessonProgress?, String>((ref, lessonId) async {
+  final progress = await ref.watch(userLessonProgressProvider.future);
+  try {
+    return progress.firstWhere((p) => p.lessonId == lessonId);
+  } catch (e) {
+    return null;
+  }
+});
+
+/// Get user's learning statistics
+final userLearningStatsProvider = FutureProvider<LearningStatistics>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
-  return service.getUserLessonProgress(userId, lessonId);
-}
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
 
-@riverpod
-Future<Map<String, dynamic>> openingStatistics(
-  OpeningStatisticsRef ref,
-  String ecoCode,
-) async {
-  final service = ref.watch(chessLessonsServiceProvider);
-  return service.getOpeningStatistics(ecoCode);
-}
-
-// ============================================================================
-// State Notifiers for Lesson Interactions
-// ============================================================================
-
-class LessonProgressNotifier extends StateNotifier<AsyncValue<void>> {
-  final ChessLessonsService _lessonsService;
-
-  LessonProgressNotifier(this._lessonsService)
-      : super(const AsyncValue.data(null));
-
-  Future<void> startLesson(String userId, String lessonId) async {
-    state = const AsyncValue.loading();
-    try {
-      await _lessonsService.startLesson(userId, lessonId);
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+  if (userId == null) {
+    return LearningStatistics(
+      lessonsStarted: 0,
+      lessonsCompleted: 0,
+      totalLessonsReviewed: 0,
+      totalTimeSpent: Duration.zero,
+      currentStreak: 0,
+      averageDifficulty: 0.0,
+      topicsMastered: [],
+      topicsToImprove: [],
+      overallProgress: 0.0,
+    );
   }
 
-  Future<void> updateProgress(
-    String userId,
-    String lessonId,
-    int percentageComplete,
-  ) async {
-    state = const AsyncValue.loading();
-    try {
-      await _lessonsService.updateLessonProgress(
-        userId,
-        lessonId,
-        percentageComplete,
-      );
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
-  }
+  return service.getLearningStats(userId);
+});
 
-  Future<void> rateLessonCompletion(
-    String userId,
-    String lessonId,
-    double score,
-  ) async {
-    state = const AsyncValue.loading();
-    try {
-      await _lessonsService.rateLessonCompletion(userId, lessonId, score);
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
-  }
+// ========== State Management Providers ==========
 
-  Future<void> addNote(String userId, String lessonId, String note) async {
-    state = const AsyncValue.loading();
-    try {
-      await _lessonsService.addNoteToLesson(userId, lessonId, note);
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
-  }
-}
+/// Track currently active lesson
+final activeLessonProvider = StateProvider<String?>((ref) {
+  return null;
+});
 
-@riverpod
-StateNotifier<AsyncValue<void>> lessonProgressNotifier(
-    LessonProgressNotifierRef ref) {
-  final service = ref.watch(chessLessonsServiceProvider);
-  return LessonProgressNotifier(service);
-}
+/// Track lesson notes/annotations
+final lessonNotesProvider = StateProvider.family<String, String>((ref, lessonId) {
+  return '';
+});
 
-// ============================================================================
-// Aggregated Progress Analytics
-// ============================================================================
+/// Track self-assessment score for lesson
+final selfAssessmentProvider = StateProvider.family<int, String>((ref, lessonId) {
+  return 0;
+});
 
-@riverpod
-Future<Map<String, dynamic>> userProgressAnalytics(
-  UserProgressAnalyticsRef ref,
-  String userId,
-) async {
-  final service = ref.watch(chessLessonsServiceProvider);
-  final progress = await service.getUserProgress(userId);
+/// Track current lesson difficulty filter
+final lessonDifficultyFilterProvider = StateProvider<int>((ref) {
+  return 1;
+});
 
-  if (progress.isEmpty) {
-    return {
-      'totalLessonsStarted': 0,
-      'totalLessonsCompleted': 0,
-      'completionRate': 0.0,
-      'averageScore': 0.0,
-      'learningStreak': 0,
-      'totalHoursSpent': 0.0,
-    };
-  }
+/// Track current lesson type filter
+final lessonTypeFilterProvider = StateProvider<String>((ref) {
+  return 'opening';
+});
 
-  final completed =
-      progress.where((p) => p.status == LessonStatus.completed).length;
-  final totalHours = progress.fold<double>(
-    0.0,
-    (sum, p) => sum + (p.percentageComplete / 100.0),
+// ========== Computed/Aggregated Providers ==========
+
+/// Check if user has started a specific lesson
+final hasStartedLessonProvider = FutureProvider.family<bool, String>((ref, lessonId) async {
+  final progress = await ref.watch(lessonProgressProvider(lessonId).future);
+  return progress != null && progress.status != 'not_started';
+});
+
+/// Get lessons completed count
+final lessonsCompletedCountProvider = FutureProvider<int>((ref) async {
+  final stats = await ref.watch(userLearningStatsProvider.future);
+  return stats.lessonsCompleted;
+});
+
+/// Get current learning streak
+final currentStreakProvider = FutureProvider<int>((ref) async {
+  final stats = await ref.watch(userLearningStatsProvider.future);
+  return stats.currentStreak;
+});
+
+/// Get topics mastered
+final topicsMasteredProvider = FutureProvider<List<String>>((ref) async {
+  final stats = await ref.watch(userLearningStatsProvider.future);
+  return stats.topicsMastered;
+});
+
+/// Get topics needing improvement
+final topicsToImproveProvider = FutureProvider<List<String>>((ref) async {
+  final stats = await ref.watch(userLearningStatsProvider.future);
+  return stats.topicsToImprove;
+});
+
+/// Get overall learning progress percentage
+final overallProgressProvider = FutureProvider<double>((ref) async {
+  final stats = await ref.watch(userLearningStatsProvider.future);
+  return stats.overallProgress;
+});
+
+/// Filter lessons by active filters
+final filteredLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async {
+  final type = ref.watch(lessonTypeFilterProvider);
+  final difficulty = ref.watch(lessonDifficultyFilterProvider);
+
+  return ref.watch(lessonsByTypeProvider((type, difficulty)).future);
+});
+
+/// Get statistics summary for dashboard
+final lessonStatsSummaryProvider = FutureProvider<LessonStatsSummary>((ref) async {
+  final stats = await ref.watch(userLearningStatsProvider.future);
+  final progress = await ref.watch(userLessonProgressProvider.future);
+  final completed = await ref.watch(lessonsCompletedCountProvider.future);
+
+  return LessonStatsSummary(
+    totalLessonsStarted: stats.lessonsStarted,
+    totalLessonsCompleted: completed,
+    currentStreak: stats.currentStreak,
+    averageDifficulty: stats.averageDifficulty,
+    overallProgress: stats.overallProgress,
+    topicsMastered: stats.topicsMastered.length,
+    topicsToImprove: stats.topicsToImprove.length,
+    totalTimeSpent: stats.totalTimeSpent,
+    nextRecommendedDifficulty: _getNextDifficulty(stats.averageDifficulty),
   );
-  final avgScore = progress.isNotEmpty
-      ? progress.fold<double>(
-          0.0,
-          (sum, p) => sum + p.selfAssessmentScore,
-        ) /
-          progress.length
-      : 0.0;
+});
 
-  return {
-    'totalLessonsStarted': progress.length,
-    'totalLessonsCompleted': completed,
-    'completionRate': completed / progress.length,
-    'averageScore': avgScore,
-    'learningStreak': _calculateLearningStreak(progress),
-    'totalHoursSpent': totalHours,
-  };
+// ========== Helper Functions ==========
+
+int _getNextDifficulty(double currentDifficulty) {
+  return (currentDifficulty + 1).ceil().clamp(1, 5);
 }
 
-int _calculateLearningStreak(List<UserLessonProgress> progress) {
-  if (progress.isEmpty) return 0;
+// ========== Data Classes ==========
 
-  final sortedByDate = [...progress];
-  sortedByDate.sort(
-    (a, b) => b.lastAccessedDate.compareTo(a.lastAccessedDate),
-  );
+class LessonStatsSummary {
+  final int totalLessonsStarted;
+  final int totalLessonsCompleted;
+  final int currentStreak;
+  final double averageDifficulty;
+  final double overallProgress;
+  final int topicsMastered;
+  final int topicsToImprove;
+  final Duration totalTimeSpent;
+  final int nextRecommendedDifficulty;
 
-  int streak = 1;
-  for (int i = 0; i < sortedByDate.length - 1; i++) {
-    final current = sortedByDate[i].lastAccessedDate;
-    final next = sortedByDate[i + 1].lastAccessedDate;
-    final daysDifference = current.difference(next).inDays;
-
-    if (daysDifference <= 1) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-
-  return streak;
+  LessonStatsSummary({
+    required this.totalLessonsStarted,
+    required this.totalLessonsCompleted,
+    required this.currentStreak,
+    required this.averageDifficulty,
+    required this.overallProgress,
+    required this.topicsMastered,
+    required this.topicsToImprove,
+    required this.totalTimeSpent,
+    required this.nextRecommendedDifficulty,
+  });
 }
