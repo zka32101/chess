@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../services/paywall_service.dart';
 import '../services/feature_gating_service.dart';
 
@@ -48,7 +49,11 @@ final userSubscriptionProvider = FutureProvider<UserSubscription>((ref) async {
     final expiryTimestamp = data['subscriptionExpiry'] as Timestamp?;
     final expiryDate = expiryTimestamp?.toDate();
 
-    final isActive = tier != 'free' && (expiryDate?.isAfter(DateTime.now()) ?? false);
+    // Check if this is a lifetime subscription (no expiry date and tier is not free)
+    final isLifetime = data['isLifetime'] as bool? ?? (expiryDate == null && tier != 'free');
+
+    // Active if: not free tier AND (lifetime OR expiry date is in the future)
+    final isActive = tier != 'free' && (isLifetime || expiryDate?.isAfter(DateTime.now()) ?? false);
 
     return UserSubscription(
       tier: tier,
@@ -56,7 +61,7 @@ final userSubscriptionProvider = FutureProvider<UserSubscription>((ref) async {
       isActive: isActive,
     );
   } catch (e) {
-    print('Error fetching subscription: $e');
+    debugPrint('Error fetching subscription: $e');
     return UserSubscription(tier: 'free', isActive: false);
   }
 });

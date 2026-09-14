@@ -100,8 +100,16 @@ class ABTestingService {
       return variant;
     } catch (e) {
       debugPrint('Error getting user variant: $e');
-      // Fallback to first variant
-      return variants.first;
+      // Fallback: try to get experiment and return first variant
+      try {
+        final experiment = await _getExperiment(experimentId);
+        return experiment.variants.isNotEmpty
+            ? experiment.variants.first
+            : 'control';
+      } catch (_) {
+        // Final fallback to 'control' variant
+        return 'control';
+      }
     }
   }
 

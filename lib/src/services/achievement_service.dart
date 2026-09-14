@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class AchievementService {
   static final AchievementService _instance = AchievementService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, List<AchievementDefinition>> _achievementCache = {};
+  final Map<String, Timer> _cacheTimers = {};
 
   factory AchievementService() {
     return _instance;
@@ -42,8 +44,14 @@ class AchievementService {
           .toList();
 
       _achievementCache['all'] = achievements;
-      Future.delayed(Duration(hours: 1)).then((_) {
+
+      // Cancel existing timer if present
+      _cacheTimers['all']?.cancel();
+
+      // Set new timer for cache invalidation
+      _cacheTimers['all'] = Timer(Duration(hours: 1), () {
         _achievementCache.remove('all');
+        _cacheTimers.remove('all');
       });
 
       return achievements;

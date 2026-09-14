@@ -69,7 +69,9 @@ final feedbackReportProvider = FutureProvider.family<FeedbackReport, Duration>((
 /// Get sentiment trend
 final sentimentTrendProvider = FutureProvider.family<double, Duration>((ref, period) async {
   final analysis = ref.watch(feedbackAnalysisServiceProvider);
-  return analysis._calculateSentimentTrend(period);
+  // Use public method instead of private implementation
+  final report = await analysis.aggregateFeedback(period);
+  return report.sentimentTrend;
 });
 
 // ========== A/B Testing Providers ==========
