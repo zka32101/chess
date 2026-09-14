@@ -1,371 +1,379 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import '../config/deployment_config.dart';
 
-/// Service for monitoring app health, performance, and user behavior post-launch
+/// Service for comprehensive post-launch monitoring
 class MonitoringService {
-  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  static final MonitoringService _instance = MonitoringService._();
   final FirebaseCrashlytics _crashlytics = FirebaseCrashlytics.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // ============================================================================
-  // APP STARTUP & PERFORMANCE MONITORING
-  // ============================================================================
+  // Severity levels
+  static const String SEVERITY_FATAL = 'fatal';
+  static const String SEVERITY_HIGH = 'high';
+  static const String SEVERITY_MEDIUM = 'medium';
+  static const String SEVERITY_LOW = 'low';
 
-  /// Track app startup time for performance monitoring
-  Future<void> trackAppStartup(Duration startupTime) async {
-    await _analytics.logEvent(
-      name: 'app_startup_time',
-      parameters: {
-        'startup_time_ms': startupTime.inMilliseconds,
-        'release_version': DeploymentConfig.appVersion,
-        'build_number': DeploymentConfig.buildNumber,
-      },
-    );
+  // Performance threshold targets (milliseconds)
+  static const int STARTUP_TARGET = 2500; // 2.5 seconds
+  static const int NAVIGATION_TARGET = 300;
+  static const int MOVE_EXECUTION_TARGET = 50;
+  static const int MEMORY_TARGET = 120; // MB
 
-    // Alert if startup time exceeds target (3 seconds)
-    if (startupTime.inMilliseconds > 3000) {
-      await _logPerformanceWarning(
-        'app_startup_slow',
-        'App startup took ${startupTime.inSeconds}s (target: <3s)',
-      );
+  MonitoringService._();
+
+  static MonitoringService get instance => _instance;
+
+  /// Record breadcrumb for session tracking
+  Future<void> recordBreadcrumb(String message, Map<String, dynamic> data) async {
+    try {
+      _crashlytics.log('[$message] ${data.toString()}');
+    } catch (e) {
+      debugPrint('Error recording breadcrumb: $e');
     }
   }
 
-  /// Track screen transition performance
-  Future<void> trackScreenTransition(
-    String fromScreen,
-    String toScreen,
-    Duration transitionTime,
-  ) async {
-    await _analytics.logEvent(
-      name: 'screen_transition',
-      parameters: {
-        'from_screen': fromScreen,
-        'to_screen': toScreen,
-        'transition_time_ms': transitionTime.inMilliseconds,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
+  /// Log user action with context
+  Future<void> logUserAction(
+    String action, {
+    required Map<String, dynamic> metadata,
+    String? userId,
+  }) async {
+    final user = userId ?? _auth.currentUser?.uid;
 
-    // Alert if transition is slow (>500ms)
-    if (transitionTime.inMilliseconds > 500) {
-      await _logPerformanceWarning(
-        'screen_transition_slow',
-        '$fromScreen → $toScreen took ${transitionTime.inMilliseconds}ms',
-      );
+    try {
+      await _firestore
+          .collection('monitoring')
+          .doc('user_actions')
+          .collection('events')
+          .add({
+        'action': action,
+        'userId': user,
+        'metadata': metadata,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Also log to Crashlytics breadcrumbs
+      _crashlytics.log('Action: $action | ${metadata.toString()}');
+    } catch (e) {
+      debugPrint('Error logging user action: $e');
     }
   }
 
-  /// Track feature-specific performance
-  Future<void> trackFeaturePerformance(
-    String featureName,
-    Duration duration,
-    Map<String, dynamic> metadata,
-  ) async {
-    await _analytics.logEvent(
-      name: 'feature_performance',
-      parameters: {
-        'feature_name': featureName,
-        'duration_ms': duration.inMilliseconds,
-        'release_version': DeploymentConfig.appVersion,
-        ...metadata,
-      },
-    );
+  /// Track performance metric
+  Future<void> trackPerformance(
+    String metricName, {
+    required int durationMs,
+    required bool exceedsTarget,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      await _firestore
+          .collection('monitoring')
+          .doc('performance_metrics')
+          .collection('measurements')
+          .add({
+        'metric': metricName,
+        'durationMs': durationMs,
+        'exceedsTarget': exceedsTarget,
+        'metadata': metadata ?? {},
+        'timestamp': FieldValue.serverTimestamp(),
+        'userId': _auth.currentUser?.uid,
+      });
+
+      if (exceedsTarget) {
+        _crashlytics.log(
+          'Performance Warning: $metricName took ${durationMs}ms (target: ${_getTarget(metricName)}ms)',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error tracking performance: $e');
+    }
   }
 
-  // ============================================================================
-  // ERROR & CRASH TRACKING
-  // ============================================================================
-
-  /// Record uncaught exceptions with detailed context
-  Future<void> recordException(
-    dynamic exception,
-    StackTrace stackTrace,
+  /// Record crash with severity categorization
+  Future<void> recordCrash(
+    Object exception,
+    StackTrace? stackTrace, {
+    required String severity,
     Map<String, dynamic>? context,
-  ) async {
-    // Log to Crashlytics
-    await _crashlytics.recordError(
-      exception,
-      stackTrace,
-      reason: 'Uncaught exception in ${context?['screen'] ?? 'unknown'}',
-      fatal: false,
-    );
+  }) async {
+    try {
+      // Log to Crashlytics
+      await _crashlytics.recordError(exception, stackTrace);
 
-    // Also log to Analytics for tracking
-    await _analytics.logEvent(
-      name: 'app_exception',
-      parameters: {
-        'error_type': exception.runtimeType.toString(),
-        'error_message': exception.toString(),
-        'screen': context?['screen'] ?? 'unknown',
-        'feature': context?['feature'] ?? 'unknown',
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
+      // Store in Firestore for analysis
+      await _firestore
+          .collection('monitoring')
+          .doc('crashes')
+          .collection('incidents')
+          .add({
+        'error': exception.toString(),
+        'severity': severity,
+        'userId': _auth.currentUser?.uid,
+        'context': context ?? {},
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-    // Check if this is a critical error
-    if (_isCriticalError(exception)) {
-      await _logCriticalError(exception, stackTrace, context);
+      // Alert if critical
+      if (severity == SEVERITY_FATAL) {
+        await _alertCriticalIssue('Critical crash detected', exception.toString());
+      }
+    } catch (e) {
+      debugPrint('Error recording crash: $e');
     }
   }
 
-  /// Track API/network errors
-  Future<void> trackNetworkError(
-    String endpoint,
-    int? statusCode,
-    String errorMessage,
-  ) async {
-    await _analytics.logEvent(
-      name: 'network_error',
-      parameters: {
-        'endpoint': endpoint,
-        'status_code': statusCode ?? 0,
-        'error_message': errorMessage,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
+  /// Track ANR (Application Not Responding) metrics
+  Future<void> trackANR({
+    required int durationMs,
+    required String screen,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      await _firestore
+          .collection('monitoring')
+          .doc('anr_events')
+          .collection('incidents')
+          .add({
+        'screen': screen,
+        'durationMs': durationMs,
+        'metadata': metadata ?? {},
+        'timestamp': FieldValue.serverTimestamp(),
+        'userId': _auth.currentUser?.uid,
+      });
 
-    // Alert on critical HTTP errors
-    if (statusCode == 500 || statusCode == 503) {
-      await _logCriticalError(
-        Exception('Server error: $statusCode'),
-        StackTrace.current,
-        {'endpoint': endpoint},
+      if (durationMs > 5000) {
+        _crashlytics.log('ANR detected on $screen: ${durationMs}ms');
+      }
+    } catch (e) {
+      debugPrint('Error tracking ANR: $e');
+    }
+  }
+
+  /// Get crash rate for period
+  Future<double> getCrashRate(Duration period) async {
+    try {
+      final cutoff = Timestamp.fromDate(
+        DateTime.now().subtract(period),
+      );
+
+      final crashes = await _firestore
+          .collection('monitoring')
+          .doc('crashes')
+          .collection('incidents')
+          .where('timestamp', isGreaterThan: cutoff)
+          .count()
+          .get();
+
+      final sessions = await _firestore
+          .collection('monitoring')
+          .doc('sessions')
+          .collection('data')
+          .where('timestamp', isGreaterThan: cutoff)
+          .count()
+          .get();
+
+      if (sessions.count == 0) return 1.0;
+      return 1.0 - (crashes.count / sessions.count);
+    } catch (e) {
+      debugPrint('Error calculating crash rate: $e');
+      return 1.0;
+    }
+  }
+
+  /// Get ANR rate for period
+  Future<double> getANRRate(Duration period) async {
+    try {
+      final cutoff = Timestamp.fromDate(
+        DateTime.now().subtract(period),
+      );
+
+      final anrs = await _firestore
+          .collection('monitoring')
+          .doc('anr_events')
+          .collection('incidents')
+          .where('timestamp', isGreaterThan: cutoff)
+          .count()
+          .get();
+
+      final sessions = await _firestore
+          .collection('monitoring')
+          .doc('sessions')
+          .collection('data')
+          .where('timestamp', isGreaterThan: cutoff)
+          .count()
+          .get();
+
+      if (sessions.count == 0) return 0.0;
+      return anrs.count / sessions.count;
+    } catch (e) {
+      debugPrint('Error calculating ANR rate: $e');
+      return 0.0;
+    }
+  }
+
+  /// Get average performance metric
+  Future<int> getAverageMetric(String metricName, Duration period) async {
+    try {
+      final cutoff = Timestamp.fromDate(
+        DateTime.now().subtract(period),
+      );
+
+      final query = await _firestore
+          .collection('monitoring')
+          .doc('performance_metrics')
+          .collection('measurements')
+          .where('metric', isEqualTo: metricName)
+          .where('timestamp', isGreaterThan: cutoff)
+          .get();
+
+      if (query.docs.isEmpty) return 0;
+
+      final total = query.docs.fold<int>(
+        0,
+        (sum, doc) => sum + (doc['durationMs'] as int? ?? 0),
+      );
+
+      return (total / query.docs.length).toInt();
+    } catch (e) {
+      debugPrint('Error getting average metric: $e');
+      return 0;
+    }
+  }
+
+  /// Get performance metrics summary
+  Future<PerformanceSummary> getPerformanceSummary(Duration period) async {
+    try {
+      final startupTime = await getAverageMetric('startup', period);
+      final navigationTime = await getAverageMetric('navigation', period);
+      final moveExecutionTime = await getAverageMetric('move_execution', period);
+      final crashRate = await getCrashRate(period);
+      final anrRate = await getANRRate(period);
+
+      return PerformanceSummary(
+        startupTimeMs: startupTime,
+        navigationTimeMs: navigationTime,
+        moveExecutionTimeMs: moveExecutionTime,
+        crashFreeRate: crashRate,
+        anrRate: anrRate,
+        period: period,
+      );
+    } catch (e) {
+      debugPrint('Error getting performance summary: $e');
+      return PerformanceSummary(
+        startupTimeMs: 0,
+        navigationTimeMs: 0,
+        moveExecutionTimeMs: 0,
+        crashFreeRate: 1.0,
+        anrRate: 0.0,
+        period: period,
       );
     }
   }
 
-  /// Track validation/input errors
-  Future<void> trackValidationError(
-    String fieldName,
-    String validationRule,
-    dynamic invalidValue,
-  ) async {
-    await _analytics.logEvent(
-      name: 'validation_error',
-      parameters: {
-        'field_name': fieldName,
-        'validation_rule': validationRule,
-        'invalid_type': invalidValue.runtimeType.toString(),
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  // ============================================================================
-  // ENGAGEMENT & HEALTH METRICS
-  // ============================================================================
-
-  /// Track user engagement metrics
-  Future<void> trackEngagement(
-    String userId,
-    String subscriptionTier,
-    Duration sessionDuration,
-  ) async {
-    await _analytics.logEvent(
-      name: 'user_engagement',
-      parameters: {
-        'user_id': userId,
-        'subscription_tier': subscriptionTier,
-        'session_duration_seconds': sessionDuration.inSeconds,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-
-    // Set user properties for segmentation
-    await _setUserProperties(userId, subscriptionTier);
-  }
-
-  /// Track retention
-  Future<void> trackRetention(String userId, int daysSinceInstall) async {
-    await _analytics.logEvent(
-      name: 'retention_check',
-      parameters: {
-        'user_id': userId,
-        'days_since_install': daysSinceInstall,
-        'is_retained': daysSinceInstall >= 1,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  /// Track churn risk
-  Future<void> trackChurnRisk(String userId, Map<String, dynamic> riskFactors) async {
-    await _analytics.logEvent(
-      name: 'churn_risk',
-      parameters: {
-        'user_id': userId,
-        'days_since_last_session': riskFactors['daysSinceLastSession'] ?? 0,
-        'session_count': riskFactors['sessionCount'] ?? 0,
-        'avg_session_duration_seconds': riskFactors['avgSessionDuration'] ?? 0,
-        'has_premium': riskFactors['hasPremium'] ?? false,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  // ============================================================================
-  // RELEASE-SPECIFIC MONITORING
-  // ============================================================================
-
-  /// Track installation source (marketing attribution)
-  Future<void> trackInstallSource(String source, String? campaign) async {
-    await _analytics.logEvent(
-      name: 'app_install',
-      parameters: {
-        'source': source, // 'organic', 'app_store', 'campaign', etc.
-        'campaign': campaign ?? 'unknown',
-        'release_version': DeploymentConfig.appVersion,
-        'install_timestamp': DateTime.now().toIso8601String(),
-      },
-    );
-  }
-
-  /// Track app rating/review submissions
-  Future<void> trackRatingSubmission(int rating, String? reviewText) async {
-    await _analytics.logEvent(
-      name: 'app_rating',
-      parameters: {
-        'rating': rating,
-        'has_review': reviewText != null && reviewText.isNotEmpty,
-        'review_length': reviewText?.length ?? 0,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  /// Track first-time user experience metrics
-  Future<void> trackFtuMetrics(
-    String userId,
-    Duration completionTime,
-    bool completed,
-  ) async {
-    await _analytics.logEvent(
-      name: 'ftu_completion',
-      parameters: {
-        'user_id': userId,
-        'completion_time_seconds': completionTime.inSeconds,
-        'completed': completed,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  // ============================================================================
-  // FEATURE & BUSINESS METRICS
-  // ============================================================================
-
-  /// Track feature usage for launch monitoring
-  Future<void> trackFeatureUsage(
-    String featureName,
-    Map<String, dynamic> metadata,
-  ) async {
-    await _analytics.logEvent(
-      name: 'feature_usage_${featureName.replaceAll(' ', '_')}',
-      parameters: {
-        'feature_name': featureName,
-        'release_version': DeploymentConfig.appVersion,
-        ...metadata,
-      },
-    );
-  }
-
-  /// Track monetization events
-  Future<void> trackMonetization(
-    String eventType,
-    String tier,
-    double amount,
-    String currency,
-  ) async {
-    await _analytics.logEvent(
-      name: 'monetization_$eventType',
-      parameters: {
-        'subscription_tier': tier,
-        'amount': amount,
-        'currency': currency,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  /// Track social/sharing events
-  Future<void> trackSharing(String contentType, String shareMethod) async {
-    await _analytics.logEvent(
-      name: 'content_shared',
-      parameters: {
-        'content_type': contentType,
-        'share_method': shareMethod,
-        'release_version': DeploymentConfig.appVersion,
-      },
-    );
-  }
-
-  // ============================================================================
-  // DEPLOYMENT HEALTH DASHBOARD DATA
-  // ============================================================================
-
-  /// Get current app health status
-  Future<Map<String, dynamic>> getHealthStatus() async {
-    return {
-      'version': DeploymentConfig.appVersion,
-      'buildNumber': DeploymentConfig.buildNumber,
-      'deploymentStatus': DeploymentConfig.getDeploymentStatusString(),
-      'timestamp': DateTime.now().toIso8601String(),
-      // These would be fetched from Firebase Analytics in production
-      'estimatedCrashRate': 0.0,
-      'estimatedRating': 4.5,
-      'estimatedDau': 0,
-    };
-  }
-
-  // ============================================================================
-  // PRIVATE HELPER METHODS
-  // ============================================================================
-
-  /// Set user properties for analytics segmentation
-  Future<void> _setUserProperties(String userId, String tier) async {
-    await _analytics.setUserId(userId);
-    await _analytics.setUserProperty(
-      name: 'subscription_tier',
-      value: tier,
-    );
-    await _analytics.setUserProperty(
-      name: 'app_version',
-      value: DeploymentConfig.appVersion,
-    );
-  }
-
-  /// Check if error is critical (app-breaking)
-  bool _isCriticalError(dynamic error) {
-    final errorString = error.toString().toLowerCase();
-    return errorString.contains('crash') ||
-        errorString.contains('fatal') ||
-        errorString.contains('unhandled') ||
-        errorString.contains('firebase');
-  }
-
-  /// Log critical errors with higher priority
-  Future<void> _logCriticalError(
-    dynamic error,
-    StackTrace stackTrace,
-    Map<String, dynamic>? context,
-  ) async {
-    await _crashlytics.recordError(
-      error,
-      stackTrace,
-      reason: 'CRITICAL: ${context?['screen'] ?? 'unknown'}',
-      fatal: true,
-    );
-
-    if (kDebugMode) {
-      debugPrint('CRITICAL ERROR: $error');
-      debugPrintStack(stackTrace: stackTrace);
+  /// Alert for critical issues
+  Future<void> _alertCriticalIssue(String title, String message) async {
+    try {
+      await _firestore
+          .collection('monitoring')
+          .doc('alerts')
+          .collection('critical')
+          .add({
+        'title': title,
+        'message': message,
+        'timestamp': FieldValue.serverTimestamp(),
+        'acknowledged': false,
+      });
+    } catch (e) {
+      debugPrint('Error creating alert: $e');
     }
   }
 
-  /// Log performance warnings
-  Future<void> _logPerformanceWarning(String metric, String message) async {
-    await _crashlytics.log('PERF_WARNING: $metric - $message');
+  /// Get target for metric
+  static int _getTarget(String metricName) {
+    switch (metricName) {
+      case 'startup':
+        return STARTUP_TARGET;
+      case 'navigation':
+        return NAVIGATION_TARGET;
+      case 'move_execution':
+        return MOVE_EXECUTION_TARGET;
+      default:
+        return 0;
+    }
   }
+
+  /// Record session start
+  Future<void> startSession(String sessionId, String platform) async {
+    try {
+      await _firestore
+          .collection('monitoring')
+          .doc('sessions')
+          .collection('data')
+          .doc(sessionId)
+          .set({
+        'userId': _auth.currentUser?.uid,
+        'platform': platform,
+        'startTime': FieldValue.serverTimestamp(),
+        'actions': [],
+      });
+    } catch (e) {
+      debugPrint('Error starting session: $e');
+    }
+  }
+
+  /// Record session end
+  Future<void> endSession(String sessionId, int durationMs) async {
+    try {
+      await _firestore
+          .collection('monitoring')
+          .doc('sessions')
+          .collection('data')
+          .doc(sessionId)
+          .update({
+        'endTime': FieldValue.serverTimestamp(),
+        'durationMs': durationMs,
+      });
+    } catch (e) {
+      debugPrint('Error ending session: $e');
+    }
+  }
+
+  /// Set custom user properties for Crashlytics
+  Future<void> setUserProperty(String key, String value) async {
+    try {
+      await _crashlytics.setCustomKey(key, value);
+    } catch (e) {
+      debugPrint('Error setting user property: $e');
+    }
+  }
+}
+
+/// Performance summary data class
+class PerformanceSummary {
+  final int startupTimeMs;
+  final int navigationTimeMs;
+  final int moveExecutionTimeMs;
+  final double crashFreeRate;
+  final double anrRate;
+  final Duration period;
+
+  PerformanceSummary({
+    required this.startupTimeMs,
+    required this.navigationTimeMs,
+    required this.moveExecutionTimeMs,
+    required this.crashFreeRate,
+    required this.anrRate,
+    required this.period,
+  });
+
+  bool get startupExceedsTarget => startupTimeMs > MonitoringService.STARTUP_TARGET;
+  bool get navigationExceedsTarget => navigationTimeMs > MonitoringService.NAVIGATION_TARGET;
+  bool get moveExecutionExceedsTarget =>
+      moveExecutionTimeMs > MonitoringService.MOVE_EXECUTION_TARGET;
+  bool get crashRateUnhealthy => crashFreeRate < 0.99;
+  bool get anrRateUnhealthy => anrRate > 0.005;
 }
