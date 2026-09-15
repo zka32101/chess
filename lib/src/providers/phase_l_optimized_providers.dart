@@ -348,7 +348,6 @@ final cacheInvalidationProvider = Provider<CacheInvalidationHelper>((ref) {
     friendService: friendService,
     challengeService: challengeService,
     tournamentService: tournamentService,
-    ref: ref,
   );
 });
 
@@ -359,24 +358,18 @@ class CacheInvalidationHelper {
   final FriendServiceOptimized friendService;
   final FriendChallengeServiceOptimized challengeService;
   final TournamentServiceOptimized tournamentService;
-  final Ref ref;
 
   CacheInvalidationHelper({
     required this.leaderboardService,
     required this.friendService,
     required this.challengeService,
     required this.tournamentService,
-    required this.ref,
   });
 
   void invalidateUserAllCaches(String userId) {
     leaderboardService.invalidateUserCache(userId);
     friendService.invalidateUserCache(userId);
     challengeService.invalidateUserCache(userId);
-
-    ref.refresh(userFriendsPaginatedProvider((userId, 20, null)));
-    ref.refresh(pendingFriendRequestsPaginatedProvider((userId, 20, null)));
-    ref.refresh(pendingChallengesPaginatedProvider((userId, 20, null)));
   }
 
   void invalidateUserInteractionCaches(String userId1, String userId2) {
@@ -388,7 +381,6 @@ class CacheInvalidationHelper {
 
   void invalidateTournamentCaches(String tournamentId) {
     tournamentService.invalidateTournamentCache(tournamentId);
-    ref.refresh(tournamentStandingsOptimizedProvider(tournamentId));
   }
 
   void clearAllCaches() {
