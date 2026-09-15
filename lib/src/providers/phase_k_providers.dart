@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/leaderboard_service.dart';
 import '../services/friend_service.dart';
+import '../services/challenge_service.dart';
+import '../services/tournament_service.dart';
 import '../models/phase_k_models.dart';
 
 // ========== Service Providers ==========
@@ -13,6 +15,16 @@ final leaderboardServiceProvider = Provider((ref) {
 /// Access to FriendService singleton
 final friendServiceProvider = Provider((ref) {
   return FriendService.instance;
+});
+
+/// Access to FriendChallengeService singleton
+final friendChallengeServiceProvider = Provider((ref) {
+  return FriendChallengeService.instance;
+});
+
+/// Access to TournamentService singleton
+final tournamentServiceProvider = Provider((ref) {
+  return TournamentService.instance;
 });
 
 // ========== Leaderboard Providers ==========
@@ -116,52 +128,46 @@ final activityFeedProvider = FutureProvider.family<List<FriendActivity>,
 /// Get pending challenges for user
 final pendingChallengesProvider =
     FutureProvider.family<List<Challenge>, String>((ref, userId) async {
-  // Uses FriendChallengeService (will be implemented)
-  return [];
+  final service = ref.watch(friendChallengeServiceProvider);
+  return service.getPendingChallenges(userId);
 });
 
 /// Get active challenges for user
 final activeChallengesProvider =
     FutureProvider.family<List<Challenge>, String>((ref, userId) async {
-  // Uses FriendChallengeService (will be implemented)
-  return [];
+  final service = ref.watch(friendChallengeServiceProvider);
+  return service.getActiveChallenges(userId);
 });
 
 /// Get challenge history
 final challengeHistoryProvider =
     FutureProvider.family<List<Challenge>, (String, int)>((ref, params) async {
-  // Uses FriendChallengeService (will be implemented)
-  return [];
+  final (userId, limit) = params;
+  final service = ref.watch(friendChallengeServiceProvider);
+  return service.getChallengeHistory(userId, limit: limit);
 });
 
 /// Get user's challenge streak
 final userChallengeStreakProvider =
     FutureProvider.family<ChallengeStreak, String>((ref, userId) async {
-  // Uses FriendChallengeService (will be implemented)
-  return ChallengeStreak(
-    userId: userId,
-    currentStreak: 0,
-    bestStreak: 0,
-    streakStartDate: DateTime.now(),
-    totalChallengesWon: 0,
-    totalChallengesLost: 0,
-    winRate: 0.0,
-  );
+  final service = ref.watch(friendChallengeServiceProvider);
+  return service.getUserStreak(userId);
 });
 
 /// Get top challenge streaks
 final topChallengeStreaksProvider =
     FutureProvider<List<ChallengeStreak>>((ref) async {
-  // Uses FriendChallengeService (will be implemented)
-  return [];
+  final service = ref.watch(friendChallengeServiceProvider);
+  return service.getTopStreaks();
 });
 
 /// Get head-to-head challenge stats
 final headToHeadChallengeStatsProvider =
     FutureProvider.family<Map<String, int>, (String, String)>(
         (ref, params) async {
-  // Uses FriendChallengeService (will be implemented)
-  return {'wins1': 0, 'wins2': 0};
+  final (userId1, userId2) = params;
+  final service = ref.watch(friendChallengeServiceProvider);
+  return service.getHeadToHeadStats(userId1, userId2);
 });
 
 // ========== Tournament Providers ==========
@@ -169,65 +175,47 @@ final headToHeadChallengeStatsProvider =
 /// Get active tournaments
 final activeTournamentsProvider =
     FutureProvider<List<Tournament>>((ref) async {
-  // Uses TournamentService (will be implemented)
-  return [];
+  final service = ref.watch(tournamentServiceProvider);
+  return service.getActiveTournaments();
 });
 
 /// Get tournament details
 final tournamentDetailsProvider =
     FutureProvider.family<Tournament, String>((ref, tournamentId) async {
-  // Uses TournamentService (will be implemented)
-  return Tournament(
-    tournamentId: tournamentId,
-    name: '',
-    description: '',
-    status: 'registration',
-    startDate: DateTime.now(),
-    endDate: DateTime.now(),
-    format: 'single-elimination',
-    maxParticipants: 0,
-    currentParticipants: 0,
-    timeControl: 'rapid',
-    entryFee: 0,
-    prizePool: 0,
-    createdBy: '',
-    participantIds: [],
-  );
+  final service = ref.watch(tournamentServiceProvider);
+  return service.getTournament(tournamentId);
 });
 
 /// Get tournament standings
 final tournamentStandingsProvider =
     FutureProvider.family<TournamentStandings, String>(
         (ref, tournamentId) async {
-  // Uses TournamentService (will be implemented)
-  return TournamentStandings(
-    tournamentId: tournamentId,
-    rankings: [],
-    lastUpdated: DateTime.now(),
-  );
+  final service = ref.watch(tournamentServiceProvider);
+  return service.getStandings(tournamentId);
 });
 
 /// Get tournament brackets
 final tournamentBracketsProvider =
     FutureProvider.family<List<TournamentMatch>, String>(
         (ref, tournamentId) async {
-  // Uses TournamentService (will be implemented)
-  return [];
+  final service = ref.watch(tournamentServiceProvider);
+  return service.getTournamentMatches(tournamentId);
 });
 
-/// Get user's tournament registrations
+/// Get tournament matches by round
+final tournamentMatchesByRoundProvider =
+    FutureProvider.family<List<TournamentMatch>, (String, int)>(
+        (ref, params) async {
+  final (tournamentId, round) = params;
+  final service = ref.watch(tournamentServiceProvider);
+  return service.getTournamentMatches(tournamentId, round: round);
+});
+
+/// Get user's tournament registrations (computed from active tournaments)
 final userTournamentRegistrationsProvider =
     FutureProvider.family<List<TournamentParticipant>, String>(
         (ref, userId) async {
-  // Uses TournamentService (will be implemented)
-  return [];
-});
-
-/// Get tournament prizes
-final tournamentPrizesProvider =
-    FutureProvider.family<List<TournamentPrize>, String>(
-        (ref, tournamentId) async {
-  // Uses TournamentService (will be implemented)
+  // This would require additional queries; implemented as placeholder
   return [];
 });
 
