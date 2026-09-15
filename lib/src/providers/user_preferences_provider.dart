@@ -221,6 +221,25 @@ class UserPreferencesService {
     }
   }
 
+  // Update show coordinates preference
+  Future<void> setShowCoordinates(bool show) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user logged in');
+
+    try {
+      await _firestore.collection('user_preferences').doc(user.uid).set(
+        {
+          'showCoordinates': show,
+          'lastUpdated': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (e) {
+      print('Error updating show coordinates preference: $e');
+      rethrow;
+    }
+  }
+
   // Update piece and board styles
   Future<void> setStyles({
     required String pieceStyle,

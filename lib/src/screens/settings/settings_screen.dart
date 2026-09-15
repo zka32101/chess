@@ -4,6 +4,7 @@ import '../../providers/user_preferences_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'sound_preferences_screen.dart';
+import 'legal_documents_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -91,7 +92,7 @@ class SettingsScreen extends ConsumerWidget {
                       subtitle: 'Display board coordinates (a-h, 1-8)',
                       value: preferences.showCoordinates,
                       onChanged: (value) {
-                        // TODO: Update coordinates preference
+                        preferencesService.setShowCoordinates(value);
                       },
                     ),
                     const Divider(height: 1),
@@ -149,7 +150,13 @@ class SettingsScreen extends ConsumerWidget {
                       title: const Text('Privacy Policy'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                        // TODO: Open privacy policy
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const LegalDocumentsScreen(documentType: 'privacy'),
+                          ),
+                        );
                       },
                     ),
                     const Divider(height: 1),
@@ -157,7 +164,13 @@ class SettingsScreen extends ConsumerWidget {
                       title: const Text('Terms of Service'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                        // TODO: Open terms of service
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const LegalDocumentsScreen(documentType: 'terms'),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -445,13 +458,45 @@ class SettingsScreen extends ConsumerWidget {
     required List<String> options,
     required Function(String) onChanged,
   }) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(currentValue[0].toUpperCase() + currentValue.substring(1)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // Note: In a real app, this would show a modal
-      },
+    return Builder(
+      builder: (context) => ListTile(
+        title: Text(title),
+        subtitle: Text(currentValue[0].toUpperCase() + currentValue.substring(1)),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Select $title',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  ...options.map((option) => ListTile(
+                    title: Text(option),
+                    trailing: option.toLowerCase() == currentValue
+                        ? const Icon(Icons.check, color: Colors.blue)
+                        : null,
+                    onTap: () {
+                      onChanged(option.toLowerCase());
+                      Navigator.pop(context);
+                    },
+                  )),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 

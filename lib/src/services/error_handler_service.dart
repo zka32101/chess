@@ -1,4 +1,6 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
+import 'crash_reporting_service.dart';
 
 /// Severity levels for errors
 enum ErrorSeverity {
@@ -66,9 +68,9 @@ class ErrorHandlerService {
         break;
     }
 
-    // In production, send critical errors to crash reporting
+    // In production, send critical errors to crash reporting (fire and forget)
     if (context.severity == ErrorSeverity.critical) {
-      _reportCriticalError(context);
+      _reportCriticalError(context).ignore();
     }
   }
 
@@ -168,23 +170,24 @@ class ErrorHandlerService {
   }
 
   /// Report critical errors (send to crash reporting service)
-  void _reportCriticalError(ErrorContext context) {
-    // TODO: Integrate with Firebase Crashlytics or similar
-    // crashlytics.recordError(context.error, context.stackTrace);
+  Future<void> _reportCriticalError(ErrorContext context) async {
     _logger.wtf('CRITICAL ERROR REPORTED: ${context.message}');
+
+    // Report to Crashlytics
+    if (crashReportingService.isInitialized) {
+      await crashReportingService.recordFatalException(
+        exception: context.error ?? Exception(context.message),
+        stackTrace: context.stackTrace,
+        context: context.context ?? 'Critical Error',
+        metadata: {
+          'severity': context.severity.name,
+          'user_id': context.userId,
+          ...?context.metadata,
+        },
+      );
+    }
   }
 }
 
 /// Singleton accessor
 final errorHandlerService = ErrorHandlerService.instance;
-
-// Firebase exception placeholder for type checking
-class FirebaseException implements Exception {
-  final String code;
-  final String message;
-
-  FirebaseException({required this.code, required this.message});
-
-  @override
-  String toString() => 'FirebaseException($code): $message';
-}

@@ -1,227 +1,406 @@
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/roadmap.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'dart:math';
 
-/// A/B Testing Service
+/// Service for A/B testing and feature flags
 class ABTestingService {
-  static final ABTestingService _instance = ABTestingService._internal();
+  static final ABTestingService _instance = ABTestingService._();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  
+  // Cache for experiments
+  final Map<String, Experiment> _experimentCache = {};
+  final Map<String, String> _userVariantCache = {};
 
-  final FirebaseFirestore _firestore;
-  final Random _random = Random();
+  ABTestingService._();
 
-  factory ABTestingService({FirebaseFirestore? firestore}) {
-    if (firestore != null) {
-      _instance._firestore = firestore;
-    }
-    return _instance;
-  }
+  static ABTestingService get instance => _instance;
 
-  ABTestingService._internal() : _firestore = FirebaseFirestore.instance;
-
-  /// Create A/B test
-  Future<void> createTest({
+  /// Create a new A/B test experiment
+  Future<Experiment> createExperiment({
     required String name,
-    required String description,
-    required List<Variant> variants,
-    required List<String> targetMetrics,
+    required String hypothesis,
+    required List<String> variants,
+    required Duration duration,
     required int sampleSize,
-    required double confidenceLevel,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
-      final test = ABTest(
-        id: _firestore.collection('ab_tests').doc().id,
+      final experiment = Experiment(
+        id: _generateId(),
         name: name,
-        description: description,
-        startDate: DateTime.now(),
-        endDate: null,
-        status: TestStatus.active,
+        hypothesis: hypothesis,
         variants: variants,
-        targetMetrics: targetMetrics,
+        createdAt: DateTime.now(),
+        endAt: DateTime.now().add(duration),
         sampleSize: sampleSize,
-        confidenceLevel: confidenceLevel,
-        winner: null,
-        statisticalSignificance: null,
-        results: null,
+        metadata: metadata ?? {},
+        status: 'active',
+        results: {},
       );
 
-      await _firestore.collection('ab_tests').doc(test.id).set(test.toJson());
-    } catch (e) {
-      print('A/B test creation error: $e');
-      rethrow;
-    }
-  }
-
-  /// Assign variant to user
-  String assignVariant(String userId, String testId, List<Variant> variants) {
-    // Deterministic assignment based on user ID
-    final hash = userId.hashCode.abs();
-    final variantIndex = hash % variants.length;
-    return variants[variantIndex].id;
-  }
-
-  /// Record metric for test
-  Future<void> recordMetric(
-    String testId,
-    String userId,
-    String metricName,
-    double value,
-  ) async {
-    try {
       await _firestore
           .collection('ab_tests')
-          .doc(testId)
-          .collection('metrics')
-          .doc('${userId}_$metricName')
+          .doc('experiments')
+          .collection('list')
+          .doc(experiment.id)
+          .set(experiment.toJson());
+
+      _experimentCache[experiment.id] = experiment;
+      return experiment;
+    } catch (e) {
+      debugPrint('Error creating experiment: $e');
+      rethrow;
+    }
+  }
+
+  /// Get user's variant for experiment (consistent hashing)
+  Future<String> getUserVariant(String userId, String experimentId) async {
+    // Check cache first
+    final cacheKey = '$userId:$experimentId';
+    if (_userVariantCache.containsKey(cacheKey)) {
+      return _userVariantCache[cacheKey]!;
+    }
+
+    try {
+      final doc = await _firestore
+          .collection('ab_tests')
+          .doc('user_assignments')
+          .collection('assignments')
+          .doc(cacheKey)
+          .get();
+
+      if (doc.exists) {
+        final variant = doc['variant'] as String;
+        _userVariantCache[cacheKey] = variant;
+        return variant;
+      }
+
+      // Create new assignment using consistent hashing
+      final experiment = _experimentCache[experimentId] ??
+          await _getExperiment(experimentId);
+      
+      final variant = _assignVariant(userId, experimentId, experiment.variants);
+
+      await _firestore
+          .collection('ab_tests')
+          .doc('user_assignments')
+          .collection('assignments')
+          .doc(cacheKey)
           .set({
-            'userId': userId,
-            'metricName': metricName,
-            'value': value,
-            'timestamp': DateTime.now().toIso8601String(),
-          });
-    } catch (e) {
-      print('Metric recording error: $e');
-      rethrow;
-    }
-  }
-
-  /// Analyze test results
-  Future<void> analyzeTest(String testId) async {
-    try {
-      final testDoc = await _firestore.collection('ab_tests').doc(testId).get();
-      if (!testDoc.exists) return;
-
-      final testData = testDoc.data() as Map<String, dynamic>;
-      final variants = (testData['variants'] as List<dynamic>?)
-          ?.map((v) => Variant.fromJson(v as Map<String, dynamic>))
-          .toList() ?? [];
-
-      if (variants.length < 2) return;
-
-      // Fetch metrics for each variant
-      final metricsSnapshot = await _firestore
-          .collection('ab_tests')
-          .doc(testId)
-          .collection('metrics')
-          .get();
-
-      final metrics = metricsSnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
-
-      // Calculate statistics (simplified)
-      final controlMetrics = _calculateMetrics(metrics, variants[0].id);
-      final treatmentMetrics = _calculateMetrics(metrics, variants[1].id);
-
-      final significance = _calculateSignificance(controlMetrics, treatmentMetrics);
-
-      final result = TestResult(
-        controlVariantMetrics: controlMetrics,
-        treatmentVariantMetrics: treatmentMetrics,
-        statisticalSignificance: significance,
-        confidenceInterval: [significance - 0.05, significance + 0.05],
-        recommendation: significance > 0.95
-            ? 'Treatment variant is significantly better'
-            : 'No significant difference detected',
-      );
-
-      await _firestore.collection('ab_tests').doc(testId).update({
-        'results': result.toJson(),
-        'statisticalSignificance': significance,
-        'status': TestStatus.concluded.name,
-        'endDate': DateTime.now().toIso8601String(),
+        'userId': userId,
+        'experimentId': experimentId,
+        'variant': variant,
+        'assignedAt': FieldValue.serverTimestamp(),
       });
+
+      _userVariantCache[cacheKey] = variant;
+      return variant;
     } catch (e) {
-      print('Test analysis error: $e');
-      rethrow;
+      debugPrint('Error getting user variant: $e');
+      // Fallback: try to get experiment and return first variant
+      try {
+        final experiment = await _getExperiment(experimentId);
+        return experiment.variants.isNotEmpty
+            ? experiment.variants.first
+            : 'control';
+      } catch (_) {
+        // Final fallback to 'control' variant
+        return 'control';
+      }
     }
   }
 
-  /// Get active tests
-  Future<List<ABTest>> getActiveTests() async {
+  /// Get variant-specific value
+  Future<T?> getVariantValue<T>(String key, String experimentId) async {
     try {
-      final querySnapshot = await _firestore
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) return null;
+
+      final variant = await getUserVariant(userId, experimentId);
+
+      final doc = await _firestore
           .collection('ab_tests')
-          .where('status', isEqualTo: TestStatus.active.name)
+          .doc('variants')
+          .collection(experimentId)
+          .doc(variant)
           .get();
 
-      return querySnapshot.docs
-          .map((doc) => ABTest.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      print('Error fetching active tests: $e');
-      return [];
-    }
-  }
-
-  /// Get test results
-  Future<ABTest?> getTestResults(String testId) async {
-    try {
-      final doc = await _firestore.collection('ab_tests').doc(testId).get();
       if (!doc.exists) return null;
-      return ABTest.fromJson(doc.data() as Map<String, dynamic>);
+
+      final data = doc.data() as Map<String, dynamic>;
+      return data[key] as T?;
     } catch (e) {
-      print('Error fetching test results: $e');
+      debugPrint('Error getting variant value: $e');
       return null;
     }
   }
 
-  /// Helper: Calculate metrics
-  Map<String, double> _calculateMetrics(
-    List<Map<String, dynamic>> metrics,
-    String variantId,
-  ) {
-    final variantMetrics = <String, List<double>>{};
-
-    for (final metric in metrics) {
-      final value = metric['value'] as double?;
-      final metricName = metric['metricName'] as String?;
-
-      if (value != null && metricName != null) {
-        variantMetrics.putIfAbsent(metricName, () => []).add(value);
-      }
-    }
-
-    final result = <String, double>{};
-    for (final entry in variantMetrics.entries) {
-      final average =
-          entry.value.reduce((a, b) => a + b) / entry.value.length;
-      result[entry.key] = average;
-    }
-
-    return result;
-  }
-
-  /// Helper: Calculate statistical significance
-  double _calculateSignificance(
-    Map<String, double> controlMetrics,
-    Map<String, double> treatmentMetrics,
-  ) {
-    if (controlMetrics.isEmpty || treatmentMetrics.isEmpty) return 0.0;
-
-    // Simplified calculation - compare averages
-    final controlAverage =
-        controlMetrics.values.reduce((a, b) => a + b) / controlMetrics.length;
-    final treatmentAverage = treatmentMetrics.values.reduce((a, b) => a + b) /
-        treatmentMetrics.length;
-
-    final difference = (treatmentAverage - controlAverage).abs();
-    final maxValue = [controlAverage, treatmentAverage].reduce(max);
-
-    if (maxValue == 0) return 0.5;
-    return 0.5 + (difference / maxValue) * 0.5;
-  }
-
-  /// Conclude test
-  Future<void> concludeTest(String testId, String? winner) async {
+  /// Track user action in experiment
+  Future<void> trackExperimentAction(
+    String experimentId,
+    String action, {
+    Map<String, dynamic>? metadata,
+  }) async {
     try {
-      await _firestore.collection('ab_tests').doc(testId).update({
-        'status': TestStatus.concluded.name,
-        'endDate': DateTime.now().toIso8601String(),
-        'winner': winner,
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) return;
+
+      final variant = await getUserVariant(userId, experimentId);
+
+      await _firestore
+          .collection('ab_tests')
+          .doc('events')
+          .collection('tracking')
+          .add({
+        'experimentId': experimentId,
+        'variant': variant,
+        'userId': userId,
+        'action': action,
+        'metadata': metadata ?? {},
+        'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Test conclusion error: $e');
+      debugPrint('Error tracking experiment action: $e');
+    }
+  }
+
+  /// End experiment and analyze results
+  Future<ExperimentResults> analyzeResults(String experimentId) async {
+    try {
+      // Fetch all events for experiment
+      final query = await _firestore
+          .collection('ab_tests')
+          .doc('events')
+          .collection('tracking')
+          .where('experimentId', isEqualTo: experimentId)
+          .get();
+
+      final experiment = _experimentCache[experimentId] ??
+          await _getExperiment(experimentId);
+
+      final events = query.docs.map((doc) => doc.data()).toList();
+      final variantStats = _calculateVariantStats(events, experiment.variants);
+      final winner = _determineWinner(variantStats, experiment.variants);
+      final confidenceLevel = _calculateConfidence(variantStats);
+
+      return ExperimentResults(
+        experimentId: experimentId,
+        variantStats: variantStats,
+        winner: winner,
+        confidenceLevel: confidenceLevel,
+        sampleSize: events.length,
+        recommendedAction: _getRecommendedAction(winner, confidenceLevel),
+      );
+    } catch (e) {
+      debugPrint('Error analyzing results: $e');
       rethrow;
     }
   }
+
+  /// Assign variant using consistent hashing
+  String _assignVariant(String userId, String experimentId, List<String> variants) {
+    final salt = '$experimentId:${variants.join(':')}';
+    final hash = _consistentHash(userId, salt);
+    return variants[hash % variants.length];
+  }
+
+  /// Consistent hash function
+  int _consistentHash(String input, String salt) {
+    final combined = '$input:$salt';
+    final bytes = utf8.encode(combined);
+    int hash = 5381;
+    for (int byte in bytes) {
+      hash = ((hash << 5) + hash) + byte;
+    }
+    return hash.abs();
+  }
+
+  /// Calculate stats per variant
+  Map<String, VariantStats> _calculateVariantStats(
+    List<Map<String, dynamic>> events,
+    List<String> variants,
+  ) {
+    final stats = <String, VariantStats>{};
+
+    for (final variant in variants) {
+      final variantEvents = events.where((e) => e['variant'] == variant).toList();
+      final uniqueUsers = variantEvents.map((e) => e['userId']).toSet();
+
+      stats[variant] = VariantStats(
+        variant: variant,
+        sampleSize: uniqueUsers.length,
+        conversions: variantEvents.where((e) => e['action'] == 'convert').length,
+        engagementScore:
+            variantEvents.where((e) => e['action'] == 'engage').length.toDouble() /
+                (uniqueUsers.isNotEmpty ? uniqueUsers.length : 1),
+      );
+    }
+
+    return stats;
+  }
+
+  /// Determine statistical winner
+  String? _determineWinner(Map<String, VariantStats> stats, List<String> variants) {
+    if (stats.isEmpty) return null;
+
+    VariantStats? best;
+    for (final variant in variants) {
+      final stat = stats[variant];
+      if (stat != null && (best == null || stat.conversionRate > best.conversionRate)) {
+        best = stat;
+      }
+    }
+
+    return best?.variant;
+  }
+
+  /// Calculate statistical confidence
+  double _calculateConfidence(Map<String, VariantStats> stats) {
+    if (stats.length < 2) return 0.0;
+
+    // Simplified chi-square test approximation
+    final variants = stats.values.toList();
+    final control = variants.first;
+    final treatment = variants.length > 1 ? variants[1] : control;
+
+    if (control.sampleSize == 0 || treatment.sampleSize == 0) return 0.0;
+
+    final p1 = control.conversionRate;
+    final p2 = treatment.conversionRate;
+    final pooled = (control.conversions + treatment.conversions).toDouble() /
+        (control.sampleSize + treatment.sampleSize);
+
+    final se = sqrt(pooled * (1 - pooled) * (1 / control.sampleSize + 1 / treatment.sampleSize));
+    if (se == 0) return 0.0;
+
+    final z = ((p1 - p2) / se).abs();
+
+    // Convert z-score to confidence (simplified)
+    if (z > 1.96) return 0.95; // 95% confidence
+    if (z > 1.645) return 0.90; // 90% confidence
+    return (z / 1.96).clamp(0.0, 0.90);
+  }
+
+  /// Get recommended action
+  String _getRecommendedAction(String? winner, double confidence) {
+    if (winner == null) return 'continue_testing';
+    if (confidence >= 0.95) return 'rollout_winner';
+    if (confidence >= 0.80) return 'expand_sample';
+    return 'continue_testing';
+  }
+
+  /// Internal helper to get experiment from cache or Firestore
+  Future<Experiment> _getExperiment(String experimentId) async {
+    if (_experimentCache.containsKey(experimentId)) {
+      return _experimentCache[experimentId]!;
+    }
+
+    final doc = await _firestore
+        .collection('ab_tests')
+        .doc('experiments')
+        .collection('list')
+        .doc(experimentId)
+        .get();
+
+    if (!doc.exists) throw Exception('Experiment not found');
+
+    final experiment = Experiment.fromJson(doc.data()!);
+    _experimentCache[experimentId] = experiment;
+    return experiment;
+  }
+
+  /// Generate unique ID
+  String _generateId() => DateTime.now().millisecondsSinceEpoch.toString();
+}
+
+/// Experiment data class
+class Experiment {
+  final String id;
+  final String name;
+  final String hypothesis;
+  final List<String> variants;
+  final DateTime createdAt;
+  final DateTime endAt;
+  final int sampleSize;
+  final Map<String, dynamic> metadata;
+  final String status;
+  final Map<String, dynamic> results;
+
+  Experiment({
+    required this.id,
+    required this.name,
+    required this.hypothesis,
+    required this.variants,
+    required this.createdAt,
+    required this.endAt,
+    required this.sampleSize,
+    required this.metadata,
+    required this.status,
+    required this.results,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'hypothesis': hypothesis,
+    'variants': variants,
+    'createdAt': Timestamp.fromDate(createdAt),
+    'endAt': Timestamp.fromDate(endAt),
+    'sampleSize': sampleSize,
+    'metadata': metadata,
+    'status': status,
+    'results': results,
+  };
+
+  factory Experiment.fromJson(Map<String, dynamic> json) => Experiment(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    hypothesis: json['hypothesis'] as String,
+    variants: List<String>.from(json['variants'] as List),
+    createdAt: (json['createdAt'] as Timestamp).toDate(),
+    endAt: (json['endAt'] as Timestamp).toDate(),
+    sampleSize: json['sampleSize'] as int,
+    metadata: json['metadata'] as Map<String, dynamic>? ?? {},
+    status: json['status'] as String,
+    results: json['results'] as Map<String, dynamic>? ?? {},
+  );
+}
+
+/// Variant statistics
+class VariantStats {
+  final String variant;
+  final int sampleSize;
+  final int conversions;
+  final double engagementScore;
+
+  VariantStats({
+    required this.variant,
+    required this.sampleSize,
+    required this.conversions,
+    required this.engagementScore,
+  });
+
+  double get conversionRate => sampleSize > 0 ? conversions / sampleSize : 0.0;
+}
+
+/// Experiment results
+class ExperimentResults {
+  final String experimentId;
+  final Map<String, VariantStats> variantStats;
+  final String? winner;
+  final double confidenceLevel;
+  final int sampleSize;
+  final String recommendedAction;
+
+  ExperimentResults({
+    required this.experimentId,
+    required this.variantStats,
+    required this.winner,
+    required this.confidenceLevel,
+    required this.sampleSize,
+    required this.recommendedAction,
+  });
 }

@@ -1,206 +1,259 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/ai_lesson_generation_service.dart';
-import '../models/ai_lesson.dart';
 
-// Service provider
-final aiLessonGenerationServiceProvider =
-    Provider<AILessonGenerationService>((ref) {
-  return aiLessonGenerationService;
+// ========== Service Provider ==========
+
+final aiLessonGenerationServiceProvider = Provider((ref) {
+  return AILessonGenerationService.instance;
 });
 
-// AI-generated lessons providers
-final aiGeneratedLessonsProvider = FutureProvider.family<
-    List<AIGeneratedLesson>,
-    String>((ref, userId) async {
+// ========== Game Analysis Providers ==========
+
+/// Analyze single game with AI evaluation
+final gameAnalysisProvider = FutureProvider.family<GameAnalysis, String>((ref, gameId) async {
   final service = ref.watch(aiLessonGenerationServiceProvider);
-  return service.getAIGeneratedLessons(userId);
+  return service.analyzeGame(gameId);
 });
 
-final aiGeneratedLessonsByTypeProvider = FutureProvider.family<
-    List<AIGeneratedLesson>,
-    ({String userId, AIContentType contentType})>((ref, args) async {
+/// Get opening recommendations based on play style
+final openingRecommendationsProvider = FutureProvider<List<AIOpeningRecommendation>>((ref) async {
   final service = ref.watch(aiLessonGenerationServiceProvider);
-  return service.getAIGeneratedLessons(
-    args.userId,
-    contentType: args.contentType,
-  );
-});
-
-final aiGeneratedLessonsByLevelProvider = FutureProvider.family<
-    List<AIGeneratedLesson>,
-    ({String userId, RecommendationLevel level})>((ref, args) async {
-  final service = ref.watch(aiLessonGenerationServiceProvider);
-  return service.getAIGeneratedLessons(
-    args.userId,
-    skillLevel: args.level,
-  );
-});
-
-// Game analysis provider
-final gameAnalysisProvider = FutureProvider.family<
-    GameAnalysis,
-    ({String userId, String gameId})>((ref, args) async {
-  final service = ref.watch(aiLessonGenerationServiceProvider);
-  return service.analyzeGame(args.userId, args.gameId);
-});
-
-// Opening recommendations provider
-final openingRecommendationsProvider =
-    FutureProvider.family<List<AIOpeningRecommendation>, String>(
-        (ref, userId) async {
-  final service = ref.watch(aiLessonGenerationServiceProvider);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) return [];
+  
   return service.generateOpeningRecommendations(userId);
 });
 
-// Player profile provider
-final playerProfileProvider = FutureProvider.family<PlayerProfile, String>(
-    (ref, userId) async {
+/// Get personalized improvement path
+final improvementPathProvider = FutureProvider<ImprovementPath>((ref) async {
   final service = ref.watch(aiLessonGenerationServiceProvider);
-  return service.generatePlayerProfile(userId);
-});
-
-// Improvement path provider
-final improvementPathProvider = FutureProvider.family<ImprovementPath, String>(
-    (ref, userId) async {
-  final service = ref.watch(aiLessonGenerationServiceProvider);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) throw Exception('Not authenticated');
+  
   return service.generateImprovementPath(userId);
 });
 
-// Endgame insights provider
-final endgameInsightsProvider = FutureProvider.family<List<EndgameInsight>, String>(
-    (ref, userId) async {
+// ========== AI Lesson Providers ==========
+
+/// Get AI-generated lessons by type and difficulty
+final aiGeneratedLessonsProvider = FutureProvider.family<
+  List<AIGeneratedLesson>,
+  (String, int)
+>((ref, args) async {
   final service = ref.watch(aiLessonGenerationServiceProvider);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) return [];
+  
+  return service.getAIGeneratedLessons(userId, args.$1, args.$2);
+});
+
+/// Get comprehensive player profile
+final playerProfileProvider = FutureProvider<PlayerProfile>((ref) async {
+  final service = ref.watch(aiLessonGenerationServiceProvider);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) throw Exception('Not authenticated');
+  
+  return service.generatePlayerProfile(userId);
+});
+
+/// Get endgame-specific insights
+final endgameInsightsProvider = FutureProvider<List<EndgameInsight>>((ref) async {
+  final service = ref.watch(aiLessonGenerationServiceProvider);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) return [];
+  
   return service.analyzeEndgameWeaknesses(userId);
 });
 
-// Recent AI insights provider
-final recentAIInsightsProvider = FutureProvider.family<List<AIInsight>, String>(
-    (ref, userId) async {
+/// Get recent AI insights
+final recentAIInsightsProvider = FutureProvider<List<AIInsight>>((ref) async {
   final service = ref.watch(aiLessonGenerationServiceProvider);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) return [];
+  
   return service.getRecentInsights(userId);
 });
 
-// Performance progress analytics provider
-final performanceProgressAnalyticsProvider = FutureProvider.family<
-    Map<String, dynamic>,
-    String>((ref, userId) async {
+// ========== Analytics Providers ==========
+
+/// Get performance progress analytics
+final performanceProgressProvider = FutureProvider.family<
+  PerformanceProgressAnalytics,
+  Duration
+>((ref, period) async {
   final service = ref.watch(aiLessonGenerationServiceProvider);
-  return service.getPerformanceProgressAnalytics(userId);
+  final auth = FirebaseAuth.instance;
+  final userId = auth.currentUser?.uid;
+  
+  if (userId == null) throw Exception('Not authenticated');
+  
+  return service.getPerformanceProgressAnalytics(userId, period);
 });
 
-// State notifier for AI lesson interactions
-class AILessonInteractionNotifier
-    extends StateNotifier<Map<String, dynamic>> {
-  final AILessonGenerationService _service;
+/// Get 30-day performance analytics
+final monthlyPerformanceProvider = FutureProvider<PerformanceProgressAnalytics>((ref) async {
+  return ref.watch(performanceProgressProvider(const Duration(days: 30)).future);
+});
 
-  AILessonInteractionNotifier(this._service)
-      : super({'loading': false, 'error': null});
+// ========== State Management Providers ==========
 
-  Future<void> rateLessonUsefulness(
-    String userId,
-    String lessonId,
-    int rating,
-  ) async {
-    state = {...state, 'loading': true};
-    try {
-      await _service.rateLessonUsefulness(userId, lessonId, rating);
-      state = {
-        ...state,
-        'loading': false,
-        'message': 'Rating submitted',
-      };
-    } catch (e) {
-      state = {
-        ...state,
-        'loading': false,
-        'error': e.toString(),
-      };
-    }
+/// Track active game analysis
+final activeGameAnalysisProvider = StateProvider<String?>((ref) {
+  return null;
+});
+
+/// Track lesson recommendations interaction
+final lessonInteractionProvider = StateNotifierProvider<
+  LessonInteractionNotifier,
+  LessonInteractionState
+>((ref) {
+  return LessonInteractionNotifier();
+});
+
+/// Track viewed insights
+final viewedInsightsProvider = StateProvider<Set<String>>((ref) {
+  return {};
+});
+
+// ========== Computed Providers ==========
+
+/// Check if player profile is available
+final hasPlayerProfileProvider = FutureProvider<bool>((ref) async {
+  final profile = await ref.watch(playerProfileProvider.future);
+  return profile.totalGamesAnalyzed > 0;
+});
+
+/// Get player's play style
+final playStyleProvider = FutureProvider<String>((ref) async {
+  final profile = await ref.watch(playerProfileProvider.future);
+  return profile.playStyle;
+});
+
+/// Get recommended focus areas
+final recommendedFocusProvider = FutureProvider<List<String>>((ref) async {
+  final profile = await ref.watch(playerProfileProvider.future);
+  return profile.recommendedFocus;
+});
+
+/// Get strength metrics summary
+final strengthMetricsSummaryProvider = FutureProvider<StrengthMetricsSummary>((ref) async {
+  final profile = await ref.watch(playerProfileProvider.future);
+  
+  return StrengthMetricsSummary(
+    tacticalStrength: profile.tacticalStrength,
+    strategicStrength: profile.strategicStrength,
+    endgameStrength: profile.endgameStrength,
+    averageAccuracy: profile.averageAccuracy,
+    playStyle: profile.playStyle,
+  );
+});
+
+/// Get improvement priority ranking
+final improvementPriorityProvider = FutureProvider<List<String>>((ref) async {
+  final path = await ref.watch(improvementPathProvider.future);
+  return path.priorityAreas;
+});
+
+/// Get estimated rating gain
+final estimatedRatingGainProvider = FutureProvider<double>((ref) async {
+  final path = await ref.watch(improvementPathProvider.future);
+  return path.expectedRatingGain;
+});
+
+/// Get AI insights count
+final aiInsightsCountProvider = FutureProvider<int>((ref) async {
+  final insights = await ref.watch(recentAIInsightsProvider.future);
+  return insights.length;
+});
+
+/// Filter unread AI insights
+final unreadInsightsProvider = FutureProvider<List<AIInsight>>((ref) async {
+  final insights = await ref.watch(recentAIInsightsProvider.future);
+  return insights.where((i) => !i.isRead).toList();
+});
+
+// ========== Notifiers & State Classes ==========
+
+class LessonInteractionNotifier extends StateNotifier<LessonInteractionState> {
+  LessonInteractionNotifier() : super(LessonInteractionState());
+
+  void acceptLesson(String lessonId) {
+    state = state.copyWith(
+      acceptedLessons: {...state.acceptedLessons, lessonId},
+    );
   }
 
-  Future<void> respondToLesson(
-    String userId,
-    String lessonId,
-    bool accepted,
-  ) async {
-    state = {...state, 'loading': true};
-    try {
-      await _service.respondToLesson(userId, lessonId, accepted);
-      state = {
-        ...state,
-        'loading': false,
-        'message': 'Response recorded',
-      };
-    } catch (e) {
-      state = {
-        ...state,
-        'loading': false,
-        'error': e.toString(),
-      };
-    }
+  void declineLesson(String lessonId) {
+    state = state.copyWith(
+      declinedLessons: {...state.declinedLessons, lessonId},
+    );
   }
 
-  Future<void> clearCache(String userId) async {
-    state = {...state, 'loading': true};
-    try {
-      await _service.clearCachedAnalysis(userId);
-      state = {
-        ...state,
-        'loading': false,
-        'message': 'Cache cleared',
-      };
-    } catch (e) {
-      state = {
-        ...state,
-        'loading': false,
-        'error': e.toString(),
-      };
-    }
+  void rateLessonUsefulness(String lessonId, int rating) {
+    state = state.copyWith(
+      lessonRatings: {...state.lessonRatings, lessonId: rating},
+    );
+  }
+
+  void clearInteractions() {
+    state = LessonInteractionState();
   }
 }
 
-// AI lesson interaction state notifier provider
-final aiLessonInteractionProvider = StateNotifierProvider<
-    AILessonInteractionNotifier,
-    Map<String, dynamic>>((ref) {
-  final service = ref.watch(aiLessonGenerationServiceProvider);
-  return AILessonInteractionNotifier(service);
-});
+class LessonInteractionState {
+  final Set<String> acceptedLessons;
+  final Set<String> declinedLessons;
+  final Map<String, int> lessonRatings;
 
-// Analytics aggregation providers
-final userLearningAnalyticsProvider = FutureProvider.family<
-    Map<String, dynamic>,
-    String>((ref, userId) async {
-  final profile = await ref.watch(playerProfileProvider(userId).future);
-  final progress = await ref.watch(performanceProgressAnalyticsProvider(userId).future);
-  final improvementPath = await ref.watch(improvementPathProvider(userId).future);
+  LessonInteractionState({
+    this.acceptedLessons = const {},
+    this.declinedLessons = const {},
+    this.lessonRatings = const {},
+  });
 
-  return {
-    'gamesAnalyzed': profile.totalGamesAnalyzed,
-    'averageAccuracy': profile.averageAccuracy,
-    'mainWeaknesses': profile.mainWeaknesses,
-    'mainStrengths': profile.mainStrengths,
-    'accuracyImprovement': progress['accuracyImprovement'] ?? 0,
-    'trend': progress['trend'] ?? 'stable',
-    'estimatedDaysToImprovement': improvementPath.estimatedDaysToImprovement,
-    'priorityAreas': improvementPath.priorityAreas,
-  };
-});
+  LessonInteractionState copyWith({
+    Set<String>? acceptedLessons,
+    Set<String>? declinedLessons,
+    Map<String, int>? lessonRatings,
+  }) {
+    return LessonInteractionState(
+      acceptedLessons: acceptedLessons ?? this.acceptedLessons,
+      declinedLessons: declinedLessons ?? this.declinedLessons,
+      lessonRatings: lessonRatings ?? this.lessonRatings,
+    );
+  }
+}
 
-// Personalized dashboard data provider
-final personalizedDashboardProvider = FutureProvider.family<
-    Map<String, dynamic>,
-    String>((ref, userId) async {
-  final profile = await ref.watch(playerProfileProvider(userId).future);
-  final recentInsights = await ref.watch(recentAIInsightsProvider(userId).future);
-  final openingRecs = await ref.watch(openingRecommendationsProvider(userId).future);
-  final improvementPath = await ref.watch(improvementPathProvider(userId).future);
+// ========== Helper Classes ==========
 
-  return {
-    'playerProfile': profile,
-    'recentInsights': recentInsights,
-    'openingRecommendations': openingRecs,
-    'improvementPath': improvementPath,
-    'lastUpdated': DateTime.now().toIso8601String(),
-  };
-});
+class StrengthMetricsSummary {
+  final double tacticalStrength;
+  final double strategicStrength;
+  final double endgameStrength;
+  final double averageAccuracy;
+  final String playStyle;
+
+  StrengthMetricsSummary({
+    required this.tacticalStrength,
+    required this.strategicStrength,
+    required this.endgameStrength,
+    required this.averageAccuracy,
+    required this.playStyle,
+  });
+
+  double get overallStrength =>
+      (tacticalStrength + strategicStrength + endgameStrength) / 3;
+}

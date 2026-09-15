@@ -3,439 +3,99 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ============================================
-    // ADMIN & SYSTEM COLLECTIONS
+    // Helper Functions
     // ============================================
 
-    // Admins collection - restricted to admins only
-    match /admins/{userId} {
-      allow read: if isAdmin(userId);
-      allow write: if false; // Only backend can modify
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    // System configuration - public read, backend-only write
-    match /system/{document=**} {
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ============================================
+    // Users Collection
+    // ============================================
+
+    match /users/{userId} {
+      // ✅ ユーザーは自分のデータを読み書き可能
+      allow read, write: if isOwner(userId);
+
+      // ✅ Admin はすべてのユーザーデータを読み取り可能
+      allow read: if isAdmin();
+
+      // ✅ 削除は本人またはadminのみ
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // ============================================
+    // Security Audit Collection (監査ログ)
+    // ============================================
+
+    match /security_audit/{document=**} {
+      // ✅ Admin のみ読み取り可能
+      allow read: if isAdmin();
+
+      // ✅ システムのみ追記可能
+      allow create: if isSignedIn();
+
+      // ✅ 監査ログは削除・更新禁止 (追記のみ)
+      allow update, delete: if false;
+    }
+
+    // ============================================
+    // Compliance Collection (GDPR)
+    // ============================================
+
+    match /compliance/{document=**} {
+      // ✅ Admin のみ読み取り可能
+      allow read: if isAdmin();
+
+      // ✅ 認証ユーザーは自分のデータリクエストのみ作成可能
+      allow create: if isSignedIn();
+
+      // ✅ Admin のみ更新・削除可能
+      allow update, delete: if isAdmin();
+    }
+
+    // ============================================
+    // Rankings Collection
+    // ============================================
+
+    match /rankings/{document=**} {
+      // ✅ 誰でも読み取り可能 (ランキングは公開)
       allow read: if true;
+
+      // ✅ システムのみ書き込み可能
       allow write: if false;
     }
 
-    // Rate limiting / Anti-abuse tracking
-    match /rate_limits/{userId} {
-      allow read, write: if false; // Cloud Functions only
+    // ============================================
+    // Security Audit & Public Collections
+    // ============================================
+
+    match /translations/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /exchange_rates/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // ============================================
-    // USER COLLECTIONS
+    // Default Deny (セキュリティ第一)
     // ============================================
 
-    // Users - Core user documents
-    match /users/{userId} {
-      // Read own profile or public fields
-      allow read: if request.auth != null &&
-        (request.auth.uid == userId ||
-         canReadPublicProfile(userId));
-
-      // Users can only update their own document
-      allow create: if request.auth != null &&
-        request.auth.uid == userId &&
-        validateUserCreation(request.resource.data);
-
-      allow update: if request.auth != null &&
-        request.auth.uid == userId &&
-        validateUserUpdate(request.resource.data, resource.data);
-
-      allow delete: if false; // Users can't delete (backend only)
-
-      // Subcollections
-      match /statistics/{document=**} {
-        allow read: if request.auth != null &&
-          (request.auth.uid == userId || true); // Stats are public
-        allow write: if false; // Cloud Functions only
-      }
-
-      match /rating_history/{document=**} {
-        allow read: if request.auth != null &&
-          request.auth.uid == userId;
-        allow write: if false; // Cloud Functions only
-      }
-
-      match /game_history/{document=**} {
-        allow read: if request.auth != null &&
-          request.auth.uid == userId;
-        allow write: if false; // Cloud Functions only
-      }
-
-      match /achievements/{document=**} {
-        allow read: if request.auth != null;
-        allow write: if false; // Cloud Functions only
-      }
-    }
-
-    // User Preferences - Individual user settings
-    match /user_preferences/{userId} {
-      allow read, write: if request.auth != null &&
-        request.auth.uid == userId;
-    }
-
-    // Player profiles (public data)
-    match /players/{playerId} {
-      allow read: if true; // Public leaderboard data
-      allow write: if false; // Backend only
-    }
-
-    // ============================================
-    // GAME COLLECTIONS
-    // ============================================
-
-    // Active games and completed games
-    match /games/{gameId} {
-      // Players can read their own game or public completed games
-      allow read: if request.auth != null &&
-        (isGameParticipant(gameId) ||
-         isCompletedGame(gameId));
-
-      // Only authenticated users can create games
-      allow create: if request.auth != null &&
-        validateGameCreation(request.resource.data);
-
-      // Only participants can update their own game
-      allow update: if request.auth != null &&
-        isGameParticipant(gameId) &&
-        validateGameUpdate(request.resource.data, resource.data);
-
-      // Only admin can delete (for moderation)
-      allow delete: if isAdmin(request.auth.uid);
-
-      // Moves subcollection - immutable game history
-      match /moves/{moveId} {
-        allow read: if request.auth != null &&
-          isGameParticipant(gameId);
-        allow create, update, delete: if false; // Cloud Functions only
-      }
-    }
-
-    // Match history - completed game records
-    match /match_history/{historyId} {
-      allow read: if request.auth != null;
-      allow write: if false; // Backend only
-    }
-
-    // Matches - Active multiplayer matches (real-time sync)
-    match /matches/{matchId} {
-      allow read: if request.auth != null &&
-        isMatchParticipant(matchId);
-      allow create: if false; // Matchmaking service creates
-      allow update: if request.auth != null &&
-        isMatchParticipant(matchId) &&
-        validateMatchUpdate(request.resource.data, resource.data);
-      allow delete: if false; // System only
-    }
-
-    // ============================================
-    // MATCHMAKING & QUEUE
-    // ============================================
-
-    // Matchmaking queue - Players seeking games
-    match /matchmaking_queue/{queueId} {
-      // Players can only read/modify their own entry
-      allow read: if request.auth != null &&
-        resource.data.playerId == request.auth.uid;
-
-      allow create: if request.auth != null &&
-        validateQueueEntry(request.resource.data) &&
-        request.resource.data.playerId == request.auth.uid &&
-        notInQueueTooOften(request.auth.uid);
-
-      allow update: if false; // Matchmaking service only
-
-      allow delete: if request.auth != null &&
-        resource.data.playerId == request.auth.uid;
-    }
-
-    // ============================================
-    // PUZZLE & TRAINING CONTENT
-    // ============================================
-
-    // Puzzles - Public chess puzzles
-    match /puzzles/{puzzleId} {
-      allow read: if true; // Public content
-      allow write: if isAdmin(request.auth.uid);
-    }
-
-    // Solved puzzles - User puzzle solutions
-    match /solved_puzzles/{solutionId} {
-      allow read: if request.auth != null &&
-        resource.data.userId == request.auth.uid;
-
-      allow create: if request.auth != null &&
-        request.resource.data.userId == request.auth.uid &&
-        validatePuzzleSolution(request.resource.data);
-
-      allow update, delete: if false; // Immutable records
-    }
-
-    // User puzzle results - Statistics
-    match /user_puzzle_results/{userId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == userId;
-      allow write: if false; // Cloud Functions only
-    }
-
-    // Daily challenges - Rotating puzzle challenges
-    match /daily_challenges/{challengeId} {
-      allow read: if true; // Public
-      allow write: if isAdmin(request.auth.uid);
-    }
-
-    // ============================================
-    // PERFORMANCE & STATS
-    // ============================================
-
-    // Performance statistics
-    match /performance_stats/{userId} {
-      allow read: if request.auth != null;
-      allow write: if false; // Backend only
-    }
-
-    // 30-day progression tracking
-    match /progression_30days/{userId} {
-      allow read: if request.auth != null;
-      allow write: if false; // Backend only
-    }
-
-    // Player matchups - Head-to-head records
-    match /player_matchups/{matchupId} {
-      allow read: if true; // Public stats
-      allow write: if false; // Backend only
-    }
-
-    // ============================================
-    // NOTIFICATIONS & MESSAGING
-    // ============================================
-
-    // Notifications - User notifications
-    match /notifications/{notificationId} {
-      allow read: if request.auth != null &&
-        resource.data.userId == request.auth.uid;
-
-      allow create: if false; // Backend only
-
-      allow update: if request.auth != null &&
-        resource.data.userId == request.auth.uid &&
-        onlyUpdatingReadStatus(request.resource.data, resource.data);
-
-      allow delete: if request.auth != null &&
-        resource.data.userId == request.auth.uid;
-    }
-
-    // ============================================
-    // MONETIZATION
-    // ============================================
-
-    // Purchases - In-app purchase records
-    match /purchases/{purchaseId} {
-      allow read: if request.auth != null &&
-        resource.data.userId == request.auth.uid;
-      allow write: if false; // Backend/payment processor only
-    }
-
-    // Subscription - User subscription status
-    match /subscription/{userId} {
-      allow read: if request.auth != null &&
-        request.auth.uid == userId;
-      allow write: if false; // Backend/payment processor only
-    }
-
-    // ============================================
-    // HELPER FUNCTIONS
-    // ============================================
-
-    // Check if user is admin
-    function isAdmin(uid) {
-      return get(/databases/$(database)/documents/admins/$(uid)).data.isAdmin == true;
-    }
-
-    // Check if current user is participant in a game
-    function isGameParticipant(gameId) {
-      let game = get(/databases/$(database)/documents/games/$(gameId)).data;
-      return game != null && (
-        game.whitePlayerId == request.auth.uid ||
-        game.blackPlayerId == request.auth.uid
-      );
-    }
-
-    // Check if game is completed (public read allowed)
-    function isCompletedGame(gameId) {
-      let game = get(/databases/$(database)/documents/games/$(gameId)).data;
-      return game != null && game.status == 'completed';
-    }
-
-    // Check if user is participant in a match
-    function isMatchParticipant(matchId) {
-      let match = get(/databases/$(database)/documents/matches/$(matchId)).data;
-      return match != null && (
-        match.whitePlayerId == request.auth.uid ||
-        match.blackPlayerId == request.auth.uid
-      );
-    }
-
-    // Can read public profile (view leaderboard, friend profiles, etc.)
-    function canReadPublicProfile(userId) {
-      return request.auth != null; // Any authenticated user can read profiles
-    }
-
-    // Validate user creation
-    function validateUserCreation(data) {
-      return data.uid != null &&
-             data.uid == request.auth.uid &&
-             data.email != null &&
-             data.email.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$') &&
-             data.displayName != null &&
-             data.displayName.size() >= 2 &&
-             data.displayName.size() <= 50 &&
-             data.createdAt != null &&
-             data.onlineRating == 1500 && // Initial rating
-             data.oflineRating == 1500 && // Initial rating (typo in code, match it)
-             data.photoUrl == null || data.photoUrl is string;
-    }
-
-    // Validate user updates - no rating manipulation
-    function validateUserUpdate(newData, oldData) {
-      // Can only update safe fields
-      let safeFieldsOnly = (
-        newData.keys().hasAll(oldData.keys()) || // No new fields added
-        newData.displayName is string ||
-        newData.photoUrl is string ||
-        newData.bio is string ||
-        newData.theme is string ||
-        newData.language is string
-      );
-
-      // Cannot change critical fields
-      let noCriticalChanges = (
-        newData.uid == oldData.uid &&
-        newData.email == oldData.email &&
-        newData.createdAt == oldData.createdAt &&
-        newData.onlineRating == oldData.onlineRating && // Ratings updated by backend only
-        newData.oflineRating == oldData.oflineRating
-      );
-
-      return safeFieldsOnly && noCriticalChanges;
-    }
-
-    // Validate game creation
-    function validateGameCreation(data) {
-      return data.whitePlayerId != null &&
-             data.blackPlayerId != null &&
-             data.whitePlayerId != data.blackPlayerId &&
-             data.whiteRating > 0 &&
-             data.blackRating > 0 &&
-             data.status == 'active' &&
-             data.createdAt != null &&
-             data.currentFen != null &&
-             data.timeControl != null &&
-             data.timeControlMs > 0 &&
-             data.whiteTimeRemainingMs > 0 &&
-             data.blackTimeRemainingMs > 0 &&
-             data.result == null && // Not set until game ends
-             data.resultReason == null;
-    }
-
-    // Validate game updates - prevent rating manipulation
-    function validateGameUpdate(newData, oldData) {
-      // Game status can only transition forward
-      let validStatusTransition = (
-        oldData.status == 'active' &&
-        (newData.status == 'active' || newData.status == 'completed')
-      ) || (
-        oldData.status == 'completed' &&
-        newData.status == 'completed'
-      );
-
-      // Ratings cannot be changed by client
-      let ratingsUnchanged = (
-        newData.whiteRating == oldData.whiteRating &&
-        newData.blackRating == oldData.blackRating
-      );
-
-      // Only active games can have moves added
-      let canUpdateMoves = (
-        newData.status == 'active' &&
-        oldData.status == 'active'
-      );
-
-      return validStatusTransition &&
-             ratingsUnchanged &&
-             (canUpdateMoves || newData.moves == oldData.moves);
-    }
-
-    // Validate match updates
-    function validateMatchUpdate(newData, oldData) {
-      // Match status transitions
-      let validTransition = (
-        oldData.status == 'active' &&
-        (newData.status == 'active' || newData.status == 'completed')
-      );
-
-      // Ratings cannot change
-      let ratingsUnchanged = (
-        newData.whiteRating == oldData.whiteRating &&
-        newData.blackRating == oldData.blackRating
-      );
-
-      return validTransition && ratingsUnchanged;
-    }
-
-    // Validate matchmaking queue entry
-    function validateQueueEntry(data) {
-      return data.playerId == request.auth.uid &&
-             data.playerName != null &&
-             data.playerName.size() > 0 &&
-             data.currentRating > 0 &&
-             data.currentRating <= 3000 &&
-             data.ratingRange != null &&
-             data.ratingRange.min > 0 &&
-             data.ratingRange.max > 0 &&
-             data.ratingRange.min <= data.ratingRange.max &&
-             data.timeControlType in ['3min', '5min', '10min'] &&
-             data.queuedAt != null &&
-             data.timeoutAt != null &&
-             data.timeoutAt > data.queuedAt &&
-             data.priority >= 0 &&
-             data.priority <= 100 &&
-             data.status == 'waiting' &&
-             data.color in ['white', 'black', 'random'];
-    }
-
-    // Check if user is joining queue too frequently (rate limit pattern)
-    function notInQueueTooOften(uid) {
-      // Check if user has active queue entry
-      // This is limited - more sophisticated rate limiting should be
-      // handled by Cloud Functions with proper time windows
-      let existingQueues = firestore.query(
-        /databases/$(database)/documents/matchmaking_queue
-      ).where('playerId', '==', uid).where('status', '==', 'waiting');
-
-      return existingQueues.size() == 0;
-    }
-
-    // Validate puzzle solution
-    function validatePuzzleSolution(data) {
-      return data.userId == request.auth.uid &&
-             data.puzzleId != null &&
-             data.solution != null &&
-             data.solution.size() > 0 &&
-             data.solvedAt != null &&
-             data.score >= 0;
-    }
-
-    // Only allow updating read status for notifications
-    function onlyUpdatingReadStatus(newData, oldData) {
-      return newData.userId == oldData.userId &&
-             newData.type == oldData.type &&
-             newData.title == oldData.title &&
-             newData.message == oldData.message &&
-             newData.createdAt == oldData.createdAt &&
-             newData.isRead != oldData.isRead; // Only field that can change
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

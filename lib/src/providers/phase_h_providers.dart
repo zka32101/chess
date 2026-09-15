@@ -1,347 +1,258 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:riverpod/riverpod.dart';
-
-import '../models/feedback.dart';
-import '../models/performance.dart';
-import '../models/roadmap.dart';
-import '../models/community.dart';
-import '../models/version.dart';
-import '../services/feedback_service.dart';
-import '../services/performance_monitor_service.dart';
-import '../services/feature_roadmap_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../services/monitoring_service.dart';
 import '../services/ab_testing_service.dart';
-import '../services/community_service.dart';
-import '../services/version_management_service.dart';
+import '../services/feedback_analysis_service.dart';
+import '../services/analytics_dashboard_service.dart';
 
-part 'phase_h_providers.g.dart';
+// ========== Service Providers ==========
 
-// ============================================================================
-// Service Providers
-// ============================================================================
+/// Access to MonitoringService singleton
+final monitoringServiceProvider = Provider((ref) {
+  return MonitoringService.instance;
+});
 
-@riverpod
-FeedbackService feedbackService(FeedbackServiceRef ref) {
-  return FeedbackService();
-}
+/// Access to ABTestingService singleton
+final abTestingServiceProvider = Provider((ref) {
+  return ABTestingService.instance;
+});
 
-@riverpod
-PerformanceMonitorService performanceMonitorService(
-    PerformanceMonitorServiceRef ref) {
-  return PerformanceMonitorService();
-}
+/// Access to FeedbackAnalysisService singleton
+final feedbackAnalysisServiceProvider = Provider((ref) {
+  return FeedbackAnalysisService.instance;
+});
 
-@riverpod
-FeatureRoadmapService featureRoadmapService(FeatureRoadmapServiceRef ref) {
-  return FeatureRoadmapService();
-}
+/// Access to AnalyticsDashboardService singleton
+final analyticsDashboardServiceProvider = Provider((ref) {
+  return AnalyticsDashboardService.instance;
+});
 
-@riverpod
-ABTestingService abTestingService(ABTestingServiceRef ref) {
-  return ABTestingService();
-}
+// ========== Monitoring Providers ==========
 
-@riverpod
-CommunityService communityService(CommunityServiceRef ref) {
-  return CommunityService();
-}
+/// Get performance summary for a time period
+final performanceSummaryProvider = FutureProvider.family<PerformanceSummary, Duration>((ref, period) async {
+  final monitoring = ref.watch(monitoringServiceProvider);
+  return monitoring.getPerformanceSummary(period);
+});
 
-@riverpod
-VersionManagementService versionManagementService(
-    VersionManagementServiceRef ref) {
-  return VersionManagementService();
-}
+/// Get crash rate for period
+final crashRateProvider = FutureProvider.family<double, Duration>((ref, period) async {
+  final monitoring = ref.watch(monitoringServiceProvider);
+  return monitoring.getCrashRate(period);
+});
 
-// ============================================================================
-// Feedback Providers
-// ============================================================================
+/// Get ANR rate for period
+final anrRateProvider = FutureProvider.family<double, Duration>((ref, period) async {
+  final monitoring = ref.watch(monitoringServiceProvider);
+  return monitoring.getANRRate(period);
+});
 
-@riverpod
-Future<List<UserFeedback>> allFeedback(AllFeedbackRef ref) async {
-  final service = ref.watch(feedbackServiceProvider);
-  return service.getAllFeedback();
-}
+/// Get average performance metric
+final averageMetricProvider = FutureProvider.family<int, (String, Duration)>((ref, args) async {
+  final monitoring = ref.watch(monitoringServiceProvider);
+  return monitoring.getAverageMetric(args.$1, args.$2);
+});
 
-@riverpod
-Future<List<UserFeedback>> feedbackByCategory(
-  FeedbackByCategoryRef ref,
-  FeedbackCategory category,
-) async {
-  final service = ref.watch(feedbackServiceProvider);
-  return service.getFeedbackByCategory(category);
-}
+// ========== Feedback Analysis Providers ==========
 
-@riverpod
-Future<List<BugReport>> allBugReports(AllBugReportsRef ref) async {
-  final service = ref.watch(feedbackServiceProvider);
-  return service.getAllBugReports();
-}
+/// Analyze sentiment of feedback text
+final feedbackSentimentProvider = FutureProvider.family<SentimentAnalysis, String>((ref, text) async {
+  final analysis = ref.watch(feedbackAnalysisServiceProvider);
+  return analysis.analyzeFeedbackSentiment(text);
+});
 
-@riverpod
-Future<List<FeatureRequest>> allFeatureRequests(AllFeatureRequestsRef ref) async {
-  final service = ref.watch(feedbackServiceProvider);
-  return service.getFeatureRequests();
-}
+/// Get aggregated feedback report for period
+final feedbackReportProvider = FutureProvider.family<FeedbackReport, Duration>((ref, period) async {
+  final analysis = ref.watch(feedbackAnalysisServiceProvider);
+  return analysis.aggregateFeedback(period);
+});
 
-@riverpod
-Future<Map<String, dynamic>> feedbackStatistics(FeedbackStatisticsRef ref) async {
-  final service = ref.watch(feedbackServiceProvider);
-  return service.getFeedbackStats();
-}
+/// Get sentiment trend
+final sentimentTrendProvider = FutureProvider.family<double, Duration>((ref, period) async {
+  final analysis = ref.watch(feedbackAnalysisServiceProvider);
+  // Use public method instead of private implementation
+  final report = await analysis.aggregateFeedback(period);
+  return report.sentimentTrend;
+});
 
-// ============================================================================
-// Performance Monitoring Providers
-// ============================================================================
+// ========== A/B Testing Providers ==========
 
-@riverpod
-Future<List<PerformanceMetric>> performanceMetrics(
-    PerformanceMetricsRef ref) async {
-  final service = ref.watch(performanceMonitorServiceProvider);
-  return service.getPerformanceMetrics();
-}
+/// Get user's variant for experiment
+final userVariantProvider = FutureProvider.family<String, (String, String)>((ref, args) async {
+  final aBTesting = ref.watch(abTestingServiceProvider);
+  return aBTesting.getUserVariant(args.$1, args.$2);
+});
 
-@riverpod
-Future<List<PerformanceMetric>> performanceMetricsByType(
-  PerformanceMetricsByTypeRef ref,
-  MetricType type,
-) async {
-  final service = ref.watch(performanceMonitorServiceProvider);
-  return service.getMetricsByType(type);
-}
+/// Get variant-specific value
+final variantValueProvider = FutureProvider.family<T?, (String, String, Type)>((ref, args) async {
+  final aBTesting = ref.watch(abTestingServiceProvider);
+  // Type system limitation - simplified version
+  return null;
+});
 
-@riverpod
-Future<List<CrashReport>> crashReports(CrashReportsRef ref) async {
-  final service = ref.watch(performanceMonitorServiceProvider);
-  return service.getCrashReports();
-}
+/// Get experiment results
+final experimentResultsProvider = FutureProvider.family<ExperimentResults, String>((ref, experimentId) async {
+  final aBTesting = ref.watch(abTestingServiceProvider);
+  return aBTesting.analyzeResults(experimentId);
+});
 
-@riverpod
-Future<List<OptimizationSuggestion>> optimizationSuggestions(
-    OptimizationSuggestionsRef ref) async {
-  final service = ref.watch(performanceMonitorServiceProvider);
-  return service.identifyBottlenecks();
-}
+// ========== Analytics Dashboard Providers ==========
 
-// ============================================================================
-// Feature Roadmap Providers
-// ============================================================================
+/// Get complete dashboard summary
+final dashboardSummaryProvider = FutureProvider<DashboardSummary>((ref) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  return dashboard.getDashboardSummary();
+});
 
-@riverpod
-Future<List<RoadmapItem>> roadmapItems(RoadmapItemsRef ref) async {
-  final service = ref.watch(featureRoadmapServiceProvider);
-  return service.getRoadmapItems();
-}
+/// Get retention metrics
+final retentionMetricsProvider = FutureProvider<RetentionMetrics>((ref) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  final summary = await dashboard.getDashboardSummary();
+  return summary.retention;
+});
 
-@riverpod
-Future<List<RoadmapItem>> roadmapByPriority(RoadmapByPriorityRef ref) async {
-  final service = ref.watch(featureRoadmapServiceProvider);
-  return service.getRoadmapByPriority();
-}
+/// Get conversion metrics
+final conversionMetricsProvider = FutureProvider<ConversionMetrics>((ref) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  final summary = await dashboard.getDashboardSummary();
+  return summary.conversion;
+});
 
-@riverpod
-Future<List<RoadmapItem>> roadmapByTimeline(RoadmapByTimelineRef ref) async {
-  final service = ref.watch(featureRoadmapServiceProvider);
-  return service.getRoadmapByTimeline();
-}
+/// Get crash metrics
+final crashMetricsProvider = FutureProvider<CrashMetrics>((ref) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  final summary = await dashboard.getDashboardSummary();
+  return summary.crashes;
+});
 
-@riverpod
-Future<double> roadmapCompletion(RoadmapCompletionRef ref) async {
-  final service = ref.watch(featureRoadmapServiceProvider);
-  return service.getCompletionPercentage();
-}
+/// Get engagement metrics
+final engagementMetricsProvider = FutureProvider<EngagementMetrics>((ref) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  final summary = await dashboard.getDashboardSummary();
+  return summary.engagement;
+});
 
-// ============================================================================
-// A/B Testing Providers
-// ============================================================================
+/// Analyze funnel conversion
+final funnelAnalysisProvider = FutureProvider.family<FunnelAnalysis, String>((ref, funnelName) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  return dashboard.analyzeFunnel(funnelName);
+});
 
-@riverpod
-Future<List<ABTest>> activeABTests(ActiveABTestsRef ref) async {
-  final service = ref.watch(abTestingServiceProvider);
-  return service.getActiveTests();
-}
+/// Analyze cohort retention
+final cohortAnalysisProvider = FutureProvider.family<CohortAnalysis, DateTime>((ref, cohortDate) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  return dashboard.analyzeCohort(cohortDate);
+});
 
-@riverpod
-Future<ABTest?> abTestResults(
-  ABTestResultsRef ref,
-  String testId,
-) async {
-  final service = ref.watch(abTestingServiceProvider);
-  return service.getTestResults(testId);
-}
+/// Get KPI trend
+final kpiTrendProvider = FutureProvider.family<KPITrend, (String, Duration)>((ref, args) async {
+  final dashboard = ref.watch(analyticsDashboardServiceProvider);
+  return dashboard.getKPITrend(args.$1, args.$2);
+});
 
-// ============================================================================
-// Community Providers
-// ============================================================================
+// ========== State Management Providers ==========
 
-@riverpod
-Future<UserProfile?> userProfile(
-  UserProfileRef ref,
-  String userId,
-) async {
-  final service = ref.watch(communityServiceProvider);
-  return service.getUserProfile(userId);
-}
+/// Track recent actions for monitoring
+final recentActionsProvider = StateProvider<List<String>>((ref) {
+  return [];
+});
 
-@riverpod
-Future<List<CommunityPost>> communityFeed(CommunityFeedRef ref) async {
-  final service = ref.watch(communityServiceProvider);
-  return service.getCommunityFeed();
-}
+/// Manage active experiments
+final activeExperimentsProvider = StateProvider<List<String>>((ref) {
+  return [];
+});
 
-@riverpod
-Future<List<UserProfile>> communityLeaderboard(CommunityLeaderboardRef ref) async {
-  final service = ref.watch(communityServiceProvider);
-  return service.getLeaderboard();
-}
+/// Store latest dashboard summary
+final latestDashboardProvider = StateProvider<DashboardSummary?>((ref) {
+  return null;
+});
 
-@riverpod
-Future<List<PuzzleChallenge>> activeChallenges(
-  ActiveChallengesRef ref,
-  String userId,
-) async {
-  final service = ref.watch(communityServiceProvider);
-  return service.getActiveChallenges(userId);
-}
+/// Track alert state
+final alertsProvider = StateProvider<List<String>>((ref) {
+  return [];
+});
 
-@riverpod
-Future<List<CommunityGroup>> communityGroups(CommunityGroupsRef ref) async {
-  final service = ref.watch(communityServiceProvider);
-  return service.getCommunityGroups();
-}
+// ========== Notifiers for State Management ==========
 
-// ============================================================================
-// Version Management Providers
-// ============================================================================
+/// Notifier for managing active experiments
+class ActiveExperimentsNotifier extends StateNotifier<List<String>> {
+  ActiveExperimentsNotifier() : super([]);
 
-@riverpod
-String currentAppVersion(CurrentAppVersionRef ref) {
-  final service = ref.watch(versionManagementServiceProvider);
-  return service.getCurrentVersion();
-}
+  void addExperiment(String experimentId) {
+    state = [...state, experimentId];
+  }
 
-@riverpod
-int currentBuildNumber(CurrentBuildNumberRef ref) {
-  final service = ref.watch(versionManagementServiceProvider);
-  return service.getCurrentBuildNumber();
-}
+  void removeExperiment(String experimentId) {
+    state = state.where((id) => id != experimentId).toList();
+  }
 
-@riverpod
-Future<AppVersion?> availableUpdate(AvailableUpdateRef ref) async {
-  final service = ref.watch(versionManagementServiceProvider);
-  return service.checkForUpdates();
-}
-
-@riverpod
-Future<String> versionReleaseNotes(
-  VersionReleaseNotesRef ref,
-  String version,
-) async {
-  final service = ref.watch(versionManagementServiceProvider);
-  return service.getVersionReleaseNotes(version);
-}
-
-// ============================================================================
-// State Notifiers for Mutable Operations
-// ============================================================================
-
-class FeedbackSubmissionNotifier extends StateNotifier<AsyncValue<void>> {
-  final FeedbackService _feedbackService;
-
-  FeedbackSubmissionNotifier(this._feedbackService) : super(const AsyncValue.data(null));
-
-  Future<void> submitFeedback({
-    required String userId,
-    required FeedbackCategory category,
-    required String message,
-    required int rating,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      await _feedbackService.submitFeedback(
-        userId: userId,
-        category: category,
-        message: message,
-        rating: rating,
-        deviceInfo: 'device_info',
-        appVersion: '1.0.0',
-        metadata: {},
-      );
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+  void clearCompleted() {
+    state = [];
   }
 }
 
-@riverpod
-StateNotifier<AsyncValue<void>> feedbackSubmission(
-    FeedbackSubmissionRef ref) {
-  final service = ref.watch(feedbackServiceProvider);
-  return FeedbackSubmissionNotifier(service);
-}
+/// Notifier for managing monitoring alerts
+class AlertsNotifier extends StateNotifier<List<String>> {
+  AlertsNotifier() : super([]);
 
-class RoadmapUpdateNotifier extends StateNotifier<AsyncValue<void>> {
-  final FeatureRoadmapService _roadmapService;
+  void addAlert(String message) {
+    state = [...state, message];
+  }
 
-  RoadmapUpdateNotifier(this._roadmapService)
-      : super(const AsyncValue.data(null));
+  void dismissAlert(String message) {
+    state = state.where((alert) => alert != message).toList();
+  }
 
-  Future<void> updateRoadmapItemStatus(
-      String itemId, RoadmapStatus status) async {
-    state = const AsyncValue.loading();
-    try {
-      await _roadmapService.updateRoadmapItemStatus(itemId, status);
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+  void clearAll() {
+    state = [];
   }
 }
 
-@riverpod
-StateNotifier<AsyncValue<void>> roadmapUpdate(RoadmapUpdateRef ref) {
-  final service = ref.watch(featureRoadmapServiceProvider);
-  return RoadmapUpdateNotifier(service);
-}
+// ========== Computed Providers ==========
 
-class CommunityPostNotifier extends StateNotifier<AsyncValue<void>> {
-  final CommunityService _communityService;
+/// Check if monitoring is healthy
+final monitoringHealthProvider = FutureProvider<bool>((ref) async {
+  final summary = await ref.watch(
+    performanceSummaryProvider(const Duration(days: 7)).future,
+  );
 
-  CommunityPostNotifier(this._communityService)
-      : super(const AsyncValue.data(null));
+  return summary.crashFreeRate >= 0.99 &&
+      !summary.startupExceedsTarget &&
+      !summary.navigationExceedsTarget &&
+      summary.anrRate < 0.005;
+});
 
-  Future<void> createPost({
-    required String authorId,
-    required String content,
-    required PostCategory category,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      await _communityService.createCommunityPost(
-        authorId: authorId,
-        content: content,
-        category: category,
-      );
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+/// Get critical issues from feedback
+final criticalIssuesProvider = FutureProvider<List<FeedbackIssue>>((ref) async {
+  final report = await ref.watch(
+    feedbackReportProvider(const Duration(days: 7)).future,
+  );
+
+  return report.topIssues
+      .where((issue) => issue.severity == 'critical')
+      .toList();
+});
+
+/// Get recommended optimizations
+final optimizationRecommendationsProvider =
+    FutureProvider<List<String>>((ref) async {
+  final summary = await ref.watch(dashboardSummaryProvider.future);
+  final recommendations = <String>[];
+
+  if (summary.crashes.crashFreeRate < 0.99) {
+    recommendations.add('Investigate crash rate: ${summary.crashes.crashFreeRate}');
   }
 
-  Future<void> upvotePost(String postId) async {
-    state = const AsyncValue.loading();
-    try {
-      await _communityService.upvotePost(postId);
-      state = const AsyncValue.data(null);
-    } catch (e) {
-      state = AsyncValue.error(e, StackTrace.current);
-    }
+  if (summary.engagement.sessionsPerDay < 1.5) {
+    recommendations.add('Improve engagement: Low session frequency');
   }
-}
 
-@riverpod
-StateNotifier<AsyncValue<void>> communityPostNotifier(
-    CommunityPostNotifierRef ref) {
-  final service = ref.watch(communityServiceProvider);
-  return CommunityPostNotifier(service);
-}
+  if (summary.conversion.conversionRate < 0.03) {
+    recommendations.add('Optimize paywall conversion rate');
+  }
+
+  if (summary.retention.d7 < 0.20) {
+    recommendations.add('Improve 7-day retention with better onboarding');
+  }
+
+  return recommendations;
+});

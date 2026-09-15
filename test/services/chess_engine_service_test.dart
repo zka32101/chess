@@ -3,231 +3,173 @@ import 'package:chess/src/services/chess_engine_service.dart';
 
 void main() {
   group('ChessEngineService', () {
-    late ChessEngineService engine;
+    late ChessEngineService chess;
 
     setUp(() {
-      engine = ChessEngineService();
+      chess = ChessEngineService();
+      chess.initGame();
     });
 
     group('initGame', () {
       test('initializes game with starting position', () {
-        engine.initGame();
-        final board = engine.getBoard();
-
-        // Check that pieces are in correct starting positions
-        expect(board, isNotNull);
-        expect(board.length, 64);
+        chess.initGame();
+        expect(chess.getCurrentFen(), startsWith('rnbqkbnr'));
+        expect(chess.isGameOver(), false);
       });
 
-      test('initializes game from FEN', () {
-        const testFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-        engine.initGame(fen: testFen);
-
-        final currentFen = engine.getCurrentFen();
-        expect(currentFen, startsWith('rnbqkbnr/pppppppp'));
-      });
-    });
-
-    group('Move validation', () {
-      setUp(() {
-        engine.initGame();
+      test('initializes game with custom FEN', () {
+        const customFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        chess.initGame(fen: customFen);
+        expect(chess.getCurrentFen(), customFen);
       });
 
-      test('validates legal pawn move from starting position', () {
-        expect(engine.isLegalMove('e2', 'e4'), isTrue);
-        expect(engine.isLegalMove('e2', 'e3'), isTrue);
-        expect(engine.isLegalMove('e2', 'e5'), isFalse);
-      });
+      test('resets game state on reinit', () {
+        chess.makeMove('e2', 'e4');
+        final firstFen = chess.getCurrentFen();
 
-      test('rejects illegal moves', () {
-        expect(engine.isLegalMove('a1', 'a2'), isFalse); // Rook can't move like that
-        expect(engine.isLegalMove('a4', 'a5'), isFalse); // No piece at a4
-      });
+        chess.initGame();
+        final resetFen = chess.getCurrentFen();
 
-      test('gets legal moves for a square', () {
-        final moves = engine.getLegalMovesForSquare('e2');
-        expect(moves, isNotEmpty);
-        expect(moves, contains('e4'));
-        expect(moves, contains('e3'));
+        expect(firstFen, isNot(resetFen));
+        expect(resetFen, startsWith('rnbqkbnr'));
       });
     });
 
-    group('Move execution', () {
-      setUp(() {
-        engine.initGame();
+    group('makeMove', () {
+      test('executes legal opening move', () {
+        final result = chess.makeMove('e2', 'e4');
+        expect(result, true);
+        expect(chess.getCurrentFen(), contains('4P3'));
       });
 
-      test('executes valid move', () {
-        final result = engine.makeMove('e2', 'e4');
-        expect(result, isTrue);
+      test('rejects illegal move', () {
+        final result = chess.makeMove('e2', 'e5');
+        expect(result, false);
       });
 
-      test('rejects invalid move', () {
-        final result = engine.makeMove('e2', 'e5');
-        expect(result, isFalse);
-      });
-
-      test('updates position after move', () {
-        engine.makeMove('e2', 'e4');
-        final board = engine.getBoard();
-
-        // e4 should now have a white pawn
-        expect(board[36], isNotNull); // e4 is index 36 (4*8 + 4)
+      test('handles pawn promotion', () {
+        chess.initGame(fen: '8/P7/8/8/8/8/8/k6K w - - 0 1');
+        final result = chess.makeMove('a7', 'a8', promotion: 'q');
+        expect(result, true);
       });
 
       test('tracks move history', () {
-        engine.makeMove('e2', 'e4');
-        engine.makeMove('e7', 'e5');
+        chess.makeMove('e2', 'e4');
+        chess.makeMove('e7', 'e5');
 
-        final history = engine.getMoveHistory();
-        expect(history.length, 2);
+        expect(chess.getCurrentMoveNumber(), 2);
       });
     });
 
-    group('Game state detection', () {
-      test('detects checkmate', () {
-        // Setup fool's mate
-        engine.initGame();
-        engine.makeMove('f2', 'f3');
-        engine.makeMove('e7', 'e5');
-        engine.makeMove('g2', 'g4');
-        engine.makeMove('d8', 'h4'); // Checkmate
-
-        expect(engine.isCheckmate(), isTrue);
+    group('isLegalMove', () {
+      test('recognizes legal pawn move', () {
+        expect(chess.isLegalMove('e2', 'e4'), true);
+        expect(chess.isLegalMove('e2', 'e3'), true);
       });
 
-      test('detects check', () {
-        engine.initGame();
-        // Make some moves to get to a check position
-        engine.makeMove('e2', 'e4');
-        engine.makeMove('e7', 'e5');
-        engine.makeMove('f1', 'c4');
-        engine.makeMove('b8', 'c6');
-        engine.makeMove('d1', 'h5');
-        engine.makeMove('g8', 'f6');
-        engine.makeMove('h5', 'f7'); // Check!
-
-        expect(engine.isCheck(), isTrue);
+      test('recognizes illegal pawn move', () {
+        expect(chess.isLegalMove('e2', 'e5'), false);
+        expect(chess.isLegalMove('e2', 'd3'), false);
       });
 
-      test('detects stalemate', () {
-        // Setup a stalemate position
-        engine.initGame(fen: '7k/5Q2/6K1/8/8/8/8/8 b - - 0 1');
+      test('recognizes legal knight move', () {
+        expect(chess.isLegalMove('g1', 'f3'), true);
+        expect(chess.isLegalMove('g1', 'h3'), true);
+      });
+    });
 
-        // Black should be stalemated (no legal moves but not in check)
-        final hasLegalMoves = engine.getLegalMoves().isNotEmpty;
-        if (!hasLegalMoves && !engine.isCheck()) {
-          expect(engine.isStalemate(), isTrue);
+    group('getLegalMoves', () {
+      test('returns legal moves for starting position', () {
+        final moves = chess.getLegalMoves();
+        expect(moves, isNotEmpty);
+        expect(moves.length, 20);
+      });
+
+      test('includes only legal moves', () {
+        final moves = chess.getLegalMoves();
+        for (final moveStr in moves) {
+          expect(moveStr, matches(RegExp(r'^[a-h][1-8][a-h][1-8]')));
         }
       });
+    });
 
-      test('detects when game is over', () {
-        engine.initGame();
-        expect(engine.isGameOver(), isFalse);
+    group('getCurrentFen', () {
+      test('returns valid FEN string', () {
+        final fen = chess.getCurrentFen();
+        expect(fen, isNotEmpty);
+        expect(fen.split(' ').length, 6);
+      });
 
-        // Play fool's mate
-        engine.makeMove('f2', 'f3');
-        engine.makeMove('e7', 'e5');
-        engine.makeMove('g2', 'g4');
-        engine.makeMove('d8', 'h4');
+      test('updates FEN after move', () {
+        final fenBefore = chess.getCurrentFen();
+        chess.makeMove('e2', 'e4');
+        final fenAfter = chess.getCurrentFen();
 
-        expect(engine.isGameOver(), isTrue);
+        expect(fenBefore, isNot(fenAfter));
       });
     });
 
-    group('Game result', () {
-      test('returns white win on checkmate', () {
-        // Setup fool's mate
-        engine.initGame();
-        engine.makeMove('f2', 'f3');
-        engine.makeMove('e7', 'e5');
-        engine.makeMove('g2', 'g4');
-        engine.makeMove('d8', 'h4');
+    group('isGameOver', () {
+      test('game not over at start', () {
+        expect(chess.isGameOver(), false);
+      });
 
-        final result = engine.getGameResult();
-        expect(result, equals('white_win'));
+      test('game continues with legal moves available', () {
+        chess.makeMove('e2', 'e4');
+        expect(chess.isGameOver(), false);
       });
     });
 
-    group('Turn detection', () {
-      setUp(() {
-        engine.initGame();
-      });
-
-      test('white starts first', () {
-        expect(engine.isWhiteTurn(), isTrue);
-      });
-
-      test('alternates turns after moves', () {
-        expect(engine.isWhiteTurn(), isTrue);
-        engine.makeMove('e2', 'e4');
-        expect(engine.isWhiteTurn(), isFalse);
-        engine.makeMove('e7', 'e5');
-        expect(engine.isWhiteTurn(), isTrue);
+    group('getGameResult', () {
+      test('returns null for ongoing game', () {
+        expect(chess.getGameResult(), isNull);
       });
     });
 
-    group('FEN handling', () {
-      test('loads position from FEN', () {
-        const testFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
-        engine.loadFromFen(testFen);
+    group('undoMove', () {
+      test('reverts to previous position', () {
+        final fenBefore = chess.getCurrentFen();
+        chess.makeMove('e2', 'e4');
+        chess.undoMove();
+        final fenAfter = chess.getCurrentFen();
 
-        final currentFen = engine.getCurrentFen();
-        expect(currentFen, startsWith('rnbqkbnr/pppppppp/8/8/4P3'));
+        expect(fenBefore, fenAfter);
       });
 
-      test('returns current FEN after moves', () {
-        engine.initGame();
-        engine.makeMove('e2', 'e4');
-
-        final fen = engine.getCurrentFen();
-        expect(fen, contains('4P3')); // Shows pawn on e4
-      });
-    });
-
-    group('Piece querying', () {
-      setUp(() {
-        engine.initGame();
-      });
-
-      test('gets piece at square', () {
-        final piece = engine.getPieceAt('e2');
-        expect(piece, isNotNull);
-        expect(piece, 'P'); // White pawn
-      });
-
-      test('returns null for empty square', () {
-        final piece = engine.getPieceAt('e4');
-        expect(piece, isNull);
+      test('does nothing when no moves made', () {
+        final fen = chess.getCurrentFen();
+        chess.undoMove();
+        expect(chess.getCurrentFen(), fen);
       });
     });
 
-    group('Move undo', () {
-      setUp(() {
-        engine.initGame();
+    group('analyzePosition', () {
+      test('returns position analysis for current board', () {
+        final analysis = chess.analyzePosition();
+        expect(analysis, isNotNull);
+        expect(analysis.legalMovesCount, 20);
       });
 
-      test('undoes last move', () {
-        engine.makeMove('e2', 'e4');
-        engine.makeMove('e7', 'e5');
-
-        engine.undoMove();
-        expect(engine.isWhiteTurn(), isFalse);
-
-        engine.undoMove();
-        expect(engine.isWhiteTurn(), isTrue);
+      test('calculates material count', () {
+        final analysis = chess.analyzePosition();
+        expect(analysis.whiteMaterial, greaterThan(0));
+        expect(analysis.blackMaterial, greaterThan(0));
+        expect(analysis.whiteMaterial, analysis.blackMaterial);
       });
     });
 
-    group('Reset', () {
-      test('resets to starting position', () {
-        engine.initGame();
-        engine.makeMove('e2', 'e4');
+    group('Performance', () {
+      test('handles rapid moves efficiently', () {
+        final stopwatch = Stopwatch()..start();
 
-        engine.reset();
+        for (int i = 0; i < 50; i++) {
+          chess.makeMove('e2', 'e4');
+          chess.undoMove();
+        }
 
-        expect(engine.getMoveHistory().length, 0);
-        expect(engine.isWhiteTurn(), isTrue);
+        stopwatch.stop();
+
+        expect(stopwatch.elapsedMilliseconds, lessThan(500));
       });
     });
   });

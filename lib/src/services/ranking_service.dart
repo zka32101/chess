@@ -1,418 +1,279 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'ranking_service.freezed.dart';
-part 'ranking_service.g.dart';
-
-/// ランキング情報とユーザーの位置情報
-@freezed
-class RankingEntry with _$RankingEntry {
-  const factory RankingEntry({
-    required String uid,
-    required String displayName,
-    required String? photoUrl,
-    required int rating,
-    required String shogiRankString,
-    required int gamesPlayed,
-    required double winRate,
-    required int rank,
-    required DateTime? lastGameAt,
-  }) = _RankingEntry;
-
-  factory RankingEntry.fromJson(Map<String, dynamic> json) =>
-      _$RankingEntryFromJson(json);
-}
-
-/// ランキング統計
-@freezed
-class RankingStats with _$RankingStats {
-  const factory RankingStats({
-    required int totalPlayers,
-    required double averageRating,
-    required int topRating,
-    required DateTime lastUpdated,
-  }) = _RankingStats;
-
-  factory RankingStats.fromJson(Map<String, dynamic> json) =>
-      _$RankingStatsFromJson(json);
-}
-
-/// ランキングサービス - Firestore ランキング管理
 class RankingService {
-  final FirebaseFirestore _firestore;
-  static const String _rankingsCollection = 'rankings';
-  static const String _statsCollection = 'ranking_stats';
+  static final RankingService _instance = RankingService._internal();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<String, List<PlayerRanking>> _rankingCache = {};
 
-  RankingService(this._firestore);
+  factory RankingService() {
+    return _instance;
+  }
 
-  /// ユーザーのランキングを更新 (ゲーム後に呼び出し)
-  Future<void> updateUserRanking({
-    required String uid,
-    required String displayName,
-    required String? photoUrl,
-    required int rating,
-    required String shogiRankString,
-    required int gamesPlayed,
-    required int wins,
-    required int losses,
-    required int draws,
-  }) async {
+  RankingService._internal();
+
+  Future<List<PlayerRanking>> getGlobalRankings(int limit) async {
+    if (_rankingCache.containsKey('global')) {
+      return _rankingCache['global']!;
+    }
+
     try {
-      final winRate = gamesPlayed > 0 ? wins / gamesPlayed : 0.0;
-
-      // グローバルランキングに追加
-      await _firestore
-          .collection(_rankingsCollection)
+      final snapshot = await _firestore
+          .collection('rankings')
           .doc('global')
           .collection('players')
-          .doc(uid)
-          .set({
-        'uid': uid,
-        'displayName': displayName,
-        'photoUrl': photoUrl,
-        'rating': rating,
-        'shogiRankString': shogiRankString,
-        'gamesPlayed': gamesPlayed,
+          .orderBy('rating', descending: true)
+          .limit(limit)
+          .get();
+
+      final rankings = snapshot.docs
+          .asMap()
+          .entries
+          .map((e) => PlayerRanking.fromJson(e.value.data(), rank: e.key + 1))
+          .toList();
+
+      _rankingCache['global'] = rankings;
+      Future.delayed(Duration(minutes: 5)).then((_) {
+        _rankingCache.remove('global');
+      });
+
+      return rankings;
+    } catch (e) {
+      print('Error fetching global rankings: $e');
+      return [];
+    }
+  }
+
+  Future<List<PlayerRanking>> getRegionalRankings(
+      String region, int limit) async {
+    final cacheKey = 'region_$region';
+    if (_rankingCache.containsKey(cacheKey)) {
+      return _rankingCache[cacheKey]!;
+    }
+
+    try {
+      final snapshot = await _firestore
+          .collection('rankings')
+          .doc('regional')
+          .collection(region)
+          .orderBy('rating', descending: true)
+          .limit(limit)
+          .get();
+
+      final rankings = snapshot.docs
+          .asMap()
+          .entries
+          .map((e) => PlayerRanking.fromJson(e.value.data(), rank: e.key + 1))
+          .toList();
+
+      _rankingCache[cacheKey] = rankings;
+      Future.delayed(Duration(minutes: 5)).then((_) {
+        _rankingCache.remove(cacheKey);
+      });
+
+      return rankings;
+    } catch (e) {
+      print('Error fetching regional rankings: $e');
+      return [];
+    }
+  }
+
+  Future<List<PlayerRanking>> getFriendRankings(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final friendIds = List<String>.from(userDoc['friends'] ?? []);
+
+      if (friendIds.isEmpty) return [];
+
+      final snapshot = await _firestore
+          .collection('rankings')
+          .doc('global')
+          .collection('players')
+          .where(FieldPath.documentId, whereIn: friendIds)
+          .orderBy('rating', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => PlayerRanking.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error fetching friend rankings: $e');
+      return [];
+    }
+  }
+
+  Future<int> getUserRankPosition(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('rankings')
+          .doc('global')
+          .collection('players')
+          .orderBy('rating', descending: true)
+          .get();
+
+      final index = snapshot.docs.indexWhere((doc) => doc.id == userId);
+      return index >= 0 ? index + 1 : -1;
+    } catch (e) {
+      print('Error fetching user rank: $e');
+      return -1;
+    }
+  }
+
+  Future<void> updatePlayerRanking(String userId, GameResult result) async {
+    try {
+      final playerDoc = await _firestore
+          .collection('rankings')
+          .doc('global')
+          .collection('players')
+          .doc(userId)
+          .get();
+
+      int currentRating = playerDoc['rating'] ?? 1000;
+      int wins = playerDoc['wins'] ?? 0;
+      int losses = playerDoc['losses'] ?? 0;
+
+      if (result.isWin) {
+        wins++;
+        currentRating += 16;
+      } else if (!result.isDraw) {
+        losses++;
+        currentRating -= 16;
+      }
+
+      final newWinRate = wins / (wins + losses);
+
+      await _firestore
+          .collection('rankings')
+          .doc('global')
+          .collection('players')
+          .doc(userId)
+          .update({
+        'rating': currentRating,
         'wins': wins,
         'losses': losses,
-        'draws': draws,
-        'winRate': winRate,
-        'lastGameAt': FieldValue.serverTimestamp(),
+        'winRate': newWinRate,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      // 段位別ランキングに追加
-      await _firestore
-          .collection(_rankingsCollection)
-          .doc('byShogi')
-          .collection(shogiRankString)
-          .doc(uid)
-          .set({
-        'uid': uid,
-        'displayName': displayName,
-        'photoUrl': photoUrl,
-        'rating': rating,
-        'shogiRankString': shogiRankString,
-        'gamesPlayed': gamesPlayed,
-        'winRate': winRate,
-        'lastGameAt': FieldValue.serverTimestamp(),
-      });
-
-      // 月間ランキングに追加
-      final now = DateTime.now();
-      final monthKey = '${now.year}-${now.month.toString().padLeft(2, '0')}';
-
-      await _firestore
-          .collection(_rankingsCollection)
-          .doc('monthly')
-          .collection(monthKey)
-          .doc(uid)
-          .set({
-        'uid': uid,
-        'displayName': displayName,
-        'photoUrl': photoUrl,
-        'rating': rating,
-        'shogiRankString': shogiRankString,
-        'gamesPlayed': gamesPlayed,
-        'winRate': winRate,
-        'monthlyGames': FieldValue.increment(1),
-        'monthlyWins': FieldValue.increment(wins > 0 ? 1 : 0),
-      }, SetOptions(merge: true));
-
-      // ランキング統計を更新
-      await _updateRankingStats();
+      _rankingCache.clear();
     } catch (e) {
-      throw Exception('Failed to update user ranking: $e');
+      print('Error updating player ranking: $e');
     }
   }
 
-  /// グローバルランキングを取得
-  Future<List<RankingEntry>> getGlobalRanking({
-    int limit = 100,
-    int offset = 0,
-  }) async {
+  Future<RankingStatistics> getRankingStatistics() async {
     try {
       final snapshot = await _firestore
-          .collection(_rankingsCollection)
-          .doc('global')
-          .collection('players')
-          .orderBy('rating', descending: true)
-          .limit(limit)
-          .offset(offset)
-          .get();
-
-      final rankings = <RankingEntry>[];
-      for (int i = 0; i < snapshot.docs.length; i++) {
-        final doc = snapshot.docs[i];
-        final data = doc.data();
-
-        rankings.add(RankingEntry(
-          uid: data['uid'] as String,
-          displayName: data['displayName'] as String,
-          photoUrl: data['photoUrl'] as String?,
-          rating: data['rating'] as int,
-          shogiRankString: data['shogiRankString'] as String,
-          gamesPlayed: data['gamesPlayed'] as int,
-          winRate: (data['winRate'] as num).toDouble(),
-          rank: offset + i + 1,
-          lastGameAt: data['lastGameAt'] != null
-              ? (data['lastGameAt'] as Timestamp).toDate()
-              : null,
-        ));
-      }
-
-      return rankings;
-    } catch (e) {
-      throw Exception('Failed to fetch global ranking: $e');
-    }
-  }
-
-  /// ユーザーのランキング位置を取得
-  Future<int?> getUserRank(String uid) async {
-    try {
-      final userDoc = await _firestore
-          .collection(_rankingsCollection)
-          .doc('global')
-          .collection('players')
-          .doc(uid)
-          .get();
-
-      if (!userDoc.exists) return null;
-
-      final userRating = userDoc['rating'] as int;
-
-      // ユーザーより高いレーティングを持つユーザーの数を数える
-      final higherRatingCount = await _firestore
-          .collection(_rankingsCollection)
-          .doc('global')
-          .collection('players')
-          .where('rating', isGreaterThan: userRating)
-          .count()
-          .get();
-
-      return higherRatingCount.count + 1;
-    } catch (e) {
-      throw Exception('Failed to fetch user rank: $e');
-    }
-  }
-
-  /// 段位別ランキングを取得
-  Future<List<RankingEntry>> getRankingByShogi(
-    String shogiRank, {
-    int limit = 50,
-  }) async {
-    try {
-      final snapshot = await _firestore
-          .collection(_rankingsCollection)
-          .doc('byShogi')
-          .collection(shogiRank)
-          .orderBy('rating', descending: true)
-          .limit(limit)
-          .get();
-
-      final rankings = <RankingEntry>[];
-      for (int i = 0; i < snapshot.docs.length; i++) {
-        final doc = snapshot.docs[i];
-        final data = doc.data();
-
-        rankings.add(RankingEntry(
-          uid: data['uid'] as String,
-          displayName: data['displayName'] as String,
-          photoUrl: data['photoUrl'] as String?,
-          rating: data['rating'] as int,
-          shogiRankString: shogiRank,
-          gamesPlayed: data['gamesPlayed'] as int,
-          winRate: (data['winRate'] as num).toDouble(),
-          rank: i + 1,
-          lastGameAt: data['lastGameAt'] != null
-              ? (data['lastGameAt'] as Timestamp).toDate()
-              : null,
-        ));
-      }
-
-      return rankings;
-    } catch (e) {
-      throw Exception('Failed to fetch shogi ranking: $e');
-    }
-  }
-
-  /// 月間ランキングを取得
-  Future<List<RankingEntry>> getMonthlyRanking({
-    int limit = 50,
-    String? monthKey,
-  }) async {
-    try {
-      final now = DateTime.now();
-      final month = monthKey ?? '${now.year}-${now.month.toString().padLeft(2, '0')}';
-
-      final snapshot = await _firestore
-          .collection(_rankingsCollection)
-          .doc('monthly')
-          .collection(month)
-          .orderBy('rating', descending: true)
-          .limit(limit)
-          .get();
-
-      final rankings = <RankingEntry>[];
-      for (int i = 0; i < snapshot.docs.length; i++) {
-        final doc = snapshot.docs[i];
-        final data = doc.data();
-
-        rankings.add(RankingEntry(
-          uid: data['uid'] as String,
-          displayName: data['displayName'] as String,
-          photoUrl: data['photoUrl'] as String?,
-          rating: data['rating'] as int,
-          shogiRankString: data['shogiRankString'] as String,
-          gamesPlayed: data['gamesPlayed'] as int,
-          winRate: (data['winRate'] as num).toDouble(),
-          rank: i + 1,
-          lastGameAt: null,
-        ));
-      }
-
-      return rankings;
-    } catch (e) {
-      throw Exception('Failed to fetch monthly ranking: $e');
-    }
-  }
-
-  /// ランキング周辺のプレイヤーを取得
-  Future<List<RankingEntry>> getNearbyRankings(
-    String uid, {
-    int proximityCount = 5,
-  }) async {
-    try {
-      final userRank = await getUserRank(uid);
-      if (userRank == null) return [];
-
-      final startRank = (userRank - proximityCount - 1).clamp(0, 999999);
-      final allRankings = await getGlobalRanking(
-        limit: proximityCount * 2 + 1,
-        offset: startRank,
-      );
-
-      return allRankings;
-    } catch (e) {
-      throw Exception('Failed to fetch nearby rankings: $e');
-    }
-  }
-
-  /// ランキング統計を取得
-  Future<RankingStats?> getRankingStats() async {
-    try {
-      final doc = await _firestore
-          .collection(_statsCollection)
-          .doc('global')
-          .get();
-
-      if (!doc.exists) return null;
-
-      final data = doc.data()!;
-      return RankingStats(
-        totalPlayers: data['totalPlayers'] as int,
-        averageRating: (data['averageRating'] as num).toDouble(),
-        topRating: data['topRating'] as int,
-        lastUpdated: (data['lastUpdated'] as Timestamp).toDate(),
-      );
-    } catch (e) {
-      throw Exception('Failed to fetch ranking stats: $e');
-    }
-  }
-
-  /// ランキング統計を更新
-  Future<void> _updateRankingStats() async {
-    try {
-      final snapshot = await _firestore
-          .collection(_rankingsCollection)
+          .collection('rankings')
           .doc('global')
           .collection('players')
           .get();
 
-      if (snapshot.docs.isEmpty) return;
-
-      final ratings = snapshot.docs
-          .map((doc) => (doc['rating'] as int))
-          .toList();
-
+      final ratings = snapshot.docs.map((doc) => doc['rating'] as int).toList();
+      final totalPlayers = ratings.length;
       final averageRating =
-          ratings.reduce((a, b) => a + b) / ratings.length;
-      final topRating = ratings.reduce((a, b) => a > b ? a : b);
+          ratings.fold(0, (a, b) => a + b) / (totalPlayers > 0 ? totalPlayers : 1);
+      final topPlayerRating = ratings.isNotEmpty ? ratings.first : 0;
 
-      await _firestore
-          .collection(_statsCollection)
-          .doc('global')
-          .set({
-        'totalPlayers': snapshot.docs.length,
-        'averageRating': averageRating,
-        'topRating': topRating,
-        'lastUpdated': FieldValue.serverTimestamp(),
-      });
+      return RankingStatistics(
+        totalPlayers: totalPlayers,
+        averageRating: averageRating,
+        topPlayerRating: topPlayerRating,
+        distribution: [],
+      );
     } catch (e) {
-      print('Error updating ranking stats: $e');
+      print('Error fetching ranking statistics: $e');
+      return RankingStatistics(
+        totalPlayers: 0,
+        averageRating: 0,
+        topPlayerRating: 0,
+        distribution: [],
+      );
     }
   }
+}
 
-  /// ランキングをリアルタイム監視
-  Stream<List<RankingEntry>> watchGlobalRanking({int limit = 100}) {
-    return _firestore
-        .collection(_rankingsCollection)
-        .doc('global')
-        .collection('players')
-        .orderBy('rating', descending: true)
-        .limit(limit)
-        .snapshots()
-        .map((snapshot) {
-      final rankings = <RankingEntry>[];
-      for (int i = 0; i < snapshot.docs.length; i++) {
-        final doc = snapshot.docs[i];
-        final data = doc.data();
+class PlayerRanking {
+  final String userId;
+  final String username;
+  final int rating;
+  final int rank;
+  final int wins;
+  final int losses;
+  final double winRate;
+  final String region;
+  final DateTime updatedAt;
 
-        rankings.add(RankingEntry(
-          uid: data['uid'] as String,
-          displayName: data['displayName'] as String,
-          photoUrl: data['photoUrl'] as String?,
-          rating: data['rating'] as int,
-          shogiRankString: data['shogiRankString'] as String,
-          gamesPlayed: data['gamesPlayed'] as int,
-          winRate: (data['winRate'] as num).toDouble(),
-          rank: i + 1,
-          lastGameAt: data['lastGameAt'] != null
-              ? (data['lastGameAt'] as Timestamp).toDate()
-              : null,
-        ));
-      }
-      return rankings;
-    });
+  PlayerRanking({
+    required this.userId,
+    required this.username,
+    required this.rating,
+    required this.rank,
+    required this.wins,
+    required this.losses,
+    required this.winRate,
+    required this.region,
+    required this.updatedAt,
+  });
+
+  factory PlayerRanking.fromJson(Map<String, dynamic> json, {int rank = 0}) {
+    return PlayerRanking(
+      userId: json['userId'] ?? '',
+      username: json['username'] ?? '',
+      rating: json['rating'] ?? 1000,
+      rank: rank,
+      wins: json['wins'] ?? 0,
+      losses: json['losses'] ?? 0,
+      winRate: (json['winRate'] ?? 0.0).toDouble(),
+      region: json['region'] ?? 'Global',
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] as Timestamp).toDate()
+          : DateTime.now(),
+    );
   }
 
-  /// ユーザーのランキング情報をリアルタイム監視
-  Stream<RankingEntry?> watchUserRanking(String uid) {
-    return _firestore
-        .collection(_rankingsCollection)
-        .doc('global')
-        .collection('players')
-        .doc(uid)
-        .snapshots()
-        .asyncMap((doc) async {
-      if (!doc.exists) return null;
-
-      final data = doc.data()!;
-      final rank = await getUserRank(uid);
-
-      return RankingEntry(
-        uid: data['uid'] as String,
-        displayName: data['displayName'] as String,
-        photoUrl: data['photoUrl'] as String?,
-        rating: data['rating'] as int,
-        shogiRankString: data['shogiRankString'] as String,
-        gamesPlayed: data['gamesPlayed'] as int,
-        winRate: (data['winRate'] as num).toDouble(),
-        rank: rank ?? 0,
-        lastGameAt: data['lastGameAt'] != null
-            ? (data['lastGameAt'] as Timestamp).toDate()
-            : null,
-      );
-    });
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'username': username,
+      'rating': rating,
+      'wins': wins,
+      'losses': losses,
+      'winRate': winRate,
+      'region': region,
+      'updatedAt': updatedAt,
+    };
   }
+}
+
+class RankingStatistics {
+  final int totalPlayers;
+  final double averageRating;
+  final int topPlayerRating;
+  final List<RatingDistribution> distribution;
+
+  RankingStatistics({
+    required this.totalPlayers,
+    required this.averageRating,
+    required this.topPlayerRating,
+    required this.distribution,
+  });
+}
+
+class RatingDistribution {
+  final String tier;
+  final int playerCount;
+  final double percentage;
+
+  RatingDistribution({
+    required this.tier,
+    required this.playerCount,
+    required this.percentage,
+  });
+}
+
+class GameResult {
+  final bool isWin;
+  final bool isDraw;
+
+  GameResult({required this.isWin, required this.isDraw});
 }

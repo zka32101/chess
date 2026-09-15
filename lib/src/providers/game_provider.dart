@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/game.dart';
 import '../services/error_logging_service.dart';
 import '../services/rating_calculation_service.dart';
+import '../services/fen_calculator_service.dart';
 
 final firestoreProvider = Provider((ref) => FirebaseFirestore.instance);
 
@@ -232,10 +233,23 @@ class GameService {
 
       currentMoves.add(moveRecord);
 
-      // Update game with new move
+      // Calculate new FEN based on the move
+      String newFen;
+      try {
+        newFen = FenCalculatorService.calculateNewFen(
+          gameData['currentFen'] as String,
+          from,
+          to,
+          promotion: promotion,
+        );
+      } catch (e) {
+        throw Exception('Failed to calculate position: $e');
+      }
+
+      // Update game with new move and FEN
       await gameRef.update({
         'moves': currentMoves,
-        'currentFen': gameData['currentFen'], // TODO: Calculate new FEN
+        'currentFen': newFen,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
