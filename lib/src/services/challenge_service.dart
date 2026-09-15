@@ -1,14 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import '../models/phase_k_models.dart';
 
-class ChallengeService {
-  static final ChallengeService _instance = ChallengeService._internal();
+class FriendChallengeService {
+  static final FriendChallengeService _instance =
+      FriendChallengeService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<String, List<Challenge>> _challengesCache = {};
+  final Map<String, ChallengeStreak> _streakCache = {};
 
-  factory ChallengeService() {
-    return _instance;
-  }
+  factory FriendChallengeService() => _instance;
+  FriendChallengeService._internal();
 
-  ChallengeService._internal();
+  static FriendChallengeService get instance => _instance;
 
   Future<Challenge> createChallenge({
     required String creatorId,
