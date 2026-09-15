@@ -1,0 +1,115 @@
+// Phase L-3: iOS Build Optimization Configuration
+// Copy this content to ios/Flutter/Release.xcconfig
+
+// ========== Compiler Optimization ==========
+
+// Maximum optimization level for release builds
+GCC_OPTIMIZATION_LEVEL = 3
+SWIFT_OPTIMIZATION_LEVEL = -Osize
+
+// ========== Code Generation & Strip Settings ==========
+
+// Strip debug symbols to reduce binary size
+STRIP_INSTALLED_PRODUCT = YES
+STRIP_BITCODE = YES
+
+// Enable bitcode for App Thinning (size optimization per device)
+ENABLE_BITCODE = YES
+
+// ========== Linking Optimization ==========
+
+// Link-time optimization
+LD_OPTIMIZATION_PROFILE = default
+
+// Use dead code stripping
+DEAD_CODE_STRIPPING = YES
+
+// Optimize object files
+OTHER_LDFLAGS = $(inherited) -Wl,-dead_strip -Wl,-alias_list,/dev/null
+
+// ========== Size-Related Settings ==========
+
+// Enable whole module optimization (Swift)
+SWIFT_WHOLE_MODULE_OPTIMIZATION = YES
+
+// Disable debug info in release
+DEBUG_INFORMATION_FORMAT = dwarf
+
+// Minimize relocations
+LD_GENERATE_MAP_FILE = NO
+
+// ========== Build Settings for Size ==========
+
+// Disable exceptions in Objective-C (saves space)
+GCC_ENABLE_CPP_EXCEPTIONS = NO
+GCC_ENABLE_OBJC_EXCEPTIONS = NO
+
+// Use faster and smaller RTTI
+GCC_ENABLE_CPP_RTTI = NO
+
+// Optimize for code size over speed
+LLVM_LTO = Yes_Thin
+
+// ========== Signing & Code Coverage ==========
+
+// Code signing
+CODE_SIGN_IDENTITY = Apple Distribution
+CODE_SIGN_STYLE = Automatic
+PROVISIONING_PROFILE_SPECIFIER =
+
+// Disable code coverage for release
+CLANG_COVERAGE_MAPPING = NO
+CLANG_ENABLE_CODE_COVERAGE = NO
+
+// ========== Asset-Related Settings ==========
+
+// Asset catalogs: compress PNG and JPEG
+ASSETCATALOG_COMPILER_OPTIMIZATION = space
+
+// Include only necessary architectures (defined in app build settings)
+VALID_ARCHS = arm64
+
+// ========== Memory & Performance ==========
+
+// Align object files for better performance
+OBJECT_FILE_DIR_normal = $(OBJECT_FILE_DIR)
+
+// Minimize symbol table
+PRESERVE_PRIVATE_XLIB_SYMBOLS = NO
+
+// ========== Compiler Flags ==========
+
+// Additional compiler flags for optimization
+OTHER_CFLAGS = $(inherited) -flto -ffunction-sections -fdata-sections
+
+// Swift-specific compiler flags
+SWIFT_VERSION = 5.0
+
+// ========== Flutter-Specific Settings ==========
+
+// Use custom Flutter framework (optimized)
+FLUTTER_ROOT = $(SRCROOT)/Flutter
+FLUTTER_APPLICATION_PATH = ../..
+FLUTTER_TARGET = lib/main.dart
+FLUTTER_BUILD_MODE = release
+FLUTTER_BUILD_DIR = build
+
+// Dart VM options for optimization
+DART_OBFUSCATION = true
+
+// ========== Warnings as Errors (Optional) ==========
+
+// Treat all warnings as errors in release
+GCC_TREAT_WARNINGS_AS_ERRORS = NO
+CLANG_WARN_MISSING_PROTOTYPES = YES
+
+// ========== Final Size-Critical Settings ==========
+
+// Create ipa with minimal size
+OTHER_LDFLAGS_RELEASE = $(inherited) -Wl,-dead_strip -Wl,-S
+
+// Disable incremental linking to enable better optimization
+SUPPORTS_TEXT_BASED_API = NO
+
+// Use relative paths to reduce binary size
+CLANG_ENABLE_OBJC_ARC = YES
