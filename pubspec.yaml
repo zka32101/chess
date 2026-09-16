@@ -31,7 +31,7 @@ dependencies:
   flutter_svg: ^1.1.0
 
   # Chess Engine
-  chess: ^1.0.0
+  chess: >=2.0.0 <9.0.0
 
   # Local Storage
   sqflite: ^2.2.0
