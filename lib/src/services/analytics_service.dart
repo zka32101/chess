@@ -1,257 +1,239 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
-import '../models/analytics.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chess_tactics_master/src/models/analytics_models.dart';
+import 'dart:developer' show log;
 
-/// Firebase Analytics Service
 class AnalyticsService {
-  final FirebaseAnalytics _analytics;
+  static final AnalyticsService _instance = AnalyticsService._internal();
 
-  AnalyticsService(this._analytics);
+  factory AnalyticsService() {
+    return _instance;
+  }
 
-  /// Log an analytics event
-  Future<void> logEvent(
-    String eventName, {
-    Map<String, Object>? parameters,
+  AnalyticsService._internal();
+
+  static AnalyticsService get instance => _instance;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<String, PerformanceMetrics> _metricsCache = {};
+
+  /// Track query performance
+  Future<void> trackQueryPerformance({
+    required String operationName,
+    required int durationMs,
+    required bool success,
+    String? errorType,
+  }) async {
+    final metric = PerformanceMetrics(
+      operationName: operationName,
+      durationMs: durationMs,
+      timestamp: DateTime.now(),
+      success: success,
+      errorType: errorType,
+    );
+
+    _metricsCache[operationName] = metric;
+
+    try {
+      await _firestore
+          .collection('analytics')
+          .doc('performance_metrics')
+          .collection('hourly')
+          .doc(DateTime.now().toIso8601String().split('T')[0])
+          .collection('metrics')
+          .add(metric.toJson());
+    } catch (e) {
+      log('Failed to track query performance: $e');
+    }
+  }
+
+  /// Track user engagement
+  Future<void> trackUserEngagement({
+    required String userId,
+    required String action,
+    Map<String, dynamic>? metadata,
   }) async {
     try {
-      await _analytics.logEvent(
-        name: eventName,
-        parameters: parameters,
-      );
+      await _firestore
+          .collection('analytics')
+          .doc('user_engagement')
+          .collection('events')
+          .add({
+        'userId': userId,
+        'action': action,
+        'timestamp': FieldValue.serverTimestamp(),
+        'metadata': metadata ?? {},
+      });
     } catch (e) {
-      // Log errors silently to not disrupt user experience
-      print('Analytics error: $e');
+      log('Failed to track user engagement: $e');
     }
   }
 
-  /// Log a custom analytics event
-  Future<void> logCustomEvent(AnalyticsEvent event) async {
+  /// Track cache metrics
+  Future<void> trackCacheMetrics({
+    required String cacheName,
+    required int hitCount,
+    required int missCount,
+    required Duration avgLookupTime,
+    required int evictionCount,
+  }) async {
+    final hitRate = hitCount / (hitCount + missCount).toDouble();
+
+    final analytics = CacheAnalytics(
+      cacheName: cacheName,
+      hitCount: hitCount,
+      missCount: missCount,
+      hitRate: hitRate,
+      avgCacheLookup: avgLookupTime,
+      evictionCount: evictionCount,
+      period: DateTime.now(),
+    );
+
     try {
-      await _analytics.logEvent(
-        name: event.eventType.analyticsName,
-        parameters: {
-          ...event.parameters,
-          'timestamp': event.timestamp.toIso8601String(),
-          if (event.userId != null) 'user_id': event.userId!,
-          if (event.sessionId != null) 'session_id': event.sessionId!,
-        },
-      );
+      await _firestore
+          .collection('analytics')
+          .doc('cache_analytics')
+          .collection('daily')
+          .doc(DateTime.now().toIso8601String().split('T')[0])
+          .set({
+        cacheName: analytics.toJson(),
+      }, SetOptions(merge: true));
     } catch (e) {
-      print('Analytics error: $e');
+      log('Failed to track cache metrics: $e');
     }
   }
 
-  /// Log screen view
-  Future<void> logScreenView({
-    required String screenName,
-    required String screenClass,
+  /// Get performance trends for query type
+  Future<List<QueryPerformanceTrend>> getPerformanceTrends({
+    required String queryType,
+    required int days,
   }) async {
     try {
-      await _analytics.logScreenView(
-        screenName: screenName,
-        screenClass: screenClass,
-      );
+      final now = DateTime.now();
+      final startDate = now.subtract(Duration(days: days));
+
+      final snapshot = await _firestore
+          .collection('analytics')
+          .doc('query_trends')
+          .collection('daily')
+          .where('queryType', isEqualTo: queryType)
+          .where('period', isGreaterThanOrEqualTo: startDate)
+          .orderBy('period', descending: true)
+          .limit(days)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => QueryPerformanceTrend.fromJson(doc.data()))
+          .toList();
     } catch (e) {
-      print('Analytics error: $e');
+      log('Failed to get performance trends: $e');
+      return [];
     }
   }
 
-  /// Log game completion
-  Future<void> logGameCompleted({
-    required String gameId,
-    required String gameType,
-    required int duration,
-    required bool won,
-    required int moveCount,
-    int? ratingBefore,
-    int? ratingAfter,
-    String? result,
+  /// Get user engagement stats
+  Future<UserEngagementMetrics?> getUserEngagementStats({
+    required String userId,
   }) async {
     try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.gameCompleted.analyticsName,
-        parameters: {
-          'game_id': gameId,
-          'game_type': gameType,
-          'duration_ms': duration,
-          'won': won,
-          'rating_before': ratingBefore ?? 0,
-          'rating_after': ratingAfter ?? 0,
-          'move_count': moveCount,
-          'result': result ?? 'unknown',
-        },
-      );
+      final doc = await _firestore
+          .collection('analytics')
+          .doc('user_engagement')
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!doc.exists) return null;
+
+      return UserEngagementMetrics.fromJson(doc.data()!);
     } catch (e) {
-      print('Analytics error: $e');
+      log('Failed to get user engagement stats: $e');
+      return null;
     }
   }
 
-  /// Log puzzle solved
-  Future<void> logPuzzleSolved({
-    required String puzzleId,
-    required int difficulty,
-    required int timeSpent,
+  /// Get cache analytics
+  Future<List<CacheAnalytics>> getCacheAnalytics({
+    required int days,
   }) async {
     try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.puzzleSolved.analyticsName,
-        parameters: {
-          'puzzle_id': puzzleId,
-          'difficulty': difficulty,
-          'time_spent_ms': timeSpent,
-        },
-      );
+      final now = DateTime.now();
+      final startDate = now.subtract(Duration(days: days));
+
+      final snapshot = await _firestore
+          .collection('analytics')
+          .doc('cache_analytics')
+          .collection('daily')
+          .where('period', isGreaterThanOrEqualTo: startDate)
+          .orderBy('period', descending: true)
+          .limit(days)
+          .get();
+
+      return snapshot.docs
+          .expand((doc) => (doc.data().values.cast<Map<String, dynamic>>()))
+          .map((data) => CacheAnalytics.fromJson(data))
+          .toList();
     } catch (e) {
-      print('Analytics error: $e');
+      log('Failed to get cache analytics: $e');
+      return [];
     }
   }
 
-  /// Log matchmaking event
-  Future<void> logMatchmakingStarted({
-    required String timeControl,
-    String? colorPreference,
+  /// Get competitive feature usage
+  Future<List<CompetitiveFeatureStats>> getCompetitiveFeatureUsage({
+    required int days,
   }) async {
     try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.matchmakingStarted.analyticsName,
-        parameters: {
-          'time_control': timeControl,
-          if (colorPreference != null) 'color_preference': colorPreference,
-        },
-      );
+      final now = DateTime.now();
+      final startDate = now.subtract(Duration(days: days));
+
+      final snapshot = await _firestore
+          .collection('analytics')
+          .doc('competitive_features')
+          .collection('daily')
+          .where('period', isGreaterThanOrEqualTo: startDate)
+          .orderBy('period', descending: true)
+          .limit(days)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => CompetitiveFeatureStats.fromJson(doc.data()))
+          .toList();
     } catch (e) {
-      print('Analytics error: $e');
+      log('Failed to get competitive feature usage: $e');
+      return [];
     }
   }
 
-  /// Log match found
-  Future<void> logMatchFound({
-    required String gameId,
-    required int waitTime,
+  /// Record daily metrics snapshot
+  Future<void> recordDailySnapshot({
+    required BuildMetrics buildMetrics,
+    required int activeUsers,
+    required double cacheHitRate,
   }) async {
     try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.matchFound.analyticsName,
-        parameters: {
-          'game_id': gameId,
-          'wait_time_ms': waitTime,
-        },
-      );
+      await _firestore
+          .collection('analytics')
+          .doc('daily_snapshots')
+          .collection('snapshots')
+          .doc(DateTime.now().toIso8601String().split('T')[0])
+          .set({
+        'buildMetrics': buildMetrics.toJson(),
+        'activeUsers': activeUsers,
+        'cacheHitRate': cacheHitRate,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
-      print('Analytics error: $e');
+      log('Failed to record daily snapshot: $e');
     }
   }
 
-  /// Log subscription event
-  Future<void> logSubscriptionPurchased({
-    required String productId,
-    required double price,
-    required String currency,
-  }) async {
-    try {
-      await _analytics.logPurchase(
-        currency: currency,
-        value: price,
-        items: [
-          AnalyticsEventItem(itemName: productId),
-        ],
-      );
-
-      await _analytics.logEvent(
-        name: AnalyticsEventType.subscriptionPurchased.analyticsName,
-        parameters: {
-          'product_id': productId,
-          'price': price,
-          'currency': currency,
-        },
-      );
-    } catch (e) {
-      print('Analytics error: $e');
-    }
+  /// Clear metrics cache
+  void clearCache() {
+    _metricsCache.clear();
   }
 
-  /// Log trial started
-  Future<void> logTrialStarted({
-    required String productId,
-    required int durationDays,
-  }) async {
-    try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.trialStarted.analyticsName,
-        parameters: {
-          'product_id': productId,
-          'duration_days': durationDays,
-        },
-      );
-    } catch (e) {
-      print('Analytics error: $e');
-    }
-  }
-
-  /// Log premium feature used
-  Future<void> logPremiumFeatureUsed({
-    required String featureName,
-    Map<String, Object>? additionalData,
-  }) async {
-    try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.premiumFeatureUsed.analyticsName,
-        parameters: {
-          'feature_name': featureName,
-          ...?additionalData,
-        },
-      );
-    } catch (e) {
-      print('Analytics error: $e');
-    }
-  }
-
-  /// Log error
-  Future<void> logError({
-    required String errorCode,
-    required String errorMessage,
-    String? screenName,
-  }) async {
-    try {
-      await _analytics.logEvent(
-        name: AnalyticsEventType.errorOccurred.analyticsName,
-        parameters: {
-          'error_code': errorCode,
-          'error_message': errorMessage,
-          if (screenName != null) 'screen_name': screenName,
-        },
-      );
-    } catch (e) {
-      print('Analytics error: $e');
-    }
-  }
-
-  /// Set user property
-  Future<void> setUserProperty({
-    required String name,
-    required String value,
-  }) async {
-    try {
-      await _analytics.setUserProperty(name: name, value: value);
-    } catch (e) {
-      print('Analytics error: $e');
-    }
-  }
-
-  /// Set user ID
-  Future<void> setUserId(String userId) async {
-    try {
-      await _analytics.setUserId(userId);
-    } catch (e) {
-      print('Analytics error: $e');
-    }
-  }
-
-  /// Reset analytics
-  Future<void> reset() async {
-    try {
-      await _analytics.resetAnalyticsData();
-    } catch (e) {
-      print('Analytics error: $e');
-    }
+  /// Get cached metrics for operation
+  PerformanceMetrics? getCachedMetric(String operationName) {
+    return _metricsCache[operationName];
   }
 }
