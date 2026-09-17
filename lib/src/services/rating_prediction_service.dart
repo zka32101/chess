@@ -318,8 +318,6 @@ class RatingPredictionService {
 
     return improvements;
   }
-
-  import 'package:cloud_firestore/cloud_firestore.dart';
 }
 
 /// Rating forecast data
