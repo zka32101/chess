@@ -1,288 +1,371 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import '../models/phase_k_models.dart';
 
-class ChallengeService {
-  static final ChallengeService _instance = ChallengeService._internal();
+/// Friend-to-friend challenge service for head-to-head competitive matches
+class FriendChallengeService {
+  static final FriendChallengeService _instance =
+      FriendChallengeService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Map<String, List<Challenge>> _challengesCache = {};
+  final Map<String, ChallengeStreak> _streakCache = {};
 
-  factory ChallengeService() {
-    return _instance;
-  }
+  factory FriendChallengeService() => _instance;
+  FriendChallengeService._internal();
 
-  ChallengeService._internal();
+  static FriendChallengeService get instance => _instance;
 
-  Future<Challenge> createChallenge({
-    required String creatorId,
-    required String type,
-    required int targetCount,
-    required Duration duration,
-    required String title,
-    required String description,
+  /// Send challenge to friend
+  Future<Challenge> sendChallenge({
+    required String challengerUserId,
+    required String challengerUsername,
+    required String challengeeUserId,
+    required String challengeeUsername,
+    required String timeControl,
+    required int wagerPoints,
   }) async {
     try {
-      final challengeId = _firestore.collection('challenges').doc().id;
-      final endsAt = DateTime.now().add(duration);
-      final shareCode = _generateShareCode();
+      final challengeId = DateTime.now().millisecondsSinceEpoch.toString();
 
-      final challenge = Challenge(
+      await _firestore
+          .collection('friend_challenges')
+          .doc('active')
+          .collection('list')
+          .doc(challengeId)
+          .set({
+            'challengeId': challengeId,
+            'challengerUserId': challengerUserId,
+            'challengerUsername': challengerUsername,
+            'challengeeUserId': challengeeUserId,
+            'challengeeUsername': challengeeUsername,
+            'createdAt': FieldValue.serverTimestamp(),
+            'status': 'pending',
+            'timeControl': timeControl,
+            'wagerPoints': wagerPoints,
+            'respondedAt': null,
+            'winnerId': null,
+            'gameId': null,
+            'completedAt': null,
+          });
+
+      _challengesCache.remove(challengeeUserId);
+
+      return Challenge(
         challengeId: challengeId,
-        creatorId: creatorId,
-        type: type,
-        title: title,
-        description: description,
-        targetCount: targetCount,
-        duration: duration,
+        challengerUserId: challengerUserId,
+        challengerUsername: challengerUsername,
+        challengeeUserId: challengeeUserId,
+        challengeeUsername: challengeeUsername,
         createdAt: DateTime.now(),
-        endsAt: endsAt,
-        shareCode: shareCode,
-        participantIds: [creatorId],
-        status: ChallengeStatus.active,
+        status: 'pending',
+        timeControl: timeControl,
+        wagerPoints: wagerPoints,
+        respondedAt: null,
+        winnerId: null,
+        gameId: null,
+        completedAt: null,
       );
-
-      await _firestore.collection('challenges').doc('active').collection('list').doc(challengeId).set({
-        'challengeId': challengeId,
-        'creatorId': creatorId,
-        'type': type,
-        'title': title,
-        'description': description,
-        'targetCount': targetCount,
-        'createdAt': Timestamp.fromDate(DateTime.now()),
-        'endsAt': Timestamp.fromDate(endsAt),
-        'shareCode': shareCode,
-        'participantIds': [creatorId],
-        'status': 'active',
-      });
-
-      return challenge;
     } catch (e) {
-      print('Error creating challenge: $e');
+      debugPrint('Error sending challenge: $e');
       rethrow;
     }
   }
 
-  Future<void> joinChallenge(String userId, String challengeCode) async {
+  /// Accept challenge
+  Future<void> acceptChallenge(
+    String challengeId,
+    String gameId,
+  ) async {
     try {
-      final challengeDoc = await _firestore
-          .collection('challenges')
-          .doc('active')
-          .collection('list')
-          .where('shareCode', isEqualTo: challengeCode)
-          .limit(1)
-          .get();
-
-      if (challengeDoc.docs.isNotEmpty) {
-        final challengeId = challengeDoc.docs.first.id;
-
-        await _firestore
-            .collection('challenges')
-            .doc('active')
-            .collection('list')
-            .doc(challengeId)
-            .update({
-          'participantIds': FieldValue.arrayUnion([userId]),
-        });
-
-        await _firestore
-            .collection('challenges')
-            .doc('progress')
-            .collection(challengeId)
-            .doc(userId)
-            .set({
-          'userId': userId,
-          'challengeId': challengeId,
-          'progress': 0,
-          'joinedAt': FieldValue.serverTimestamp(),
-        });
-      }
-    } catch (e) {
-      print('Error joining challenge: $e');
-    }
-  }
-
-  Future<void> updateChallengeProgress(
-      String userId, String challengeId) async {
-    try {
-      final progressDoc = await _firestore
-          .collection('challenges')
-          .doc('progress')
-          .collection(challengeId)
-          .doc(userId)
-          .get();
-
-      final currentProgress = (progressDoc['progress'] ?? 0) + 1;
-
       await _firestore
-          .collection('challenges')
-          .doc('progress')
-          .collection(challengeId)
-          .doc(userId)
-          .update({'progress': currentProgress});
-    } catch (e) {
-      print('Error updating challenge progress: $e');
-    }
-  }
-
-  Future<List<ChallengeLeaderboard>> getChallengeLeaderboard(
-      String challengeId) async {
-    try {
-      final snapshot = await _firestore
-          .collection('challenges')
-          .doc('progress')
-          .collection(challengeId)
-          .orderBy('progress', descending: true)
-          .get();
-
-      return snapshot.docs
-          .asMap()
-          .entries
-          .map((e) {
-            final data = e.value.data();
-            return ChallengeLeaderboard(
-              rank: e.key + 1,
-              userId: data['userId'] ?? '',
-              username: data['username'] ?? 'Unknown',
-              score: data['progress'] ?? 0,
-              progress: data['progress'] ?? 0,
-              completionPercentage: 0.0,
-            );
-          })
-          .toList();
-    } catch (e) {
-      print('Error fetching challenge leaderboard: $e');
-      return [];
-    }
-  }
-
-  Future<void> distributeChallengeRewards(String challengeId) async {
-    try {
-      final leaderboard = await getChallengeLeaderboard(challengeId);
-
-      for (final entry in leaderboard.take(3)) {
-        final points = [100, 50, 25][leaderboard.indexOf(entry)];
-        await _firestore
-            .collection('user_rewards')
-            .doc(entry.userId)
-            .update({
-          'totalPoints': FieldValue.increment(points),
-        });
-      }
-
-      await _firestore
-          .collection('challenges')
+          .collection('friend_challenges')
           .doc('active')
           .collection('list')
           .doc(challengeId)
-          .update({'status': 'completed'});
+          .update({
+            'status': 'accepted',
+            'respondedAt': FieldValue.serverTimestamp(),
+            'gameId': gameId,
+          });
+
+      _challengesCache.clear();
     } catch (e) {
-      print('Error distributing challenge rewards: $e');
+      debugPrint('Error accepting challenge: $e');
+      rethrow;
     }
   }
 
-  Future<List<Challenge>> getUserActiveChallenges(String userId) async {
+  /// Reject challenge
+  Future<void> rejectChallenge(String challengeId) async {
     try {
-      final snapshot = await _firestore
-          .collection('challenges')
+      await _firestore
+          .collection('friend_challenges')
           .doc('active')
           .collection('list')
-          .where('participantIds', arrayContains: userId)
+          .doc(challengeId)
+          .update({
+            'status': 'rejected',
+            'respondedAt': FieldValue.serverTimestamp(),
+          });
+
+      _challengesCache.clear();
+    } catch (e) {
+      debugPrint('Error rejecting challenge: $e');
+      rethrow;
+    }
+  }
+
+  /// Cancel challenge
+  Future<void> cancelChallenge(String challengeId) async {
+    try {
+      await _firestore
+          .collection('friend_challenges')
+          .doc('active')
+          .collection('list')
+          .doc(challengeId)
+          .update({
+            'status': 'cancelled',
+            'completedAt': FieldValue.serverTimestamp(),
+          });
+
+      _challengesCache.clear();
+    } catch (e) {
+      debugPrint('Error cancelling challenge: $e');
+      rethrow;
+    }
+  }
+
+  /// Complete challenge with winner
+  Future<void> completeChallengeWithWinner({
+    required String challengeId,
+    required String winnerId,
+    required String loserId,
+    required int winnerRatingGain,
+    required int loserRatingLoss,
+    required int moveCount,
+  }) async {
+    try {
+      final resultId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      await _firestore.runTransaction((transaction) async {
+        // Update challenge status
+        transaction.update(
+            _firestore
+                .collection('friend_challenges')
+                .doc('active')
+                .collection('list')
+                .doc(challengeId),
+            {
+              'status': 'completed',
+              'winnerId': winnerId,
+              'completedAt': FieldValue.serverTimestamp(),
+            });
+
+        // Record result
+        transaction.set(
+            _firestore
+                .collection('challenge_results')
+                .doc(resultId),
+            {
+              'resultId': resultId,
+              'challengeId': challengeId,
+              'winnerId': winnerId,
+              'loserId': loserId,
+              'winnerRatingGain': winnerRatingGain,
+              'loserRatingLoss': loserRatingLoss,
+              'completedAt': FieldValue.serverTimestamp(),
+              'gameMode': 'challenge',
+              'moveCount': moveCount,
+            });
+
+        // Update winner's streak
+        transaction.update(
+            _firestore
+                .collection('challenge_streaks')
+                .doc(winnerId),
+            {
+              'currentStreak': FieldValue.increment(1),
+              'totalChallengesWon': FieldValue.increment(1),
+              'streakStartDate': FieldValue.serverTimestamp(),
+            });
+
+        // Reset loser's streak
+        transaction.update(
+            _firestore
+                .collection('challenge_streaks')
+                .doc(loserId),
+            {
+              'currentStreak': 0,
+              'totalChallengesLost': FieldValue.increment(1),
+            });
+      });
+
+      _challengesCache.clear();
+      _streakCache.remove(winnerId);
+      _streakCache.remove(loserId);
+    } catch (e) {
+      debugPrint('Error completing challenge: $e');
+      rethrow;
+    }
+  }
+
+  /// Get pending challenges
+  Future<List<Challenge>> getPendingChallenges(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('friend_challenges')
+          .doc('active')
+          .collection('list')
+          .where('challengeeUserId', isEqualTo: userId)
+          .where('status', isEqualTo: 'pending')
+          .orderBy('createdAt', descending: true)
           .get();
 
       return snapshot.docs
           .map((doc) => Challenge.fromJson(doc.data()))
           .toList();
     } catch (e) {
-      print('Error fetching user active challenges: $e');
+      debugPrint('Error fetching pending challenges: $e');
       return [];
     }
   }
 
-  String _generateShareCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    String result = '';
-    for (int i = 0; i < 6; i++) {
-      result += chars[(DateTime.now().millisecondsSinceEpoch + i) % chars.length];
-    }
-    return result;
-  }
-}
+  /// Get active challenges
+  Future<List<Challenge>> getActiveChallenges(String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('friend_challenges')
+          .doc('active')
+          .collection('list')
+          .where('status', isEqualTo: 'accepted')
+          .orderBy('createdAt', descending: true)
+          .get();
 
-class Challenge {
-  final String challengeId;
-  final String creatorId;
-  final String type;
-  final String title;
-  final String description;
-  final int targetCount;
-  final Duration duration;
-  final DateTime createdAt;
-  final DateTime endsAt;
-  final String shareCode;
-  final List<String> participantIds;
-  final ChallengeStatus status;
+      final userChallenges = snapshot.docs
+          .map((doc) => Challenge.fromJson(doc.data()))
+          .where((c) => c.challengerUserId == userId || c.challengeeUserId == userId)
+          .toList();
 
-  Challenge({
-    required this.challengeId,
-    required this.creatorId,
-    required this.type,
-    required this.title,
-    required this.description,
-    required this.targetCount,
-    required this.duration,
-    required this.createdAt,
-    required this.endsAt,
-    required this.shareCode,
-    required this.participantIds,
-    required this.status,
-  });
-
-  factory Challenge.fromJson(Map<String, dynamic> json) {
-    return Challenge(
-      challengeId: json['challengeId'] ?? '',
-      creatorId: json['creatorId'] ?? '',
-      type: json['type'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      targetCount: json['targetCount'] ?? 0,
-      duration: Duration(days: json['duration'] ?? 7),
-      createdAt: json['createdAt'] != null
-          ? (json['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      endsAt: json['endsAt'] != null
-          ? (json['endsAt'] as Timestamp).toDate()
-          : DateTime.now().add(Duration(days: 7)),
-      shareCode: json['shareCode'] ?? '',
-      participantIds: List<String>.from(json['participantIds'] ?? []),
-      status: _parseStatus(json['status']),
-    );
-  }
-
-  static ChallengeStatus _parseStatus(String? status) {
-    switch (status) {
-      case 'completed':
-        return ChallengeStatus.completed;
-      case 'cancelled':
-        return ChallengeStatus.cancelled;
-      default:
-        return ChallengeStatus.active;
+      return userChallenges;
+    } catch (e) {
+      debugPrint('Error fetching active challenges: $e');
+      return [];
     }
   }
+
+  /// Get challenge history
+  Future<List<Challenge>> getChallengeHistory(
+    String userId, {
+    int limit = 50,
+  }) async {
+    try {
+      final snapshot = await _firestore
+          .collection('friend_challenges')
+          .doc('active')
+          .collection('list')
+          .where('status', isEqualTo: 'completed')
+          .orderBy('completedAt', descending: true)
+          .limit(limit)
+          .get();
+
+      final userChallenges = snapshot.docs
+          .map((doc) => Challenge.fromJson(doc.data()))
+          .where((c) => c.challengerUserId == userId || c.challengeeUserId == userId)
+          .toList();
+
+      return userChallenges;
+    } catch (e) {
+      debugPrint('Error fetching challenge history: $e');
+      return [];
+    }
+  }
+
+  /// Get user's challenge streak
+  Future<ChallengeStreak> getUserStreak(String userId) async {
+    if (_streakCache.containsKey(userId)) {
+      return _streakCache[userId]!;
+    }
+
+    try {
+      final doc = await _firestore
+          .collection('challenge_streaks')
+          .doc(userId)
+          .get();
+
+      if (!doc.exists) {
+        return ChallengeStreak(
+          userId: userId,
+          currentStreak: 0,
+          bestStreak: 0,
+          streakStartDate: DateTime.now(),
+          totalChallengesWon: 0,
+          totalChallengesLost: 0,
+          winRate: 0.0,
+        );
+      }
+
+      final streak = ChallengeStreak.fromJson(doc.data()!);
+      _streakCache[userId] = streak;
+      return streak;
+    } catch (e) {
+      debugPrint('Error fetching user streak: $e');
+      rethrow;
+    }
+  }
+
+  /// Get top streaks
+  Future<List<ChallengeStreak>> getTopStreaks({int limit = 50}) async {
+    try {
+      final snapshot = await _firestore
+          .collection('challenge_streaks')
+          .orderBy('currentStreak', descending: true)
+          .limit(limit)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => ChallengeStreak.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      debugPrint('Error fetching top streaks: $e');
+      return [];
+    }
+  }
+
+  /// Get head-to-head stats
+  Future<Map<String, int>> getHeadToHeadStats(
+    String userId1,
+    String userId2,
+  ) async {
+    try {
+      int wins1 = 0;
+      int wins2 = 0;
+
+      final snapshot1 = await _firestore
+          .collection('challenge_results')
+          .where('winnerId', isEqualTo: userId1)
+          .where('loserId', isEqualTo: userId2)
+          .get();
+
+      wins1 = snapshot1.docs.length;
+
+      final snapshot2 = await _firestore
+          .collection('challenge_results')
+          .where('winnerId', isEqualTo: userId2)
+          .where('loserId', isEqualTo: userId1)
+          .get();
+
+      wins2 = snapshot2.docs.length;
+
+      return {'wins1': wins1, 'wins2': wins2};
+    } catch (e) {
+      debugPrint('Error fetching head-to-head stats: $e');
+      return {'wins1': 0, 'wins2': 0};
+    }
+  }
+
+  /// Clear cache
+  void clearCache() {
+    _challengesCache.clear();
+    _streakCache.clear();
+  }
 }
-
-class ChallengeLeaderboard {
-  final int rank;
-  final String userId;
-  final String username;
-  final int score;
-  final int progress;
-  final double completionPercentage;
-
-  ChallengeLeaderboard({
-    required this.rank,
-    required this.userId,
-    required this.username,
-    required this.score,
-    required this.progress,
-    required this.completionPercentage,
-  });
-}
-
-enum ChallengeStatus { active, completed, cancelled }
