@@ -390,6 +390,3 @@ class MatchmakingStats {
     required this.ratingDistribution,
   });
 }
-
-typedef Timestamp = cloud_firestore.Timestamp;
-import 'package:cloud_firestore/cloud_firestore.dart' as cloud_firestore;
