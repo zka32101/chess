@@ -124,3 +124,99 @@ class DashboardKPI with _$DashboardKPI {
   factory DashboardKPI.fromJson(Map<String, dynamic> json) =>
       _$DashboardKPIFromJson(json);
 }
+
+// Player-focused Analytics Models
+
+/// Game statistics for a player
+@freezed
+class GameStats with _$GameStats {
+  const factory GameStats({
+    required int totalGames,
+    required int wins,
+    required int losses,
+    required int draws,
+    required double winRate,
+    required double averageAccuracy,
+    required int totalMoves,
+    required DateTime lastGameDate,
+  }) = _GameStats;
+
+  factory GameStats.fromJson(Map<String, dynamic> json) =>
+      _$GameStatsFromJson(json);
+}
+
+/// Performance metrics over time
+@freezed
+class PerformanceMetric with _$PerformanceMetric {
+  const factory PerformanceMetric({
+    required DateTime timestamp,
+    required double accuracy,
+    required double rating,
+    required int gameCount,
+    required String difficulty,
+  }) = _PerformanceMetric;
+
+  factory PerformanceMetric.fromJson(Map<String, dynamic> json) =>
+      _$PerformanceMetricFromJson(json);
+}
+
+/// Aggregated performance data for trends
+@freezed
+class PerformanceTrend with _$PerformanceTrend {
+  const factory PerformanceTrend({
+    required List<PerformanceMetric> metrics,
+    required double trendDirection,
+    required double averageAccuracy,
+    required double averageRating,
+    required int totalDataPoints,
+  }) = _PerformanceTrend;
+
+  factory PerformanceTrend.fromJson(Map<String, dynamic> json) =>
+      _$PerformanceTrendFromJson(json);
+}
+
+/// Difficulty-specific performance breakdown
+@freezed
+class DifficultyBreakdown with _$DifficultyBreakdown {
+  const factory DifficultyBreakdown({
+    required String difficulty,
+    required int gamesPlayed,
+    required int wins,
+    required double winRate,
+    required double averageAccuracy,
+  }) = _DifficultyBreakdown;
+
+  factory DifficultyBreakdown.fromJson(Map<String, dynamic> json) =>
+      _$DifficultyBreakdownFromJson(json);
+}
+
+/// Streak information
+@freezed
+class StreakInfo with _$StreakInfo {
+  const factory StreakInfo({
+    required int currentWinStreak,
+    required int longestWinStreak,
+    required DateTime longestStreakDate,
+    required int currentLossStreak,
+    required int longestLossStreak,
+  }) = _StreakInfo;
+
+  factory StreakInfo.fromJson(Map<String, dynamic> json) =>
+      _$StreakInfoFromJson(json);
+}
+
+/// Overall player analytics dashboard
+@freezed
+class PlayerAnalyticsDashboard with _$PlayerAnalyticsDashboard {
+  const factory PlayerAnalyticsDashboard({
+    required String userId,
+    required GameStats gameStats,
+    required StreakInfo streakInfo,
+    required PerformanceTrend performanceTrend,
+    required List<DifficultyBreakdown> difficultyStats,
+    required DateTime generatedAt,
+  }) = _PlayerAnalyticsDashboard;
+
+  factory PlayerAnalyticsDashboard.fromJson(Map<String, dynamic> json) =>
+      _$PlayerAnalyticsDashboardFromJson(json);
+}
