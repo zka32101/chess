@@ -5,6 +5,7 @@ import '../models/game.dart';
 import '../models/cpu_game_state.dart';
 import '../services/chess_engine_service.dart';
 import '../services/ai_opponent_engine.dart';
+import '../services/stockfish_engine_service.dart';
 
 /// CPU game state
 class CPUGameState {
@@ -470,14 +471,35 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
     }
   }
 
+  bool _stockfishFailed = false;
+
   /// Request AI to make a move
   Future<void> makeAIMove() async {
     if (state.isPlayerTurn || state.isGameOver || state.isAIThinking) return;
 
     state = state.copyWith(isAIThinking: true);
 
-    // Get best move from AI
-    final bestMove = _aiEngine.getBestMove();
+    // Prefer the native Stockfish engine: it's far stronger and runs off
+    // the UI thread (no jank), falling back to the built-in minimax engine
+    // if Stockfish isn't available on this platform (e.g. web) or errors.
+    String? bestMove;
+    if (!_stockfishFailed) {
+      try {
+        final stockfish = StockfishEngineService.instance;
+        await stockfish.configureDifficulty(state.difficulty);
+        bestMove = await stockfish.getBestMove(
+          _chess.getCurrentFen(),
+          moveTimeMs: state.difficulty.stockfishMoveTimeMs,
+        );
+      } catch (e) {
+        _stockfishFailed = true;
+        bestMove = null;
+      }
+    }
+
+    // Fallback: hand-rolled minimax/alpha-beta engine.
+    bestMove ??= _aiEngine.getBestMove();
+
     if (bestMove == null) {
       _endGame();
       state = state.copyWith(isAIThinking: false);

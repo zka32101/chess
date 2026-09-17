@@ -32,6 +32,7 @@ dependencies:
 
   # Chess Engine
   chess: ^2.0.0
+  stockfish: ^1.7.0
 
   # Local Storage
   sqflite: ^2.2.0
