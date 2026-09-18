@@ -471,8 +471,9 @@ class EventLeaderboardCard extends ConsumerWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
-            ...entries.indexed.map((indexed) {
-              final (index, entry) = indexed;
+            ...entries.asMap().entries.map((e) {
+              final index = e.key;
+              final entry = e.value;
               return _buildLeaderboardEntry(context, index, entry);
             }),
           ],
