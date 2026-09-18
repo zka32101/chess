@@ -1,5 +1,6 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../services/season_management_service.dart';
 import '../services/battle_pass_service.dart';
 import '../services/season_challenge_service.dart';
@@ -7,6 +8,7 @@ import '../services/seasonal_reward_service.dart';
 import '../services/seasonal_event_service.dart';
 
 // Parameter classes for family providers (Dart 2.17+ compatibility)
+@immutable
 class SeasonPaginationParams {
   final int limit;
   final int offset;
@@ -25,6 +27,7 @@ class SeasonPaginationParams {
   int get hashCode => limit.hashCode ^ offset.hashCode;
 }
 
+@immutable
 class BattlePassRewardsParams {
   final String playerId;
   final String seasonId;
@@ -50,6 +53,7 @@ class BattlePassRewardsParams {
       playerId.hashCode ^ seasonId.hashCode ^ isPremium.hashCode;
 }
 
+@immutable
 class ChallengesParams {
   final String seasonId;
   final String? type;
@@ -68,6 +72,7 @@ class ChallengesParams {
   int get hashCode => seasonId.hashCode ^ type.hashCode;
 }
 
+@immutable
 class ChallengeDifficultyParams {
   final String seasonId;
   final String difficulty;
@@ -89,6 +94,7 @@ class ChallengeDifficultyParams {
   int get hashCode => seasonId.hashCode ^ difficulty.hashCode;
 }
 
+@immutable
 class PlayerChallengeParams {
   final String playerId;
   final String challengeId;
@@ -110,6 +116,7 @@ class PlayerChallengeParams {
   int get hashCode => playerId.hashCode ^ challengeId.hashCode;
 }
 
+@immutable
 class SeasonChallengesParams {
   final String playerId;
   final String seasonId;
@@ -131,6 +138,7 @@ class SeasonChallengesParams {
   int get hashCode => playerId.hashCode ^ seasonId.hashCode;
 }
 
+@immutable
 class EventLeaderboardParams {
   final String eventId;
   final int limit;
@@ -149,6 +157,7 @@ class EventLeaderboardParams {
   int get hashCode => eventId.hashCode ^ limit.hashCode;
 }
 
+@immutable
 class EventParticipationParams {
   final String playerId;
   final String eventId;
@@ -170,6 +179,7 @@ class EventParticipationParams {
   int get hashCode => playerId.hashCode ^ eventId.hashCode;
 }
 
+@immutable
 class TopEventParticipantsParams {
   final String eventId;
   final int limit;
@@ -191,6 +201,7 @@ class TopEventParticipantsParams {
   int get hashCode => eventId.hashCode ^ limit.hashCode;
 }
 
+@immutable
 class EventChallengesParams {
   final String seasonId;
   final String eventId;
@@ -212,6 +223,7 @@ class EventChallengesParams {
   int get hashCode => seasonId.hashCode ^ eventId.hashCode;
 }
 
+@immutable
 class RewardHistoryParams {
   final String playerId;
   final String? seasonId;
@@ -237,6 +249,7 @@ class RewardHistoryParams {
       playerId.hashCode ^ seasonId.hashCode ^ limit.hashCode;
 }
 
+@immutable
 class RewardCodeParams {
   final String playerId;
   final String code;
@@ -255,6 +268,7 @@ class RewardCodeParams {
   int get hashCode => playerId.hashCode ^ code.hashCode;
 }
 
+@immutable
 class RewardsByTypeParams {
   final String seasonId;
   final String type;
