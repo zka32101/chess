@@ -185,7 +185,12 @@ class BattlePassProgressCard extends ConsumerWidget {
     List<int> premiumRewards,
   ) {
     if (progress == null || bp == null) {
-      return const Card(child: Padding(padding: EdgeInsets.all(16), child: Text('Battle pass data unavailable')));
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text('Battle pass data unavailable'),
+        ),
+      );
     }
 
     final progressPercent = (progress.currentLevel / bp.maxLevel * 100).toInt();
@@ -204,14 +209,22 @@ class BattlePassProgressCard extends ConsumerWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: progress.hasPremiumPass ? Colors.amber : Colors.grey,
+                    color: progress.hasPremiumPass
+                        ? Colors.amber
+                        : Colors.grey,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     progress.hasPremiumPass ? 'Premium' : 'Free',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -219,7 +232,10 @@ class BattlePassProgressCard extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               'Level ${progress.currentLevel}/${bp.maxLevel}',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             ClipRRect(
@@ -246,7 +262,10 @@ class BattlePassProgressCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Free: ${freeRewards.length}', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'Free: ${freeRewards.length}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ],
                   ),
                 ),
@@ -254,7 +273,10 @@ class BattlePassProgressCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Premium: ${premiumRewards.length}', style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        'Premium: ${premiumRewards.length}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ],
                   ),
                 ),
@@ -303,7 +325,10 @@ class ChallengeTrackerCard extends ConsumerWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text('No active challenges', style: Theme.of(context).textTheme.bodyMedium),
+          child: Text(
+            'No active challenges',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       );
     }
@@ -377,14 +402,20 @@ class ChallengeTrackerCard extends ConsumerWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _getDifficultyColor(challenge.difficulty),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         challenge.difficulty,
-                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -410,11 +441,17 @@ class ChallengeTrackerCard extends ConsumerWidget {
       },
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 8),
-        child: SizedBox(height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+        child: SizedBox(
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
       ),
       error: (e, st) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text('Error loading challenge', style: Theme.of(context).textTheme.bodySmall),
+        child: Text(
+          'Error loading challenge',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
       ),
     );
   }
@@ -466,7 +503,10 @@ class EventLeaderboardCard extends ConsumerWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Text('No leaderboard data', style: Theme.of(context).textTheme.bodyMedium),
+          child: Text(
+            'No leaderboard data',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       );
     }
@@ -520,7 +560,10 @@ class EventLeaderboardCard extends ConsumerWidget {
           ),
           Text(
             entry.score.toString(),
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .titleSmall
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -564,7 +607,12 @@ class SeasonStatisticsCard extends ConsumerWidget {
     List<PlayerChallengeProgress> challenges,
   ) {
     if (progress == null) {
-      return const Card(child: Padding(padding: EdgeInsets.all(16), child: Text('Statistics unavailable')));
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text('Statistics unavailable'),
+        ),
+      );
     }
 
     final completedChallenges = challenges.where((c) => c.isCompleted).length;
@@ -631,7 +679,10 @@ class SeasonStatisticsCard extends ConsumerWidget {
           ),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -684,7 +735,10 @@ class BattlePassLoadingWidget extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: SizedBox(height: 120, child: Center(child: CircularProgressIndicator())),
+        child: SizedBox(
+          height: 120,
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
@@ -714,7 +768,10 @@ class ChallengeLoadingWidget extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: SizedBox(height: 80, child: Center(child: CircularProgressIndicator())),
+        child: SizedBox(
+          height: 80,
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
@@ -744,7 +801,10 @@ class EventLoadingWidget extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+        child: SizedBox(
+          height: 100,
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
@@ -774,7 +834,10 @@ class StatisticsLoadingWidget extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: SizedBox(height: 80, child: Center(child: CircularProgressIndicator())),
+        child: SizedBox(
+          height: 80,
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
     );
   }
