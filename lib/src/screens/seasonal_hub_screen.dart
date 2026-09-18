@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/phase_u_providers.dart';
 import '../widgets/phase_u_seasonal_widgets.dart';
+import '../services/season_management_service.dart';
+import '../services/seasonal_event_service.dart';
 
 /// Main Seasonal Hub Screen
 /// Displays all seasonal features: seasons, battle pass, challenges, events
