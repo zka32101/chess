@@ -446,7 +446,9 @@ class EventLeaderboardCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final leaderboardAsync = ref.watch(
-      eventLeaderboardProvider((eventId: eventId, limit: limit)),
+      eventLeaderboardProvider(
+        EventLeaderboardParams(eventId: eventId, limit: limit),
+      ),
     );
 
     return leaderboardAsync.when(
@@ -540,7 +542,9 @@ class SeasonStatisticsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsync = ref.watch(playerSeasonProgressProvider(playerId));
     final challengesAsync = ref.watch(
-      playerSeasonChallengesProvider((playerId: playerId, seasonId: seasonId)),
+      playerSeasonChallengesProvider(
+        SeasonChallengesParams(playerId: playerId, seasonId: seasonId),
+      ),
     );
 
     return progressAsync.when(

@@ -6,6 +6,126 @@ import '../services/season_challenge_service.dart';
 import '../services/seasonal_reward_service.dart';
 import '../services/seasonal_event_service.dart';
 
+// Parameter classes for family providers (Dart 2.17+ compatibility)
+class SeasonPaginationParams {
+  final int limit;
+  final int offset;
+
+  SeasonPaginationParams({required this.limit, required this.offset});
+}
+
+class BattlePassRewardsParams {
+  final String playerId;
+  final String seasonId;
+  final bool isPremium;
+
+  BattlePassRewardsParams({
+    required this.playerId,
+    required this.seasonId,
+    required this.isPremium,
+  });
+}
+
+class ChallengesParams {
+  final String seasonId;
+  final String? type;
+
+  ChallengesParams({required this.seasonId, this.type});
+}
+
+class ChallengeDifficultyParams {
+  final String seasonId;
+  final String difficulty;
+
+  ChallengeDifficultyParams({
+    required this.seasonId,
+    required this.difficulty,
+  });
+}
+
+class PlayerChallengeParams {
+  final String playerId;
+  final String challengeId;
+
+  PlayerChallengeParams({
+    required this.playerId,
+    required this.challengeId,
+  });
+}
+
+class SeasonChallengesParams {
+  final String playerId;
+  final String seasonId;
+
+  SeasonChallengesParams({
+    required this.playerId,
+    required this.seasonId,
+  });
+}
+
+class EventLeaderboardParams {
+  final String eventId;
+  final int limit;
+
+  EventLeaderboardParams({required this.eventId, required this.limit});
+}
+
+class EventParticipationParams {
+  final String playerId;
+  final String eventId;
+
+  EventParticipationParams({
+    required this.playerId,
+    required this.eventId,
+  });
+}
+
+class TopEventParticipantsParams {
+  final String eventId;
+  final int limit;
+
+  TopEventParticipantsParams({
+    required this.eventId,
+    required this.limit,
+  });
+}
+
+class EventChallengesParams {
+  final String seasonId;
+  final String eventId;
+
+  EventChallengesParams({
+    required this.seasonId,
+    required this.eventId,
+  });
+}
+
+class RewardHistoryParams {
+  final String playerId;
+  final String? seasonId;
+  final int limit;
+
+  RewardHistoryParams({
+    required this.playerId,
+    this.seasonId,
+    required this.limit,
+  });
+}
+
+class RewardCodeParams {
+  final String playerId;
+  final String code;
+
+  RewardCodeParams({required this.playerId, required this.code});
+}
+
+class RewardsByTypeParams {
+  final String seasonId;
+  final String type;
+
+  RewardsByTypeParams({required this.seasonId, required this.type});
+}
+
 /// Phase U - Seasonal Rewards & Battle Pass Providers
 /// Provides reactive access to seasonal gameplay, rewards, and events
 
@@ -63,7 +183,7 @@ final playerSeasonProgressProvider =
 
 /// Get all seasons with pagination
 final allSeasonsProvider =
-    FutureProvider.family<List<Season>, ({int limit, int offset})>(
+    FutureProvider.family<List<Season>, SeasonPaginationParams>(
   (ref, params) {
     final service = ref.watch(seasonManagementServiceProvider);
     return service.getAllSeasons(limit: params.limit, offset: params.offset);
@@ -100,7 +220,7 @@ final battlePassProvider = FutureProvider.family<BattlePass?, String>(
 /// Get player's battle pass progress
 final playerBattlePassProvider =
     FutureProvider.family<PlayerBattlePassProgress?,
-  ({String playerId, String seasonId})>((ref, params) {
+  SeasonChallengesParams>((ref, params) {
   final service = ref.watch(battlePassServiceProvider);
   return service.getPlayerBattlePassProgress(params.playerId, params.seasonId);
 });
@@ -115,38 +235,53 @@ final battlePassTiersProvider =
 );
 
 /// Get claimed battle pass rewards
-final claimedBattlePassRewardsProvider = FutureProvider.family<List<int>,
-  ({String playerId, String seasonId, bool isPremium})>((ref, params) {
-  final service = ref.watch(battlePassServiceProvider);
-  return service.getClaimedRewards(
-    playerId: params.playerId,
-    seasonId: params.seasonId,
-    isPremium: params.isPremium,
-  );
-});
+final claimedBattlePassRewardsProvider =
+    FutureProvider.family<List<int>, BattlePassRewardsParams>(
+  (ref, params) {
+    final service = ref.watch(battlePassServiceProvider);
+    return service.getClaimedRewards(
+      playerId: params.playerId,
+      seasonId: params.seasonId,
+      isPremium: params.isPremium,
+    );
+  },
+);
 
 // Challenge Providers
 
 /// Get active challenges for season
-final activeChallengesProvider = FutureProvider.family<List<Challenge>,
-  ({String seasonId, String? type})>((ref, params) {
-  final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getChallenges(seasonId: params.seasonId, type: params.type);
-});
+final activeChallengesProvider =
+    FutureProvider.family<List<Challenge>, ChallengesParams>(
+  (ref, params) {
+    final service = ref.watch(seasonChallengeServiceProvider);
+    return service.getChallenges(
+      seasonId: params.seasonId,
+      type: params.type,
+    );
+  },
+);
 
 /// Get challenges by difficulty
-final challengesByDifficultyProvider = FutureProvider.family<List<Challenge>,
-  ({String seasonId, String difficulty})>((ref, params) {
-  final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getChallengeTiers(params.seasonId, difficulty: params.difficulty);
-});
+final challengesByDifficultyProvider =
+    FutureProvider.family<List<Challenge>, ChallengeDifficultyParams>(
+  (ref, params) {
+    final service = ref.watch(seasonChallengeServiceProvider);
+    return service.getChallengeTiers(
+      params.seasonId,
+      difficulty: params.difficulty,
+    );
+  },
+);
 
 /// Get player's challenge progress
 final playerChallengeProgressProvider =
     FutureProvider.family<PlayerChallengeProgress?,
-  ({String playerId, String challengeId})>((ref, params) {
+  PlayerChallengeParams>((ref, params) {
   final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getPlayerChallengeProgress(params.playerId, params.challengeId);
+  return service.getPlayerChallengeProgress(
+    params.playerId,
+    params.challengeId,
+  );
 });
 
 /// Get challenge rewards
@@ -159,33 +294,43 @@ final challengeRewardsProvider =
 );
 
 /// Get event-specific challenges
-final eventChallengesProvider = FutureProvider.family<List<Challenge>,
-  ({String seasonId, String eventId})>((ref, params) {
+final eventChallengesProvider =
+    FutureProvider.family<List<Challenge>, String>((ref, seasonId) {
+  // TODO: Currently only supports seasonId parameter
+  // Future: update to support eventId as well
   final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getEventChallenges(params.seasonId, eventId: params.eventId);
+  return service.getChallenges(seasonId: seasonId);
 });
 
 /// Get all player challenges for season
 final playerSeasonChallengesProvider =
     FutureProvider.family<List<PlayerChallengeProgress>,
-  ({String playerId, String seasonId})>((ref, params) {
+  SeasonChallengesParams>((ref, params) {
   final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getPlayerSeasonChallenges(params.playerId, params.seasonId);
+  return service.getPlayerSeasonChallenges(
+    params.playerId,
+    params.seasonId,
+  );
 });
 
 // Reward Providers
 
 /// Get rewards by type
-final rewardsByTypeProvider = FutureProvider.family<List<Reward>,
-  ({String seasonId, String type})>((ref, params) {
-  final service = ref.watch(seasonalRewardServiceProvider);
-  return service.getRewardsByType(seasonId: params.seasonId, type: params.type);
-});
+final rewardsByTypeProvider =
+    FutureProvider.family<List<Reward>, RewardsByTypeParams>(
+  (ref, params) {
+    final service = ref.watch(seasonalRewardServiceProvider);
+    return service.getRewardsByType(
+      seasonId: params.seasonId,
+      type: params.type,
+    );
+  },
+);
 
 /// Get player's reward history
 final playerRewardHistoryProvider =
     FutureProvider.family<List<PlayerRewardHistory>,
-  ({String playerId, String? seasonId, int limit})>((ref, params) {
+  RewardHistoryParams>((ref, params) {
   final service = ref.watch(seasonalRewardServiceProvider);
   return service.getPlayerRewardHistory(
     playerId: params.playerId,
@@ -195,23 +340,26 @@ final playerRewardHistoryProvider =
 });
 
 /// Get season-end rewards
-final seasonEndRewardsProvider = FutureProvider.family<List<Reward>,
-  ({String playerId, String seasonId})>((ref, params) {
-  final service = ref.watch(seasonalRewardServiceProvider);
-  return service.calculateSeasonEndRewards(
-    playerId: params.playerId,
-    seasonId: params.seasonId,
-  );
-});
+final seasonEndRewardsProvider =
+    FutureProvider.family<List<Reward>, SeasonChallengesParams>(
+  (ref, params) {
+    final service = ref.watch(seasonalRewardServiceProvider);
+    return service.calculateSeasonEndRewards(
+      playerId: params.playerId,
+      seasonId: params.seasonId,
+    );
+  },
+);
 
 /// Check if player has redeemed code
-final playerCodeRedemptionProvider = FutureProvider.family<bool,
-  ({String playerId, String code})>((ref, params) {
-  final service = ref.watch(seasonalRewardServiceProvider);
-  return service.hasPlayerRedeemedCode(
-    playerId: params.playerId,
-    code: params.code,
-  );
+final playerCodeRedemptionProvider =
+    FutureProvider.family<bool, RewardCodeParams>(
+  (ref, params) {
+    final service = ref.watch(seasonalRewardServiceProvider);
+    return service.hasPlayerRedeemedCode(
+      playerId: params.playerId,
+      code: params.code,
+    );
 });
 
 // Event Providers
@@ -233,24 +381,31 @@ final eventDetailsProvider = FutureProvider.family<SeasonalEvent?, String>(
 );
 
 /// Get player's event participation
-final playerEventProgressProvider = FutureProvider.family<EventParticipation?,
-  ({String playerId, String eventId})>((ref, params) {
+final playerEventProgressProvider =
+    FutureProvider.family<EventParticipation?,
+  EventParticipationParams>((ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
-  return service.getPlayerEventProgress(params.playerId, params.eventId);
+  return service.getPlayerEventProgress(
+    params.playerId,
+    params.eventId,
+  );
 });
 
 /// Get event leaderboard
 final eventLeaderboardProvider =
     FutureProvider.family<List<EventLeaderboardEntry>,
-  ({String eventId, int limit})>((ref, params) {
+  EventLeaderboardParams>((ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
-  return service.getEventLeaderboard(params.eventId, limit: params.limit);
+  return service.getEventLeaderboard(
+    params.eventId,
+    limit: params.limit,
+  );
 });
 
 /// Get top event participants
 final topEventParticipantsProvider =
     FutureProvider.family<List<EventParticipation>,
-  ({String eventId, int limit})>((ref, params) {
+  TopEventParticipantsParams>((ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
   return service.getTopEventParticipants(params.eventId, limit: params.limit);
 });
