@@ -726,7 +726,8 @@ class ChallengeCompleteNotifier extends StateNotifier<ChallengeCompleteState> {
   }
 }
 
-class EventParticipationNotifier extends StateNotifier<EventParticipationState> {
+class EventParticipationNotifier
+    extends StateNotifier<EventParticipationState> {
   final SeasonalEventService _service;
 
   EventParticipationNotifier(this._service)
@@ -769,7 +770,9 @@ class EventParticipationNotifier extends StateNotifier<EventParticipationState> 
         eventId: eventId,
       );
 
-      final updated = state.joinedEventIds.where((id) => id != eventId).toList();
+      final updated = state.joinedEventIds
+          .where((id) => id != eventId)
+          .toList();
       state = state.copyWith(
         isLoading: false,
         joinedEventIds: updated,
