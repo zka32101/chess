@@ -15,11 +15,11 @@ final playerConnectionServiceProvider =
 });
 
 final leaderboardServiceProvider = Provider<LeaderboardService>((ref) {
-  return LeaderboardService(firestore: FirebaseFirestore.instance);
+  return LeaderboardService();
 });
 
 final achievementServiceProvider = Provider<AchievementService>((ref) {
-  return AchievementService(firestore: FirebaseFirestore.instance);
+  return AchievementService();
 });
 
 // Connection Providers
@@ -62,86 +62,66 @@ final friendshipStatusProvider = FutureProvider.family<
 final globalLeaderboardProvider = FutureProvider.family<
     List<LeaderboardEntry>,
     ({
-      int page,
       int limit,
+      int offset,
     })>((ref, params) {
   final service = ref.watch(leaderboardServiceProvider);
   return service.getGlobalLeaderboard(
-    page: params.page,
     limit: params.limit,
+    offset: params.offset,
   );
 });
 
-/// Get seasonal leaderboard
-final seasonalLeaderboardProvider = FutureProvider.family<
+/// Get regional leaderboard
+final regionalLeaderboardProvider =
+    FutureProvider.family<List<LeaderboardEntry>, String>((ref, region) {
+  final service = ref.watch(leaderboardServiceProvider);
+  return service.getRegionalLeaderboard(region);
+});
+
+/// Get player's leaderboard rank
+final playerLeaderboardRankProvider =
+    FutureProvider.family<int, String>((ref, playerId) {
+  final service = ref.watch(leaderboardServiceProvider);
+  return service.getUserGlobalRank(playerId);
+});
+
+/// Get player's percentile rank
+final playerPercentileProvider =
+    FutureProvider.family<int, String>((ref, playerId) {
+  final service = ref.watch(leaderboardServiceProvider);
+  return service.getUserPercentile(playerId);
+});
+
+/// Get time-based leaderboard (daily, weekly, monthly)
+final timeBasedLeaderboardProvider = FutureProvider.family<
     List<LeaderboardEntry>,
-    ({
-      String season,
-      int page,
-      int limit,
-    })>((ref, params) {
+    String>((ref, period) {
   final service = ref.watch(leaderboardServiceProvider);
-  return service.getSeasonalLeaderboard(
-    season: params.season,
-    page: params.page,
-    limit: params.limit,
-  );
+  return service.getTimeBasedLeaderboard(period);
 });
 
-/// Get player's leaderboard position
-final playerLeaderboardPositionProvider =
-    FutureProvider.family<LeaderboardRanking?, String>((ref, playerId) {
+/// Search leaderboard by username
+final leaderboardSearchProvider =
+    FutureProvider.family<List<LeaderboardEntry>, String>((ref, query) {
   final service = ref.watch(leaderboardServiceProvider);
-  return service.getLeaderboardPosition(playerId);
-});
-
-/// Get rating tiers
-final ratingTiersProvider = FutureProvider<List<RatingTier>>((ref) {
-  final service = ref.watch(leaderboardServiceProvider);
-  return service.getRatingTiers();
-});
-
-/// Get win streak leaderboard
-final streakLeaderboardProvider = FutureProvider.family<
-    List<LeaderboardEntry>,
-    ({
-      int page,
-      int limit,
-    })>((ref, params) {
-  final service = ref.watch(leaderboardServiceProvider);
-  return service.getStreakLeaderboard(
-    page: params.page,
-    limit: params.limit,
-  );
-});
-
-/// Get progress leaderboard (ranked by recent rating change)
-final progressLeaderboardProvider = FutureProvider.family<
-    List<LeaderboardEntry>,
-    ({
-      int page,
-      int limit,
-    })>((ref, params) {
-  final service = ref.watch(leaderboardServiceProvider);
-  return service.getProgressLeaderboard(
-    page: params.page,
-    limit: params.limit,
-  );
+  return service.searchByUsername(query);
 });
 
 // Achievement Providers
 
 /// Get all available achievements
-final allAchievementsProvider = FutureProvider<List<Achievement>>((ref) {
+final allAchievementsProvider =
+    FutureProvider<List<AchievementDefinition>>((ref) {
   final service = ref.watch(achievementServiceProvider);
-  return service.getAchievements();
+  return service.getAllAchievements();
 });
 
 /// Get player's earned achievements
 final playerAchievementsProvider =
-    FutureProvider.family<List<PlayerAchievement>, String>((ref, playerId) {
+    FutureProvider.family<List<UserAchievement>, String>((ref, playerId) {
   final service = ref.watch(achievementServiceProvider);
-  return service.getPlayerAchievements(playerId);
+  return service.getUserAchievements(playerId);
 });
 
 /// Check progress toward achievement
@@ -152,28 +132,14 @@ final achievementProgressProvider = FutureProvider.family<
       String achievementId,
     })>((ref, params) {
   final service = ref.watch(achievementServiceProvider);
-  return service.checkAchievementProgress(params.playerId, params.achievementId);
+  return service.getAchievementProgress(params.playerId, params.achievementId);
 });
 
-/// Get rarest achievements
-final rarestAchievementsProvider =
-    FutureProvider<List<Achievement>>((ref) {
+/// Get nearby achievements (close to completion)
+final nearbyAchievementsProvider =
+    FutureProvider.family<List<NearbyAchievement>, String>((ref, playerId) {
   final service = ref.watch(achievementServiceProvider);
-  return service.getRarestAchievements();
-});
-
-/// Get achievements by category
-final achievementsByCategoryProvider =
-    FutureProvider.family<List<Achievement>, String>((ref, category) {
-  final service = ref.watch(achievementServiceProvider);
-  return service.getAchievementsByCategory(category);
-});
-
-/// Get achievement statistics
-final achievementStatsProvider =
-    FutureProvider<List<AchievementStatistic>>((ref) {
-  final service = ref.watch(achievementServiceProvider);
-  return service.getAchievementStats();
+  return service.getNearbyAchievements(playerId);
 });
 
 // State Management Providers
@@ -309,16 +275,16 @@ class AchievementUnlockNotifier extends StateNotifier<AchievementUnlockState> {
   AchievementUnlockNotifier(this._service)
       : super(const AchievementUnlockState());
 
-  Future<void> awardAchievement({
+  Future<void> unlockAchievement({
     required String playerId,
     required String achievementId,
   }) async {
     state = state.copyWith(isLoading: true);
 
     try {
-      await _service.awardAchievement(
-        playerId: playerId,
-        achievementId: achievementId,
+      await _service.unlockAchievement(
+        playerId,
+        achievementId,
       );
 
       state = state.copyWith(
