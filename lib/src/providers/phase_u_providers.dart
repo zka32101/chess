@@ -12,6 +12,17 @@ class SeasonPaginationParams {
   final int offset;
 
   SeasonPaginationParams({required this.limit, required this.offset});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SeasonPaginationParams &&
+          runtimeType == other.runtimeType &&
+          limit == other.limit &&
+          offset == other.offset;
+
+  @override
+  int get hashCode => limit.hashCode ^ offset.hashCode;
 }
 
 class BattlePassRewardsParams {
@@ -24,6 +35,19 @@ class BattlePassRewardsParams {
     required this.seasonId,
     required this.isPremium,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BattlePassRewardsParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          seasonId == other.seasonId &&
+          isPremium == other.isPremium;
+
+  @override
+  int get hashCode =>
+      playerId.hashCode ^ seasonId.hashCode ^ isPremium.hashCode;
 }
 
 class ChallengesParams {
@@ -31,6 +55,17 @@ class ChallengesParams {
   final String? type;
 
   ChallengesParams({required this.seasonId, this.type});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChallengesParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          type == other.type;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ type.hashCode;
 }
 
 class ChallengeDifficultyParams {
@@ -41,6 +76,17 @@ class ChallengeDifficultyParams {
     required this.seasonId,
     required this.difficulty,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChallengeDifficultyParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          difficulty == other.difficulty;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ difficulty.hashCode;
 }
 
 class PlayerChallengeParams {
@@ -51,6 +97,17 @@ class PlayerChallengeParams {
     required this.playerId,
     required this.challengeId,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlayerChallengeParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          challengeId == other.challengeId;
+
+  @override
+  int get hashCode => playerId.hashCode ^ challengeId.hashCode;
 }
 
 class SeasonChallengesParams {
@@ -61,6 +118,17 @@ class SeasonChallengesParams {
     required this.playerId,
     required this.seasonId,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SeasonChallengesParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          seasonId == other.seasonId;
+
+  @override
+  int get hashCode => playerId.hashCode ^ seasonId.hashCode;
 }
 
 class EventLeaderboardParams {
@@ -68,6 +136,17 @@ class EventLeaderboardParams {
   final int limit;
 
   EventLeaderboardParams({required this.eventId, required this.limit});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventLeaderboardParams &&
+          runtimeType == other.runtimeType &&
+          eventId == other.eventId &&
+          limit == other.limit;
+
+  @override
+  int get hashCode => eventId.hashCode ^ limit.hashCode;
 }
 
 class EventParticipationParams {
@@ -78,6 +157,17 @@ class EventParticipationParams {
     required this.playerId,
     required this.eventId,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventParticipationParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          eventId == other.eventId;
+
+  @override
+  int get hashCode => playerId.hashCode ^ eventId.hashCode;
 }
 
 class TopEventParticipantsParams {
@@ -88,6 +178,17 @@ class TopEventParticipantsParams {
     required this.eventId,
     required this.limit,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TopEventParticipantsParams &&
+          runtimeType == other.runtimeType &&
+          eventId == other.eventId &&
+          limit == other.limit;
+
+  @override
+  int get hashCode => eventId.hashCode ^ limit.hashCode;
 }
 
 class EventChallengesParams {
@@ -98,6 +199,17 @@ class EventChallengesParams {
     required this.seasonId,
     required this.eventId,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventChallengesParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          eventId == other.eventId;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ eventId.hashCode;
 }
 
 class RewardHistoryParams {
@@ -110,6 +222,19 @@ class RewardHistoryParams {
     this.seasonId,
     required this.limit,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RewardHistoryParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          seasonId == other.seasonId &&
+          limit == other.limit;
+
+  @override
+  int get hashCode =>
+      playerId.hashCode ^ seasonId.hashCode ^ limit.hashCode;
 }
 
 class RewardCodeParams {
@@ -117,6 +242,17 @@ class RewardCodeParams {
   final String code;
 
   RewardCodeParams({required this.playerId, required this.code});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RewardCodeParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          code == other.code;
+
+  @override
+  int get hashCode => playerId.hashCode ^ code.hashCode;
 }
 
 class RewardsByTypeParams {
@@ -124,6 +260,17 @@ class RewardsByTypeParams {
   final String type;
 
   RewardsByTypeParams({required this.seasonId, required this.type});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RewardsByTypeParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          type == other.type;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ type.hashCode;
 }
 
 /// Phase U - Seasonal Rewards & Battle Pass Providers
