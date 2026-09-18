@@ -120,7 +120,8 @@ class _SeasonalHubScreenState extends ConsumerState<SeasonalHubScreen>
             _buildInfoRow('Max Level:', '${season.maxLevel}'),
             _buildInfoRow(
               'Duration:',
-              '${season.startDate.toString().split(' ')[0]} - ${season.endDate.toString().split(' ')[0]}',
+              '${season.startDate.toString().split(' ')[0]} - '
+              '${season.endDate.toString().split(' ')[0]}',
             ),
             _buildInfoRow('Status:', season.status),
           ],
@@ -170,10 +171,22 @@ class _SeasonalHubScreenState extends ConsumerState<SeasonalHubScreen>
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
-            _buildFeatureItem('Free Track', 'Earn rewards with free battle pass'),
-            _buildFeatureItem('Premium Track', 'Unlock exclusive rewards with premium'),
-            _buildFeatureItem('Weekly Rewards', 'Claim milestone rewards at each level'),
-            _buildFeatureItem('Progression', 'Earn XP from matches and challenges'),
+            _buildFeatureItem(
+              'Free Track',
+              'Earn rewards with free battle pass',
+            ),
+            _buildFeatureItem(
+              'Premium Track',
+              'Unlock exclusive rewards with premium',
+            ),
+            _buildFeatureItem(
+              'Weekly Rewards',
+              'Claim milestone rewards at each level',
+            ),
+            _buildFeatureItem(
+              'Progression',
+              'Earn XP from matches and challenges',
+            ),
           ],
         ),
       ),

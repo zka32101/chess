@@ -156,7 +156,13 @@ class BattlePassProgressCard extends ConsumerWidget {
         data: (bp) => claimedFreeAsync.when(
           data: (freeRewards) => claimedPremiumAsync.when(
             data: (premiumRewards) =>
-                _buildBattlePassCard(context, progress, bp, freeRewards, premiumRewards),
+                _buildBattlePassCard(
+                  context,
+                  progress,
+                  bp,
+                  freeRewards,
+                  premiumRewards,
+                ),
             loading: () => const BattlePassLoadingWidget(),
             error: (e, st) => BattlePassErrorWidget(error: e.toString()),
           ),
@@ -336,7 +342,9 @@ class ChallengeTrackerCard extends ConsumerWidget {
     return progressAsync.when(
       data: (progress) {
         final progressPercent = progress != null
-            ? ((progress.currentProgress / progress.targetProgress) * 100).clamp(0, 100).toInt()
+            ? ((progress.currentProgress / progress.targetProgress) * 100)
+                .clamp(0, 100)
+                .toInt()
             : 0;
 
         return Padding(
@@ -391,7 +399,8 @@ class ChallengeTrackerCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${progress?.currentProgress ?? 0}/${progress?.targetProgress ?? challenge.target}',
+                  '${progress?.currentProgress ?? 0}/'
+                  '${progress?.targetProgress ?? challenge.target}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -556,7 +565,9 @@ class SeasonStatisticsCard extends ConsumerWidget {
 
     final completedChallenges = challenges.where((c) => c.isCompleted).length;
     final totalChallenges = challenges.length;
-    final completionRate = totalChallenges > 0 ? ((completedChallenges / totalChallenges) * 100).toInt() : 0;
+    final completionRate = totalChallenges > 0
+        ? ((completedChallenges / totalChallenges) * 100).toInt()
+        : 0;
 
     return Card(
       child: Padding(
