@@ -28,7 +28,7 @@ dependencies:
   # UI/UX
   lottie: ^2.0.0
   google_fonts: ^5.1.0
-  flutter_svg: ^1.1.0
+  flutter_svg: ^2.0.0
 
   # Chess Engine
   chess: ^0.7.0
