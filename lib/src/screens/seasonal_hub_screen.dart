@@ -319,7 +319,10 @@ class _SeasonalHubScreenState extends ConsumerState<SeasonalHubScreen>
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: isActive ? Colors.green : Colors.grey,
                     borderRadius: BorderRadius.circular(20),
@@ -337,7 +340,10 @@ class _SeasonalHubScreenState extends ConsumerState<SeasonalHubScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Participants: ${event.currentParticipants}/${event.maxParticipants}'),
+                Text(
+                  'Participants: ${event.currentParticipants}/'
+                  '${event.maxParticipants}',
+                ),
                 Text('$daysRemaining days left'),
               ],
             ),
