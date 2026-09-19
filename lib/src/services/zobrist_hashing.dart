@@ -195,31 +195,31 @@ class ZobristHash {
   }
 }
 
+/// Transposition table entry
+class TranspositionEntry {
+  final int hash;
+  final int score;
+  final int depth;
+  final int flag; // 0 = exact, 1 = lower bound, 2 = upper bound
+
+  TranspositionEntry({
+    required this.hash,
+    required this.score,
+    required this.depth,
+    required this.flag,
+  });
+
+  bool isExact() => flag == 0;
+  bool isLowerBound() => flag == 1;
+  bool isUpperBound() => flag == 2;
+}
+
 /// Zobrist-based Transposition Table
 ///
 /// Efficient hash table for storing evaluated positions.
 /// Uses 64-bit Zobrist keys instead of FEN strings.
 /// Faster lookup and lower memory usage than string-based approach.
 class ZobristTranspositionTable {
-  /// Transposition table entry
-  static class TranspositionEntry {
-    final int hash;
-    final int score;
-    final int depth;
-    final int flag; // 0 = exact, 1 = lower bound, 2 = upper bound
-
-    TranspositionEntry({
-      required this.hash,
-      required this.score,
-      required this.depth,
-      required this.flag,
-    });
-
-    bool isExact() => flag == 0;
-    bool isLowerBound() => flag == 1;
-    bool isUpperBound() => flag == 2;
-  }
-
   /// Transposition table storage
   final Map<int, TranspositionEntry> _table = {};
 

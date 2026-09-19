@@ -79,7 +79,8 @@ class ValidationService {
 
     if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
       throw ValidationException(
-        'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)',
+        'Password must contain at least one special character '
+        r'(!@#$%^&*(),.?":{}|<>)',
       );
     }
 
