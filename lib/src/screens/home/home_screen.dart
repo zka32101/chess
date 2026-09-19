@@ -12,6 +12,7 @@ import '../game/cpu_game_selection_screen.dart';
 import '../premium/premium_screen.dart';
 import '../notifications_screen.dart';
 import '../leaderboard_screen.dart';
+import '../learn/learn_hub_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -112,6 +113,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             actions: [
               _buildNotificationButton(context, userAsync),
               IconButton(
+                icon: const Icon(Icons.school_outlined),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    SmoothPageTransition(page: const LearnHubScreen()),
+                  );
+                },
+                tooltip: 'Learn',
+              ),
+              IconButton(
                 icon: const Icon(Icons.leaderboard_outlined),
                 onPressed: () {
                   Navigator.of(context).push(
@@ -144,6 +154,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 // User Status Section
                 _UserStatusSection(user: user),
+
+                // Learn Section
+                _LearnSection(),
 
                 // Daily Challenge Section
                 _DailyChallengeSection(),
@@ -389,6 +402,56 @@ class _DailyChallengeSection extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LearnSection extends StatelessWidget {
+  const _LearnSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Card(
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.of(context).push(
+              SmoothPageTransition(page: const LearnHubScreen()),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.school_outlined, size: 32),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '遊び方・戦術・戦略を学ぶ',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '初めての方はここから。ルールからオープニングまで、ステップで学べます。',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
