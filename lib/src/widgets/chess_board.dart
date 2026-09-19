@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chess/chess.dart' as chess_lib;
+import '../models/board_theme.dart';
 import '../services/chess_engine_service.dart';
 
 typedef OnMoveMade = void Function(String from, String to);
@@ -12,6 +13,11 @@ class ChessBoard extends StatefulWidget {
   final bool enabled;
   final bool showCoordinates;
 
+  /// Visual theme for squares/pieces. Defaults to [BoardThemeCatalog.classic]
+  /// (the board's original hardcoded colors) when omitted, so every existing
+  /// caller keeps rendering exactly as before.
+  final BoardTheme theme;
+
   const ChessBoard({
     Key? key,
     required this.engine,
@@ -19,6 +25,7 @@ class ChessBoard extends StatefulWidget {
     this.size = 350,
     this.enabled = true,
     this.showCoordinates = true,
+    this.theme = BoardThemeCatalog.classic,
   }) : super(key: key);
 
   @override
@@ -47,6 +54,7 @@ class _ChessBoardState extends State<ChessBoard> {
               painter: _ChessBoardPainter(
                 size: widget.size,
                 showCoordinates: widget.showCoordinates,
+                theme: widget.theme,
               ),
               size: Size(widget.size, widget.size),
             ),
@@ -78,7 +86,7 @@ class _ChessBoardState extends State<ChessBoard> {
             width: squareSize,
             height: squareSize,
             decoration: BoxDecoration(
-              color: Colors.green.withOpacity(0.3),
+              color: widget.theme.legalMoveIndicatorColor.withOpacity(0.3),
               borderRadius: BorderRadius.circular(squareSize / 2),
             ),
             child: Center(
@@ -86,7 +94,7 @@ class _ChessBoardState extends State<ChessBoard> {
                 width: squareSize / 3,
                 height: squareSize / 3,
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: widget.theme.legalMoveIndicatorColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -120,7 +128,9 @@ class _ChessBoardState extends State<ChessBoard> {
                 width: squareSize,
                 height: squareSize,
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.yellow.withOpacity(0.5) : null,
+                  color: isSelected
+                      ? widget.theme.selectedSquareColor.withOpacity(0.5)
+                      : null,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Center(
@@ -129,6 +139,9 @@ class _ChessBoardState extends State<ChessBoard> {
                     style: TextStyle(
                       fontSize: squareSize * 0.6,
                       fontWeight: FontWeight.bold,
+                      color: piece.color == chess_lib.Color.WHITE
+                          ? widget.theme.whitePieceColor
+                          : widget.theme.blackPieceColor,
                     ),
                   ),
                 ),
@@ -226,22 +239,24 @@ class _ChessBoardState extends State<ChessBoard> {
   }
 
   String _getPieceSymbol(chess_lib.Piece piece) {
-    const whitePieces = {
-      chess_lib.PieceType.king: '♔',
-      chess_lib.PieceType.queen: '♕',
-      chess_lib.PieceType.rook: '♖',
-      chess_lib.PieceType.bishop: '♗',
-      chess_lib.PieceType.knight: '♘',
-      chess_lib.PieceType.pawn: '♙',
+    // Not `const`: PieceType overrides hashCode/==, which Dart disallows
+    // for constant map keys.
+    final whitePieces = {
+      chess_lib.PieceType.KING: '♔',
+      chess_lib.PieceType.QUEEN: '♕',
+      chess_lib.PieceType.ROOK: '♖',
+      chess_lib.PieceType.BISHOP: '♗',
+      chess_lib.PieceType.KNIGHT: '♘',
+      chess_lib.PieceType.PAWN: '♙',
     };
 
-    const blackPieces = {
-      chess_lib.PieceType.king: '♚',
-      chess_lib.PieceType.queen: '♛',
-      chess_lib.PieceType.rook: '♜',
-      chess_lib.PieceType.bishop: '♝',
-      chess_lib.PieceType.knight: '♞',
-      chess_lib.PieceType.pawn: '♟',
+    final blackPieces = {
+      chess_lib.PieceType.KING: '♚',
+      chess_lib.PieceType.QUEEN: '♛',
+      chess_lib.PieceType.ROOK: '♜',
+      chess_lib.PieceType.BISHOP: '♝',
+      chess_lib.PieceType.KNIGHT: '♞',
+      chess_lib.PieceType.PAWN: '♟',
     };
 
     final pieceMap =
@@ -254,10 +269,12 @@ class _ChessBoardState extends State<ChessBoard> {
 class _ChessBoardPainter extends CustomPainter {
   final double size;
   final bool showCoordinates;
+  final BoardTheme theme;
 
   _ChessBoardPainter({
     required this.size,
     required this.showCoordinates,
+    required this.theme,
   });
 
   @override
@@ -269,7 +286,7 @@ class _ChessBoardPainter extends CustomPainter {
     for (int rank = 0; rank < 8; rank++) {
       for (int file = 0; file < 8; file++) {
         final isLight = (rank + file) % 2 == 0;
-        paint.color = isLight ? Color(0xFFF0D9B5) : Color(0xFFB58863);
+        paint.color = isLight ? theme.lightSquareColor : theme.darkSquareColor;
 
         canvas.drawRect(
           Rect.fromLTWH(
@@ -344,6 +361,7 @@ class _ChessBoardPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ChessBoardPainter oldDelegate) {
     return oldDelegate.size != size ||
-        oldDelegate.showCoordinates != showCoordinates;
+        oldDelegate.showCoordinates != showCoordinates ||
+        oldDelegate.theme != theme;
   }
 }

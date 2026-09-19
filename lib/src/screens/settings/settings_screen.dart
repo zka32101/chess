@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/user_preferences_provider.dart';
-import '../../providers/theme_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'sound_preferences_screen.dart';
 import 'legal_documents_screen.dart';
+import 'board_themes_screen.dart';
+import '../../providers/board_theme_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -35,7 +36,12 @@ class SettingsScreen extends ConsumerWidget {
                 _buildSettingSection(
                   title: 'Display',
                   children: [
-                    _buildNewThemeOption(context, ref),
+                    _buildThemeOption(
+                      context,
+                      ref,
+                      preferences.themeMode,
+                      preferencesService,
+                    ),
                     const Divider(height: 1),
                     _buildLanguageOption(
                       context,
@@ -59,7 +65,8 @@ class SettingsScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const SoundPreferencesScreen(),
+                            builder: (context) =>
+                                const SoundPreferencesScreen(),
                           ),
                         );
                       },
@@ -96,17 +103,7 @@ class SettingsScreen extends ConsumerWidget {
                       },
                     ),
                     const Divider(height: 1),
-                    _buildStyleOption(
-                      title: 'Board Style',
-                      currentValue: preferences.boardStyle,
-                      options: const ['Default', 'Wooden', 'Marble'],
-                      onChanged: (value) {
-                        preferencesService.setStyles(
-                          pieceStyle: preferences.pieceStyle,
-                          boardStyle: value.toLowerCase(),
-                        );
-                      },
-                    ),
+                    _buildBoardThemeOption(context, ref),
                     const Divider(height: 1),
                     _buildStyleOption(
                       title: 'Piece Style',
@@ -128,7 +125,8 @@ class SettingsScreen extends ConsumerWidget {
                   children: [
                     ListTile(
                       title: const Text('Reset to Defaults'),
-                      subtitle: const Text('Restore all settings to default values'),
+                      subtitle:
+                          const Text('Restore all settings to default values'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
                         _showResetDialog(context, preferencesService);
@@ -153,8 +151,8 @@ class SettingsScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const LegalDocumentsScreen(documentType: 'privacy'),
+                            builder: (context) => const LegalDocumentsScreen(
+                                documentType: 'privacy'),
                           ),
                         );
                       },
@@ -167,8 +165,8 @@ class SettingsScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const LegalDocumentsScreen(documentType: 'terms'),
+                            builder: (context) => const LegalDocumentsScreen(
+                                documentType: 'terms'),
                           ),
                         );
                       },
@@ -214,73 +212,6 @@ class SettingsScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
       ],
-    );
-  }
-
-  Widget _buildNewThemeOption(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-    final themeNotifier = ref.read(themeModeProvider.notifier);
-
-    String themeName;
-    switch (themeMode) {
-      case ThemeMode.light:
-        themeName = 'Light';
-        break;
-      case ThemeMode.dark:
-        themeName = 'Dark';
-        break;
-      case ThemeMode.system:
-        themeName = 'System';
-        break;
-    }
-
-    return ListTile(
-      title: const Text('Theme'),
-      subtitle: Text(themeName),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text('Light'),
-                  trailing: themeMode == ThemeMode.light
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    themeNotifier.setLightMode();
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text('Dark'),
-                  trailing: themeMode == ThemeMode.dark
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    themeNotifier.setDarkMode();
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text('System'),
-                  trailing: themeMode == ThemeMode.system
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    themeNotifier.setSystemMode();
-                    Navigator.pop(context);
-                  },
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -452,6 +383,37 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildBoardThemeOption(BuildContext context, WidgetRef ref) {
+    final selectedTheme = ref.watch(selectedBoardThemeProvider);
+
+    return ListTile(
+      leading: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          gradient: LinearGradient(
+            colors: [
+              selectedTheme.lightSquareColor,
+              selectedTheme.darkSquareColor,
+            ],
+          ),
+        ),
+      ),
+      title: const Text('Board Theme'),
+      subtitle: Text(selectedTheme.displayName),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BoardThemesScreen(),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildStyleOption({
     required String title,
     required String currentValue,
@@ -461,7 +423,8 @@ class SettingsScreen extends ConsumerWidget {
     return Builder(
       builder: (context) => ListTile(
         title: Text(title),
-        subtitle: Text(currentValue[0].toUpperCase() + currentValue.substring(1)),
+        subtitle:
+            Text(currentValue[0].toUpperCase() + currentValue.substring(1)),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
           showModalBottomSheet(
@@ -481,15 +444,15 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ),
                   ...options.map((option) => ListTile(
-                    title: Text(option),
-                    trailing: option.toLowerCase() == currentValue
-                        ? const Icon(Icons.check, color: Colors.blue)
-                        : null,
-                    onTap: () {
-                      onChanged(option.toLowerCase());
-                      Navigator.pop(context);
-                    },
-                  )),
+                        title: Text(option),
+                        trailing: option.toLowerCase() == currentValue
+                            ? const Icon(Icons.check, color: Colors.blue)
+                            : null,
+                        onTap: () {
+                          onChanged(option.toLowerCase());
+                          Navigator.pop(context);
+                        },
+                      )),
                   const SizedBox(height: 8),
                 ],
               ),
@@ -524,7 +487,8 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Settings'),
-        content: const Text('Are you sure you want to reset all settings to their default values?'),
+        content: const Text(
+            'Are you sure you want to reset all settings to their default values?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

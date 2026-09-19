@@ -23,11 +23,20 @@ class ChessEngineService {
   /// Get current FEN string
   String getCurrentFen() => _chess.fen;
 
-  /// Get current board as 8x8 array
-  List<List<chess_lib.Piece?>> getBoard() => _chess.board;
+  /// Get current board as an 8x8 array (row 0 = rank 8, column 0 = file a).
+  List<List<chess_lib.Piece?>> getBoard() {
+    return List.generate(
+      8,
+      (rank) => List.generate(
+        8,
+        (file) => _chess.get(indicesToSquare(rank, file)),
+      ),
+    );
+  }
 
   /// Get all legal moves for current position
-  List<chess_lib.Move> getLegalMoves() => _chess.moves() as List<chess_lib.Move>;
+  List<chess_lib.Move> getLegalMoves() =>
+      _chess.moves({'asObjects': true}).cast<chess_lib.Move>();
 
   /// Get legal moves for a specific square with detailed information
   List<LegalMove> getLegalMovesForSquareDetailed(String square) {
@@ -48,24 +57,26 @@ class ChessEngineService {
 
   /// Validate if a move is legal with detailed error reporting
   bool isLegalMove(String from, String to, {String? promotion}) {
-    final result = MoveValidationService.validateMove(_chess, from, to, promotion: promotion);
+    final result = MoveValidationService.validateMove(_chess, from, to,
+        promotion: promotion);
     return result.isValid;
   }
 
   /// Validate move and get detailed error information
-  MoveValidationResult validateMoveDetailed(String from, String to, {String? promotion}) {
-    return MoveValidationService.validateMove(_chess, from, to, promotion: promotion);
+  MoveValidationResult validateMoveDetailed(String from, String to,
+      {String? promotion}) {
+    return MoveValidationService.validateMove(_chess, from, to,
+        promotion: promotion);
   }
 
   /// Make a move (returns true if successful)
   bool makeMove(String from, String to, {String? promotion}) {
     try {
-      final move = chess_lib.Move(
-        fromAlgebraic: from,
-        toAlgebraic: to,
-        promotion: promotion,
-      );
-      final result = _chess.move(move);
+      final result = _chess.move({
+        'from': from,
+        'to': to,
+        if (promotion != null) 'promotion': promotion,
+      });
       if (result) {
         // Track move in history for draw detection
         _moveHistory.add({
@@ -96,12 +107,10 @@ class ChessEngineService {
   /// Undo the last move
   bool undoMove() {
     try {
-      final moves = _chess.moves() as List<chess_lib.Move>;
-      if (moves.isEmpty) return false;
-      _chess.undo_move();
-      if (_moveHistory.isNotEmpty) {
-        _moveHistory.removeLast();
-      }
+      if (_moveHistory.isEmpty) return false;
+      final undone = _chess.undo_move();
+      if (undone == null) return false;
+      _moveHistory.removeLast();
       return true;
     } catch (e) {
       return false;
@@ -109,16 +118,16 @@ class ChessEngineService {
   }
 
   /// Check if the current position is checkmate
-  bool isCheckmate() => _chess.in_checkmate();
+  bool isCheckmate() => _chess.in_checkmate;
 
   /// Check if the current position is stalemate
-  bool isStalemate() => _chess.in_stalemate();
+  bool isStalemate() => _chess.in_stalemate;
 
   /// Check if the current position is check
-  bool isCheck() => _chess.in_check();
+  bool isCheck() => _chess.in_check;
 
   /// Check if the game is over
-  bool isGameOver() => _chess.game_over();
+  bool isGameOver() => _chess.game_over;
 
   /// Get game result (white win, black win, draw)
   String? getGameResult() {
@@ -126,7 +135,8 @@ class ChessEngineService {
 
     if (isCheckmate()) {
       return _chess.turn == chess_lib.Color.WHITE ? 'black_win' : 'white_win';
-    } else if (DrawDetectionService.canClaimDraw(_chess, _chess.fen, _moveHistory)) {
+    } else if (DrawDetectionService.canClaimDraw(
+        _chess, _chess.fen, _moveHistory)) {
       return 'draw';
     }
     return null;
@@ -134,7 +144,8 @@ class ChessEngineService {
 
   /// Get draw reasons if game is a draw
   List<String> getDrawReasons() {
-    return DrawDetectionService.getDrawReasons(_chess, _chess.fen, _moveHistory);
+    return DrawDetectionService.getDrawReasons(
+        _chess, _chess.fen, _moveHistory);
   }
 
   /// Check if player can claim draw
@@ -148,9 +159,7 @@ class ChessEngineService {
   /// Get piece at a specific square
   chess_lib.Piece? getPieceAt(String square) {
     try {
-      final rank = int.parse(square[1]) - 1;
-      final file = square.codeUnitAt(0) - 'a'.codeUnitAt(0);
-      return _chess.board[rank][file];
+      return _chess.get(square);
     } catch (e) {
       return null;
     }
@@ -161,20 +170,10 @@ class ChessEngineService {
 
   /// Get detailed move information
   List<Map<String, dynamic>> getMoveHistory() {
-    final moves = _chess.moves(
-      {
-        'verbose': true,
-      },
-    ) as List<chess_lib.Move>;
-
-    return moves.map((move) {
-      return {
-        'from': move.fromAlgebraic,
-        'to': move.toAlgebraic,
-        'piece': move.piece,
-        'promotion': move.promotion,
-      };
-    }).toList();
+    return _chess
+        .moves({'verbose': true})
+        .cast<Map<String, dynamic>>()
+        .toList();
   }
 
   /// Get best moves for CPU (simple evaluation)
@@ -186,12 +185,13 @@ class ChessEngineService {
     final scoredMoves = allMoves.map((move) {
       int score = 0;
 
-      // Bonus for captures
-      if (move.flags.contains(chess_lib.PieceType.pawn)) score += 1;
-      if (move.flags.contains(chess_lib.PieceType.knight)) score += 3;
-      if (move.flags.contains(chess_lib.PieceType.bishop)) score += 3;
-      if (move.flags.contains(chess_lib.PieceType.rook)) score += 5;
-      if (move.flags.contains(chess_lib.PieceType.queen)) score += 9;
+      // Bonus for captures, scaled by the captured piece's value
+      final captured = move.captured;
+      if (captured == chess_lib.PieceType.PAWN) score += 1;
+      if (captured == chess_lib.PieceType.KNIGHT) score += 3;
+      if (captured == chess_lib.PieceType.BISHOP) score += 3;
+      if (captured == chess_lib.PieceType.ROOK) score += 5;
+      if (captured == chess_lib.PieceType.QUEEN) score += 9;
 
       // Apply move temporarily to check if it gives check
       _chess.move(move);
@@ -232,7 +232,8 @@ class ChessEngineService {
   }
 
   /// Load position from FEN and move history
-  bool loadFromFenAndMoves(String startingFen, List<Map<String, dynamic>> moves) {
+  bool loadFromFenAndMoves(
+      String startingFen, List<Map<String, dynamic>> moves) {
     try {
       _chess = chess_lib.Chess.fromFEN(startingFen);
       _moveHistory.clear();
@@ -242,13 +243,13 @@ class ChessEngineService {
         final to = moveData['to'] as String;
         final promotion = moveData['promotion'] as String?;
 
-        final move = chess_lib.Move(
-          fromAlgebraic: from,
-          toAlgebraic: to,
-          promotion: promotion,
-        );
+        final moveMap = <String, String>{
+          'from': from,
+          'to': to,
+          if (promotion != null) 'promotion': promotion,
+        };
 
-        if (!_chess.move(move)) {
+        if (!_chess.move(moveMap)) {
           return false;
         }
         _moveHistory.add(moveData);
@@ -270,6 +271,7 @@ class ChessEngineService {
 
   /// Convert board indices to square name
   static String indicesToSquare(int rank, int file) {
-    return String.fromCharCode('a'.codeUnitAt(0) + file) + (8 - rank).toString();
+    return String.fromCharCode('a'.codeUnitAt(0) + file) +
+        (8 - rank).toString();
   }
 }
