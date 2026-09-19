@@ -1,17 +1,299 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../services/season_management_service.dart';
 import '../services/battle_pass_service.dart';
 import '../services/season_challenge_service.dart';
 import '../services/seasonal_reward_service.dart';
 import '../services/seasonal_event_service.dart';
 
+// Parameter classes for family providers (Dart 2.17+ compatibility)
+@immutable
+class SeasonPaginationParams {
+  final int limit;
+  final int offset;
+
+  SeasonPaginationParams({required this.limit, required this.offset});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SeasonPaginationParams &&
+          runtimeType == other.runtimeType &&
+          limit == other.limit &&
+          offset == other.offset;
+
+  @override
+  int get hashCode => limit.hashCode ^ offset.hashCode;
+}
+
+@immutable
+class BattlePassRewardsParams {
+  final String playerId;
+  final String seasonId;
+  final bool isPremium;
+
+  BattlePassRewardsParams({
+    required this.playerId,
+    required this.seasonId,
+    required this.isPremium,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BattlePassRewardsParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          seasonId == other.seasonId &&
+          isPremium == other.isPremium;
+
+  @override
+  int get hashCode =>
+      playerId.hashCode ^ seasonId.hashCode ^ isPremium.hashCode;
+}
+
+@immutable
+class ChallengesParams {
+  final String seasonId;
+  final String? type;
+
+  ChallengesParams({required this.seasonId, this.type});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChallengesParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          type == other.type;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ type.hashCode;
+}
+
+@immutable
+class ChallengeDifficultyParams {
+  final String seasonId;
+  final String difficulty;
+
+  ChallengeDifficultyParams({
+    required this.seasonId,
+    required this.difficulty,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ChallengeDifficultyParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          difficulty == other.difficulty;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ difficulty.hashCode;
+}
+
+@immutable
+class PlayerChallengeParams {
+  final String playerId;
+  final String challengeId;
+
+  PlayerChallengeParams({
+    required this.playerId,
+    required this.challengeId,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlayerChallengeParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          challengeId == other.challengeId;
+
+  @override
+  int get hashCode => playerId.hashCode ^ challengeId.hashCode;
+}
+
+@immutable
+class SeasonChallengesParams {
+  final String playerId;
+  final String seasonId;
+
+  SeasonChallengesParams({
+    required this.playerId,
+    required this.seasonId,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SeasonChallengesParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          seasonId == other.seasonId;
+
+  @override
+  int get hashCode => playerId.hashCode ^ seasonId.hashCode;
+}
+
+@immutable
+class EventLeaderboardParams {
+  final String eventId;
+  final int limit;
+
+  EventLeaderboardParams({required this.eventId, required this.limit});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventLeaderboardParams &&
+          runtimeType == other.runtimeType &&
+          eventId == other.eventId &&
+          limit == other.limit;
+
+  @override
+  int get hashCode => eventId.hashCode ^ limit.hashCode;
+}
+
+@immutable
+class EventParticipationParams {
+  final String playerId;
+  final String eventId;
+
+  EventParticipationParams({
+    required this.playerId,
+    required this.eventId,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventParticipationParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          eventId == other.eventId;
+
+  @override
+  int get hashCode => playerId.hashCode ^ eventId.hashCode;
+}
+
+@immutable
+class TopEventParticipantsParams {
+  final String eventId;
+  final int limit;
+
+  TopEventParticipantsParams({
+    required this.eventId,
+    required this.limit,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TopEventParticipantsParams &&
+          runtimeType == other.runtimeType &&
+          eventId == other.eventId &&
+          limit == other.limit;
+
+  @override
+  int get hashCode => eventId.hashCode ^ limit.hashCode;
+}
+
+@immutable
+class EventChallengesParams {
+  final String seasonId;
+  final String eventId;
+
+  EventChallengesParams({
+    required this.seasonId,
+    required this.eventId,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EventChallengesParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          eventId == other.eventId;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ eventId.hashCode;
+}
+
+@immutable
+class RewardHistoryParams {
+  final String playerId;
+  final String? seasonId;
+  final int limit;
+
+  RewardHistoryParams({
+    required this.playerId,
+    this.seasonId,
+    required this.limit,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RewardHistoryParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          seasonId == other.seasonId &&
+          limit == other.limit;
+
+  @override
+  int get hashCode =>
+      playerId.hashCode ^ seasonId.hashCode ^ limit.hashCode;
+}
+
+@immutable
+class RewardCodeParams {
+  final String playerId;
+  final String code;
+
+  RewardCodeParams({required this.playerId, required this.code});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RewardCodeParams &&
+          runtimeType == other.runtimeType &&
+          playerId == other.playerId &&
+          code == other.code;
+
+  @override
+  int get hashCode => playerId.hashCode ^ code.hashCode;
+}
+
+@immutable
+class RewardsByTypeParams {
+  final String seasonId;
+  final String type;
+
+  RewardsByTypeParams({required this.seasonId, required this.type});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RewardsByTypeParams &&
+          runtimeType == other.runtimeType &&
+          seasonId == other.seasonId &&
+          type == other.type;
+
+  @override
+  int get hashCode => seasonId.hashCode ^ type.hashCode;
+}
+
 /// Phase U - Seasonal Rewards & Battle Pass Providers
 /// Provides reactive access to seasonal gameplay, rewards, and events
 
 // Service Providers
 
-final seasonManagementServiceProvider = Provider<SeasonManagementService>((ref) {
+final seasonManagementServiceProvider =
+    Provider<SeasonManagementService>((ref) {
   return SeasonManagementService(firestore: FirebaseFirestore.instance);
 });
 
@@ -40,13 +322,16 @@ final currentSeasonProvider = FutureProvider<Season?>((ref) {
 });
 
 /// Get season by ID
-final seasonByIdProvider = FutureProvider.family<Season?, String>((ref, seasonId) {
+final seasonByIdProvider = FutureProvider.family<Season?, String>(
+    (ref, seasonId) {
   final service = ref.watch(seasonManagementServiceProvider);
   return service.getSeasonById(seasonId);
 });
 
 /// Get player's seasonal progress
-final playerSeasonProgressProvider = FutureProvider.family<PlayerSeasonProgress?, String>((ref, playerId) async {
+final playerSeasonProgressProvider =
+    FutureProvider.family<PlayerSeasonProgress?, String>(
+        (ref, playerId) async {
   final service = ref.watch(seasonManagementServiceProvider);
   final currentSeason = await ref.watch(currentSeasonProvider.future);
 
@@ -58,7 +343,8 @@ final playerSeasonProgressProvider = FutureProvider.family<PlayerSeasonProgress?
 });
 
 /// Get all seasons with pagination
-final allSeasonsProvider = FutureProvider.family<List<Season>, ({int limit, int offset})>(
+final allSeasonsProvider =
+    FutureProvider.family<List<Season>, SeasonPaginationParams>(
   (ref, params) {
     final service = ref.watch(seasonManagementServiceProvider);
     return service.getAllSeasons(limit: params.limit, offset: params.offset);
@@ -86,20 +372,23 @@ final currentBattlePassProvider = FutureProvider<BattlePass?>((ref) async {
 });
 
 /// Get battle pass by ID
-final battlePassProvider = FutureProvider.family<BattlePass?, String>((ref, battlePassId) {
+final battlePassProvider = FutureProvider.family<BattlePass?, String>(
+    (ref, battlePassId) {
   final service = ref.watch(battlePassServiceProvider);
   return service.getBattlePass(battlePassId);
 });
 
 /// Get player's battle pass progress
-final playerBattlePassProvider = FutureProvider.family<PlayerBattlePassProgress?,
-  ({String playerId, String seasonId})>((ref, params) {
+final playerBattlePassProvider =
+    FutureProvider.family<PlayerBattlePassProgress?,
+  SeasonChallengesParams>((ref, params) {
   final service = ref.watch(battlePassServiceProvider);
   return service.getPlayerBattlePassProgress(params.playerId, params.seasonId);
 });
 
 /// Get battle pass tiers
-final battlePassTiersProvider = FutureProvider.family<List<BattlePassTier>, String>(
+final battlePassTiersProvider =
+    FutureProvider.family<List<BattlePassTier>, String>(
   (ref, battlePassId) {
     final service = ref.watch(battlePassServiceProvider);
     return service.getBattlePassTiers(battlePassId);
@@ -107,41 +396,58 @@ final battlePassTiersProvider = FutureProvider.family<List<BattlePassTier>, Stri
 );
 
 /// Get claimed battle pass rewards
-final claimedBattlePassRewardsProvider = FutureProvider.family<List<int>,
-  ({String playerId, String seasonId, bool isPremium})>((ref, params) {
-  final service = ref.watch(battlePassServiceProvider);
-  return service.getClaimedRewards(
-    playerId: params.playerId,
-    seasonId: params.seasonId,
-    isPremium: params.isPremium,
-  );
-});
+final claimedBattlePassRewardsProvider =
+    FutureProvider.family<List<int>, BattlePassRewardsParams>(
+  (ref, params) {
+    final service = ref.watch(battlePassServiceProvider);
+    return service.getClaimedRewards(
+      playerId: params.playerId,
+      seasonId: params.seasonId,
+      isPremium: params.isPremium,
+    );
+  },
+);
 
 // Challenge Providers
 
 /// Get active challenges for season
-final activeChallengesProvider = FutureProvider.family<List<Challenge>,
-  ({String seasonId, String? type})>((ref, params) {
-  final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getChallenges(seasonId: params.seasonId, type: params.type);
-});
+final activeChallengesProvider =
+    FutureProvider.family<List<Challenge>, ChallengesParams>(
+  (ref, params) {
+    final service = ref.watch(seasonChallengeServiceProvider);
+    return service.getChallenges(
+      seasonId: params.seasonId,
+      type: params.type,
+    );
+  },
+);
 
 /// Get challenges by difficulty
-final challengesByDifficultyProvider = FutureProvider.family<List<Challenge>,
-  ({String seasonId, String difficulty})>((ref, params) {
-  final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getChallengeTiers(params.seasonId, difficulty: params.difficulty);
-});
+final challengesByDifficultyProvider =
+    FutureProvider.family<List<Challenge>, ChallengeDifficultyParams>(
+  (ref, params) {
+    final service = ref.watch(seasonChallengeServiceProvider);
+    return service.getChallengeTiers(
+      params.seasonId,
+      difficulty: params.difficulty,
+    );
+  },
+);
 
 /// Get player's challenge progress
-final playerChallengeProgressProvider = FutureProvider.family<PlayerChallengeProgress?,
-  ({String playerId, String challengeId})>((ref, params) {
+final playerChallengeProgressProvider =
+    FutureProvider.family<PlayerChallengeProgress?,
+  PlayerChallengeParams>((ref, params) {
   final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getPlayerChallengeProgress(params.playerId, params.challengeId);
+  return service.getPlayerChallengeProgress(
+    params.playerId,
+    params.challengeId,
+  );
 });
 
 /// Get challenge rewards
-final challengeRewardsProvider = FutureProvider.family<List<ChallengeReward>, String>(
+final challengeRewardsProvider =
+    FutureProvider.family<List<ChallengeReward>, String>(
   (ref, challengeId) {
     final service = ref.watch(seasonChallengeServiceProvider);
     return service.getChallengeRewards(challengeId);
@@ -149,31 +455,43 @@ final challengeRewardsProvider = FutureProvider.family<List<ChallengeReward>, St
 );
 
 /// Get event-specific challenges
-final eventChallengesProvider = FutureProvider.family<List<Challenge>,
-  ({String seasonId, String eventId})>((ref, params) {
+final eventChallengesProvider =
+    FutureProvider.family<List<Challenge>, String>((ref, seasonId) {
+  // TODO: Currently only supports seasonId parameter
+  // Future: update to support eventId as well
   final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getEventChallenges(params.seasonId, eventId: params.eventId);
+  return service.getChallenges(seasonId: seasonId);
 });
 
 /// Get all player challenges for season
-final playerSeasonChallengesProvider = FutureProvider.family<List<PlayerChallengeProgress>,
-  ({String playerId, String seasonId})>((ref, params) {
+final playerSeasonChallengesProvider =
+    FutureProvider.family<List<PlayerChallengeProgress>,
+  SeasonChallengesParams>((ref, params) {
   final service = ref.watch(seasonChallengeServiceProvider);
-  return service.getPlayerSeasonChallenges(params.playerId, params.seasonId);
+  return service.getPlayerSeasonChallenges(
+    params.playerId,
+    params.seasonId,
+  );
 });
 
 // Reward Providers
 
 /// Get rewards by type
-final rewardsByTypeProvider = FutureProvider.family<List<Reward>,
-  ({String seasonId, String type})>((ref, params) {
-  final service = ref.watch(seasonalRewardServiceProvider);
-  return service.getRewardsByType(seasonId: params.seasonId, type: params.type);
-});
+final rewardsByTypeProvider =
+    FutureProvider.family<List<Reward>, RewardsByTypeParams>(
+  (ref, params) {
+    final service = ref.watch(seasonalRewardServiceProvider);
+    return service.getRewardsByType(
+      seasonId: params.seasonId,
+      type: params.type,
+    );
+  },
+);
 
 /// Get player's reward history
-final playerRewardHistoryProvider = FutureProvider.family<List<PlayerRewardHistory>,
-  ({String playerId, String? seasonId, int limit})>((ref, params) {
+final playerRewardHistoryProvider =
+    FutureProvider.family<List<PlayerRewardHistory>,
+  RewardHistoryParams>((ref, params) {
   final service = ref.watch(seasonalRewardServiceProvider);
   return service.getPlayerRewardHistory(
     playerId: params.playerId,
@@ -183,23 +501,26 @@ final playerRewardHistoryProvider = FutureProvider.family<List<PlayerRewardHisto
 });
 
 /// Get season-end rewards
-final seasonEndRewardsProvider = FutureProvider.family<List<Reward>,
-  ({String playerId, String seasonId})>((ref, params) {
-  final service = ref.watch(seasonalRewardServiceProvider);
-  return service.calculateSeasonEndRewards(
-    playerId: params.playerId,
-    seasonId: params.seasonId,
-  );
-});
+final seasonEndRewardsProvider =
+    FutureProvider.family<List<Reward>, SeasonChallengesParams>(
+  (ref, params) {
+    final service = ref.watch(seasonalRewardServiceProvider);
+    return service.calculateSeasonEndRewards(
+      playerId: params.playerId,
+      seasonId: params.seasonId,
+    );
+  },
+);
 
 /// Check if player has redeemed code
-final playerCodeRedemptionProvider = FutureProvider.family<bool,
-  ({String playerId, String code})>((ref, params) {
-  final service = ref.watch(seasonalRewardServiceProvider);
-  return service.hasPlayerRedeemedCode(
-    playerId: params.playerId,
-    code: params.code,
-  );
+final playerCodeRedemptionProvider =
+    FutureProvider.family<bool, RewardCodeParams>(
+  (ref, params) {
+    final service = ref.watch(seasonalRewardServiceProvider);
+    return service.hasPlayerRedeemedCode(
+      playerId: params.playerId,
+      code: params.code,
+    );
 });
 
 // Event Providers
@@ -221,22 +542,31 @@ final eventDetailsProvider = FutureProvider.family<SeasonalEvent?, String>(
 );
 
 /// Get player's event participation
-final playerEventProgressProvider = FutureProvider.family<EventParticipation?,
-  ({String playerId, String eventId})>((ref, params) {
+final playerEventProgressProvider =
+    FutureProvider.family<EventParticipation?,
+  EventParticipationParams>((ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
-  return service.getPlayerEventProgress(params.playerId, params.eventId);
+  return service.getPlayerEventProgress(
+    params.playerId,
+    params.eventId,
+  );
 });
 
 /// Get event leaderboard
-final eventLeaderboardProvider = FutureProvider.family<List<EventLeaderboardEntry>,
-  ({String eventId, int limit})>((ref, params) {
+final eventLeaderboardProvider =
+    FutureProvider.family<List<EventLeaderboardEntry>,
+  EventLeaderboardParams>((ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
-  return service.getEventLeaderboard(params.eventId, limit: params.limit);
+  return service.getEventLeaderboard(
+    params.eventId,
+    limit: params.limit,
+  );
 });
 
 /// Get top event participants
-final topEventParticipantsProvider = FutureProvider.family<List<EventParticipation>,
-  ({String eventId, int limit})>((ref, params) {
+final topEventParticipantsProvider =
+    FutureProvider.family<List<EventParticipation>,
+  TopEventParticipantsParams>((ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
   return service.getTopEventParticipants(params.eventId, limit: params.limit);
 });
@@ -396,7 +726,8 @@ class ChallengeCompleteNotifier extends StateNotifier<ChallengeCompleteState> {
   }
 }
 
-class EventParticipationNotifier extends StateNotifier<EventParticipationState> {
+class EventParticipationNotifier
+    extends StateNotifier<EventParticipationState> {
   final SeasonalEventService _service;
 
   EventParticipationNotifier(this._service)
@@ -439,7 +770,9 @@ class EventParticipationNotifier extends StateNotifier<EventParticipationState> 
         eventId: eventId,
       );
 
-      final updated = state.joinedEventIds.where((id) => id != eventId).toList();
+      final updated = state.joinedEventIds
+          .where((id) => id != eventId)
+          .toList();
       state = state.copyWith(
         isLoading: false,
         joinedEventIds: updated,
