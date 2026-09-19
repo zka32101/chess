@@ -1,3 +1,5 @@
+import 'dart:math' show pow;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/src/models/online_game.dart';
 
@@ -571,6 +573,3 @@ void main() {
     });
   });
 }
-
-// Imports
-import 'dart:math' show pow;

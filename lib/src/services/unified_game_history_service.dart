@@ -48,10 +48,11 @@ class UnifiedGameHistoryService {
         _auth = auth ?? FirebaseAuth.instance;
 
   /// Get current user ID
-  String get _userId => _auth.currentUser?.uid ?? throw GameHistoryException(
-    'No user logged in',
-    code: 'auth_required',
-  );
+  String get _userId => _auth.currentUser?.uid ??
+      (throw GameHistoryException(
+        'No user logged in',
+        code: 'auth_required',
+      ));
 
   // ============================================
   // MULTIPLAYER GAME HISTORY

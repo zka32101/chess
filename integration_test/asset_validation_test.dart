@@ -79,7 +79,7 @@ void main() {
     /// Test splash screen assets display without letterboxing
     testWidgets('Splash screen assets render without distortion', (WidgetTester tester) async {
       // Test Android splash (1080x1920)
-      await tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
 
       await tester.pumpWidget(
