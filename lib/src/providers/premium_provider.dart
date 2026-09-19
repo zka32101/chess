@@ -50,10 +50,12 @@ final userSubscriptionProvider = FutureProvider<UserSubscription>((ref) async {
     final expiryDate = expiryTimestamp?.toDate();
 
     // Check if this is a lifetime subscription (no expiry date and tier is not free)
-    final isLifetime = data['isLifetime'] as bool? ?? (expiryDate == null && tier != 'free');
+    final isLifetime =
+        data['isLifetime'] as bool? ?? (expiryDate == null && tier != 'free');
 
     // Active if: not free tier AND (lifetime OR expiry date is in the future)
-    final isActive = tier != 'free' && (isLifetime || expiryDate?.isAfter(DateTime.now()) ?? false);
+    final isActive = tier != 'free' &&
+        (isLifetime || (expiryDate?.isAfter(DateTime.now()) ?? false));
 
     return UserSubscription(
       tier: tier,
@@ -67,13 +69,15 @@ final userSubscriptionProvider = FutureProvider<UserSubscription>((ref) async {
 });
 
 // Check if specific premium feature is available
-final premiumFeatureProvider = FutureProvider.family<bool, String>((ref, feature) async {
+final premiumFeatureProvider =
+    FutureProvider.family<bool, String>((ref, feature) async {
   final subscription = await ref.watch(userSubscriptionProvider.future);
 
   final premiumFeatures = {
     'unlimited_puzzles': subscription.isPro || subscription.isPremium,
     'unlimited_games': subscription.isPro || subscription.isPremium,
     'advanced_analysis': subscription.isPro || subscription.isPremium,
+    'custom_board_themes': subscription.isPro || subscription.isPremium,
     'ai_lessons': subscription.isPremium,
     'personalized_training': subscription.isPremium,
     'offline_mode': subscription.isPremium,
@@ -84,7 +88,8 @@ final premiumFeatureProvider = FutureProvider.family<bool, String>((ref, feature
 });
 
 // Check if user can perform action with remaining attempts
-final remainingAttemptsProvider = FutureProvider.family<int, String>((ref, action) async {
+final remainingAttemptsProvider =
+    FutureProvider.family<int, String>((ref, action) async {
   final subscription = await ref.watch(userSubscriptionProvider.future);
 
   if (subscription.isPro || subscription.isPremium) {
@@ -111,7 +116,8 @@ final featureGatingServiceProvider = Provider((ref) {
 });
 
 // Check if user can perform action (with daily limits)
-final canPerformActionProvider = FutureProvider.family<bool, String>((ref, action) async {
+final canPerformActionProvider =
+    FutureProvider.family<bool, String>((ref, action) async {
   final subscription = await ref.watch(userSubscriptionProvider.future);
   final featureGatingService = ref.watch(featureGatingServiceProvider);
 
@@ -119,15 +125,18 @@ final canPerformActionProvider = FutureProvider.family<bool, String>((ref, actio
 });
 
 // Get remaining daily attempts (tracks usage)
-final remainingDailyUsageProvider = FutureProvider.family<int, String>((ref, action) async {
+final remainingDailyUsageProvider =
+    FutureProvider.family<int, String>((ref, action) async {
   final subscription = await ref.watch(userSubscriptionProvider.future);
   final featureGatingService = ref.watch(featureGatingServiceProvider);
 
-  return featureGatingService.getRemainingDailyAttempts(action, subscription.tier);
+  return featureGatingService.getRemainingDailyAttempts(
+      action, subscription.tier);
 });
 
 // Track action usage
-final trackActionUsageProvider = FutureProvider.family<void, String>((ref, action) async {
+final trackActionUsageProvider =
+    FutureProvider.family<void, String>((ref, action) async {
   final subscription = await ref.watch(userSubscriptionProvider.future);
   final featureGatingService = ref.watch(featureGatingServiceProvider);
 

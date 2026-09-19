@@ -7,6 +7,7 @@ import '../../widgets/game_board.dart';
 import '../../widgets/game_result.dart';
 import '../../widgets/move_history.dart';
 import '../../providers/cpu_game_provider.dart';
+import '../../providers/board_theme_provider.dart';
 
 class CPUGameScreen extends ConsumerStatefulWidget {
   final AIDifficulty difficulty;
@@ -29,9 +30,9 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
     // Initialize game on first build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(cpuGameProvider.notifier).initGame(
-        difficulty: widget.difficulty,
-        playerIsWhite: widget.playerIsWhite,
-      );
+            difficulty: widget.difficulty,
+            playerIsWhite: widget.playerIsWhite,
+          );
     });
   }
 
@@ -56,17 +57,23 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
 
     // Make AI move if it's AI's turn
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!gameState.isPlayerTurn && !gameState.isAIThinking && !gameState.isGameOver) {
+      if (!gameState.isPlayerTurn &&
+          !gameState.isAIThinking &&
+          !gameState.isGameOver) {
         ref.read(cpuGameProvider.notifier).makeAIMove();
       }
     });
 
     return SafeArea(
-      child: isMobile ? _buildMobileLayout(gameState) : _buildDesktopLayout(gameState),
+      child: isMobile
+          ? _buildMobileLayout(gameState)
+          : _buildDesktopLayout(gameState),
     );
   }
 
   Widget _buildMobileLayout(CpuGameState gameState) {
+    final boardTheme = ref.watch(selectedBoardThemeProvider);
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -79,12 +86,13 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
             // Game board with controls
             GameBoard(
               gameState: gameState.gameState,
+              theme: boardTheme,
               onMove: (from, to, {promotion}) {
                 ref.read(cpuGameProvider.notifier).makePlayerMove(
-                  from,
-                  to,
-                  promotion: promotion,
-                );
+                      from,
+                      to,
+                      promotion: promotion,
+                    );
               },
               onUndo: gameState.moves.isNotEmpty
                   ? () => ref.read(cpuGameProvider.notifier).undoMove()
@@ -116,6 +124,8 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
   }
 
   Widget _buildDesktopLayout(CpuGameState gameState) {
+    final boardTheme = ref.watch(selectedBoardThemeProvider);
+
     return Row(
       children: [
         // Left side: Board and controls
@@ -130,12 +140,13 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
                 Expanded(
                   child: GameBoard(
                     gameState: gameState.gameState,
+                    theme: boardTheme,
                     onMove: (from, to, {promotion}) {
                       ref.read(cpuGameProvider.notifier).makePlayerMove(
-                        from,
-                        to,
-                        promotion: promotion,
-                      );
+                            from,
+                            to,
+                            promotion: promotion,
+                          );
                     },
                     onUndo: gameState.moves.isNotEmpty
                         ? () => ref.read(cpuGameProvider.notifier).undoMove()
@@ -155,7 +166,8 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              border: Border(left: BorderSide(color: Colors.grey[300] ?? Colors.grey)),
+              border: Border(
+                  left: BorderSide(color: Colors.grey[300] ?? Colors.grey)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -286,8 +298,8 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
           Text(
             value,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
@@ -319,7 +331,8 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resign Game'),
-        content: const Text('Are you sure you want to resign? You will lose this game.'),
+        content: const Text(
+            'Are you sure you want to resign? You will lose this game.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

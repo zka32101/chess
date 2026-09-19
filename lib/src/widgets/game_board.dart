@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess_tactics_master/src/widgets/chess_board.dart';
+import 'package:chess_tactics_master/src/models/board_theme.dart';
 import 'package:chess_tactics_master/src/widgets/captured_pieces.dart';
 
 /// Game container with board and controls
@@ -13,6 +13,7 @@ class GameBoard extends StatefulWidget {
   final List<chess_lib.Move> moveHistory;
   final bool showMaterial;
   final bool isPlayerTurn;
+  final BoardTheme theme;
 
   const GameBoard({
     Key? key,
@@ -24,6 +25,7 @@ class GameBoard extends StatefulWidget {
     this.moveHistory = const [],
     this.showMaterial = true,
     this.isPlayerTurn = true,
+    this.theme = BoardThemeCatalog.classic,
   }) : super(key: key);
 
   @override
@@ -70,12 +72,7 @@ class _GameBoardState extends State<GameBoard> {
           // Chess board
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ChessBoard(
-              gameState: widget.gameState,
-              onSquareTap: _handleSquareTap,
-              selectedSquare: _selectedSquare,
-              highlightedSquares: _availableMoves,
-            ),
+            child: _buildBoard(),
           ),
 
           // Game controls
@@ -142,9 +139,8 @@ class _GameBoardState extends State<GameBoard> {
         final to = square;
 
         // Handle promotion
-        String? promotion;
         final piece = _getPieceAt(from);
-        if (piece?.type == chess_lib.PieceType.pawn &&
+        if (piece?.type == chess_lib.PieceType.PAWN &&
             ((piece?.color == chess_lib.Color.WHITE && to[1] == '8') ||
                 (piece?.color == chess_lib.Color.BLACK && to[1] == '1'))) {
           // Show promotion dialog
@@ -206,68 +202,47 @@ class _GameBoardState extends State<GameBoard> {
 
   chess_lib.Piece? _getPieceAt(String square) {
     try {
-      final rank = int.parse(square[1]) - 1;
-      final file = square.codeUnitAt(0) - 'a'.codeUnitAt(0);
-      return widget.gameState.board[rank][file];
+      return widget.gameState.get(square);
     } catch (e) {
       return null;
     }
   }
 
   List<String> _getLegalMovesForSquare(String square) {
-    return (widget.gameState.moves() as List<chess_lib.Move>)
+    return widget.gameState
+        .moves({'asObjects': true})
+        .cast<chess_lib.Move>()
         .where((move) => move.fromAlgebraic == square)
         .map((move) => move.toAlgebraic)
         .toList();
   }
 
+  // Not `const`: PieceType overrides hashCode/==, which Dart disallows for
+  // constant map keys.
+  static final Map<chess_lib.PieceType, int> _startingCounts = {
+    chess_lib.PieceType.PAWN: 8,
+    chess_lib.PieceType.KNIGHT: 2,
+    chess_lib.PieceType.BISHOP: 2,
+    chess_lib.PieceType.ROOK: 2,
+    chess_lib.PieceType.QUEEN: 1,
+  };
+
   List<chess_lib.Piece> _getWhiteCapturedPieces() {
-    final captured = <chess_lib.Piece>[];
-    // Count pieces on board to determine captured
-    final whitePieces = _countPieces(chess_lib.Color.WHITE);
-
-    final initialCounts = {
-      chess_lib.PieceType.pawn: 8,
-      chess_lib.PieceType.knight: 2,
-      chess_lib.PieceType.bishop: 2,
-      chess_lib.PieceType.rook: 2,
-      chess_lib.PieceType.queen: 1,
-    };
-
-    initialCounts.forEach((type, count) {
-      final currentCount = whitePieces[type] ?? 0;
-      final capturedCount = count - currentCount;
-      for (int i = 0; i < capturedCount; i++) {
-        captured.add(chess_lib.Piece(
-          color: chess_lib.Color.WHITE,
-          type: type,
-        ));
-      }
-    });
-
-    return captured;
+    return _getCapturedPieces(chess_lib.Color.WHITE);
   }
 
   List<chess_lib.Piece> _getBlackCapturedPieces() {
+    return _getCapturedPieces(chess_lib.Color.BLACK);
+  }
+
+  List<chess_lib.Piece> _getCapturedPieces(chess_lib.Color color) {
     final captured = <chess_lib.Piece>[];
-    final blackPieces = _countPieces(chess_lib.Color.BLACK);
+    final onBoard = _countPieces(color);
 
-    final initialCounts = {
-      chess_lib.PieceType.pawn: 8,
-      chess_lib.PieceType.knight: 2,
-      chess_lib.PieceType.bishop: 2,
-      chess_lib.PieceType.rook: 2,
-      chess_lib.PieceType.queen: 1,
-    };
-
-    initialCounts.forEach((type, count) {
-      final currentCount = blackPieces[type] ?? 0;
-      final capturedCount = count - currentCount;
-      for (int i = 0; i < capturedCount; i++) {
-        captured.add(chess_lib.Piece(
-          color: chess_lib.Color.BLACK,
-          type: type,
-        ));
+    _startingCounts.forEach((type, startingCount) {
+      final missing = startingCount - (onBoard[type] ?? 0);
+      for (var i = 0; i < missing; i++) {
+        captured.add(chess_lib.Piece(type, color));
       }
     });
 
@@ -276,14 +251,178 @@ class _GameBoardState extends State<GameBoard> {
 
   Map<chess_lib.PieceType, int> _countPieces(chess_lib.Color color) {
     final counts = <chess_lib.PieceType, int>{};
-    for (int rank = 0; rank < 8; rank++) {
-      for (int file = 0; file < 8; file++) {
-        final piece = widget.gameState.board[rank][file];
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    for (final file in files) {
+      for (var rank = 1; rank <= 8; rank++) {
+        final piece = widget.gameState.get('$file$rank');
         if (piece != null && piece.color == color) {
           counts[piece.type] = (counts[piece.type] ?? 0) + 1;
         }
       }
     }
     return counts;
+  }
+
+  Widget _buildBoard() {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final boardSize = constraints.maxWidth;
+          final squareSize = boardSize / 8;
+
+          return GestureDetector(
+            onTapDown: (details) {
+              final file = (details.localPosition.dx / squareSize).floor();
+              final rank = (details.localPosition.dy / squareSize).floor();
+              if (file < 0 || file > 7 || rank < 0 || rank > 7) return;
+              _handleSquareTap(_squareFromIndices(rank, file));
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400, width: 2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  CustomPaint(
+                    painter: _GameBoardPainter(
+                      size: boardSize,
+                      theme: widget.theme,
+                      selectedSquare: _selectedSquare,
+                      legalMoveSquares: _availableMoves,
+                    ),
+                    size: Size(boardSize, boardSize),
+                  ),
+                  for (var rank = 0; rank < 8; rank++)
+                    for (var file = 0; file < 8; file++)
+                      if (widget.gameState.get(_squareFromIndices(rank, file))
+                          case final piece?)
+                        Positioned(
+                          left: file * squareSize,
+                          top: rank * squareSize,
+                          width: squareSize,
+                          height: squareSize,
+                          child: Center(
+                            child: Text(
+                              _pieceSymbol(piece),
+                              style: TextStyle(
+                                fontSize: squareSize * 0.6,
+                                fontWeight: FontWeight.bold,
+                                color: piece.color == chess_lib.Color.WHITE
+                                    ? widget.theme.whitePieceColor
+                                    : widget.theme.blackPieceColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  String _squareFromIndices(int rank, int file) {
+    return String.fromCharCode('a'.codeUnitAt(0) + file) +
+        (8 - rank).toString();
+  }
+
+  String _pieceSymbol(chess_lib.Piece piece) {
+    final whiteSymbols = {
+      chess_lib.PieceType.KING: '♔',
+      chess_lib.PieceType.QUEEN: '♕',
+      chess_lib.PieceType.ROOK: '♖',
+      chess_lib.PieceType.BISHOP: '♗',
+      chess_lib.PieceType.KNIGHT: '♘',
+      chess_lib.PieceType.PAWN: '♙',
+    };
+    final blackSymbols = {
+      chess_lib.PieceType.KING: '♚',
+      chess_lib.PieceType.QUEEN: '♛',
+      chess_lib.PieceType.ROOK: '♜',
+      chess_lib.PieceType.BISHOP: '♝',
+      chess_lib.PieceType.KNIGHT: '♞',
+      chess_lib.PieceType.PAWN: '♟',
+    };
+    final symbols =
+        piece.color == chess_lib.Color.WHITE ? whiteSymbols : blackSymbols;
+    return symbols[piece.type] ?? '?';
+  }
+}
+
+/// Paints the board squares plus selection/legal-move highlights for
+/// [GameBoard]. Kept separate from `chess_board.dart`'s painter since that
+/// one is private to its own library and this widget is driven by a raw
+/// `chess_lib.Chess` rather than a `ChessEngineService`.
+class _GameBoardPainter extends CustomPainter {
+  final double size;
+  final BoardTheme theme;
+  final String? selectedSquare;
+  final List<String> legalMoveSquares;
+
+  _GameBoardPainter({
+    required this.size,
+    required this.theme,
+    required this.selectedSquare,
+    required this.legalMoveSquares,
+  });
+
+  @override
+  void paint(Canvas canvas, Size canvasSize) {
+    final squareSize = size / 8;
+    final paint = Paint();
+    final legalMoveSet = legalMoveSquares.toSet();
+
+    for (var rank = 0; rank < 8; rank++) {
+      for (var file = 0; file < 8; file++) {
+        final square = String.fromCharCode('a'.codeUnitAt(0) + file) +
+            (8 - rank).toString();
+        final isLight = (rank + file) % 2 == 0;
+
+        if (square == selectedSquare) {
+          paint.color = theme.selectedSquareColor;
+        } else if (legalMoveSet.contains(square)) {
+          paint.color =
+              (isLight ? theme.lightSquareColor : theme.darkSquareColor)
+                  .withOpacity(0.85);
+        } else {
+          paint.color =
+              isLight ? theme.lightSquareColor : theme.darkSquareColor;
+        }
+
+        canvas.drawRect(
+          Rect.fromLTWH(
+            file * squareSize,
+            rank * squareSize,
+            squareSize,
+            squareSize,
+          ),
+          paint,
+        );
+
+        if (legalMoveSet.contains(square)) {
+          paint.color = theme.legalMoveIndicatorColor;
+          canvas.drawCircle(
+            Offset(
+              file * squareSize + squareSize / 2,
+              rank * squareSize + squareSize / 2,
+            ),
+            squareSize / 6,
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GameBoardPainter oldDelegate) {
+    return oldDelegate.size != size ||
+        oldDelegate.theme != theme ||
+        oldDelegate.selectedSquare != selectedSquare ||
+        oldDelegate.legalMoveSquares != legalMoveSquares;
   }
 }
