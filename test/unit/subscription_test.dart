@@ -115,12 +115,12 @@ void main() {
         };
       }
 
-      test('Free tier is $0', () {
+      test('Free tier is \$0', () {
         final pricing = getTierPricing();
         expect(pricing['free'], 0.0);
       });
 
-      test('Premium monthly is $4.99', () {
+      test('Premium monthly is \$4.99', () {
         final pricing = getTierPricing();
         expect(pricing['premium_monthly'], 4.99);
       });
