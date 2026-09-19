@@ -14,19 +14,23 @@ class CapturedPieces extends StatelessWidget {
 
   /// Get material value for a piece
   int _getMaterialValue(chess_lib.Piece piece) {
+    // PieceType is a plain class with static const instances, not a real
+    // Dart enum, so the analyzer can't prove this switch is exhaustive.
     switch (piece.type) {
-      case chess_lib.PieceType.pawn:
+      case chess_lib.PieceType.PAWN:
         return 1;
-      case chess_lib.PieceType.knight:
+      case chess_lib.PieceType.KNIGHT:
         return 3;
-      case chess_lib.PieceType.bishop:
+      case chess_lib.PieceType.BISHOP:
         return 3;
-      case chess_lib.PieceType.rook:
+      case chess_lib.PieceType.ROOK:
         return 5;
-      case chess_lib.PieceType.queen:
+      case chess_lib.PieceType.QUEEN:
         return 9;
-      case chess_lib.PieceType.king:
+      case chess_lib.PieceType.KING:
         return 0;
+      default:
+        throw ArgumentError('Unknown piece type: ${piece.type}');
     }
   }
 
@@ -37,7 +41,7 @@ class CapturedPieces extends StatelessWidget {
 
   /// Get symbol for display
   String _getSymbol(chess_lib.Piece piece) {
-    return piece.type.symbol.toUpperCase();
+    return piece.type.name.toUpperCase();
   }
 
   @override
@@ -82,7 +86,9 @@ class CapturedPieces extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                isWhiteAdvantage ? '+$materialDifference' : '-$materialDifference',
+                isWhiteAdvantage
+                    ? '+$materialDifference'
+                    : '-$materialDifference',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: isWhiteAdvantage ? Colors.black : Colors.white,
