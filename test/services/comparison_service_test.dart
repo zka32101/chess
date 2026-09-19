@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/services/comparison_service.dart';
-import 'package:chess/src/models/head_to_head_stats.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/services/comparison_service.dart';
+import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 // Mock Firestore
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
@@ -36,13 +36,15 @@ void main() {
         expect(probability, closeTo(0.5, 0.01));
       });
 
-      test('should return higher probability for positive rating difference', () {
+      test('should return higher probability for positive rating difference',
+          () {
         final prob1 = service.calculateWinProbability(0);
         final prob2 = service.calculateWinProbability(200);
         expect(prob2, greaterThan(prob1));
       });
 
-      test('should return lower probability for negative rating difference', () {
+      test('should return lower probability for negative rating difference',
+          () {
         final prob1 = service.calculateWinProbability(0);
         final prob2 = service.calculateWinProbability(-200);
         expect(prob2, lessThan(prob1));
@@ -56,7 +58,8 @@ void main() {
     });
 
     group('_getMatchupId', () {
-      test('should generate consistent matchup ID regardless of player order', () {
+      test('should generate consistent matchup ID regardless of player order',
+          () {
         final id1 = service.matchupIdForTest('player1', 'player2');
         final id2 = service.matchupIdForTest('player2', 'player1');
         expect(id1, id2);

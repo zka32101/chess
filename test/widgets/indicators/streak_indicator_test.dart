@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/widgets/indicators/streak_indicator.dart';
+import 'package:chess_tactics_master/src/widgets/indicators/streak_indicator.dart';
 
 void main() {
   group('StreakIndicator', () {

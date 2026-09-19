@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 import '../helpers/widget_test_helpers.dart';
 
 void main() {
@@ -118,7 +118,8 @@ void main() {
         for (int i = 0; i < history.length - 1; i++) {
           final date1 = history[i]['date'] as DateTime;
           final date2 = history[i + 1]['date'] as DateTime;
-          expect(date1.isBefore(date2) || date1.isAtSameMomentAs(date2), isTrue);
+          expect(
+              date1.isBefore(date2) || date1.isAtSameMomentAs(date2), isTrue);
         }
       });
     });
@@ -153,8 +154,7 @@ void main() {
         expect(find.text('Item 3'), findsOneWidget);
       });
 
-      testWidgets('Image widget handles null URL',
-          (WidgetTester tester) async {
+      testWidgets('Image widget handles null URL', (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: Image.asset('assets/images/placeholder.png'),
@@ -165,8 +165,7 @@ void main() {
         expect(find.byType(Image), findsOneWidget);
       });
 
-      testWidgets('Container handles null child',
-          (WidgetTester tester) async {
+      testWidgets('Container handles null child', (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: Container(
@@ -315,8 +314,7 @@ void main() {
 
       testWidgets('StreamBuilder handles stream error',
           (WidgetTester tester) async {
-        final errorStream =
-            Stream<String>.error(Exception('Test error'));
+        final errorStream = Stream<String>.error(Exception('Test error'));
 
         await tester.pumpWidget(
           createTestApp(
@@ -375,9 +373,11 @@ void main() {
         );
 
         await tester.pumpAndSettleWithTimeout();
-        expect(find.byWidgetPredicate(
-          (w) => w is Text && (w.data ?? '').contains('Error'),
-        ), findsOneWidget);
+        expect(
+            find.byWidgetPredicate(
+              (w) => w is Text && (w.data ?? '').contains('Error'),
+            ),
+            findsOneWidget);
       });
     });
   });

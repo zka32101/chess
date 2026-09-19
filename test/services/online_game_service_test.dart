@@ -1,16 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/services/matchmaking_service.dart';
-import 'package:chess/src/services/online_game_service.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/services/matchmaking_service.dart';
+import 'package:chess_tactics_master/src/services/online_game_service.dart';
 
 // Mock classes
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
-class MockQuerySnapshot extends Mock implements QuerySnapshot<Map<String, dynamic>> {}
-class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
+
+class MockCollectionReference extends Mock
+    implements CollectionReference<Map<String, dynamic>> {}
+
+class MockDocumentReference extends Mock
+    implements DocumentReference<Map<String, dynamic>> {}
+
+class MockQuerySnapshot extends Mock
+    implements QuerySnapshot<Map<String, dynamic>> {}
+
+class MockDocumentSnapshot extends Mock
+    implements DocumentSnapshot<Map<String, dynamic>> {}
+
 class MockQuery extends Mock implements Query<Map<String, dynamic>> {}
 
 void main() {
@@ -67,7 +76,8 @@ void main() {
 
       test('handles non-existent queue entries', () async {
         final queue = <Map<String, dynamic>>[];
-        final removed = queue.where((e) => e['playerId'] == 'nonexistent').toList();
+        final removed =
+            queue.where((e) => e['playerId'] == 'nonexistent').toList();
 
         expect(removed, isEmpty);
       });
@@ -101,7 +111,8 @@ void main() {
           {'id': 'queue-001', 'status': 'waiting'},
         ];
 
-        final result = queue.where((q) => q['id'] == invalidQueueId).firstOrNull;
+        final result =
+            queue.where((q) => q['id'] == invalidQueueId).firstOrNull;
         expect(result, isNull);
       });
     });
@@ -114,7 +125,8 @@ void main() {
           {'playerId': 'player-003', 'status': 'matched'},
         ];
 
-        final waitingCount = queue.where((q) => q['status'] == 'waiting').length;
+        final waitingCount =
+            queue.where((q) => q['status'] == 'waiting').length;
         expect(waitingCount, 2);
       });
 
@@ -145,7 +157,8 @@ void main() {
 
         final totalWaitMs = queue.fold<int>(
           0,
-          (sum, q) => sum + now.difference(q['joinedAt'] as DateTime).inMilliseconds,
+          (sum, q) =>
+              sum + now.difference(q['joinedAt'] as DateTime).inMilliseconds,
         );
         final avgWaitMs = totalWaitMs ~/ queue.length;
 
@@ -195,8 +208,14 @@ void main() {
       test('preserves non-expired entries', () async {
         final now = DateTime.now();
         final queue = [
-          {'playerId': 'player-001', 'timeout': now.add(const Duration(seconds: 20))},
-          {'playerId': 'player-002', 'timeout': now.add(const Duration(seconds: 15))},
+          {
+            'playerId': 'player-001',
+            'timeout': now.add(const Duration(seconds: 20))
+          },
+          {
+            'playerId': 'player-002',
+            'timeout': now.add(const Duration(seconds: 15))
+          },
         ];
 
         final validEntries = queue.where((q) {
@@ -253,7 +272,8 @@ void main() {
         // 5min should be 300000ms
         // 10min should be 600000ms
         final parseTimeControl = (String timeControl) {
-          final value = int.tryParse(timeControl.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          final value =
+              int.tryParse(timeControl.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
           if (timeControl.contains('min')) {
             return value * 60 * 1000;
           }
@@ -326,9 +346,11 @@ void main() {
       });
 
       test('updates FEN position', () async {
-        var currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+        var currentFen =
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
         // After e2-e4
-        currentFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        currentFen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
 
         expect(currentFen, contains('4P3'));
       });
@@ -579,7 +601,10 @@ void main() {
       test('returns stream of game updates', () async {
         // Mock stream would emit game updates
         final gameUpdates = [
-          {'status': 'active', 'fen': 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'},
+          {
+            'status': 'active',
+            'fen': 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+          },
         ];
 
         expect(gameUpdates, isNotEmpty);
@@ -602,7 +627,8 @@ void main() {
           {'gameId': 'g3', 'whitePlayerId': 'other', 'status': 'active'},
         ];
 
-        final whiteGames = games.where((g) => g['whitePlayerId'] == playerId).toList();
+        final whiteGames =
+            games.where((g) => g['whitePlayerId'] == playerId).toList();
         expect(whiteGames.length, 1);
       });
 
@@ -613,7 +639,8 @@ void main() {
           {'gameId': 'g2', 'blackPlayerId': playerId, 'status': 'active'},
         ];
 
-        final blackGames = games.where((g) => g['blackPlayerId'] == playerId).toList();
+        final blackGames =
+            games.where((g) => g['blackPlayerId'] == playerId).toList();
         expect(blackGames.length, 1);
       });
 
@@ -624,10 +651,12 @@ void main() {
           {'gameId': 'g2', 'blackPlayerId': playerId, 'status': 'active'},
         ];
 
-        final allGames = games.where((g) =>
-          (g['whitePlayerId'] == playerId || g['blackPlayerId'] == playerId) &&
-          g['status'] == 'active'
-        ).toList();
+        final allGames = games
+            .where((g) =>
+                (g['whitePlayerId'] == playerId ||
+                    g['blackPlayerId'] == playerId) &&
+                g['status'] == 'active')
+            .toList();
 
         expect(allGames.length, 2);
       });
@@ -639,7 +668,8 @@ void main() {
           {'gameId': 'g2', 'whitePlayerId': playerId, 'status': 'completed'},
         ];
 
-        final activeGames = games.where((g) => g['status'] == 'active').toList();
+        final activeGames =
+            games.where((g) => g['status'] == 'active').toList();
         expect(activeGames.length, 1);
       });
 
@@ -649,9 +679,10 @@ void main() {
           {'gameId': 'g1', 'whitePlayerId': 'other', 'status': 'active'},
         ];
 
-        final activeGames = games.where((g) =>
-          (g['whitePlayerId'] == playerId || g['blackPlayerId'] == playerId)
-        ).toList();
+        final activeGames = games
+            .where((g) => (g['whitePlayerId'] == playerId ||
+                g['blackPlayerId'] == playerId))
+            .toList();
 
         expect(activeGames, isEmpty);
       });
@@ -665,9 +696,9 @@ void main() {
           {'gameId': 'g3', 'createdAt': DateTime(2026, 8, 27)},
         ];
 
-        final sorted = games..sort((a, b) =>
-          (b['createdAt'] as DateTime).compareTo(a['createdAt'] as DateTime)
-        );
+        final sorted = games
+          ..sort((a, b) => (b['createdAt'] as DateTime)
+              .compareTo(a['createdAt'] as DateTime));
 
         expect(sorted[0]['gameId'], 'g3');
       });
@@ -693,9 +724,8 @@ void main() {
         ];
 
         final recentStati = ['completed', 'abandoned', 'active'];
-        final filtered = games.where((g) =>
-          recentStati.contains(g['status'])
-        ).toList();
+        final filtered =
+            games.where((g) => recentStati.contains(g['status'])).toList();
 
         expect(filtered.length, 3);
       });
@@ -873,7 +903,9 @@ void main() {
       final updates = [game];
 
       // 3. Make moves
-      final moves = [{'from': 'e2', 'to': 'e4'}];
+      final moves = [
+        {'from': 'e2', 'to': 'e4'}
+      ];
 
       // 4. Verify stream emits updates
       expect(updates, isNotEmpty);

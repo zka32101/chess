@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/deployment_manager.dart';
 import '../utils/beta_testing_manager.dart';
 import '../utils/launch_checklist.dart';
@@ -135,7 +135,8 @@ class DeploymentNotifier extends StateNotifier<bool> {
 }
 
 /// Deployment execution provider
-final deploymentExecutionProvider = StateNotifierProvider<DeploymentNotifier, bool>((ref) {
+final deploymentExecutionProvider =
+    StateNotifierProvider<DeploymentNotifier, bool>((ref) {
   return DeploymentNotifier();
 });
 
@@ -156,7 +157,8 @@ class BetaSessionNotifier extends StateNotifier<int> {
 }
 
 /// Beta session provider
-final betaSessionNotifierProvider = StateNotifierProvider<BetaSessionNotifier, int>((ref) {
+final betaSessionNotifierProvider =
+    StateNotifierProvider<BetaSessionNotifier, int>((ref) {
   return BetaSessionNotifier();
 });
 
@@ -181,7 +183,8 @@ class LaunchPhaseNotifier extends StateNotifier<LaunchPhase> {
 }
 
 /// Launch phase provider
-final launchPhaseNotifierProvider = StateNotifierProvider<LaunchPhaseNotifier, LaunchPhase>((ref) {
+final launchPhaseNotifierProvider =
+    StateNotifierProvider<LaunchPhaseNotifier, LaunchPhase>((ref) {
   return LaunchPhaseNotifier();
 });
 
@@ -203,6 +206,7 @@ class PipelineNotifier extends StateNotifier<bool> {
 }
 
 /// Pipeline execution provider
-final pipelineExecutionProvider = StateNotifierProvider<PipelineNotifier, bool>((ref) {
+final pipelineExecutionProvider =
+    StateNotifierProvider<PipelineNotifier, bool>((ref) {
   return PipelineNotifier();
 });

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/opening_book.dart';
+import 'package:chess_tactics_master/src/services/opening_book.dart';
 
 void main() {
   group('OpeningBook', () {
@@ -14,7 +14,8 @@ void main() {
       });
 
       test('returns recommended moves for 1.e4', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         final moves = OpeningBook.getRecommendedMoves(fen);
 
         expect(moves.isNotEmpty, true);
@@ -24,7 +25,8 @@ void main() {
       });
 
       test('returns recommended moves for 1.d4', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1';
         final moves = OpeningBook.getRecommendedMoves(fen);
 
         expect(moves.isNotEmpty, true);
@@ -32,7 +34,8 @@ void main() {
       });
 
       test('returns recommended moves for 1.c4', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1';
         final moves = OpeningBook.getRecommendedMoves(fen);
 
         expect(moves.isNotEmpty, true);
@@ -61,7 +64,8 @@ void main() {
       });
 
       test('returns true for 1.e4 position', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         expect(OpeningBook.isInBook(fen), true);
       });
 
@@ -81,19 +85,22 @@ void main() {
       });
 
       test('returns correct depth after first white move', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         final depth = OpeningBook.getBookDepth(fen);
         expect(depth, 1); // One half-move (ply)
       });
 
       test('returns correct depth after first black move', () {
-        const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2';
+        const fen =
+            'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2';
         final depth = OpeningBook.getBookDepth(fen);
         expect(depth, 2); // Two half-moves
       });
 
       test('returns correct depth for move 5', () {
-        const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 3';
+        const fen =
+            'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 3';
         final depth = OpeningBook.getBookDepth(fen);
         expect(depth >= 4, true); // At least 4 plies in
       });
@@ -107,7 +114,8 @@ void main() {
     group('_normalizeFen', () {
       test('normalizes FEN with different move counters', () {
         const fen1 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-        const fen2 = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 10';
+        const fen2 =
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5 10';
 
         final normalized1 = OpeningBook.getRecommendedMoves(fen1);
         final normalized2 = OpeningBook.getRecommendedMoves(fen2);
@@ -118,8 +126,10 @@ void main() {
 
     group('_areFenPositionsEquivalent', () {
       test('recognizes equivalent positions', () {
-        const fen1 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
-        const fen2 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 5 10';
+        const fen1 =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen2 =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 5 10';
 
         // Both should return same moves
         final moves1 = OpeningBook.getRecommendedMoves(fen1);
@@ -129,8 +139,10 @@ void main() {
       });
 
       test('distinguishes different positions', () {
-        const fen1 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
-        const fen2 = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1';
+        const fen1 =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen2 =
+            'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1';
 
         // Different positions might have different moves
         final moves1 = OpeningBook.getRecommendedMoves(fen1);
@@ -165,8 +177,7 @@ void main() {
 
         // Average should be total divided by positions
         expect(
-          (totalMoveEntries / totalPositions).abs() -
-                  averageMoveOptions.abs(),
+          (totalMoveEntries / totalPositions).abs() - averageMoveOptions.abs(),
           lessThan(0.01),
         );
       });
@@ -201,7 +212,8 @@ void main() {
       });
 
       test('has Queen\'s Gambit lines', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1';
         final moves = OpeningBook.getRecommendedMoves(fen);
 
         expect(moves.isNotEmpty, true);
@@ -221,14 +233,15 @@ void main() {
       });
 
       test('recommends strong openings for black', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         final moves = OpeningBook.getRecommendedMoves(fen);
 
         expect(moves.isNotEmpty, true);
         // Should include Sicilian, e5, etc.
         expect(
-          moves.any((m) =>
-              ['c7c5', 'e7e5', 'c7c6', 'd7d5', 'e7e6'].contains(m)),
+          moves
+              .any((m) => ['c7c5', 'e7e5', 'c7c6', 'd7d5', 'e7e6'].contains(m)),
           true,
         );
       });
@@ -243,7 +256,8 @@ void main() {
       });
 
       test('recommends Sicilian first for 1.e4', () {
-        const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const fen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         final moves = OpeningBook.getRecommendedMoves(fen);
 
         expect(moves[0], 'c7c5');

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 /// Service for managing and querying match history
 class MatchHistoryService {
@@ -28,7 +28,8 @@ class MatchHistoryService {
 
       final snapshot = await query.get();
       return snapshot.docs
-          .map((doc) => MatchRecord.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => MatchRecord.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw Exception('Failed to get match history: $e');
@@ -46,7 +47,8 @@ class MatchHistoryService {
         .map((snapshot) => snapshot.docs
             .map((doc) => MatchRecord.fromJson(doc.data()))
             .toList())
-        .handleError((e) => throw Exception('Failed to watch match history: $e'));
+        .handleError(
+            (e) => throw Exception('Failed to watch match history: $e'));
   }
 
   /// Filter matches by criteria
@@ -91,7 +93,8 @@ class MatchHistoryService {
 
       final snapshot = await query.get();
       return snapshot.docs
-          .map((doc) => MatchRecord.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => MatchRecord.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw Exception('Failed to filter matches: $e');
@@ -106,13 +109,13 @@ class MatchHistoryService {
       final buffer = StringBuffer();
 
       // CSV Header
-      buffer.writeln('Date,Opponent,Result,Rating Change,Time Control,Duration');
+      buffer
+          .writeln('Date,Opponent,Result,Rating Change,Time Control,Duration');
 
       // CSV Data
       for (final match in matches) {
         final ratingChange = match.playerRatingAfter - match.playerRatingBefore;
-        final durationStr =
-            match.duration != null ? '${match.duration}s' : '-';
+        final durationStr = match.duration != null ? '${match.duration}s' : '-';
 
         buffer.writeln(
           '${match.playedAt.toIso8601String()}'
@@ -184,10 +187,7 @@ class MatchHistoryService {
           .set(match.toJson());
 
       // Also record basic info in user stats for quick access
-      await _firestore
-          .collection('users')
-          .doc(match.playerId)
-          .update({
+      await _firestore.collection('users').doc(match.playerId).update({
         'gamesPlayed': FieldValue.increment(1),
         if (match.result == 'win') 'wins': FieldValue.increment(1),
         if (match.result == 'loss') 'losses': FieldValue.increment(1),

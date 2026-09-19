@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/chess_engine_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 void main() {
   group('AIOpponentEngineEnhanced', () {
@@ -311,7 +311,8 @@ void main() {
       });
 
       test('medium mode balances depth and speed', () {
-        final mediumEngine = AIOpponentEngineEnhanced(chess, AIDifficulty.medium);
+        final mediumEngine =
+            AIOpponentEngineEnhanced(chess, AIDifficulty.medium);
         final move = mediumEngine.getBestMove();
         expect(move, isNotNull);
       });

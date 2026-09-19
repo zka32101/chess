@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/providers/match_history_provider.dart';
-import 'package:chess/src/widgets/animations/chart_entrance_animation.dart';
+import 'package:chess_tactics_master/src/providers/match_history_provider.dart';
+import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
 
 /// Screen for displaying match history with filtering and pagination
 class MatchHistoryScreen extends ConsumerWidget {
@@ -144,9 +144,8 @@ class MatchHistoryScreen extends ConsumerWidget {
 
   Widget _buildMatchCard(BuildContext context, dynamic match) {
     final ratingChange = match.playerRatingAfter - match.playerRatingBefore;
-    final ratingChangeText = ratingChange >= 0
-        ? '+$ratingChange'
-        : '$ratingChange';
+    final ratingChangeText =
+        ratingChange >= 0 ? '+$ratingChange' : '$ratingChange';
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -203,9 +202,8 @@ class MatchHistoryScreen extends ConsumerWidget {
                     Text(
                       ratingChangeText,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: ratingChange >= 0
-                                ? Colors.green
-                                : Colors.red,
+                            color:
+                                ratingChange >= 0 ? Colors.green : Colors.red,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -286,11 +284,13 @@ class MatchHistoryScreen extends ConsumerWidget {
                   isExpanded: true,
                   items: [
                     const DropdownMenuItem(value: null, child: Text('すべて')),
-                    const DropdownMenuItem(value: 'bullet', child: Text('バレット')),
+                    const DropdownMenuItem(
+                        value: 'bullet', child: Text('バレット')),
                     const DropdownMenuItem(value: 'blitz', child: Text('ブリッツ')),
                     const DropdownMenuItem(value: 'rapid', child: Text('ラピッド')),
                   ],
-                  onChanged: (value) => setState(() => selectedTimeControl = value),
+                  onChanged: (value) =>
+                      setState(() => selectedTimeControl = value),
                 ),
               ],
             ),

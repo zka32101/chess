@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/providers/comparison_provider.dart';
-import 'package:chess/src/models/head_to_head_stats.dart';
-import 'package:chess/src/widgets/animations/chart_entrance_animation.dart';
+import 'package:chess_tactics_master/src/providers/comparison_provider.dart';
+import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
+import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
 
 /// Screen for displaying player-to-player comparison
 class PlayerComparisonScreen extends ConsumerWidget {
@@ -385,9 +385,10 @@ class PlayerComparisonScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           match.timeControl,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey,
+                                  ),
                         ),
                       ],
                     ),

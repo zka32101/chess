@@ -1,9 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:logger/logger.dart';
-import 'package:chess/src/models/game_history.dart';
-import 'package:chess/src/services/game_history_service.dart';
-import 'package:chess/src/services/firebase_game_history_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/game_history.dart';
+import 'package:chess_tactics_master/src/services/game_history_service.dart';
+import 'package:chess_tactics_master/src/services/firebase_game_history_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Hybrid service combining local and cloud storage with automatic sync
 ///
@@ -101,7 +101,8 @@ class HybridGameHistoryService implements GameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesByDifficulty(AIDifficulty difficulty) async {
+  Future<List<GameRecord>> loadGamesByDifficulty(
+      AIDifficulty difficulty) async {
     try {
       if (!_isOnline) {
         return _local.loadGamesByDifficulty(difficulty);
@@ -120,7 +121,8 @@ class HybridGameHistoryService implements GameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesBetween(DateTime start, DateTime end) async {
+  Future<List<GameRecord>> loadGamesBetween(
+      DateTime start, DateTime end) async {
     try {
       if (!_isOnline) {
         return _local.loadGamesBetween(start, end);
@@ -245,9 +247,7 @@ class HybridGameHistoryService implements GameHistoryService {
   Future<List<GameRecord>> getPendingSync() async {
     try {
       final allGames = await _local.loadAllGames();
-      return allGames
-          .where((game) => _shouldSyncGame(game.gameId))
-          .toList();
+      return allGames.where((game) => _shouldSyncGame(game.gameId)).toList();
     } catch (e) {
       _logger.e('Error getting pending sync: $e');
       return [];

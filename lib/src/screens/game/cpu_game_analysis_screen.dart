@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
-import 'package:chess/src/services/chess_engine_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
-import 'package:chess/src/widgets/game_analysis_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/widgets/game_analysis_bar.dart';
 import 'package:chess/chess.dart' as chess_lib;
 
 /// CPU Game Screen with Integrated Analysis
@@ -141,7 +141,8 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('CPU vs Player'),
-        subtitle: Text('${widget.difficulty.displayName} - ${_getMoveCount()} moves'),
+        subtitle:
+            Text('${widget.difficulty.displayName} - ${_getMoveCount()} moves'),
       ),
       body: Column(
         children: [
@@ -322,11 +323,9 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
               '${index + 1}. ${move.notation}',
               style: Theme.of(context).textTheme.labelSmall,
             ),
-            backgroundColor:
-                isAI ? Colors.blue[100] : Colors.grey[300],
+            backgroundColor: isAI ? Colors.blue[100] : Colors.grey[300],
             avatar: CircleAvatar(
-              backgroundColor:
-                  isAI ? Colors.blue : Colors.grey,
+              backgroundColor: isAI ? Colors.blue : Colors.grey,
               child: Text(
                 isAI ? 'AI' : 'P',
                 style: const TextStyle(
@@ -361,8 +360,15 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
                     'Performance Metrics',
                     [
                       ('Search Depth', '${lastEngineStats['depth']}'),
-                      ('Nodes Evaluated', _formatNumber(lastEngineStats['nodesEvaluated'] as int? ?? 0)),
-                      ('Difficulty', lastEngineStats['difficulty'] as String? ?? 'N/A'),
+                      (
+                        'Nodes Evaluated',
+                        _formatNumber(
+                            lastEngineStats['nodesEvaluated'] as int? ?? 0)
+                      ),
+                      (
+                        'Difficulty',
+                        lastEngineStats['difficulty'] as String? ?? 'N/A'
+                      ),
                     ],
                   ),
                 ),
@@ -375,9 +381,19 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
                   child: _buildAnalysisSection(
                     'Cache Performance',
                     [
-                      ('Zobrist Hits', (lastEngineStats['zobristHits'] as int? ?? 0).toString()),
-                      ('Zobrist Misses', (lastEngineStats['zobristMisses'] as int? ?? 0).toString()),
-                      ('Hit Rate', '${lastEngineStats['zobristHitRate'] as String? ?? '0.0'}%'),
+                      (
+                        'Zobrist Hits',
+                        (lastEngineStats['zobristHits'] as int? ?? 0).toString()
+                      ),
+                      (
+                        'Zobrist Misses',
+                        (lastEngineStats['zobristMisses'] as int? ?? 0)
+                            .toString()
+                      ),
+                      (
+                        'Hit Rate',
+                        '${lastEngineStats['zobristHitRate'] as String? ?? '0.0'}%'
+                      ),
                     ],
                   ),
                 ),
@@ -390,8 +406,14 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
                   child: _buildAnalysisSection(
                     'Heuristic Effectiveness',
                     [
-                      ('Killer Cutoffs', '${(lastEngineStats['killerStats'] as Map?)['totalCutoffs'] ?? 0}'),
-                      ('Countermove Cutoffs', '${(lastEngineStats['countermoveStats'] as Map?)['totalCutoffs'] ?? 0}'),
+                      (
+                        'Killer Cutoffs',
+                        '${(lastEngineStats['killerStats'] as Map?)['totalCutoffs'] ?? 0}'
+                      ),
+                      (
+                        'Countermove Cutoffs',
+                        '${(lastEngineStats['countermoveStats'] as Map?)['totalCutoffs'] ?? 0}'
+                      ),
                       ('Adaptive Settings', widget.difficulty.displayName),
                     ],
                   ),
@@ -428,20 +450,20 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
         ),
         const SizedBox(height: 8),
         ...items.map((item) => Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(item.$1, style: Theme.of(context).textTheme.bodySmall),
-              Text(
-                item.$2,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(item.$1, style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    item.$2,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        )),
+            )),
       ],
     );
   }
@@ -570,7 +592,8 @@ class GameAnalysisRecorder {
     print('Total moves: ${moves.length}');
     print('AI moves: $aiMoveCount');
     print('Total time: ${totalTimeMs}ms');
-    print('Average time per AI move: ${(totalTimeMs / aiMoveCount).toStringAsFixed(0)}ms');
+    print(
+        'Average time per AI move: ${(totalTimeMs / aiMoveCount).toStringAsFixed(0)}ms');
   }
 }
 

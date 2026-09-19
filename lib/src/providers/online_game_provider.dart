@@ -1,9 +1,9 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/services/matchmaking_service.dart';
-import 'package:chess/src/services/online_game_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/services/matchmaking_service.dart';
+import 'package:chess_tactics_master/src/services/online_game_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Provider for Firebase Auth state
 final firebaseAuthProvider = StreamProvider<User?>((ref) {
@@ -48,8 +48,7 @@ final userActiveGamesProvider = FutureProvider<List<OnlineGame>>((ref) async {
 });
 
 /// Provider for current user's recent games
-final userRecentGamesProvider =
-    FutureProvider<List<OnlineGame>>((ref) async {
+final userRecentGamesProvider = FutureProvider<List<OnlineGame>>((ref) async {
   final authState = ref.watch(firebaseAuthProvider);
   final service = ref.watch(onlineGameServiceProvider);
 

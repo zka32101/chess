@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/chess_engine_service.dart';
-import 'package:chess/src/services/ai_opponent_engine.dart';
-import 'package:chess/src/services/iterative_deepening.dart';
+import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
+import 'package:chess_tactics_master/src/services/iterative_deepening.dart';
 
 void main() {
   group('IterativeDeepeningEngine', () {
@@ -62,7 +62,8 @@ void main() {
         final result1 = await engine.getBestMove(timeLimit: 50);
         final result2 = await engine.getBestMove(timeLimit: 500);
 
-        expect(result2.depthReached, greaterThanOrEqualTo(result1.depthReached));
+        expect(
+            result2.depthReached, greaterThanOrEqualTo(result1.depthReached));
       });
 
       test('handles single legal move', () async {
@@ -107,7 +108,8 @@ void main() {
 
         // Deeper search should find better moves (higher score magnitude)
         // or search more nodes
-        expect(result2.nodesEvaluated, greaterThanOrEqualTo(result1.nodesEvaluated));
+        expect(result2.nodesEvaluated,
+            greaterThanOrEqualTo(result1.nodesEvaluated));
       });
 
       test('each iteration produces a valid move', () async {

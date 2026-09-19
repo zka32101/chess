@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/player_connection_service.dart';
 import '../services/leaderboard_service.dart';
@@ -95,9 +95,8 @@ final playerPercentileProvider =
 });
 
 /// Get time-based leaderboard (daily, weekly, monthly)
-final timeBasedLeaderboardProvider = FutureProvider.family<
-    List<LeaderboardEntry>,
-    String>((ref, period) {
+final timeBasedLeaderboardProvider =
+    FutureProvider.family<List<LeaderboardEntry>, String>((ref, period) {
   final service = ref.watch(leaderboardServiceProvider);
   return service.getTimeBasedLeaderboard(period);
 });
@@ -146,17 +145,16 @@ final nearbyAchievementsProvider =
 // State Management Providers
 
 /// State notifier for friend request operations
-final friendRequestNotifierProvider = StateNotifierProvider<
-    FriendRequestNotifier,
-    FriendRequestState>((ref) {
+final friendRequestNotifierProvider =
+    StateNotifierProvider<FriendRequestNotifier, FriendRequestState>((ref) {
   final service = ref.watch(playerConnectionServiceProvider);
   return FriendRequestNotifier(service);
 });
 
 /// State notifier for achievement unlocks
-final achievementUnlockNotifierProvider = StateNotifierProvider<
-    AchievementUnlockNotifier,
-    AchievementUnlockState>((ref) {
+final achievementUnlockNotifierProvider =
+    StateNotifierProvider<AchievementUnlockNotifier, AchievementUnlockState>(
+        (ref) {
   final service = ref.watch(achievementServiceProvider);
   return AchievementUnlockNotifier(service);
 });
@@ -166,8 +164,7 @@ final achievementUnlockNotifierProvider = StateNotifierProvider<
 class FriendRequestNotifier extends StateNotifier<FriendRequestState> {
   final PlayerConnectionService _service;
 
-  FriendRequestNotifier(this._service)
-      : super(const FriendRequestState());
+  FriendRequestNotifier(this._service) : super(const FriendRequestState());
 
   Future<void> sendFriendRequest({
     required String fromPlayerId,

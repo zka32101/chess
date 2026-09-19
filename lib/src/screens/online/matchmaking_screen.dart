@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/providers/online_game_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
 
 /// Screen for matchmaking queue management
 class MatchmakingScreen extends ConsumerStatefulWidget {
@@ -258,7 +258,8 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
             ),
             const Divider(),
             const SizedBox(height: 8),
-            const Text('By Time Control:', style: TextStyle(fontWeight: FontWeight.w500)),
+            const Text('By Time Control:',
+                style: TextStyle(fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
             ...((stats['byTimeControl'] as Map<String, dynamic>?) ?? {})
                 .entries

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/screens/analytics/match_history_screen.dart';
+import 'package:chess_tactics_master/src/screens/analytics/match_history_screen.dart';
 
 void main() {
   group('MatchHistoryScreen', () {
@@ -78,7 +78,8 @@ void main() {
       expect(find.byType(Column), findsWidgets);
     });
 
-    testWidgets('displays empty state when no matches', (WidgetTester tester) async {
+    testWidgets('displays empty state when no matches',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(

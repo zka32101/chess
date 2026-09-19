@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/widgets/indicators/win_rate_progress_bar.dart';
+import 'package:chess_tactics_master/src/widgets/indicators/win_rate_progress_bar.dart';
 
 void main() {
   group('WinRateProgressBar', () {
@@ -20,7 +20,8 @@ void main() {
       expect(find.text('75%'), findsOneWidget);
     });
 
-    testWidgets('displays correct progress bar value', (WidgetTester tester) async {
+    testWidgets('displays correct progress bar value',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -35,7 +36,8 @@ void main() {
       expect(find.byType(LinearProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('displays high percentage color (green)', (WidgetTester tester) async {
+    testWidgets('displays high percentage color (green)',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

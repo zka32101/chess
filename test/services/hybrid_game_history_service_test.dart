@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/models/game_history.dart';
-import 'package:chess/src/services/game_history_service.dart';
-import 'package:chess/src/services/hybrid_game_history_service.dart';
-import 'package:chess/src/services/firebase_game_history_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/game_history.dart';
+import 'package:chess_tactics_master/src/services/game_history_service.dart';
+import 'package:chess_tactics_master/src/services/hybrid_game_history_service.dart';
+import 'package:chess_tactics_master/src/services/firebase_game_history_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 // Mock implementations
 class MockLocalGameHistoryService implements LocalGameHistoryService {
@@ -21,15 +21,15 @@ class MockLocalGameHistoryService implements LocalGameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesByDifficulty(AIDifficulty difficulty) async {
-    return _games.values
-        .where((g) => g.difficulty == difficulty)
-        .toList()
+  Future<List<GameRecord>> loadGamesByDifficulty(
+      AIDifficulty difficulty) async {
+    return _games.values.where((g) => g.difficulty == difficulty).toList()
       ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
   }
 
   @override
-  Future<List<GameRecord>> loadGamesBetween(DateTime start, DateTime end) async {
+  Future<List<GameRecord>> loadGamesBetween(
+      DateTime start, DateTime end) async {
     return _games.values
         .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
         .toList()
@@ -85,16 +85,16 @@ class MockFirebaseGameHistoryService implements FirebaseGameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesByDifficulty(AIDifficulty difficulty) async {
+  Future<List<GameRecord>> loadGamesByDifficulty(
+      AIDifficulty difficulty) async {
     if (shouldFail) throw Exception('Firebase error');
-    return _games.values
-        .where((g) => g.difficulty == difficulty)
-        .toList()
+    return _games.values.where((g) => g.difficulty == difficulty).toList()
       ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
   }
 
   @override
-  Future<List<GameRecord>> loadGamesBetween(DateTime start, DateTime end) async {
+  Future<List<GameRecord>> loadGamesBetween(
+      DateTime start, DateTime end) async {
     if (shouldFail) throw Exception('Firebase error');
     return _games.values
         .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
@@ -136,7 +136,8 @@ class MockFirebaseGameHistoryService implements FirebaseGameHistoryService {
   }
 
   @override
-  Future<int> syncLocalGames(List<GameRecord> localGames) async => localGames.length;
+  Future<int> syncLocalGames(List<GameRecord> localGames) async =>
+      localGames.length;
 
   @override
   Future<String> exportGamesAsJson() async => '{}';

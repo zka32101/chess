@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/security_service.dart';
+import 'package:chess_tactics_master/src/services/security_service.dart';
 
 void main() {
   group('SecurityService', () {
@@ -12,7 +12,8 @@ void main() {
     group('Authorization Tests', () {
       test('UnauthorizedException has correct message', () {
         // Arrange
-        const message = 'Cannot enable 2FA for other users. Only account owner or admin allowed.';
+        const message =
+            'Cannot enable 2FA for other users. Only account owner or admin allowed.';
         final exception = UnauthorizedException(message);
 
         // Act & Assert
@@ -23,7 +24,8 @@ void main() {
       test('Authorization check requires proper permissions', () {
         // This test verifies the authorization pattern is in place
         // Actual Firestore calls are tested via integration tests
-        final authError = UnauthorizedException('Only account owner or admin can request data operations');
+        final authError = UnauthorizedException(
+            'Only account owner or admin can request data operations');
         expect(authError.message, isNotEmpty);
       });
     });

@@ -1,5 +1,5 @@
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/ai_opponent_engine.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
 
 /// State of a CPU game
 class CpuGameState {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/providers/online_game_provider.dart';
-import 'package:chess/src/providers/auth_provider.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
+import 'package:chess_tactics_master/src/providers/auth_provider.dart';
 
 /// Displays the result of a completed online game
 class OnlineGameResultScreen extends ConsumerWidget {
@@ -46,8 +46,9 @@ class OnlineGameResultScreen extends ConsumerWidget {
   Widget _buildResultHeader(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider).value;
     final isCurrentUserWhite = game.whitePlayerId == user?.uid;
-    final currentPlayerWon = (isCurrentUserWhite && game.result == 'white_win') ||
-        (!isCurrentUserWhite && game.result == 'black_win');
+    final currentPlayerWon =
+        (isCurrentUserWhite && game.result == 'white_win') ||
+            (!isCurrentUserWhite && game.result == 'black_win');
     final isDraw = game.result == 'draw';
 
     final backgroundColor = currentPlayerWon

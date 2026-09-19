@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/heuristic_aging.dart';
+import 'package:chess_tactics_master/src/services/heuristic_aging.dart';
 
 void main() {
   group('AgedKillerMoveHeuristic', () {
@@ -292,15 +292,13 @@ void main() {
 
       test('returns recommended moves for known position', () {
         final moves = ExtendedOpeningBook.getRecommendedMoves(
-          'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR'
-        );
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR');
         expect(moves.isNotEmpty, true);
       });
 
       test('returns empty for unknown position', () {
         final moves = ExtendedOpeningBook.getRecommendedMoves(
-          'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-        );
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
         expect(moves.isEmpty, true);
       });
     });
@@ -308,15 +306,13 @@ void main() {
     group('position detection', () {
       test('recognizes positions in book', () {
         final inBook = ExtendedOpeningBook.isInBook(
-          'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR'
-        );
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR');
         expect(inBook, true);
       });
 
       test('rejects unknown positions', () {
         final inBook = ExtendedOpeningBook.isInBook(
-          'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-        );
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
         expect(inBook, false);
       });
     });
@@ -324,15 +320,13 @@ void main() {
     group('book depth', () {
       test('returns 0 for positions not in book', () {
         final depth = ExtendedOpeningBook.getBookDepth(
-          'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-        );
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
         expect(depth, equals(0));
       });
 
       test('returns positive depth for book positions', () {
         final depth = ExtendedOpeningBook.getBookDepth(
-          'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR'
-        );
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR');
         expect(depth, greaterThanOrEqualTo(0));
       });
     });
@@ -376,10 +370,12 @@ void main() {
 
       test('clamps difficulty to valid range', () {
         manager.setDifficulty(-1);
-        expect(manager.getAdaptiveKillerLimit(), equals(2)); // Clamped to medium
+        expect(
+            manager.getAdaptiveKillerLimit(), equals(2)); // Clamped to medium
 
         manager.setDifficulty(5);
-        expect(manager.getAdaptiveKillerLimit(), equals(3)); // Clamped to hard (with time)
+        expect(manager.getAdaptiveKillerLimit(),
+            equals(3)); // Clamped to hard (with time)
       });
     });
 

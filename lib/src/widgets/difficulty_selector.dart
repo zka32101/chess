@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chess/src/services/ai_opponent_engine.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
 
 /// Widget for selecting AI difficulty level
 class DifficultySelector extends StatefulWidget {
@@ -40,7 +40,8 @@ class _DifficultySelectorState extends State<DifficultySelector> {
           ),
           ...AIDifficulty.values.map((difficulty) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Card(
                 child: ListTile(
                   title: Text(difficulty.displayName),

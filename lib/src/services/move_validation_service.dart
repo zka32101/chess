@@ -44,7 +44,7 @@ class MoveValidationService {
       }
 
       // Validate pawn promotion
-      if (piece.type == chess_lib.PieceType.pawn) {
+      if (piece.type == chess_lib.PieceType.PAWN) {
         final destinationRank = int.parse(to[1]);
         if ((destinationRank == 8 && piece.color == chess_lib.Color.WHITE) ||
             (destinationRank == 1 && piece.color == chess_lib.Color.BLACK)) {
@@ -60,17 +60,13 @@ class MoveValidationService {
 
       // Check move is legal
       try {
-        final move = chess_lib.Move(
-          fromAlgebraic: from,
-          toAlgebraic: to,
-          promotion: promotion,
-        );
-
-        final legalMoves = chess.moves() as List<chess_lib.Move>;
+        final legalMoves =
+            chess.moves({'asObjects': true}).cast<chess_lib.Move>();
         final isLegal = legalMoves.any((m) =>
-            m.fromAlgebraic == move.fromAlgebraic &&
-            m.toAlgebraic == move.toAlgebraic &&
-            (promotion == null || m.promotion == promotion));
+            m.fromAlgebraic == from &&
+            m.toAlgebraic == to &&
+            (promotion == null ||
+                m.promotion?.name == promotion.toLowerCase()));
 
         if (!isLegal) {
           return MoveValidationResult(
@@ -107,25 +103,25 @@ class MoveValidationService {
         return [];
       }
 
-      final legalMoves = chess.moves() as List<chess_lib.Move>;
-      final movesFromSquare = legalMoves
-          .where((move) => move.fromAlgebraic == fromSquare)
-          .toList();
+      final legalMoves =
+          chess.moves({'asObjects': true}).cast<chess_lib.Move>();
+      final movesFromSquare =
+          legalMoves.where((move) => move.fromAlgebraic == fromSquare).toList();
 
       return movesFromSquare.map((move) {
         // Check if move gives check
         chess.move(move);
-        final givesCheck = chess.in_check();
-        final gameEnds = chess.game_over();
+        final givesCheck = chess.in_check;
+        final isCheckmate = chess.game_over && chess.in_checkmate;
         chess.undo_move();
 
         return LegalMove(
           from: move.fromAlgebraic,
           to: move.toAlgebraic,
-          promotion: move.promotion,
+          promotion: move.promotion?.name,
           isCheck: givesCheck,
-          isCheckmate: gameEnds && chess.in_checkmate(),
-          isCapture: move.flags.contains('c'),
+          isCheckmate: isCheckmate,
+          isCapture: (move.flags & chess_lib.Chess.BITS_CAPTURE) != 0,
         );
       }).toList();
     } catch (e) {
@@ -136,7 +132,8 @@ class MoveValidationService {
   /// Analyze a position for tactical patterns
   static PositionAnalysis analyzePosition(chess_lib.Chess chess) {
     try {
-      final legalMoves = chess.moves() as List<chess_lib.Move>;
+      final legalMoves =
+          chess.moves({'asObjects': true}).cast<chess_lib.Move>();
       var checkMovesCount = 0;
       var captureMovesCount = 0;
       var checkMateMovesCount = 0;
@@ -144,16 +141,16 @@ class MoveValidationService {
       for (final move in legalMoves) {
         chess.move(move);
 
-        if (chess.in_checkmate()) {
+        if (chess.in_checkmate) {
           checkMateMovesCount++;
-        } else if (chess.in_check()) {
+        } else if (chess.in_check) {
           checkMovesCount++;
         }
 
         chess.undo_move();
 
         // Count captures
-        if (move.flags.contains('c')) {
+        if ((move.flags & chess_lib.Chess.BITS_CAPTURE) != 0) {
           captureMovesCount++;
         }
       }
@@ -166,9 +163,9 @@ class MoveValidationService {
         checkMovesAvailable: checkMovesCount > 0,
         captureMovesAvailable: captureMovesCount > 0,
         checkMateMovesAvailable: checkMateMovesCount > 0,
-        isCheck: chess.in_check(),
-        isStalemate: chess.in_stalemate(),
-        isCheckmate: chess.in_checkmate(),
+        isCheck: chess.in_check,
+        isStalemate: chess.in_stalemate,
+        isCheckmate: chess.in_checkmate,
         isEndgame: isEndgame,
         whiteMaterial: material['white']!,
         blackMaterial: material['black']!,
@@ -204,9 +201,7 @@ class MoveValidationService {
   /// Helper: Get piece at square
   static chess_lib.Piece? _getPieceAt(chess_lib.Chess chess, String square) {
     try {
-      final rank = 8 - int.parse(square[1]);
-      final file = square.codeUnitAt(0) - 'a'.codeUnitAt(0);
-      return chess.board[rank][file];
+      return chess.get(square);
     } catch (e) {
       return null;
     }
@@ -226,9 +221,10 @@ class MoveValidationService {
     var whiteMaterial = 0;
     var blackMaterial = 0;
 
-    for (int rank = 0; rank < 8; rank++) {
-      for (int file = 0; file < 8; file++) {
-        final piece = chess.board[rank][file];
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    for (final file in files) {
+      for (var rank = 1; rank <= 8; rank++) {
+        final piece = chess.get('$file$rank');
         if (piece != null) {
           final value = pieceValues[piece.type.name] ?? 0;
           if (piece.color == chess_lib.Color.WHITE) {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/providers/performance_analytics_provider.dart';
-import 'package:chess/src/widgets/charts/rating_progression_chart.dart';
-import 'package:chess/src/widgets/charts/performance_breakdown_chart.dart';
-import 'package:chess/src/widgets/indicators/streak_indicator.dart';
-import 'package:chess/src/widgets/animations/chart_entrance_animation.dart';
+import 'package:chess_tactics_master/src/providers/performance_analytics_provider.dart';
+import 'package:chess_tactics_master/src/widgets/charts/rating_progression_chart.dart';
+import 'package:chess_tactics_master/src/widgets/charts/performance_breakdown_chart.dart';
+import 'package:chess_tactics_master/src/widgets/indicators/streak_indicator.dart';
+import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
 
 /// Screen for displaying performance analytics and trends
 class PerformanceAnalyticsScreen extends ConsumerWidget {

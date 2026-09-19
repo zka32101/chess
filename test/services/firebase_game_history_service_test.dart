@@ -2,17 +2,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:chess/src/models/game_history.dart';
-import 'package:chess/src/services/firebase_game_history_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/game_history.dart';
+import 'package:chess_tactics_master/src/services/firebase_game_history_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 // Mock classes
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
-class MockQuerySnapshot extends Mock implements QuerySnapshot<Map<String, dynamic>> {}
-class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
+
+class MockCollectionReference extends Mock
+    implements CollectionReference<Map<String, dynamic>> {}
+
+class MockDocumentReference extends Mock
+    implements DocumentReference<Map<String, dynamic>> {}
+
+class MockQuerySnapshot extends Mock
+    implements QuerySnapshot<Map<String, dynamic>> {}
+
+class MockDocumentSnapshot extends Mock
+    implements DocumentSnapshot<Map<String, dynamic>> {}
+
 class MockUser extends Mock implements User {}
 
 void main() {
@@ -228,7 +238,8 @@ void main() {
           ),
         ];
 
-        final mediumGames = allGames.where((g) => g.difficulty == AIDifficulty.medium).toList();
+        final mediumGames =
+            allGames.where((g) => g.difficulty == AIDifficulty.medium).toList();
         expect(mediumGames.length, 1);
         expect(mediumGames[0].difficulty, AIDifficulty.medium);
       });
@@ -284,7 +295,8 @@ void main() {
           ),
         ];
 
-        expect(games.where((g) => g.difficulty == AIDifficulty.medium).length, 1);
+        expect(
+            games.where((g) => g.difficulty == AIDifficulty.medium).length, 1);
       });
 
       test('filters hard games correctly', () async {
@@ -316,7 +328,8 @@ void main() {
 
       test('returns empty list for difficulty with no games', () async {
         final games = <GameRecord>[];
-        final hardGames = games.where((g) => g.difficulty == AIDifficulty.hard).toList();
+        final hardGames =
+            games.where((g) => g.difficulty == AIDifficulty.hard).toList();
         expect(hardGames, isEmpty);
       });
     });
@@ -349,7 +362,9 @@ void main() {
           ),
         ];
 
-        final filtered = games.where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end)).toList();
+        final filtered = games
+            .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
+            .toList();
         expect(filtered.length, 1);
       });
 
@@ -380,7 +395,9 @@ void main() {
           ),
         ];
 
-        final filtered = games.where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end)).toList();
+        final filtered = games
+            .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
+            .toList();
         expect(filtered, isEmpty);
       });
 
@@ -857,11 +874,12 @@ void main() {
           ),
         ];
 
-        final todaysGames = games.where((g) =>
-          g.playedAt.year == today.year &&
-          g.playedAt.month == today.month &&
-          g.playedAt.day == today.day
-        ).toList();
+        final todaysGames = games
+            .where((g) =>
+                g.playedAt.year == today.year &&
+                g.playedAt.month == today.month &&
+                g.playedAt.day == today.day)
+            .toList();
 
         expect(todaysGames.length, 1);
         expect(todaysGames[0].gameId, 'today-1');
@@ -893,8 +911,11 @@ void main() {
 
         // Calculate average performance metrics
         final avgNodesPerSec = games.isNotEmpty
-          ? games.map((g) => g.statistics.avgNodesPerSec).reduce((a, b) => a + b) / games.length
-          : 0;
+            ? games
+                    .map((g) => g.statistics.avgNodesPerSec)
+                    .reduce((a, b) => a + b) /
+                games.length
+            : 0;
 
         expect(avgNodesPerSec, greaterThan(0));
       });

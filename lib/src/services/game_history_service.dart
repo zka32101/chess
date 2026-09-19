@@ -1,5 +1,5 @@
-import 'package:chess/src/models/game_history.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/game_history.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Service for managing game history and statistics
 ///
@@ -44,15 +44,15 @@ class LocalGameHistoryService implements GameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesByDifficulty(AIDifficulty difficulty) async {
-    return _games.values
-        .where((g) => g.difficulty == difficulty)
-        .toList()
+  Future<List<GameRecord>> loadGamesByDifficulty(
+      AIDifficulty difficulty) async {
+    return _games.values.where((g) => g.difficulty == difficulty).toList()
       ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
   }
 
   @override
-  Future<List<GameRecord>> loadGamesBetween(DateTime start, DateTime end) async {
+  Future<List<GameRecord>> loadGamesBetween(
+      DateTime start, DateTime end) async {
     return _games.values
         .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
         .toList()
@@ -272,9 +272,11 @@ class GameAnalyzer {
     // Insight 1: Overall performance
     if (overall['totalGames'] >= 5) {
       if (overall['winRate'] > 0.6) {
-        insights.add('Excellent performance with ${(overall["winRate"] * 100).toStringAsFixed(0)}% win rate');
+        insights.add(
+            'Excellent performance with ${(overall["winRate"] * 100).toStringAsFixed(0)}% win rate');
       } else if (overall['winRate'] > 0.4) {
-        insights.add('Good balanced play with ${(overall["winRate"] * 100).toStringAsFixed(0)}% win rate');
+        insights.add(
+            'Good balanced play with ${(overall["winRate"] * 100).toStringAsFixed(0)}% win rate');
       } else {
         insights.add('Learning opportunities at lower win rate');
       }
@@ -282,7 +284,8 @@ class GameAnalyzer {
 
     // Insight 2: Trend
     if (trend.containsKey('trend') && trend['trend'] == 'improving') {
-      insights.add('Performance trending upward: ${trend["nodeImprovement"]}% improvement');
+      insights.add(
+          'Performance trending upward: ${trend["nodeImprovement"]}% improvement');
     }
 
     // Insight 3: Cache efficiency

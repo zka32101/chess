@@ -1,10 +1,10 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/paywall_service.dart';
 
 /// Current subscription provider
-final currentSubscriptionProvider = StateNotifierProvider<
-    SubscriptionNotifier,
-    AsyncValue<Subscription?>>((ref) {
+final currentSubscriptionProvider =
+    StateNotifierProvider<SubscriptionNotifier, AsyncValue<Subscription?>>(
+        (ref) {
   return SubscriptionNotifier();
 });
 
@@ -110,19 +110,23 @@ final premiumFeaturesProvider = Provider((ref) {
 });
 
 /// Feature availability provider
-final featureAvailabilityProvider = Provider.family<bool, String>((ref, featureId) {
+final featureAvailabilityProvider =
+    Provider.family<bool, String>((ref, featureId) {
   final paywallService = PaywallService();
   return paywallService.isFeatureAvailable(featureId);
 });
 
 /// Subscription price provider
-final subscriptionPriceProvider = Provider.family<double, (SubscriptionType, SubscriptionPeriod)>((ref, params) {
+final subscriptionPriceProvider =
+    Provider.family<double, (SubscriptionType, SubscriptionPeriod)>(
+        (ref, params) {
   final paywallService = PaywallService();
   return paywallService.getPrice(params.$1, params.$2);
 });
 
 /// Features for tier provider
-final featuresForTierProvider = Provider.family<List<PremiumFeature>, SubscriptionType>((ref, tier) {
+final featuresForTierProvider =
+    Provider.family<List<PremiumFeature>, SubscriptionType>((ref, tier) {
   final paywallService = PaywallService();
   return paywallService.getFeaturesForTier(tier);
 });

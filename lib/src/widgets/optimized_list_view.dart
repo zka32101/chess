@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Optimized list view with virtual scrolling and lazy loading
 /// Handles large lists efficiently by rendering only visible items

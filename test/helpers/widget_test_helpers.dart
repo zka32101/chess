@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 import 'dart:math';
 
 /// Custom finder for chess-specific widgets
@@ -13,21 +13,25 @@ class ChessWidgetFinders {
   /// Find game status badge
   static Finder findGameStatusBadge(String status) {
     return find.byWidgetPredicate((widget) =>
-        widget is Chip && (widget.label as Text?)?.data?.contains(status) ?? false);
+        widget is Chip && (widget.label as Text?)?.data?.contains(status) ??
+        false);
   }
 
   /// Find game card by opponent name
   static Finder findGameCard(String opponentName) {
     return find.byWidgetPredicate((widget) =>
         widget is Card &&
-        find.descendant(of: find.byWidget(widget), matching: find.text(opponentName))
+        find
+            .descendant(
+                of: find.byWidget(widget), matching: find.text(opponentName))
             .evaluate()
             .isNotEmpty);
   }
 
   /// Find rating display widget
   static Finder findRatingWidget() {
-    return find.byWidgetPredicate((widget) => widget is Text && (widget.data ?? '').contains('Rating'));
+    return find.byWidgetPredicate(
+        (widget) => widget is Text && (widget.data ?? '').contains('Rating'));
   }
 
   /// Find loading indicator
@@ -45,7 +49,8 @@ class ChessWidgetFinders {
 /// Extension methods for WidgetTester
 extension WidgetTesterX on WidgetTester {
   /// Pump and settle with custom timeout
-  Future<void> pumpAndSettleWithTimeout({Duration timeout = const Duration(seconds: 2)}) async {
+  Future<void> pumpAndSettleWithTimeout(
+      {Duration timeout = const Duration(seconds: 2)}) async {
     return pumpAndSettle(timeout);
   }
 
@@ -74,7 +79,8 @@ extension WidgetTesterX on WidgetTester {
   }
 
   /// Scroll to find a widget
-  Future<void> scrollToFind(Finder finder, {Axis scrollDirection = Axis.vertical}) async {
+  Future<void> scrollToFind(Finder finder,
+      {Axis scrollDirection = Axis.vertical}) async {
     while (!finder.evaluate().isNotEmpty) {
       if (scrollDirection == Axis.vertical) {
         await scroll(find.byType(SingleChildScrollView).first, 0, -300);
@@ -137,7 +143,9 @@ class MockDataGenerator {
       blackRating: 1650 + _random.nextInt(400),
       status: status,
       pgn: pgn ?? 'e4 c5 Nf3 d6 d4 cxd4 Nxd4',
-      result: status == 'completed' ? ['1-0', '0-1', '1/2-1/2'][_random.nextInt(3)] : null,
+      result: status == 'completed'
+          ? ['1-0', '0-1', '1/2-1/2'][_random.nextInt(3)]
+          : null,
       createdAt: DateTime.now().subtract(Duration(hours: _random.nextInt(24))),
       updatedAt: DateTime.now(),
       timeControl: '5+3',
@@ -165,7 +173,8 @@ class MockDataGenerator {
       'wins': _random.nextInt(250),
       'losses': _random.nextInt(250),
       'draws': _random.nextInt(100),
-      'createdAt': DateTime.now().subtract(Duration(days: _random.nextInt(365))),
+      'createdAt':
+          DateTime.now().subtract(Duration(days: _random.nextInt(365))),
     };
   }
 
@@ -221,76 +230,76 @@ class TestScenario {
 
   /// Scenario with no games
   static TestScenario noGames() => TestScenario(
-    name: 'No Active Games',
-    games: [],
-    currentUser: MockDataGenerator.mockUser(),
-  );
+        name: 'No Active Games',
+        games: [],
+        currentUser: MockDataGenerator.mockUser(),
+      );
 
   /// Scenario with one active game
   static TestScenario singleGame() => TestScenario(
-    name: 'Single Active Game',
-    games: [MockDataGenerator.mockGame(status: 'active')],
-    currentUser: MockDataGenerator.mockUser(),
-  );
+        name: 'Single Active Game',
+        games: [MockDataGenerator.mockGame(status: 'active')],
+        currentUser: MockDataGenerator.mockUser(),
+      );
 
   /// Scenario with multiple active games
   static TestScenario multipleGames({int count = 3}) => TestScenario(
-    name: 'Multiple Active Games',
-    games: MockDataGenerator.mockGames(count, status: 'active'),
-    currentUser: MockDataGenerator.mockUser(),
-  );
+        name: 'Multiple Active Games',
+        games: MockDataGenerator.mockGames(count, status: 'active'),
+        currentUser: MockDataGenerator.mockUser(),
+      );
 
   /// Scenario with mixed game statuses
   static TestScenario mixedGameStatus() => TestScenario(
-    name: 'Mixed Game Status',
-    games: [
-      ...MockDataGenerator.mockGames(2, status: 'active'),
-      ...MockDataGenerator.mockGames(3, status: 'completed'),
-    ],
-    currentUser: MockDataGenerator.mockUser(),
-  );
+        name: 'Mixed Game Status',
+        games: [
+          ...MockDataGenerator.mockGames(2, status: 'active'),
+          ...MockDataGenerator.mockGames(3, status: 'completed'),
+        ],
+        currentUser: MockDataGenerator.mockUser(),
+      );
 
   /// Scenario with loading state
   static TestScenario loading() => TestScenario(
-    name: 'Loading State',
-    games: [],
-    isLoading: true,
-  );
+        name: 'Loading State',
+        games: [],
+        isLoading: true,
+      );
 
   /// Scenario with network error
   static TestScenario networkError() => TestScenario(
-    name: 'Network Error',
-    games: [],
-    errors: {'error': 'Network connection failed'},
-  );
+        name: 'Network Error',
+        games: [],
+        errors: {'error': 'Network connection failed'},
+      );
 
   /// Scenario with no user (logged out)
   static TestScenario notLoggedIn() => TestScenario(
-    name: 'Not Logged In',
-    games: [],
-    currentUser: null,
-  );
+        name: 'Not Logged In',
+        games: [],
+        currentUser: null,
+      );
 
   /// Scenario with null opponent data
   static TestScenario nullOpponentData() => TestScenario(
-    name: 'Null Opponent Data',
-    games: [
-      OnlineGame(
-        id: 'test_game',
-        whitePlayerId: 'white_1',
-        whitePlayerName: 'Known Player',
-        whiteRating: 1600,
-        blackPlayerId: null,
-        blackPlayerName: null,
-        blackRating: null,
-        status: 'active',
-        pgn: 'e4',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        timeControl: '5+3',
-      ),
-    ],
-  );
+        name: 'Null Opponent Data',
+        games: [
+          OnlineGame(
+            id: 'test_game',
+            whitePlayerId: 'white_1',
+            whitePlayerName: 'Known Player',
+            whiteRating: 1600,
+            blackPlayerId: null,
+            blackPlayerName: null,
+            blackRating: null,
+            status: 'active',
+            pgn: 'e4',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            timeControl: '5+3',
+          ),
+        ],
+      );
 }
 
 /// Performance measurement helper

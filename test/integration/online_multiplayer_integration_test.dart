@@ -3,17 +3,20 @@ import 'dart:math' show pow;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/services/online_game_service.dart';
-import 'package:chess/src/services/matchmaking_service.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/services/online_game_service.dart';
+import 'package:chess_tactics_master/src/services/matchmaking_service.dart';
 
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
+class MockCollectionReference extends Mock
+    implements CollectionReference<Map<String, dynamic>> {}
 
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
+class MockDocumentReference extends Mock
+    implements DocumentReference<Map<String, dynamic>> {}
 
-class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {}
+class MockDocumentSnapshot extends Mock
+    implements DocumentSnapshot<Map<String, dynamic>> {}
 
 void main() {
   group('Online Multiplayer Integration Tests', () {
@@ -97,7 +100,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -148,7 +152,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -171,7 +176,8 @@ void main() {
         expect(move1.playerId, 'user_1');
 
         // Simulate FEN update after move
-        const updatedFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const updatedFen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         const updatedPgn = '1. e4';
 
         final gameAfterMove1 = initialGame.copyWith(
@@ -195,7 +201,8 @@ void main() {
         final rating2 = 1580;
 
         // Expected score for 1600
-        final expected1 = 1.0 / (1.0 + pow(10, (rating2 - rating1) / D).toDouble());
+        final expected1 =
+            1.0 / (1.0 + pow(10, (rating2 - rating1) / D).toDouble());
         // Expected score for 1580
         final expected2 = 1.0 - expected1;
 
@@ -219,7 +226,8 @@ void main() {
         final rating1 = 1600;
         final rating2 = 1600;
 
-        final expected1 = 1.0 / (1.0 + pow(10, (rating2 - rating1) / D).toDouble());
+        final expected1 =
+            1.0 / (1.0 + pow(10, (rating2 - rating1) / D).toDouble());
         final expected2 = 1.0 - expected1;
 
         // Draw (0.5 points each)
@@ -238,7 +246,8 @@ void main() {
         final rating1 = 1400; // Lower rated
         final rating2 = 1800; // Higher rated
 
-        final expected1 = 1.0 / (1.0 + pow(10, (rating2 - rating1) / D).toDouble());
+        final expected1 =
+            1.0 / (1.0 + pow(10, (rating2 - rating1) / D).toDouble());
         final expected2 = 1.0 - expected1;
 
         // 1400 wins (upset)
@@ -264,7 +273,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5 2. Nf3 Nc6',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -299,7 +309,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5',
-          currentFen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+          currentFen:
+              'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -337,7 +348,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5',
-          currentFen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+          currentFen:
+              'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -371,7 +383,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -404,7 +417,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -425,7 +439,8 @@ void main() {
           whiteRating: 1700,
           blackRating: 1650,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '3min',
           timeControlMs: 3 * 60 * 1000,
@@ -457,7 +472,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -478,7 +494,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1620,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '3min',
           timeControlMs: 3 * 60 * 1000,
@@ -550,8 +567,10 @@ void main() {
           blackPlayerName: 'Bob',
           whiteRating: 1600,
           blackRating: 1580,
-          pgn: '1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O d3 8. Qxd3 Qe7 9. e5 Ng4 10. e6 fxe6 11. Bxe6+ Kd8 12. Bf7 Qd6 13. Bg5+ Kc7 14. Bxg4 Bxc3 15. Bxe6 Bxa1 16. Qg3#',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          pgn:
+              '1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O d3 8. Qxd3 Qe7 9. e5 Ng4 10. e6 fxe6 11. Bxe6+ Kd8 12. Bf7 Qd6 13. Bg5+ Kc7 14. Bxg4 Bxc3 15. Bxe6 Bxa1 16. Qg3#',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -584,7 +603,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5 2. Nf3 Nc6 3. Bb5',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -615,8 +635,10 @@ void main() {
           blackPlayerName: 'Bob',
           whiteRating: 1600,
           blackRating: 1600,
-          pgn: '1. e4 e5 2. Nf3 Nf6 3. Bc4 Bc5 4. d3 d6 5. O-O O-O 6. Bg5 h6 7. Bh4 g5 8. Bg3 Ne4 9. dxe4 gxh4 10. Bxh4',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          pgn:
+              '1. e4 e5 2. Nf3 Nf6 3. Bc4 Bc5 4. d3 d6 5. O-O O-O 6. Bg5 h6 7. Bh4 g5 8. Bg3 Ne4 9. dxe4 gxh4 10. Bxh4',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -650,7 +672,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5',
-          currentFen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+          currentFen:
+              'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,

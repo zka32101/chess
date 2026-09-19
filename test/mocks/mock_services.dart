@@ -1,7 +1,7 @@
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/models/user.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/user.dart';
 
 /// Mock Firestore instance
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {
@@ -29,7 +29,8 @@ class MockFirebaseFirestore extends Mock implements FirebaseFirestore {
 }
 
 /// Mock CollectionReference
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {
+class MockCollectionReference extends Mock
+    implements CollectionReference<Map<String, dynamic>> {
   final String collectionPath;
   final Map<String, Map<String, dynamic>> _data;
 
@@ -91,7 +92,8 @@ class MockCollectionReference extends Mock implements CollectionReference<Map<St
 }
 
 /// Mock DocumentReference
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {
+class MockDocumentReference extends Mock
+    implements DocumentReference<Map<String, dynamic>> {
   final String docId;
   final Map<String, dynamic> _data;
 
@@ -124,7 +126,8 @@ class MockDocumentReference extends Mock implements DocumentReference<Map<String
 }
 
 /// Mock DocumentSnapshot
-class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, dynamic>> {
+class MockDocumentSnapshot extends Mock
+    implements DocumentSnapshot<Map<String, dynamic>> {
   final String _docId;
   final Map<String, dynamic> _data;
 
@@ -147,7 +150,8 @@ class MockDocumentSnapshot extends Mock implements DocumentSnapshot<Map<String, 
 }
 
 /// Mock QuerySnapshot
-class MockQuerySnapshot extends Mock implements QuerySnapshot<Map<String, dynamic>> {
+class MockQuerySnapshot extends Mock
+    implements QuerySnapshot<Map<String, dynamic>> {
   final List<QueryDocumentSnapshot<Map<String, dynamic>>> _docs;
 
   MockQuerySnapshot(this._docs);
@@ -163,7 +167,8 @@ class MockQuerySnapshot extends Mock implements QuerySnapshot<Map<String, dynami
 }
 
 /// Mock QueryDocumentSnapshot
-class MockQueryDocumentSnapshot extends Mock implements QueryDocumentSnapshot<Map<String, dynamic>> {
+class MockQueryDocumentSnapshot extends Mock
+    implements QueryDocumentSnapshot<Map<String, dynamic>> {
   final String _docId;
   final Map<String, dynamic> _data;
 
@@ -240,7 +245,8 @@ class MockOnlineGameService extends Mock {
     if (_shouldFail) {
       return Stream.error(Exception('Network error'));
     }
-    final game = _games.firstWhere((g) => g.id == gameId, orElse: () => throw Exception('Not found'));
+    final game = _games.firstWhere((g) => g.id == gameId,
+        orElse: () => throw Exception('Not found'));
     return Stream.value(game);
   }
 

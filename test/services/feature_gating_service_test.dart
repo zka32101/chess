@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/feature_gating_service.dart';
+import 'package:chess_tactics_master/src/services/feature_gating_service.dart';
 
 void main() {
   group('FeatureGatingService', () {
@@ -57,7 +57,8 @@ void main() {
         ];
 
         for (final feature in features) {
-          final hasAccess = await featureGating.hasFeatureAccess(feature, 'premium');
+          final hasAccess =
+              await featureGating.hasFeatureAccess(feature, 'premium');
           expect(hasAccess, true, reason: 'Premium should have $feature');
         }
       });
@@ -111,20 +112,24 @@ void main() {
 
     group('Action permission checking', () {
       test('free user can perform action with remaining attempts', () async {
-        final canPerform = await featureGating.canPerformAction('puzzles', 'free');
+        final canPerform =
+            await featureGating.canPerformAction('puzzles', 'free');
         expect(canPerform, true);
       });
 
       test('pro user can always perform action', () async {
-        final canPerform = await featureGating.canPerformAction('puzzles', 'pro');
+        final canPerform =
+            await featureGating.canPerformAction('puzzles', 'pro');
         expect(canPerform, true);
 
-        final canPerformGames = await featureGating.canPerformAction('games', 'pro');
+        final canPerformGames =
+            await featureGating.canPerformAction('games', 'pro');
         expect(canPerformGames, true);
       });
 
       test('premium user can always perform action', () async {
-        final canPerform = await featureGating.canPerformAction('puzzles', 'premium');
+        final canPerform =
+            await featureGating.canPerformAction('puzzles', 'premium');
         expect(canPerform, true);
       });
     });
@@ -148,7 +153,8 @@ void main() {
       });
 
       test('returns empty description for unknown feature', () {
-        final description = featureGating.getFeatureDescription('unknown_feature');
+        final description =
+            featureGating.getFeatureDescription('unknown_feature');
         expect(description, isEmpty);
       });
     });
@@ -175,7 +181,7 @@ void main() {
       test('returns same instance', () {
         final instance1 = FeatureGatingService.instance;
         final instance2 = FeatureGatingService.instance;
-        
+
         expect(identical(instance1, instance2), true);
       });
     });

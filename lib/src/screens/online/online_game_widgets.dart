@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 
 /// Widget displaying player presence status
 class PlayerPresenceWidget extends ConsumerWidget {
@@ -71,10 +71,11 @@ class PlayerPresenceWidget extends ConsumerWidget {
                         ),
                         child: Text(
                           'You',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.blue[900],
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.blue[900],
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ),
                   ],
@@ -479,7 +480,8 @@ class MoveHistoryWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         final moveNumber = index + 1;
         final whiteMove = moves.length > index * 2 ? moves[index * 2] : null;
-        final blackMove = moves.length > index * 2 + 1 ? moves[index * 2 + 1] : null;
+        final blackMove =
+            moves.length > index * 2 + 1 ? moves[index * 2 + 1] : null;
 
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/match_history_service.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/services/match_history_service.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 void main() {
   group('MatchHistoryService', () {
@@ -14,7 +14,8 @@ void main() {
       test('should generate valid CSV header', () async {
         // This would require mocking Firestore
         // For now, test the CSV format structure
-        final csvHeader = 'Date,Opponent,Result,Rating Change,Time Control,Duration';
+        final csvHeader =
+            'Date,Opponent,Result,Rating Change,Time Control,Duration';
         expect(csvHeader.split(','), hasLength(6));
       });
 
@@ -64,7 +65,8 @@ void main() {
 
       test('should calculate average rating changes', () {
         final ratingGains = [15, 12, 18, 10];
-        final avgGain = ratingGains.reduce((a, b) => a + b) / ratingGains.length;
+        final avgGain =
+            ratingGains.reduce((a, b) => a + b) / ratingGains.length;
 
         expect(avgGain, equals(13.75));
       });
@@ -102,7 +104,8 @@ void main() {
           playedAt: DateTime.now(),
         );
 
-        expect(['bullet', 'blitz', 'rapid'].contains(match.timeControl), isTrue);
+        expect(
+            ['bullet', 'blitz', 'rapid'].contains(match.timeControl), isTrue);
       });
     });
   });

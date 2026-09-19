@@ -1,5 +1,5 @@
-import 'package:chess/src/models/ai_lesson.dart';
-import 'package:chess/src/models/game.dart';
+import 'package:chess_tactics_master/src/models/ai_lesson.dart';
+import 'package:chess_tactics_master/src/models/game.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Optimized AI analysis service

@@ -1,10 +1,10 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:chess/src/models/game_history.dart';
-import 'package:chess/src/services/game_history_service.dart';
-import 'package:chess/src/services/firebase_game_history_service.dart';
-import 'package:chess/src/services/hybrid_game_history_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/game_history.dart';
+import 'package:chess_tactics_master/src/services/game_history_service.dart';
+import 'package:chess_tactics_master/src/services/firebase_game_history_service.dart';
+import 'package:chess_tactics_master/src/services/hybrid_game_history_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Provider for Firebase Auth state
 final firebaseAuthProvider = StreamProvider<User?>((ref) {
@@ -34,7 +34,8 @@ final gameHistoryServiceProvider = Provider<GameHistoryService>((ref) {
 });
 
 /// Provider for Firebase service (when user is authenticated)
-final firebaseGameHistoryServiceProvider = Provider<FirebaseGameHistoryService?>((ref) {
+final firebaseGameHistoryServiceProvider =
+    Provider<FirebaseGameHistoryService?>((ref) {
   final authState = ref.watch(firebaseAuthProvider);
 
   return authState.whenData((user) {
@@ -55,7 +56,8 @@ final allGamesProvider = FutureProvider<List<GameRecord>>((ref) async {
 });
 
 /// Provider for games by difficulty
-final gamesByDifficultyProvider = FutureProvider.family<List<GameRecord>, AIDifficulty>(
+final gamesByDifficultyProvider =
+    FutureProvider.family<List<GameRecord>, AIDifficulty>(
   (ref, difficulty) async {
     final service = ref.watch(gameHistoryServiceProvider);
     return service.loadGamesByDifficulty(difficulty);
@@ -179,7 +181,8 @@ class GameHistoryNotifier extends StateNotifier<AsyncValue<void>> {
 }
 
 /// State notifier provider for game history operations
-final gameHistoryNotifierProvider = StateNotifierProvider<GameHistoryNotifier, AsyncValue<void>>((ref) {
+final gameHistoryNotifierProvider =
+    StateNotifierProvider<GameHistoryNotifier, AsyncValue<void>>((ref) {
   final service = ref.watch(gameHistoryServiceProvider);
   return GameHistoryNotifier(service);
 });
@@ -196,7 +199,8 @@ final gameHistoryExportProvider = FutureProvider<String>((ref) async {
 });
 
 /// Get specific game record by ID
-final gameRecordProvider = FutureProvider.family<GameRecord?, String>((ref, gameId) async {
+final gameRecordProvider =
+    FutureProvider.family<GameRecord?, String>((ref, gameId) async {
   final games = await ref.watch(allGamesProvider.future);
   try {
     return games.firstWhere((game) => game.gameId == gameId);

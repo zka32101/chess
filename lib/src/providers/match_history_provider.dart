@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/services/match_history_service.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/services/match_history_service.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 /// Provider for match history service
 final matchHistoryServiceProvider = Provider((ref) {
@@ -42,11 +42,11 @@ class MatchHistoryState {
 }
 
 /// State notifier for match history with pagination
-class MatchHistoryNotifier extends StateNotifier<AsyncValue<MatchHistoryState>> {
+class MatchHistoryNotifier
+    extends StateNotifier<AsyncValue<MatchHistoryState>> {
   final MatchHistoryService _service;
 
-  MatchHistoryNotifier(this._service)
-      : super(const AsyncValue.loading());
+  MatchHistoryNotifier(this._service) : super(const AsyncValue.loading());
 
   /// Load initial match history
   Future<void> loadHistory(String playerId) async {

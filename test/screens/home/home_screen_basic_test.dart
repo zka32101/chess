@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/screens/home/home_screen.dart';
+import 'package:chess_tactics_master/src/screens/home/home_screen.dart';
 import '../../helpers/widget_test_helpers.dart';
 import '../../mocks/mock_services.dart';
 
@@ -17,7 +17,8 @@ void main() {
         expect(find.byType(AppBar), findsOneWidget);
       });
 
-      testWidgets('displays welcome text when no user', (WidgetTester tester) async {
+      testWidgets('displays welcome text when no user',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -40,7 +41,8 @@ void main() {
     });
 
     group('Game List Display', () {
-      testWidgets('displays empty state when no games', (WidgetTester tester) async {
+      testWidgets('displays empty state when no games',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -51,7 +53,8 @@ void main() {
         expect(find.text('No active games'), findsOneWidget);
       });
 
-      testWidgets('displays game cards for active games', (WidgetTester tester) async {
+      testWidgets('displays game cards for active games',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -63,7 +66,8 @@ void main() {
         expect(find.byType(Card), findsWidgets);
       });
 
-      testWidgets('displays correct number of game cards', (WidgetTester tester) async {
+      testWidgets('displays correct number of game cards',
+          (WidgetTester tester) async {
         const gameCount = 3;
 
         await tester.pumpWidget(
@@ -78,7 +82,8 @@ void main() {
         expect(cardCount, greaterThanOrEqualTo(0));
       });
 
-      testWidgets('game card displays opponent name', (WidgetTester tester) async {
+      testWidgets('game card displays opponent name',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -91,7 +96,8 @@ void main() {
         expect(textWidgets, findsWidgets);
       });
 
-      testWidgets('game card displays rating info', (WidgetTester tester) async {
+      testWidgets('game card displays rating info',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -109,7 +115,8 @@ void main() {
     });
 
     group('Loading & Error States', () {
-      testWidgets('displays loading indicator while fetching', (WidgetTester tester) async {
+      testWidgets('displays loading indicator while fetching',
+          (WidgetTester tester) async {
         // Mock service that delays response
         await tester.pumpWidget(
           createTestApp(
@@ -126,7 +133,8 @@ void main() {
         await tester.pumpAndSettleWithTimeout();
       });
 
-      testWidgets('displays error message on load failure', (WidgetTester tester) async {
+      testWidgets('displays error message on load failure',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -138,7 +146,9 @@ void main() {
 
         // Error widget should either show or not, depending on actual implementation
         final errorFinder = find.byWidgetPredicate(
-          (widget) => widget is Text && (widget.data ?? '').toLowerCase().contains('error'),
+          (widget) =>
+              widget is Text &&
+              (widget.data ?? '').toLowerCase().contains('error'),
         );
         // May or may not find error message
         expect(errorFinder, isA<Finder>());
@@ -154,11 +164,15 @@ void main() {
 
         // Look for retry button
         final retryButton = find.byWidgetPredicate(
-          (widget) => widget is ElevatedButton &&
-              find.descendant(
-                of: find.byWidget(widget),
-                matching: find.text('Retry'),
-              ).evaluate().isNotEmpty,
+          (widget) =>
+              widget is ElevatedButton &&
+              find
+                  .descendant(
+                    of: find.byWidget(widget),
+                    matching: find.text('Retry'),
+                  )
+                  .evaluate()
+                  .isNotEmpty,
         );
         // May or may not exist depending on error state
         expect(retryButton, isA<Finder>());
@@ -166,7 +180,8 @@ void main() {
     });
 
     group('User Interaction', () {
-      testWidgets('tapping game card navigates to game', (WidgetTester tester) async {
+      testWidgets('tapping game card navigates to game',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -234,7 +249,8 @@ void main() {
     });
 
     group('Accessibility', () {
-      testWidgets('all buttons have semantic labels', (WidgetTester tester) async {
+      testWidgets('all buttons have semantic labels',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -257,7 +273,8 @@ void main() {
         expect(find.byType(Text), findsWidgets);
       });
 
-      testWidgets('interactive elements are large enough', (WidgetTester tester) async {
+      testWidgets('interactive elements are large enough',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -307,7 +324,8 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
       });
 
-      testWidgets('renders large game lists efficiently', (WidgetTester tester) async {
+      testWidgets('renders large game lists efficiently',
+          (WidgetTester tester) async {
         const gameCount = 100;
 
         // Would need to populate mock with 100 games
@@ -326,7 +344,8 @@ void main() {
     });
 
     group('Edge Cases', () {
-      testWidgets('handles null opponent name gracefully', (WidgetTester tester) async {
+      testWidgets('handles null opponent name gracefully',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -338,7 +357,8 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
       });
 
-      testWidgets('handles empty rating gracefully', (WidgetTester tester) async {
+      testWidgets('handles empty rating gracefully',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -350,7 +370,8 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
       });
 
-      testWidgets('handles very long opponent names', (WidgetTester tester) async {
+      testWidgets('handles very long opponent names',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),
@@ -362,7 +383,8 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
       });
 
-      testWidgets('handles rapid game status changes', (WidgetTester tester) async {
+      testWidgets('handles rapid game status changes',
+          (WidgetTester tester) async {
         await tester.pumpWidget(
           createTestApp(
             child: HomeScreen(),

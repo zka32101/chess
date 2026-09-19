@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/widgets/charts/chart_utils.dart';
+import 'package:chess_tactics_master/src/widgets/charts/chart_utils.dart';
 
 void main() {
   group('ChartColors', () {
@@ -21,7 +21,8 @@ void main() {
       );
     });
 
-    testWidgets('getPerformanceColor returns orange for medium percentage (light)',
+    testWidgets(
+        'getPerformanceColor returns orange for medium percentage (light)',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -163,8 +164,8 @@ void main() {
       expect(ChartConfig.borderWidth, 2.0);
       expect(ChartConfig.dotRadius, 6.0);
       expect(ChartConfig.animationDuration, const Duration(milliseconds: 300));
-      expect(ChartConfig.chartEntranceDuration,
-          const Duration(milliseconds: 500));
+      expect(
+          ChartConfig.chartEntranceDuration, const Duration(milliseconds: 500));
     });
   });
 

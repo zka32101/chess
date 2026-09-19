@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/tournament_management_service.dart';
 import '../services/bracket_generation_service.dart';
 
@@ -36,7 +36,8 @@ final tournamentParticipantsProvider =
 
 /// Get tournament standings
 final tournamentStandingsProvider =
-    FutureProvider.family<List<TournamentStanding>, String>((ref, tournamentId) {
+    FutureProvider.family<List<TournamentStanding>, String>(
+        (ref, tournamentId) {
   final service = ref.watch(tournamentManagementServiceProvider);
   return service.getTournamentStandings(tournamentId);
 });
@@ -66,8 +67,8 @@ final tournamentCreationNotifierProvider =
 );
 
 /// State notifier for tournament operations
-final tournamentOperationNotifierProvider =
-    StateNotifierProvider<TournamentOperationNotifier, TournamentOperationState>(
+final tournamentOperationNotifierProvider = StateNotifierProvider<
+    TournamentOperationNotifier, TournamentOperationState>(
   (ref) {
     final managementService = ref.watch(tournamentManagementServiceProvider);
     final bracketService = ref.watch(bracketGenerationServiceProvider);
@@ -77,7 +78,8 @@ final tournamentOperationNotifierProvider =
 
 // Notifier implementations
 
-class TournamentCreationNotifier extends StateNotifier<TournamentCreationState> {
+class TournamentCreationNotifier
+    extends StateNotifier<TournamentCreationState> {
   final TournamentManagementService _service;
 
   TournamentCreationNotifier(this._service)
@@ -122,7 +124,8 @@ class TournamentCreationNotifier extends StateNotifier<TournamentCreationState> 
   }
 }
 
-class TournamentOperationNotifier extends StateNotifier<TournamentOperationState> {
+class TournamentOperationNotifier
+    extends StateNotifier<TournamentOperationState> {
   final TournamentManagementService _managementService;
   final BracketGenerationService _bracketService;
 
