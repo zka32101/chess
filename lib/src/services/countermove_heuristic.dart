@@ -110,7 +110,9 @@ class CountermoveHeuristic {
               'counterCount': e.value.length,
               'topCounter': e.value.isNotEmpty ? e.value[0] : null,
               'score': e.value.fold<int>(
-                  0, (sum, counter) => sum + (_pairScores['${e.key}→$counter'] ?? 0)),
+                  0,
+                  (sum, counter) =>
+                      sum + (_pairScores['${e.key}→$counter'] ?? 0)),
             })
         .toList()
       ..sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
@@ -165,12 +167,16 @@ class AdvancedMoveOrderer {
     final moveUci = _moveToUci(move);
 
     // 1. Captures (highest priority)
-    if (move.flags.contains('c')) {
+    if ((move.flags & chess_lib.Chess.BITS_CAPTURE) != 0) {
       score += 10000;
     }
 
-    // 2. Checks
-    if (move.flags.contains('+')) {
+    // 2. Checks. Move.flags has no "gives check" bit, so this has to be
+    // detected by playing the move.
+    chess.move(move);
+    final givesCheck = chess.in_check;
+    chess.undo_move();
+    if (givesCheck) {
       score += 5000;
     }
 
@@ -179,7 +185,8 @@ class AdvancedMoveOrderer {
         countermoves.isCountermove(_lastOpponentMove!, moveUci)) {
       score += 3000;
       // Primary counter-move gets bonus
-      if (countermoves.getCountermovePriority(_lastOpponentMove!, moveUci) == 0) {
+      if (countermoves.getCountermovePriority(_lastOpponentMove!, moveUci) ==
+          0) {
         score += 500;
       }
     }
@@ -234,7 +241,7 @@ class AdvancedMoveOrderer {
   String _moveToUci(chess_lib.Move move) {
     String promotion = '';
     if (move.promotion != null) {
-      promotion = move.promotion!.symbol;
+      promotion = move.promotion!.name;
     }
     return '${move.fromAlgebraic}${move.toAlgebraic}$promotion';
   }

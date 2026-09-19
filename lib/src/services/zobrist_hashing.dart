@@ -69,6 +69,8 @@ class ZobristHash {
 
   /// Get piece type index (0-5 for white pieces)
   static int _getPieceTypeIndex(chess_lib.PieceType type) {
+    // PieceType is a plain class with static const instances, not a real
+    // Dart enum, so the analyzer can't prove this switch is exhaustive.
     switch (type) {
       case chess_lib.PieceType.PAWN:
         return 0;
@@ -82,6 +84,8 @@ class ZobristHash {
         return 4;
       case chess_lib.PieceType.KING:
         return 5;
+      default:
+        throw ArgumentError('Unknown piece type: $type');
     }
   }
 
@@ -107,7 +111,7 @@ class ZobristHash {
     // Hash all pieces on the board
     for (int i = 0; i < 64; i++) {
       final square = _indexToSquare(i);
-      final piece = chess.getPieceAt(i);
+      final piece = chess.get(square);
 
       if (piece != null) {
         final pieceIndex = _getPieceIndex(piece);
@@ -116,28 +120,40 @@ class ZobristHash {
     }
 
     // Hash white to move
-    if (chess.isWhiteTurn()) {
+    if (chess.turn == chess_lib.Color.WHITE) {
       hash ^= _whiteToMove;
     }
 
-    // Hash castling rights
-    if (chess.canCastle(chess_lib.Color.WHITE, chess_lib.CastleSide.KING)) {
+    // Hash castling rights (Chess.castling is a per-color bitmask of
+    // Chess.BITS_KSIDE_CASTLE/BITS_QSIDE_CASTLE; there's no CastleSide type
+    // or canCastle() method in the chess package).
+    if ((chess.castling[chess_lib.Color.WHITE] &
+            chess_lib.Chess.BITS_KSIDE_CASTLE) !=
+        0) {
       hash ^= _castlingRights[0];
     }
-    if (chess.canCastle(chess_lib.Color.WHITE, chess_lib.CastleSide.QUEEN)) {
+    if ((chess.castling[chess_lib.Color.WHITE] &
+            chess_lib.Chess.BITS_QSIDE_CASTLE) !=
+        0) {
       hash ^= _castlingRights[1];
     }
-    if (chess.canCastle(chess_lib.Color.BLACK, chess_lib.CastleSide.KING)) {
+    if ((chess.castling[chess_lib.Color.BLACK] &
+            chess_lib.Chess.BITS_KSIDE_CASTLE) !=
+        0) {
       hash ^= _castlingRights[2];
     }
-    if (chess.canCastle(chess_lib.Color.BLACK, chess_lib.CastleSide.QUEEN)) {
+    if ((chess.castling[chess_lib.Color.BLACK] &
+            chess_lib.Chess.BITS_QSIDE_CASTLE) !=
+        0) {
       hash ^= _castlingRights[3];
     }
 
-    // Hash en passant file (if available)
-    final enPassant = chess.en_passant();
-    if (enPassant != null) {
-      final file = enPassant.codeUnitAt(0) - 'a'.codeUnitAt(0);
+    // Hash en passant file (if available). ep_square is a 0x88 square index
+    // (or Chess.EMPTY when there's none), not an algebraic string.
+    final epSquare = chess.ep_square;
+    if (epSquare != null && epSquare != chess_lib.Chess.EMPTY) {
+      final square = chess_lib.Chess.algebraic(epSquare);
+      final file = square.codeUnitAt(0) - 'a'.codeUnitAt(0);
       hash ^= _enPassantFiles[file];
     }
 
@@ -154,7 +170,7 @@ class ZobristHash {
     int newHash = currentHash;
 
     // Remove moving piece from source square
-    final piece = chess.getPieceAt(_squareToIndex(move.fromAlgebraic));
+    final piece = chess.get(move.fromAlgebraic);
     if (piece != null) {
       final pieceIndex = _getPieceIndex(piece);
       final fromIndex = _squareToIndex(move.fromAlgebraic);
@@ -274,7 +290,8 @@ class ZobristTranspositionTable {
   /// Get table statistics
   Map<String, dynamic> getStatistics() {
     final total = _hits + _misses;
-    final hitRate = total > 0 ? (_hits / total * 100).toStringAsFixed(2) : '0.00';
+    final hitRate =
+        total > 0 ? (_hits / total * 100).toStringAsFixed(2) : '0.00';
 
     return {
       'entries': _table.length,
