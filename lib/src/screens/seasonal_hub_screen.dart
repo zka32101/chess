@@ -10,7 +10,8 @@ import '../services/seasonal_event_service.dart';
 class SeasonalHubScreen extends ConsumerStatefulWidget {
   final String playerId;
 
-  const SeasonalHubScreen({required this.playerId});
+  const SeasonalHubScreen({Key? key, required this.playerId})
+      : super(key: key);
 
   @override
   ConsumerState<SeasonalHubScreen> createState() => _SeasonalHubScreenState();

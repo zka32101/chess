@@ -12,9 +12,10 @@ class SeasonProgressCard extends ConsumerWidget {
   final String seasonId;
 
   const SeasonProgressCard({
+    Key? key,
     required this.playerId,
     required this.seasonId,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -130,9 +131,10 @@ class BattlePassProgressCard extends ConsumerWidget {
   final String seasonId;
 
   const BattlePassProgressCard({
+    Key? key,
     required this.playerId,
     required this.seasonId,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -296,10 +298,11 @@ class ChallengeTrackerCard extends ConsumerWidget {
   final String? challengeType;  // daily, weekly, seasonal, event
 
   const ChallengeTrackerCard({
+    Key? key,
     required this.playerId,
     required this.seasonId,
     this.challengeType,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -476,9 +479,10 @@ class EventLeaderboardCard extends ConsumerWidget {
   final int limit;
 
   const EventLeaderboardCard({
+    Key? key,
     required this.eventId,
     this.limit = 10,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -577,9 +581,10 @@ class SeasonStatisticsCard extends ConsumerWidget {
   final String seasonId;
 
   const SeasonStatisticsCard({
+    Key? key,
     required this.playerId,
     required this.seasonId,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -693,7 +698,7 @@ class SeasonStatisticsCard extends ConsumerWidget {
 /// Loading and Error Widgets
 
 class SeasonLoadingWidget extends StatelessWidget {
-  const SeasonLoadingWidget();
+  const SeasonLoadingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -714,7 +719,7 @@ class SeasonLoadingWidget extends StatelessWidget {
 class SeasonErrorWidget extends StatelessWidget {
   final String error;
 
-  const SeasonErrorWidget({required this.error});
+  const SeasonErrorWidget({Key? key, required this.error}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -728,7 +733,7 @@ class SeasonErrorWidget extends StatelessWidget {
 }
 
 class BattlePassLoadingWidget extends StatelessWidget {
-  const BattlePassLoadingWidget();
+  const BattlePassLoadingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -747,7 +752,8 @@ class BattlePassLoadingWidget extends StatelessWidget {
 class BattlePassErrorWidget extends StatelessWidget {
   final String error;
 
-  const BattlePassErrorWidget({required this.error});
+  const BattlePassErrorWidget({Key? key, required this.error})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -761,7 +767,7 @@ class BattlePassErrorWidget extends StatelessWidget {
 }
 
 class ChallengeLoadingWidget extends StatelessWidget {
-  const ChallengeLoadingWidget();
+  const ChallengeLoadingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -780,7 +786,8 @@ class ChallengeLoadingWidget extends StatelessWidget {
 class ChallengeErrorWidget extends StatelessWidget {
   final String error;
 
-  const ChallengeErrorWidget({required this.error});
+  const ChallengeErrorWidget({Key? key, required this.error})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -794,7 +801,7 @@ class ChallengeErrorWidget extends StatelessWidget {
 }
 
 class EventLoadingWidget extends StatelessWidget {
-  const EventLoadingWidget();
+  const EventLoadingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -813,7 +820,7 @@ class EventLoadingWidget extends StatelessWidget {
 class EventErrorWidget extends StatelessWidget {
   final String error;
 
-  const EventErrorWidget({required this.error});
+  const EventErrorWidget({Key? key, required this.error}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -827,7 +834,7 @@ class EventErrorWidget extends StatelessWidget {
 }
 
 class StatisticsLoadingWidget extends StatelessWidget {
-  const StatisticsLoadingWidget();
+  const StatisticsLoadingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -846,7 +853,8 @@ class StatisticsLoadingWidget extends StatelessWidget {
 class StatisticsErrorWidget extends StatelessWidget {
   final String error;
 
-  const StatisticsErrorWidget({required this.error});
+  const StatisticsErrorWidget({Key? key, required this.error})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
