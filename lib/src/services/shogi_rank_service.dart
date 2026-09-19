@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'shogi_rank_service.freezed.dart';
+part 'shogi_rank_service.g.dart';
 
 /// 将棋式ランキング（段位・級位）の管理サービス
 ///

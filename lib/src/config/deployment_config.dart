@@ -3,6 +3,19 @@
 /// This file manages app deployment, version tracking, and release-specific
 /// configurations for both iOS and Android platforms.
 
+/// Release channel (alpha, beta, production)
+enum ReleaseChannel { alpha, beta, production }
+
+/// Track deployment status
+enum DeploymentStatus {
+  building, // Build in progress
+  submitting, // Submitted to stores
+  inReview, // Under review
+  approved, // Approved by store
+  released, // Available to users
+  rolled_back // Rolled back
+}
+
 class DeploymentConfig {
   // ============================================================================
   // VERSION MANAGEMENT
@@ -29,9 +42,6 @@ class DeploymentConfig {
 
   /// Current release date (UTC)
   static const String releaseDate = '2026-08-27T00:00:00Z';
-
-  /// Release channel (alpha, beta, production)
-  enum ReleaseChannel { alpha, beta, production }
 
   static const ReleaseChannel currentChannel = ReleaseChannel.production;
 
@@ -74,16 +84,6 @@ Send feedback: support@chessmaster.app
   // ============================================================================
   // DEPLOYMENT TRACKING
   // ============================================================================
-
-  /// Track deployment status
-  enum DeploymentStatus {
-    building,      // Build in progress
-    submitting,    // Submitted to stores
-    inReview,      // Under review
-    approved,      // Approved by store
-    released,      // Available to users
-    rolled_back    // Rolled back
-  }
 
   static const DeploymentStatus currentStatus = DeploymentStatus.released;
 
