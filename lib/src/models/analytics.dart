@@ -115,6 +115,8 @@ class ScreenViewData with _$ScreenViewData {
 /// Analytics session
 @freezed
 class AnalyticsSession with _$AnalyticsSession {
+  const AnalyticsSession._();
+
   const factory AnalyticsSession({
     required String sessionId,
     required String userId,

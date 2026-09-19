@@ -43,6 +43,8 @@ enum PremiumFeature {
 /// User subscription model
 @freezed
 class UserSubscription with _$UserSubscription {
+  const UserSubscription._();
+
   const factory UserSubscription({
     required String userId,
     required SubscriptionTier currentTier,
