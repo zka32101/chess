@@ -41,7 +41,8 @@ class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
     final agedScores = <String, double>{};
     for (final killer in baseKillers) {
       final age = _moveAge[killer] ?? 0;
-      final decayedScore = getMoveScore(killer) * (_decayFactor * (1 - (age / _maxAge)));
+      final decayedScore =
+          getMoveScore(killer) * (_decayFactor * (1 - (age / _maxAge)));
       agedScores[killer] = decayedScore;
     }
 
@@ -87,7 +88,8 @@ class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
       ...getStatistics(),
       'averageAge': _moveAge.isEmpty
           ? 0.0
-          : _moveAge.values.fold<int>(0, (sum, age) => sum + age) / _moveAge.length,
+          : _moveAge.values.fold<int>(0, (sum, age) => sum + age) /
+              _moveAge.length,
       'agedMoves': _moveAge.length,
       'decayFactor': _decayFactor,
       'maxAge': _maxAge,
@@ -177,7 +179,8 @@ class AgedCountermoveHeuristic extends CountermoveHeuristic {
       ...getStatistics(),
       'averagePairAge': _pairAge.isEmpty
           ? 0.0
-          : _pairAge.values.fold<int>(0, (sum, age) => sum + age) / _pairAge.length,
+          : _pairAge.values.fold<int>(0, (sum, age) => sum + age) /
+              _pairAge.length,
       'agedPairs': _pairAge.length,
       'decayFactor': _decayFactor,
       'maxAge': _maxAge,
@@ -190,14 +193,21 @@ class AgedCountermoveHeuristic extends CountermoveHeuristic {
 /// Automatically identifies common opening positions and
 /// suggests moves with difficulty-based variation.
 class ExtendedOpeningBook {
-  /// Extended book with 40+ positions
+  /// Extended book with 40+ positions.
+  ///
+  /// Several opening families (Ruy Lopez, Sicilian, French, Caro-Kann, ...)
+  /// share the same shallow starting FEN (e.g. "after 1.e4" or "after
+  /// 1.d4"); a Dart const map can't hold the same key twice, so each of
+  /// those shared positions lists the union of all the reply moves that
+  /// were originally spread across the duplicate entries below it.
   static const Map<String, List<String>> _extendedBook = {
-    // Ruy Lopez (Spanish Opening) - 8 variations
+    // After 1.e4 (Ruy Lopez / Caro-Kann replies)
     'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR': [
       'c7c5',
-      'e7e5'
-    ], // After 1.e4
-    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR': ['c7c5', 'c7c6', 'e7e5'],
+      'e7e5',
+      'c7c6',
+      'd7d5',
+    ],
     'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR': [
       'd2d4',
       'f2f4',
@@ -218,29 +228,36 @@ class ExtendedOpeningBook {
       'e4e5'
     ], // 1.e4 e5 2.Nf3 Nc6
 
-    // Sicilian Defense - 6 variations
+    // Sicilian Defense (1.e4 c5)
     'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR': [
       'd2d4',
       'c2c3',
-      'd1d5'
-    ], // Sicilian (1.e4 c5)
-    'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR': ['d2d4', 'g2g3'],
-    'rnbqkbnr/pp1ppppp/8/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR': ['d7d6', 'g7g6', 'd8d1'],
+      'd1d5',
+      'g2g3',
+    ],
+    'rnbqkbnr/pp1ppppp/8/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR': [
+      'd7d6',
+      'g7g6',
+      'd8d1'
+    ],
 
-    // French Defense - 4 variations
+    // After 1.d4 (French / Queen's Gambit / Indian replies)
     'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR': [
       'e7e6',
       'c7c5',
-      'e7e5'
-    ], // 1.d4
+      'e7e5',
+      'd7d5',
+      'c7c6',
+      'g7g6',
+      'f7f5',
+    ],
     'rnbqkbnr/pppp1ppp/4p3/8/3P4/8/PPP1PPPP/RNBQKBNR': [
       'c2c4',
       'c2c3',
       'f1c4'
     ], // 1.d4 e6
 
-    // Queen's Gambit - 6 variations
-    'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR': ['d7d5', 'c7c6'],
+    // Queen's Gambit lines
     'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR': [
       'c2c4',
       'd2d5',
@@ -257,16 +274,19 @@ class ExtendedOpeningBook {
       'e2e3'
     ], // Semi-Slav
 
-    // English Opening - 4 variations
-    'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR': ['e7e5', 'c7c6', 'f7f5'],
-    'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR': ['c7c5', 'd7d5'],
+    // After 1.c4 (English Opening)
+    'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR': [
+      'e7e5',
+      'c7c6',
+      'f7f5',
+      'c7c5',
+      'd7d5',
+    ],
 
-    // Caro-Kann Defense - 3 variations
-    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR': ['c7c6', 'd7d5'],
+    // Caro-Kann Defense
     'rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR': ['d7d5', 'e2e5'],
 
-    // Indian Defenses - 3 variations
-    'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR': ['g7g6', 'f7f5'],
+    // Indian Defenses
     'rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR': ['d4d5', 'c2c4'],
   };
 
@@ -300,7 +320,8 @@ class ExtendedOpeningBook {
   static Map<String, dynamic> getStatistics() {
     return {
       'totalPositions': _extendedBook.length,
-      'totalMoves': _extendedBook.values.fold<int>(0, (sum, moves) => sum + moves.length),
+      'totalMoves':
+          _extendedBook.values.fold<int>(0, (sum, moves) => sum + moves.length),
       'openings': [
         'Ruy Lopez (8 positions)',
         'Sicilian (3 positions)',
@@ -360,7 +381,8 @@ class AdaptiveHeuristicManager {
     // Base: 2 killers
     // Adjust by difficulty and time
     if (_difficulty == 0) return 1; // Easy: fewer killers
-    if (_difficulty == 2 && _timeRemaining > 3000) return 3; // Hard + time: more killers
+    if (_difficulty == 2 && _timeRemaining > 3000)
+      return 3; // Hard + time: more killers
     return 2; // Medium or default
   }
 
@@ -369,7 +391,8 @@ class AdaptiveHeuristicManager {
     // Base: 4 countermoves per position
     // Reduce if time is low
     if (_timeRemaining < 1000) return 2; // Low time: fewer
-    if (_difficulty == 2 && _positionPhase == 0) return 5; // Hard in opening: more
+    if (_difficulty == 2 && _positionPhase == 0)
+      return 5; // Hard in opening: more
     return 4; // Default
   }
 

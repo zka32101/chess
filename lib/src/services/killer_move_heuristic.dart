@@ -185,13 +185,17 @@ class MoveOrderingManager {
     final moveUci = _moveToUci(move);
 
     // MVV/LVA for captures (highest priority)
-    if (move.flags.contains('c')) {
+    if ((move.flags & chess_lib.Chess.BITS_CAPTURE) != 0) {
       score += 10000; // Captures have highest priority
       // TODO: Add piece value difference (MVV/LVA refinement)
     }
 
-    // Checks (high priority, can discover tactics)
-    if (move.flags.contains('+')) {
+    // Checks (high priority, can discover tactics). Move.flags has no
+    // "gives check" bit, so this has to be detected by playing the move.
+    chess.move(move);
+    final givesCheck = chess.in_check;
+    chess.undo_move();
+    if (givesCheck) {
       score += 5000;
     }
 
@@ -249,7 +253,7 @@ class MoveOrderingManager {
   String _moveToUci(chess_lib.Move move) {
     String promotion = '';
     if (move.promotion != null) {
-      promotion = move.promotion!.symbol;
+      promotion = move.promotion!.name;
     }
     return '${move.fromAlgebraic}${move.toAlgebraic}$promotion';
   }
@@ -286,18 +290,17 @@ class ButterflyHeuristic {
     final entries = _totalAttempts.entries
         .where((e) => e.value >= 5) // Minimum attempts for reliability
         .map((e) {
-          final moveUci = e.key;
-          final rate = getCutoffRate(moveUci);
-          return {
-            'move': moveUci,
-            'attempts': e.value,
-            'cutoffs': _cutoffCounts[moveUci] ?? 0,
-            'rate': (rate * 100).toStringAsFixed(2),
-          };
-        })
-        .toList()
-      ..sort((a, b) =>
-          double.parse(b['rate'] as String).compareTo(double.parse(a['rate'] as String)));
+      final moveUci = e.key;
+      final rate = getCutoffRate(moveUci);
+      return {
+        'move': moveUci,
+        'attempts': e.value,
+        'cutoffs': _cutoffCounts[moveUci] ?? 0,
+        'rate': (rate * 100).toStringAsFixed(2),
+      };
+    }).toList()
+      ..sort((a, b) => double.parse(b['rate'] as String)
+          .compareTo(double.parse(a['rate'] as String)));
 
     return entries.take(count).toList();
   }
@@ -311,8 +314,10 @@ class ButterflyHeuristic {
   /// Get statistics
   Map<String, dynamic> getStatistics() {
     return {
-      'totalAttempts': _totalAttempts.values.fold<int>(0, (sum, val) => sum + val),
-      'totalCutoffs': _cutoffCounts.values.fold<int>(0, (sum, val) => sum + val),
+      'totalAttempts':
+          _totalAttempts.values.fold<int>(0, (sum, val) => sum + val),
+      'totalCutoffs':
+          _cutoffCounts.values.fold<int>(0, (sum, val) => sum + val),
       'uniqueMoves': _totalAttempts.length,
       'topMoves': getTopMoves(10),
     };
