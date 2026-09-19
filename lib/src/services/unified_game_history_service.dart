@@ -266,9 +266,17 @@ class UnifiedGameHistoryService {
         final result = game['result'] as String?;
 
         if (result == 'white_win') {
-          if (isWhite) wins++ else losses++;
+          if (isWhite) {
+            wins++;
+          } else {
+            losses++;
+          }
         } else if (result == 'black_win') {
-          if (isWhite) losses++ else wins++;
+          if (isWhite) {
+            losses++;
+          } else {
+            wins++;
+          }
         } else if (result == 'draw') {
           draws++;
         }
@@ -326,9 +334,17 @@ class UnifiedGameHistoryService {
             : (game['blackRatingAfter'] as int? ?? 0) - (game['blackRatingBefore'] as int? ?? 0);
 
         if (result == 'white_win') {
-          if (isWhite) wins++ else losses++;
+          if (isWhite) {
+            wins++;
+          } else {
+            losses++;
+          }
         } else if (result == 'black_win') {
-          if (isWhite) losses++ else wins++;
+          if (isWhite) {
+            losses++;
+          } else {
+            wins++;
+          }
         } else if (result == 'draw') {
           draws++;
         }
