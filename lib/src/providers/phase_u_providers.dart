@@ -58,7 +58,7 @@ class ChallengesParams {
   final String seasonId;
   final String? type;
 
-  ChallengesParams({required this.seasonId, this.type});
+  const ChallengesParams({required this.seasonId, this.type});
 
   @override
   bool operator ==(Object other) =>
@@ -77,7 +77,7 @@ class ChallengeDifficultyParams {
   final String seasonId;
   final String difficulty;
 
-  ChallengeDifficultyParams({
+  const ChallengeDifficultyParams({
     required this.seasonId,
     required this.difficulty,
   });
@@ -99,7 +99,7 @@ class PlayerChallengeParams {
   final String playerId;
   final String challengeId;
 
-  PlayerChallengeParams({
+  const PlayerChallengeParams({
     required this.playerId,
     required this.challengeId,
   });
@@ -121,7 +121,7 @@ class SeasonChallengesParams {
   final String playerId;
   final String seasonId;
 
-  SeasonChallengesParams({
+  const SeasonChallengesParams({
     required this.playerId,
     required this.seasonId,
   });
@@ -143,7 +143,7 @@ class EventLeaderboardParams {
   final String eventId;
   final int limit;
 
-  EventLeaderboardParams({required this.eventId, required this.limit});
+  const EventLeaderboardParams({required this.eventId, required this.limit});
 
   @override
   bool operator ==(Object other) =>
@@ -162,7 +162,7 @@ class EventParticipationParams {
   final String playerId;
   final String eventId;
 
-  EventParticipationParams({
+  const EventParticipationParams({
     required this.playerId,
     required this.eventId,
   });
@@ -184,7 +184,7 @@ class TopEventParticipantsParams {
   final String eventId;
   final int limit;
 
-  TopEventParticipantsParams({
+  const TopEventParticipantsParams({
     required this.eventId,
     required this.limit,
   });
@@ -206,7 +206,7 @@ class EventChallengesParams {
   final String seasonId;
   final String eventId;
 
-  EventChallengesParams({
+  const EventChallengesParams({
     required this.seasonId,
     required this.eventId,
   });
@@ -229,7 +229,7 @@ class RewardHistoryParams {
   final String? seasonId;
   final int limit;
 
-  RewardHistoryParams({
+  const RewardHistoryParams({
     required this.playerId,
     this.seasonId,
     required this.limit,
@@ -254,7 +254,7 @@ class RewardCodeParams {
   final String playerId;
   final String code;
 
-  RewardCodeParams({required this.playerId, required this.code});
+  const RewardCodeParams({required this.playerId, required this.code});
 
   @override
   bool operator ==(Object other) =>
@@ -273,7 +273,7 @@ class RewardsByTypeParams {
   final String seasonId;
   final String type;
 
-  RewardsByTypeParams({required this.seasonId, required this.type});
+  const RewardsByTypeParams({required this.seasonId, required this.type});
 
   @override
   bool operator ==(Object other) =>
