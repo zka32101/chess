@@ -94,6 +94,8 @@ class PlayerStatistics with _$PlayerStatistics {
 /// Leaderboard data with entries
 @freezed
 class Leaderboard with _$Leaderboard {
+  const Leaderboard._();
+
   const factory Leaderboard({
     required List<LeaderboardEntry> entries,
     required LeaderboardFilter filter,
