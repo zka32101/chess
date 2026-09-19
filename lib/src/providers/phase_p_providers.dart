@@ -1,8 +1,8 @@
-import 'package:riverpod/riverpod.dart';
-import 'package:chess/src/services/realtime_sync_service.dart';
-import 'package:chess/src/services/advanced_timeout_service.dart';
-import 'package:chess/src/services/enhanced_rating_system.dart';
-import 'package:chess/src/services/optimized_matchmaking_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:chess_tactics_master/src/services/realtime_sync_service.dart';
+import 'package:chess_tactics_master/src/services/advanced_timeout_service.dart';
+import 'package:chess_tactics_master/src/services/enhanced_rating_system.dart';
+import 'package:chess_tactics_master/src/services/optimized_matchmaking_service.dart';
 
 // ============================================================================
 // Service Providers
@@ -112,11 +112,11 @@ final ratingChangeCalculatorProvider =
 // ============================================================================
 
 /// Matchmaking queue entry notifier
-class MatchmakingQueueNotifier extends StateNotifier<AsyncValue<MatchmakingQueue?>> {
+class MatchmakingQueueNotifier
+    extends StateNotifier<AsyncValue<MatchmakingQueue?>> {
   final OptimizedMatchmakingService _service;
 
-  MatchmakingQueueNotifier(this._service)
-      : super(const AsyncValue.data(null));
+  MatchmakingQueueNotifier(this._service) : super(const AsyncValue.data(null));
 
   Future<void> enqueuePlayer({
     required String playerId,
@@ -142,9 +142,8 @@ class MatchmakingQueueNotifier extends StateNotifier<AsyncValue<MatchmakingQueue
 }
 
 /// Matchmaking queue state provider
-final matchmakingQueueProvider =
-    StateNotifierProvider<MatchmakingQueueNotifier, AsyncValue<MatchmakingQueue?>>(
-        (ref) {
+final matchmakingQueueProvider = StateNotifierProvider<MatchmakingQueueNotifier,
+    AsyncValue<MatchmakingQueue?>>((ref) {
   final service = ref.watch(optimizedMatchmakingServiceProvider);
   return MatchmakingQueueNotifier(service);
 });

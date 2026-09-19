@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/screens/online/online_game_result_screen.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/screens/online/online_game_result_screen.dart';
 
 class MockAuthService extends Mock {}
 
@@ -116,7 +116,8 @@ void main() {
       );
     }
 
-    testWidgets('displays win result with green background', (WidgetTester tester) async {
+    testWidgets('displays win result with green background',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(winGame));
 
       expect(find.text('You Won! 🎉'), findsOneWidget);
@@ -137,7 +138,8 @@ void main() {
       expect(find.text('STALEMATE'), findsOneWidget);
     });
 
-    testWidgets('displays rating changes for both players', (WidgetTester tester) async {
+    testWidgets('displays rating changes for both players',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(winGame));
 
       expect(find.text('Rating Changes'), findsOneWidget);
@@ -169,7 +171,8 @@ void main() {
       expect(find.text('Play Again'), findsOneWidget);
     });
 
-    testWidgets('back to home button navigates correctly', (WidgetTester tester) async {
+    testWidgets('back to home button navigates correctly',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(winGame));
 
       await tester.tap(find.text('Back to Home'));
@@ -179,7 +182,8 @@ void main() {
       expect(find.byType(OnlineGameResultScreen), findsNothing);
     });
 
-    testWidgets('play again button navigates to matchmaking', (WidgetTester tester) async {
+    testWidgets('play again button navigates to matchmaking',
+        (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(winGame));
 
       await tester.tap(find.text('Play Again'));

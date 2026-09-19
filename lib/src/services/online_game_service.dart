@@ -2,8 +2,8 @@ import 'dart:math' show pow;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Manages online multiplayer games in real-time
 class OnlineGameService {
@@ -47,8 +47,7 @@ class OnlineGameService {
         whiteRating: whiteRating,
         blackRating: blackRating,
         pgn: '',
-        currentFen:
-            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
         moves: [],
         timeControl: timeControl,
         timeControlMs: timeControlMs,
@@ -173,7 +172,9 @@ class OnlineGameService {
   /// Record player activity (for detecting timeouts)
   Future<void> recordActivity(String gameId, String playerId) async {
     try {
-      final fieldName = playerId == 'white' ? 'whiteLastActivityTimestamp' : 'blackLastActivityTimestamp';
+      final fieldName = playerId == 'white'
+          ? 'whiteLastActivityTimestamp'
+          : 'blackLastActivityTimestamp';
 
       await _firestore.collection(_gamesCollection).doc(gameId).update({
         fieldName: FieldValue.serverTimestamp(),
@@ -306,9 +307,7 @@ class OnlineGameService {
           .orderBy('moveNumber')
           .get();
 
-      return snapshot.docs
-          .map((doc) => GameMove.fromJson(doc.data()))
-          .toList();
+      return snapshot.docs.map((doc) => GameMove.fromJson(doc.data())).toList();
     } catch (e, st) {
       _logger.e('Failed to get game moves', error: e, stackTrace: st);
       rethrow;
@@ -322,11 +321,11 @@ class OnlineGameService {
         .doc(gameId)
         .snapshots()
         .map((snapshot) {
-          if (!snapshot.exists) {
-            throw Exception('Game not found');
-          }
-          return OnlineGame.fromJson(snapshot.data()!);
-        });
+      if (!snapshot.exists) {
+        throw Exception('Game not found');
+      }
+      return OnlineGame.fromJson(snapshot.data()!);
+    });
   }
 
   /// Get player's active games
@@ -384,8 +383,7 @@ class OnlineGameService {
           .map((doc) => OnlineGame.fromJson(doc.data()))
           .toList();
     } catch (e, st) {
-      _logger.e('Failed to get player recent games',
-          error: e, stackTrace: st);
+      _logger.e('Failed to get player recent games', error: e, stackTrace: st);
       rethrow;
     }
   }

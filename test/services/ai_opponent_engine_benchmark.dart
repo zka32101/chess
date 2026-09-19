@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/chess_engine_service.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Performance benchmark suite for AIOpponentEngineEnhanced
 ///
@@ -45,12 +45,14 @@ void main() {
           stats['zobristMisses'] as int? ?? 0,
         );
 
-        print('Easy - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
+        print(
+            'Easy - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
         expect(time, lessThan(AIDifficulty.easy.thinkingTimeMs * 1.5));
       });
 
       test('medium difficulty - opening position', () {
-        final mediumEngine = AIOpponentEngineEnhanced(chess, AIDifficulty.medium);
+        final mediumEngine =
+            AIOpponentEngineEnhanced(chess, AIDifficulty.medium);
         final stopwatch = Stopwatch()..start();
 
         final move = mediumEngine.getBestMove();
@@ -70,7 +72,8 @@ void main() {
           stats['zobristMisses'] as int? ?? 0,
         );
 
-        print('Medium - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
+        print(
+            'Medium - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
         expect(time, lessThan(AIDifficulty.medium.thinkingTimeMs * 1.5));
       });
 
@@ -95,7 +98,8 @@ void main() {
           stats['zobristMisses'] as int? ?? 0,
         );
 
-        print('Hard - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
+        print(
+            'Hard - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
         expect(time, lessThan(AIDifficulty.hard.thinkingTimeMs * 1.5));
       });
     });
@@ -137,7 +141,8 @@ void main() {
           stats['zobristMisses'] as int? ?? 0,
         );
 
-        print('Sicilian - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
+        print(
+            'Sicilian - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
       });
     });
 
@@ -164,11 +169,14 @@ void main() {
           'Zobrist Hit Rate',
           firstHits,
           firstMisses,
-          firstTotal > 0 ? (firstHits / firstTotal * 100).toStringAsFixed(1) : '0.0',
+          firstTotal > 0
+              ? (firstHits / firstTotal * 100).toStringAsFixed(1)
+              : '0.0',
         );
 
         print('Zobrist Performance:');
-        print('  First search - Hits: $firstHits, Misses: $firstMisses, Rate: ${(firstHits / (firstHits + firstMisses) * 100).toStringAsFixed(1)}%');
+        print(
+            '  First search - Hits: $firstHits, Misses: $firstMisses, Rate: ${(firstHits / (firstHits + firstMisses) * 100).toStringAsFixed(1)}%');
         print('  Second search - Additional hits: $additionalHits');
 
         expect(firstTotal, greaterThan(0));
@@ -242,7 +250,8 @@ void main() {
 
         print('Countermove Statistics:');
         print('  Total cutoffs: ${countermoveStats?['totalCutoffs'] ?? 0}');
-        print('  Total countermoves: ${countermoveStats?['totalCountermoves'] ?? 0}');
+        print(
+            '  Total countermoves: ${countermoveStats?['totalCountermoves'] ?? 0}');
       });
     });
 
@@ -291,7 +300,8 @@ void main() {
           stats['zobristMisses'] as int? ?? 0,
         );
 
-        print('Midgame - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
+        print(
+            'Midgame - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
       });
     });
 
@@ -349,7 +359,8 @@ void main() {
           stats['zobristMisses'] as int? ?? 0,
         );
 
-        print('Endgame - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
+        print(
+            'Endgame - Nodes: $nodes, Time: ${time}ms, Rate: ${(nodes / (time / 1000)).toStringAsFixed(0)} nodes/sec');
       });
     });
 
@@ -511,24 +522,32 @@ class BenchmarkResults {
   String getSummary() {
     final buffer = StringBuffer();
 
-    buffer.writeln('\n═══════════════════════════════════════════════════════════════');
-    buffer.writeln('AI OPPONENT ENGINE ENHANCED - PERFORMANCE BENCHMARK REPORT');
-    buffer.writeln('═══════════════════════════════════════════════════════════════\n');
+    buffer.writeln(
+        '\n═══════════════════════════════════════════════════════════════');
+    buffer
+        .writeln('AI OPPONENT ENGINE ENHANCED - PERFORMANCE BENCHMARK REPORT');
+    buffer.writeln(
+        '═══════════════════════════════════════════════════════════════\n');
 
     // Benchmark Summary
     if (_benchmarks.isNotEmpty) {
       buffer.writeln('PERFORMANCE BENCHMARKS');
-      buffer.writeln('─────────────────────────────────────────────────────────────');
+      buffer.writeln(
+          '─────────────────────────────────────────────────────────────');
       for (final bench in _benchmarks) {
         final rate = (bench.nodes / (bench.timeMs / 1000)).toStringAsFixed(0);
         final hitRate = bench.zobristHits + bench.zobristMisses > 0
-            ? (bench.zobristHits / (bench.zobristHits + bench.zobristMisses) * 100)
+            ? (bench.zobristHits /
+                    (bench.zobristHits + bench.zobristMisses) *
+                    100)
                 .toStringAsFixed(1)
             : '0.0';
 
         buffer.writeln('${bench.name}');
-        buffer.writeln('  Nodes: ${bench.nodes} | Time: ${bench.timeMs}ms | Rate: $rate nodes/sec');
-        buffer.writeln('  Zobrist Hit Rate: $hitRate% (${bench.zobristHits} hits, ${bench.zobristMisses} misses)');
+        buffer.writeln(
+            '  Nodes: ${bench.nodes} | Time: ${bench.timeMs}ms | Rate: $rate nodes/sec');
+        buffer.writeln(
+            '  Zobrist Hit Rate: $hitRate% (${bench.zobristHits} hits, ${bench.zobristMisses} misses)');
       }
       buffer.writeln('');
     }
@@ -536,10 +555,12 @@ class BenchmarkResults {
     // Cache Performance
     if (_cacheEntries.isNotEmpty) {
       buffer.writeln('CACHE EFFICIENCY');
-      buffer.writeln('─────────────────────────────────────────────────────────────');
+      buffer.writeln(
+          '─────────────────────────────────────────────────────────────');
       for (final cache in _cacheEntries) {
         buffer.writeln('${cache.name}');
-        buffer.writeln('  Hits: ${cache.hits} | Misses: ${cache.misses} | Hit Rate: ${cache.hitRate}%');
+        buffer.writeln(
+            '  Hits: ${cache.hits} | Misses: ${cache.misses} | Hit Rate: ${cache.hitRate}%');
       }
       buffer.writeln('');
     }
@@ -547,12 +568,14 @@ class BenchmarkResults {
     // Table Growth
     if (_tableGrowth.isNotEmpty) {
       buffer.writeln('TRANSPOSITION TABLE GROWTH');
-      buffer.writeln('─────────────────────────────────────────────────────────────');
+      buffer.writeln(
+          '─────────────────────────────────────────────────────────────');
       for (final growth in _tableGrowth) {
         buffer.writeln('${growth.name}');
         buffer.writeln('  First search: ${growth.firstSearch} entries');
         buffer.writeln('  Second search: ${growth.secondSearch} entries');
-        buffer.writeln('  Growth: ${growth.secondSearch - growth.firstSearch} entries');
+        buffer.writeln(
+            '  Growth: ${growth.secondSearch - growth.firstSearch} entries');
       }
       buffer.writeln('');
     }
@@ -560,7 +583,8 @@ class BenchmarkResults {
     // Heuristic Usage
     if (_heuristics.isNotEmpty) {
       buffer.writeln('HEURISTIC EFFECTIVENESS');
-      buffer.writeln('─────────────────────────────────────────────────────────────');
+      buffer.writeln(
+          '─────────────────────────────────────────────────────────────');
       for (final heur in _heuristics) {
         buffer.writeln('${heur.name}');
         buffer.writeln('  Total cutoffs: ${heur.cutoffs}');
@@ -571,10 +595,12 @@ class BenchmarkResults {
     // Book Performance
     if (_bookEntries.isNotEmpty) {
       buffer.writeln('OPENING BOOK PERFORMANCE');
-      buffer.writeln('─────────────────────────────────────────────────────────────');
+      buffer.writeln(
+          '─────────────────────────────────────────────────────────────');
       for (final book in _bookEntries) {
         buffer.writeln('${book.name}');
-        buffer.writeln('  Time: ${book.timeMs}ms | In Book: ${book.isInBook ? 'Yes' : 'No'}');
+        buffer.writeln(
+            '  Time: ${book.timeMs}ms | In Book: ${book.isInBook ? 'Yes' : 'No'}');
       }
       buffer.writeln('');
     }
@@ -582,7 +608,8 @@ class BenchmarkResults {
     // Performance Summary
     if (_benchmarks.isNotEmpty) {
       buffer.writeln('PERFORMANCE SUMMARY');
-      buffer.writeln('─────────────────────────────────────────────────────────────');
+      buffer.writeln(
+          '─────────────────────────────────────────────────────────────');
 
       double avgRate = 0;
       for (final bench in _benchmarks) {
@@ -590,7 +617,8 @@ class BenchmarkResults {
       }
       avgRate /= _benchmarks.length;
 
-      buffer.writeln('Average Node Evaluation Rate: ${avgRate.toStringAsFixed(0)} nodes/sec');
+      buffer.writeln(
+          'Average Node Evaluation Rate: ${avgRate.toStringAsFixed(0)} nodes/sec');
 
       double avgCacheHitRate = 0;
       int validCacheEntries = 0;
@@ -602,11 +630,13 @@ class BenchmarkResults {
         }
       }
       if (validCacheEntries > 0) {
-        buffer.writeln('Average Zobrist Hit Rate: ${(avgCacheHitRate / validCacheEntries * 100).toStringAsFixed(1)}%');
+        buffer.writeln(
+            'Average Zobrist Hit Rate: ${(avgCacheHitRate / validCacheEntries * 100).toStringAsFixed(1)}%');
       }
     }
 
-    buffer.writeln('═══════════════════════════════════════════════════════════════\n');
+    buffer.writeln(
+        '═══════════════════════════════════════════════════════════════\n');
 
     return buffer.toString();
   }

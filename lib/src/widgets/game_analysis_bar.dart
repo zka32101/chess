@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Game Analysis Bar Widget
 ///
@@ -293,9 +293,9 @@ class EvaluationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Normalize evaluation to 0-1 range where 0.5 = equal position
-    final normalized = (evaluation.clamp(-maxEvaluation, maxEvaluation) /
-            (maxEvaluation * 2) +
-        0.5);
+    final normalized =
+        (evaluation.clamp(-maxEvaluation, maxEvaluation) / (maxEvaluation * 2) +
+            0.5);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

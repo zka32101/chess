@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/analytics_service.dart';
+import 'package:chess_tactics_master/src/services/analytics_service.dart';
 
 void main() {
   group('AnalyticsService', () {
@@ -102,8 +102,7 @@ void main() {
 
       test('should calculate average win rate', () {
         final winRates = [60.0, 55.0, 65.0, 70.0];
-        final average =
-            winRates.reduce((a, b) => a + b) / winRates.length;
+        final average = winRates.reduce((a, b) => a + b) / winRates.length;
 
         expect(average, equals(62.5));
       });

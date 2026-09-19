@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/providers/online_game_provider.dart';
-import 'package:chess/src/widgets/game_board.dart';
-import 'package:chess/src/widgets/time_clock.dart';
-import 'package:chess/src/widgets/game_info_panel.dart';
-import 'package:chess/src/utils/animations.dart';
-import 'package:chess/src/services/sound_service.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
+import 'package:chess_tactics_master/src/widgets/game_board.dart';
+import 'package:chess_tactics_master/src/widgets/time_clock.dart';
+import 'package:chess_tactics_master/src/widgets/game_info_panel.dart';
+import 'package:chess_tactics_master/src/utils/animations.dart';
+import 'package:chess_tactics_master/src/services/sound_service.dart';
 
 /// Screen for playing online multiplayer chess games
 class OnlineGameScreen extends ConsumerStatefulWidget {
@@ -64,7 +64,8 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
       children: [
         // Top player info (opponent) with animated time clock
         PlayerTimeClock(
-          playerName: isWhitePlayer ? game.blackPlayerName : game.whitePlayerName,
+          playerName:
+              isWhitePlayer ? game.blackPlayerName : game.whitePlayerName,
           rating: isWhitePlayer ? game.blackRating : game.whiteRating,
           timeMs: isWhitePlayer
               ? game.blackTimeRemainingMs
@@ -84,7 +85,8 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
 
         // Bottom player info (self) with animated time clock
         PlayerTimeClock(
-          playerName: isWhitePlayer ? game.whitePlayerName : game.blackPlayerName,
+          playerName:
+              isWhitePlayer ? game.whitePlayerName : game.blackPlayerName,
           rating: isWhitePlayer ? game.whiteRating : game.blackRating,
           timeMs: isWhitePlayer
               ? game.whiteTimeRemainingMs
@@ -662,7 +664,9 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Move sent'), duration: Duration(milliseconds: 800)),
+          const SnackBar(
+              content: Text('Move sent'),
+              duration: Duration(milliseconds: 800)),
         );
       }
     } catch (e) {

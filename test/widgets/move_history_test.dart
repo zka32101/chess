@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/widgets/move_history.dart';
+import 'package:chess_tactics_master/src/widgets/move_history.dart';
 
 void main() {
   group('MoveHistory', () {
-    testWidgets('displays empty state when no moves', (WidgetTester tester) async {
+    testWidgets('displays empty state when no moves',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -39,7 +40,8 @@ void main() {
       expect(find.text('1.'), findsOneWidget);
     });
 
-    testWidgets('displays moves in pairs (white and black)', (WidgetTester tester) async {
+    testWidgets('displays moves in pairs (white and black)',
+        (WidgetTester tester) async {
       final game = chess_lib.Chess();
       game.move(chess_lib.Move(fromAlgebraic: 'e2', toAlgebraic: 'e4'));
       game.move(chess_lib.Move(fromAlgebraic: 'c7', toAlgebraic: 'c5'));
@@ -101,7 +103,8 @@ void main() {
       expect(find.byType(Container), findsWidgets);
     });
 
-    testWidgets('calls callback when move selected', (WidgetTester tester) async {
+    testWidgets('calls callback when move selected',
+        (WidgetTester tester) async {
       final game = chess_lib.Chess();
       game.move(chess_lib.Move(fromAlgebraic: 'e2', toAlgebraic: 'e4'));
       game.move(chess_lib.Move(fromAlgebraic: 'e7', toAlgebraic: 'e5'));
@@ -199,7 +202,8 @@ void main() {
       expect(find.byType(ListView), findsOneWidget);
     });
 
-    testWidgets('shows both white and black moves', (WidgetTester tester) async {
+    testWidgets('shows both white and black moves',
+        (WidgetTester tester) async {
       final game = chess_lib.Chess();
       game.move(chess_lib.Move(fromAlgebraic: 'e2', toAlgebraic: 'e4'));
       game.move(chess_lib.Move(fromAlgebraic: 'c7', toAlgebraic: 'c5'));

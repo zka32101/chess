@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/models/head_to_head_stats.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 /// Service for managing player-to-player comparisons
 class ComparisonService {
@@ -18,10 +18,8 @@ class ComparisonService {
       final matchupId = _getMatchupId(player1Id, player2Id);
 
       // Try to get cached stats
-      final doc = await _firestore
-          .collection('player_matchups')
-          .doc(matchupId)
-          .get();
+      final doc =
+          await _firestore.collection('player_matchups').doc(matchupId).get();
 
       if (doc.exists) {
         return HeadToHeadStats.fromJson({
@@ -236,8 +234,9 @@ class ComparisonService {
       final totalGames = wins + losses + draws;
       final player1WinRate =
           totalGames > 0 ? (wins / totalGames * 100).toStringAsFixed(1) : '0.0';
-      final player2WinRate =
-          totalGames > 0 ? (losses / totalGames * 100).toStringAsFixed(1) : '0.0';
+      final player2WinRate = totalGames > 0
+          ? (losses / totalGames * 100).toStringAsFixed(1)
+          : '0.0';
 
       return HeadToHeadStats(
         player1Id: player1Id,
@@ -268,10 +267,7 @@ class ComparisonService {
     try {
       final matchupId = _getMatchupId(stats.player1Id, stats.player2Id);
 
-      await _firestore
-          .collection('player_matchups')
-          .doc(matchupId)
-          .set({
+      await _firestore.collection('player_matchups').doc(matchupId).set({
         'player1Id': stats.player1Id,
         'player2Id': stats.player2Id,
         'player1Wins': stats.player1Wins,

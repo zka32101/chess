@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/match_prediction_service.dart';
 import '../services/adaptive_matchmaking_service.dart';
 

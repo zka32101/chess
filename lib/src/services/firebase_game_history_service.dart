@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'package:chess/src/models/game_history.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/models/game_history.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Firebase implementation of game history service
@@ -24,9 +24,7 @@ class FirebaseGameHistoryService implements GameHistoryService {
     try {
       _logger.i('Saving game ${game.gameId} to Firebase');
 
-      final gameRef = _firestore
-          .collection(_gamesCollection)
-          .doc(game.gameId);
+      final gameRef = _firestore.collection(_gamesCollection).doc(game.gameId);
 
       // Save game with metadata
       await gameRef.set({
@@ -56,9 +54,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
           .orderBy('playedAt', descending: true)
           .get();
 
-      final games = snapshot.docs
-          .map((doc) => GameRecord.fromJson(doc.data()))
-          .toList();
+      final games =
+          snapshot.docs.map((doc) => GameRecord.fromJson(doc.data())).toList();
 
       _logger.i('Loaded ${games.length} games from Firebase');
       return games;
@@ -69,7 +66,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesByDifficulty(AIDifficulty difficulty) async {
+  Future<List<GameRecord>> loadGamesByDifficulty(
+      AIDifficulty difficulty) async {
     try {
       _logger.i('Loading games by difficulty: ${difficulty.displayName}');
 
@@ -79,9 +77,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
           .orderBy('playedAt', descending: true)
           .get();
 
-      final games = snapshot.docs
-          .map((doc) => GameRecord.fromJson(doc.data()))
-          .toList();
+      final games =
+          snapshot.docs.map((doc) => GameRecord.fromJson(doc.data())).toList();
 
       _logger.i('Loaded ${games.length} ${difficulty.displayName} games');
       return games;
@@ -92,7 +89,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadGamesBetween(DateTime start, DateTime end) async {
+  Future<List<GameRecord>> loadGamesBetween(
+      DateTime start, DateTime end) async {
     try {
       _logger.i('Loading games between $start and $end');
 
@@ -103,9 +101,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
           .orderBy('playedAt', descending: true)
           .get();
 
-      final games = snapshot.docs
-          .map((doc) => GameRecord.fromJson(doc.data()))
-          .toList();
+      final games =
+          snapshot.docs.map((doc) => GameRecord.fromJson(doc.data())).toList();
 
       _logger.i('Loaded ${games.length} games in date range');
       return games;
@@ -120,10 +117,7 @@ class FirebaseGameHistoryService implements GameHistoryService {
     try {
       _logger.i('Deleting game $gameId from Firebase');
 
-      await _firestore
-          .collection(_gamesCollection)
-          .doc(gameId)
-          .delete();
+      await _firestore.collection(_gamesCollection).doc(gameId).delete();
 
       // Recalculate stats after deletion
       await _updatePlayerStats();
@@ -141,9 +135,7 @@ class FirebaseGameHistoryService implements GameHistoryService {
       _logger.w('Clearing all games for user $_userId');
 
       final batch = _firestore.batch();
-      final snapshot = await _firestore
-          .collection(_gamesCollection)
-          .get();
+      final snapshot = await _firestore.collection(_gamesCollection).get();
 
       for (var doc in snapshot.docs) {
         batch.delete(doc.reference);
@@ -152,10 +144,7 @@ class FirebaseGameHistoryService implements GameHistoryService {
       await batch.commit();
 
       // Clear stats
-      await _firestore
-          .collection(_statsCollection)
-          .doc('overall')
-          .delete();
+      await _firestore.collection(_statsCollection).doc('overall').delete();
 
       _logger.i('All games cleared');
     } catch (e) {
@@ -204,32 +193,26 @@ class FirebaseGameHistoryService implements GameHistoryService {
       final mediumStats = stats.getStatsByDifficulty(AIDifficulty.medium);
       final hardStats = stats.getStatsByDifficulty(AIDifficulty.hard);
 
-      await _firestore
-          .collection(_statsCollection)
-          .doc('overall')
-          .set({
-            'totalGames': overall['totalGames'],
-            'wins': overall['wins'],
-            'draws': overall['draws'],
-            'losses': overall['losses'],
-            'winRate': overall['winRate'],
-            'avgNodesPerSec': overall['avgNodesPerSec'],
-            'avgCacheHitRate': overall['avgCacheHitRate'],
-            'trend': trend['trend'],
-            'nodeImprovement': trend['nodeImprovement'],
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
+      await _firestore.collection(_statsCollection).doc('overall').set({
+        'totalGames': overall['totalGames'],
+        'wins': overall['wins'],
+        'draws': overall['draws'],
+        'losses': overall['losses'],
+        'winRate': overall['winRate'],
+        'avgNodesPerSec': overall['avgNodesPerSec'],
+        'avgCacheHitRate': overall['avgCacheHitRate'],
+        'trend': trend['trend'],
+        'nodeImprovement': trend['nodeImprovement'],
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
       // Store difficulty-specific stats
-      await _firestore
-          .collection(_statsCollection)
-          .doc('byDifficulty')
-          .set({
-            'easy': easyStats,
-            'medium': mediumStats,
-            'hard': hardStats,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
+      await _firestore.collection(_statsCollection).doc('byDifficulty').set({
+        'easy': easyStats,
+        'medium': mediumStats,
+        'hard': hardStats,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
       _logger.e('Error updating player stats: $e');
       // Don't rethrow - stats update failure shouldn't block game save
@@ -239,10 +222,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
   /// Get cached player statistics from Firestore
   Future<Map<String, dynamic>?> getCachedStats() async {
     try {
-      final doc = await _firestore
-          .collection(_statsCollection)
-          .doc('overall')
-          .get();
+      final doc =
+          await _firestore.collection(_statsCollection).doc('overall').get();
 
       return doc.data();
     } catch (e) {
@@ -273,26 +254,25 @@ class FirebaseGameHistoryService implements GameHistoryService {
         .orderBy('playedAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          final games = snapshot.docs
-              .map((doc) => GameRecord.fromJson(doc.data()))
-              .toList();
+      final games =
+          snapshot.docs.map((doc) => GameRecord.fromJson(doc.data())).toList();
 
-          if (games.isEmpty) {
-            return PlayerStatistics(
-              playerId: _userId,
-              games: [],
-              firstGame: DateTime.now(),
-              lastGame: DateTime.now(),
-            );
-          }
+      if (games.isEmpty) {
+        return PlayerStatistics(
+          playerId: _userId,
+          games: [],
+          firstGame: DateTime.now(),
+          lastGame: DateTime.now(),
+        );
+      }
 
-          return PlayerStatistics(
-            playerId: _userId,
-            games: games,
-            firstGame: games.last.playedAt,
-            lastGame: games.first.playedAt,
-          );
-        });
+      return PlayerStatistics(
+        playerId: _userId,
+        games: games,
+        firstGame: games.last.playedAt,
+        lastGame: games.first.playedAt,
+      );
+    });
   }
 
   /// Stream of games for real-time sync
@@ -429,10 +409,8 @@ class FirebaseGameHistoryService implements GameHistoryService {
   /// Check if user has games synced to cloud
   Future<bool> hasSyncedGames() async {
     try {
-      final snapshot = await _firestore
-          .collection(_gamesCollection)
-          .limit(1)
-          .get();
+      final snapshot =
+          await _firestore.collection(_gamesCollection).limit(1).get();
 
       return snapshot.docs.isNotEmpty;
     } catch (e) {

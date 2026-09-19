@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/firestore_query_optimizer.dart';
-import 'package:chess/src/services/provider_cache_service.dart';
-import 'package:chess/src/services/ai_analysis_optimizer.dart';
+import 'package:chess_tactics_master/src/services/firestore_query_optimizer.dart';
+import 'package:chess_tactics_master/src/services/provider_cache_service.dart';
+import 'package:chess_tactics_master/src/services/ai_analysis_optimizer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mockito/mockito.dart';
 

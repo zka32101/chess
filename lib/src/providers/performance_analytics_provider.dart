@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/services/performance_service.dart';
-import 'package:chess/src/services/analytics_service.dart';
-import 'package:chess/src/models/rating_progression.dart';
-import 'package:chess/src/models/performance_stats.dart';
-import 'package:chess/src/models/analytics_snapshot.dart';
+import 'package:chess_tactics_master/src/services/performance_service.dart';
+import 'package:chess_tactics_master/src/services/analytics_service.dart';
+import 'package:chess_tactics_master/src/models/rating_progression.dart';
+import 'package:chess_tactics_master/src/models/performance_stats.dart';
+import 'package:chess_tactics_master/src/models/analytics_snapshot.dart';
 
 /// Provider for performance service
 final performanceServiceProvider = Provider((ref) {
@@ -16,8 +16,7 @@ final analyticsServiceProvider = Provider((ref) {
 });
 
 /// Provider for rating progression over a specific period
-final ratingProgressionProvider = StreamProvider.family<
-    List<RatingProgression>,
+final ratingProgressionProvider = StreamProvider.family<List<RatingProgression>,
     ({String playerId, int days})>(
   (ref, params) async* {
     final service = ref.watch(performanceServiceProvider);
@@ -37,7 +36,8 @@ final performanceWinRateProvider = FutureProvider.family<double, String>(
 );
 
 /// Provider for performance by opponent rank
-final performanceByRankProvider = FutureProvider.family<Map<String, int>, String>(
+final performanceByRankProvider =
+    FutureProvider.family<Map<String, int>, String>(
   (ref, playerId) {
     final service = ref.watch(performanceServiceProvider);
     return service.getPerformanceByRank(playerId);
@@ -62,7 +62,8 @@ final streakInfoProvider = FutureProvider.family(
 );
 
 /// Comprehensive performance stats provider
-final performanceStatsProvider = FutureProvider.family<PerformanceStats, String>(
+final performanceStatsProvider =
+    FutureProvider.family<PerformanceStats, String>(
   (ref, playerId) async {
     final service = ref.watch(performanceServiceProvider);
 
@@ -94,8 +95,8 @@ final performanceStatsProvider = FutureProvider.family<PerformanceStats, String>
 );
 
 /// Provider for monthly analytics snapshot
-final monthlyAnalyticsProvider =
-    FutureProvider.family<AnalyticsSnapshot, ({String playerId, int monthYear})>(
+final monthlyAnalyticsProvider = FutureProvider.family<AnalyticsSnapshot,
+    ({String playerId, int monthYear})>(
   (ref, params) {
     final service = ref.watch(analyticsServiceProvider);
     return service.getMonthlySnapshot(params.playerId, params.monthYear);
@@ -103,8 +104,7 @@ final monthlyAnalyticsProvider =
 );
 
 /// Provider for analytics range
-final analyticsRangeProvider = FutureProvider.family<
-    List<AnalyticsSnapshot>,
+final analyticsRangeProvider = FutureProvider.family<List<AnalyticsSnapshot>,
     ({String playerId, DateTime fromDate, DateTime toDate})>(
   (ref, params) {
     final service = ref.watch(analyticsServiceProvider);
@@ -126,8 +126,7 @@ final currentMonthAnalyticsProvider =
 );
 
 /// Provider for comparing analytics between two players
-final compareAnalyticsProvider = FutureProvider.family<
-    Map<String, dynamic>,
+final compareAnalyticsProvider = FutureProvider.family<Map<String, dynamic>,
     ({String player1Id, String player2Id})>(
   (ref, params) {
     final service = ref.watch(analyticsServiceProvider);
@@ -136,8 +135,7 @@ final compareAnalyticsProvider = FutureProvider.family<
 );
 
 /// Provider for performance trends
-final performanceTrendsProvider = FutureProvider.family<
-    Map<String, dynamic>,
+final performanceTrendsProvider = FutureProvider.family<Map<String, dynamic>,
     ({String playerId, int months})>(
   (ref, params) {
     final service = ref.watch(analyticsServiceProvider);

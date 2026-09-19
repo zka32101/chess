@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:chess/src/providers/performance_analytics_provider.dart';
-import 'package:chess/src/models/rating_progression.dart';
+import 'package:chess_tactics_master/src/providers/performance_analytics_provider.dart';
+import 'package:chess_tactics_master/src/models/rating_progression.dart';
 import 'chart_utils.dart';
 
 /// Chart displaying rating progression over time
@@ -44,7 +44,8 @@ class RatingProgressionChart extends ConsumerWidget {
     final ratings = data.map((p) => p.rating.toDouble()).toList();
     final minRating = ratings.reduce((a, b) => a < b ? a : b).toInt();
     final maxRating = ratings.reduce((a, b) => a > b ? a : b).toInt();
-    final avgRating = (ratings.reduce((a, b) => a + b) / ratings.length).toInt();
+    final avgRating =
+        (ratings.reduce((a, b) => a + b) / ratings.length).toInt();
 
     // Create chart spots
     final spots = <FlSpot>[];
@@ -211,10 +212,8 @@ class RatingProgressionChart extends ConsumerWidget {
                 lineTouchData: LineTouchData(
                   handleBuiltInTouches: true,
                   touchTooltipData: LineTouchTooltipData(
-                    tooltipBgColor: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withOpacity(0.9),
+                    tooltipBgColor:
+                        Theme.of(context).colorScheme.surface.withOpacity(0.9),
                     tooltipBorder: Border.all(
                       color: Theme.of(context).colorScheme.outline,
                     ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/widgets/animations/chart_entrance_animation.dart';
+import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
 
 void main() {
   group('ChartEntranceAnimation', () {

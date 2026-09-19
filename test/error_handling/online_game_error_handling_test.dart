@@ -1,7 +1,7 @@
 import 'dart:math' show pow;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 
 /// Tests for error handling and resilience in online multiplayer
 void main() {
@@ -28,7 +28,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5 2. Nf3 Nc6',
-          currentFen: 'rnbqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 1 3',
+          currentFen:
+              'rnbqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 1 3',
           moves: [
             GameMove(
               moveNumber: 1,
@@ -103,7 +104,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -117,7 +119,8 @@ void main() {
 
         // After reconnection attempt fails, game should be marked as offline
         final offlineGame = game.copyWith(
-          status: 'active', // Keep active but with offline flag in state manager
+          status:
+              'active', // Keep active but with offline flag in state manager
         );
 
         expect(offlineGame.gameId, game.gameId);
@@ -225,9 +228,8 @@ void main() {
         final moves = [move, move]; // Duplicate
 
         // Deduplicate based on moveNumber + position + player
-        final uniqueMoves = moves
-            .toSet()
-            .toList(); // In real code, would use unique key
+        final uniqueMoves =
+            moves.toSet().toList(); // In real code, would use unique key
 
         // Still have duplicates since we're just storing references
         // In real implementation, validate move uniqueness in Cloud Function
@@ -304,7 +306,12 @@ void main() {
       });
 
       test('Validate promotion piece type', () {
-        const validPromotions = ['q', 'r', 'b', 'n']; // Queen, Rook, Bishop, Knight
+        const validPromotions = [
+          'q',
+          'r',
+          'b',
+          'n'
+        ]; // Queen, Rook, Bishop, Knight
 
         for (final promotion in validPromotions) {
           final move = GameMove(
@@ -340,7 +347,8 @@ void main() {
           whiteRating: 100, // Very low rating
           blackRating: 3000, // Very high rating
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -411,7 +419,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -482,7 +491,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5',
-          currentFen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+          currentFen:
+              'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -524,7 +534,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1600,
           pgn: '1. e4 e5 2. Nf3 Nf6',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,

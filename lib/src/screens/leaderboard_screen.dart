@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/models/player_leaderboard.dart';
+import 'package:chess_tactics_master/src/models/player_leaderboard.dart';
 
 /// Leaderboard screen displaying player rankings
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -128,7 +128,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 backgroundColor: Colors.grey[200],
                 selectedColor: Colors.blue[100],
                 labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: isSelected ? Colors.blue[900] : Colors.grey[700],
                     ),
               ),
@@ -211,12 +212,16 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Color(int.parse(ratingBadgeColor.replaceFirst('#', '0xff'))),
+                            color: Color(int.parse(
+                                ratingBadgeColor.replaceFirst('#', '0xff'))),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             ratingCategory,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -225,9 +230,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                         const SizedBox(width: 8),
                         Text(
                           '${entry.totalGamesPlayed} games',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
                         ),
                       ],
                     ),
@@ -366,7 +372,8 @@ class PlayerProfilePreview extends StatelessWidget {
 
   /// Build stats grid
   Widget _buildStatsGrid() {
-    final winRate = (entry.wins / entry.totalGamesPlayed * 100).toStringAsFixed(1);
+    final winRate =
+        (entry.wins / entry.totalGamesPlayed * 100).toStringAsFixed(1);
 
     return GridView.count(
       crossAxisCount: 2,
@@ -375,7 +382,8 @@ class PlayerProfilePreview extends StatelessWidget {
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       children: [
-        _buildStatCard('Total Games', entry.totalGamesPlayed.toString(), Colors.blue),
+        _buildStatCard(
+            'Total Games', entry.totalGamesPlayed.toString(), Colors.blue),
         _buildStatCard('Win Rate', '$winRate%', Colors.green),
         _buildStatCard('Wins', entry.wins.toString(), Colors.green),
         _buildStatCard('Losses', entry.losses.toString(), Colors.red),
@@ -429,9 +437,12 @@ class PlayerProfilePreview extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _buildStatRow('Total Games', entry.totalGamesPlayed.toString()),
-            _buildStatRow('Wins', '${entry.wins} (${(entry.wins / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
-            _buildStatRow('Draws', '${entry.draws} (${(entry.draws / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
-            _buildStatRow('Losses', '${entry.losses} (${(entry.losses / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
+            _buildStatRow('Wins',
+                '${entry.wins} (${(entry.wins / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
+            _buildStatRow('Draws',
+                '${entry.draws} (${(entry.draws / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
+            _buildStatRow('Losses',
+                '${entry.losses} (${(entry.losses / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
             const SizedBox(height: 12),
             _buildStatRow('Rating', entry.rating.toString()),
             _buildStatRow('Rank', '#${entry.rank}'),

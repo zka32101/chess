@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chess/src/services/shogi_rank_service.dart';
+import 'package:chess_tactics_master/src/services/shogi_rank_service.dart';
 
 /// Displays a player's shogi rank with visual styling
 class ShogiRankDisplay extends StatelessWidget {
@@ -132,7 +132,8 @@ class ShogiRankProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = ShogiRankService.progressToNextRank(eloRating, currentRank);
+    final progress =
+        ShogiRankService.progressToNextRank(eloRating, currentRank);
     final currentRankName = ShogiRankService.displayName(currentRank);
 
     return Column(
@@ -250,9 +251,10 @@ class ShogiRankComparison extends StatelessWidget {
                   children: [
                     Text(
                       ShogiRankService.displayName(player1Rank),
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -292,9 +294,10 @@ class ShogiRankComparison extends StatelessWidget {
                   children: [
                     Text(
                       ShogiRankService.displayName(player2Rank),
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 4),
                     Text(

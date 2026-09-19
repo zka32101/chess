@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/countermove_heuristic.dart';
+import 'package:chess_tactics_master/src/services/countermove_heuristic.dart';
 
 void main() {
   group('CountermoveHeuristic', () {

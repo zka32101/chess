@@ -1,7 +1,7 @@
 import 'dart:math' show pow;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 
 /// Performance testing utilities for online multiplayer
 class PerformanceMetrics {
@@ -88,7 +88,8 @@ void main() {
             whiteRating: 1600 + (i % 100),
             blackRating: 1580 + (i % 100),
             pgn: '',
-            currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+            currentFen:
+                'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             moves: [],
             timeControl: '5min',
             timeControlMs: 5 * 60 * 1000,
@@ -124,7 +125,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -145,7 +147,8 @@ void main() {
           );
 
           expect(modifiedGame.gameId, baseGame.gameId);
-          expect(modifiedGame.whiteTimeRemainingMs, lessThan(baseGame.whiteTimeRemainingMs));
+          expect(modifiedGame.whiteTimeRemainingMs,
+              lessThan(baseGame.whiteTimeRemainingMs));
         }
 
         metrics.recordEnd(copyCount);
@@ -170,7 +173,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '',
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,
@@ -228,7 +232,8 @@ void main() {
         for (int i = 0; i < queryCount; i++) {
           final lastMove = moves.last;
           final moveCount = moves.length;
-          final whiteMovesOnly = moves.where((m) => m.playerId == 'user_1').toList();
+          final whiteMovesOnly =
+              moves.where((m) => m.playerId == 'user_1').toList();
 
           expect(lastMove, isNotNull);
           expect(moveCount, 500);
@@ -274,7 +279,8 @@ void main() {
         metrics.recordEnd(gameCount);
         print(metrics);
 
-        expect(metrics.operationsPerSecond, greaterThan(1000)); // 1000+ calcs/sec
+        expect(
+            metrics.operationsPerSecond, greaterThan(1000)); // 1000+ calcs/sec
       });
     });
 
@@ -323,7 +329,8 @@ void main() {
             whiteRating: 1600,
             blackRating: 1580,
             pgn: '',
-            currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+            currentFen:
+                'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             moves: [],
             timeControl: '5min',
             timeControlMs: 5 * 60 * 1000,
@@ -418,7 +425,8 @@ void main() {
             whiteRating: 1600,
             blackRating: 1580,
             pgn: '',
-            currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+            currentFen:
+                'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
             moves: [],
             timeControl: '5min',
             timeControlMs: 5 * 60 * 1000,
@@ -462,7 +470,8 @@ void main() {
           whiteRating: 1600,
           blackRating: 1580,
           pgn: '1. e4 e5 2. Nf3 Nc6' * 10, // Simulate longer game
-          currentFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+          currentFen:
+              'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           moves: [],
           timeControl: '5min',
           timeControlMs: 5 * 60 * 1000,

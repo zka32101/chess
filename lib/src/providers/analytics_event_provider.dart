@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/analytics_event_tracker.dart';
 import '../services/revenue_tracking_service.dart';
 
@@ -37,7 +37,8 @@ final averageTransactionValueProvider = Provider((ref) {
 });
 
 /// Revenue by segment provider
-final revenueBySegmentProvider = Provider.family<double, String>((ref, segment) {
+final revenueBySegmentProvider =
+    Provider.family<double, String>((ref, segment) {
   final revenueService = ref.watch(revenueTrackingProvider);
   return revenueService.getSegmentRevenue(segment);
 });
@@ -75,7 +76,8 @@ class PurchaseTracker extends StateNotifier<bool> {
 }
 
 /// Purchase tracking provider
-final purchaseTrackingProvider = StateNotifierProvider<PurchaseTracker, bool>((ref) {
+final purchaseTrackingProvider =
+    StateNotifierProvider<PurchaseTracker, bool>((ref) {
   return PurchaseTracker();
 });
 
@@ -92,7 +94,8 @@ class FeatureUsageTracker extends StateNotifier<Map<String, int>> {
 }
 
 /// Feature usage tracking provider
-final featureUsageTrackingProvider = StateNotifierProvider<FeatureUsageTracker, Map<String, int>>((ref) {
+final featureUsageTrackingProvider =
+    StateNotifierProvider<FeatureUsageTracker, Map<String, int>>((ref) {
   return FeatureUsageTracker();
 });
 
@@ -117,6 +120,7 @@ class GameCompletionTracker extends StateNotifier<int> {
 }
 
 /// Game completion tracking provider
-final gameCompletionTrackingProvider = StateNotifierProvider<GameCompletionTracker, int>((ref) {
+final gameCompletionTrackingProvider =
+    StateNotifierProvider<GameCompletionTracker, int>((ref) {
   return GameCompletionTracker();
 });

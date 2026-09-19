@@ -1,5 +1,5 @@
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
-import 'package:chess/src/widgets/performance_graphs.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/widgets/performance_graphs.dart';
 
 /// Represents a complete game with all analysis data
 class GameRecord {
@@ -59,8 +59,8 @@ class GameRecord {
               ?.map((m) => _moveMetricsFromJson(m as Map<String, dynamic>))
               .toList() ??
           [],
-      statistics: GameStatistics.fromJson(
-          json['statistics'] as Map<String, dynamic>),
+      statistics:
+          GameStatistics.fromJson(json['statistics'] as Map<String, dynamic>),
       notes: json['notes'] as String?,
     );
   }
@@ -235,12 +235,12 @@ class GameStatistics {
       avgTimePerMove: json['avgTimePerMove'] as double? ?? 0,
       totalKillerCutoffs: json['totalKillerCutoffs'] as int? ?? 0,
       totalCountermoveCutoffs: json['totalCountermoveCutoffs'] as int? ?? 0,
-      openingStats:
-          PhaseStatistics.fromJson(json['openingStats'] as Map<String, dynamic>? ?? {}),
-      midgameStats:
-          PhaseStatistics.fromJson(json['midgameStats'] as Map<String, dynamic>? ?? {}),
-      endgameStats:
-          PhaseStatistics.fromJson(json['endgameStats'] as Map<String, dynamic>? ?? {}),
+      openingStats: PhaseStatistics.fromJson(
+          json['openingStats'] as Map<String, dynamic>? ?? {}),
+      midgameStats: PhaseStatistics.fromJson(
+          json['midgameStats'] as Map<String, dynamic>? ?? {}),
+      endgameStats: PhaseStatistics.fromJson(
+          json['endgameStats'] as Map<String, dynamic>? ?? {}),
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/test_runner.dart';
 import '../utils/security_auditor.dart';
 import '../utils/app_store_submission_checklist.dart';
@@ -121,7 +121,8 @@ class TestExecutionNotifier extends StateNotifier<bool> {
 }
 
 /// Test execution provider
-final testExecutionProvider = StateNotifierProvider<TestExecutionNotifier, bool>((ref) {
+final testExecutionProvider =
+    StateNotifierProvider<TestExecutionNotifier, bool>((ref) {
   return TestExecutionNotifier();
 });
 
@@ -142,6 +143,7 @@ class SecurityAuditNotifier extends StateNotifier<bool> {
 }
 
 /// Security audit execution provider
-final securityAuditExecutionProvider = StateNotifierProvider<SecurityAuditNotifier, bool>((ref) {
+final securityAuditExecutionProvider =
+    StateNotifierProvider<SecurityAuditNotifier, bool>((ref) {
   return SecurityAuditNotifier();
 });

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/models/online_game.dart';
-import 'package:chess/src/screens/online/online_game_widgets.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/screens/online/online_game_widgets.dart';
 
 void main() {
   group('PlayerPresenceWidget', () {
-    testWidgets('displays online player with green indicator', (WidgetTester tester) async {
+    testWidgets('displays online player with green indicator',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -28,7 +29,8 @@ void main() {
       expect(container, findsWidgets);
     });
 
-    testWidgets('displays offline player with grey indicator', (WidgetTester tester) async {
+    testWidgets('displays offline player with grey indicator',
+        (WidgetTester tester) async {
       final lastActivity = DateTime.now().subtract(const Duration(minutes: 5));
 
       await tester.pumpWidget(
@@ -92,7 +94,8 @@ void main() {
   });
 
   group('MatchmakingStatusWidget', () {
-    testWidgets('displays queue status with position', (WidgetTester tester) async {
+    testWidgets('displays queue status with position',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -231,7 +234,8 @@ void main() {
       expect(find.text('Time Control'), findsOneWidget);
     });
 
-    testWidgets('shows action buttons for active game', (WidgetTester tester) async {
+    testWidgets('shows action buttons for active game',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -248,7 +252,8 @@ void main() {
       expect(find.text('Resign Game'), findsOneWidget);
     });
 
-    testWidgets('hides action buttons for completed game', (WidgetTester tester) async {
+    testWidgets('hides action buttons for completed game',
+        (WidgetTester tester) async {
       final completedGame = game.copyWith(status: 'completed');
       await tester.pumpWidget(
         MaterialApp(
@@ -264,7 +269,8 @@ void main() {
   });
 
   group('MoveHistoryWidget', () {
-    testWidgets('displays empty state when no moves', (WidgetTester tester) async {
+    testWidgets('displays empty state when no moves',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -315,7 +321,8 @@ void main() {
       expect(find.text('e7e5'), findsOneWidget);
     });
 
-    testWidgets('displays promotion moves correctly', (WidgetTester tester) async {
+    testWidgets('displays promotion moves correctly',
+        (WidgetTester tester) async {
       final moves = [
         GameMove(
           moveNumber: 1,

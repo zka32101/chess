@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/widgets/chess_board.dart';
-import 'package:chess/src/widgets/captured_pieces.dart';
+import 'package:chess_tactics_master/src/widgets/chess_board.dart';
+import 'package:chess_tactics_master/src/widgets/captured_pieces.dart';
 
 /// Game container with board and controls
 class GameBoard extends StatefulWidget {
@@ -59,11 +59,11 @@ class _GameBoardState extends State<GameBoard> {
                   ? 'White to Move'
                   : 'Black to Move',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: widget.gameState.turn == chess_lib.Color.WHITE
-                    ? Colors.grey[300]
-                    : Colors.grey[700],
-              ),
+                    fontWeight: FontWeight.bold,
+                    color: widget.gameState.turn == chess_lib.Color.WHITE
+                        ? Colors.grey[300]
+                        : Colors.grey[700],
+                  ),
             ),
           ),
 
@@ -87,9 +87,8 @@ class _GameBoardState extends State<GameBoard> {
                 children: [
                   if (widget.onUndo != null)
                     ElevatedButton.icon(
-                      onPressed: widget.moveHistory.isEmpty
-                          ? null
-                          : widget.onUndo,
+                      onPressed:
+                          widget.moveHistory.isEmpty ? null : widget.onUndo,
                       icon: const Icon(Icons.undo),
                       label: const Text('Undo'),
                     ),
@@ -147,7 +146,7 @@ class _GameBoardState extends State<GameBoard> {
         final piece = _getPieceAt(from);
         if (piece?.type == chess_lib.PieceType.pawn &&
             ((piece?.color == chess_lib.Color.WHITE && to[1] == '8') ||
-             (piece?.color == chess_lib.Color.BLACK && to[1] == '1'))) {
+                (piece?.color == chess_lib.Color.BLACK && to[1] == '1'))) {
           // Show promotion dialog
           _showPromotionDialog(from, to);
         } else {

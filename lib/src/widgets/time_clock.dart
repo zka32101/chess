@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chess/src/utils/animations.dart';
+import 'package:chess_tactics_master/src/utils/animations.dart';
 
 /// Time clock widget for displaying remaining time in online games
 ///
@@ -39,7 +39,8 @@ class TimeClock extends StatefulWidget {
 
 enum ClockSize { small, standard, large }
 
-class _TimeClockState extends State<TimeClock> with SingleTickerProviderStateMixin {
+class _TimeClockState extends State<TimeClock>
+    with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   bool _timeExpiredNotified = false;
@@ -70,9 +71,7 @@ class _TimeClockState extends State<TimeClock> with SingleTickerProviderStateMix
     super.didUpdateWidget(oldWidget);
 
     // Check if time just expired
-    if (widget.timeMs <= 0 &&
-        oldWidget.timeMs > 0 &&
-        !_timeExpiredNotified) {
+    if (widget.timeMs <= 0 && oldWidget.timeMs > 0 && !_timeExpiredNotified) {
       _timeExpiredNotified = true;
       widget.onTimeExpired?.call();
     }
@@ -124,7 +123,7 @@ class _TimeClockState extends State<TimeClock> with SingleTickerProviderStateMix
       return Colors.orange.withOpacity(0.15); // < 1 minute
     } else if (widget.isCurrentPlayer) {
       return isDarkMode
-          ? Colors.blue.withOpacity(0.15)  // Darker blue for dark mode
+          ? Colors.blue.withOpacity(0.15) // Darker blue for dark mode
           : Colors.blue.withOpacity(0.05); // Light blue for light mode
     } else {
       return Colors.transparent;
@@ -162,7 +161,8 @@ class _TimeClockState extends State<TimeClock> with SingleTickerProviderStateMix
   }
 
   /// Build the actual clock widget
-  Widget _buildClockWidget(BuildContext context, Color timeColor, Color backgroundColor, double fontSize) {
+  Widget _buildClockWidget(BuildContext context, Color timeColor,
+      Color backgroundColor, double fontSize) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -243,7 +243,8 @@ class PlayerTimeClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundColor ?? (isCurrentPlayer ? Colors.blue[50] : Colors.transparent),
+      color: backgroundColor ??
+          (isCurrentPlayer ? Colors.blue[50] : Colors.transparent),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

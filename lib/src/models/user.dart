@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:chess/src/services/shogi_rank_service.dart';
+import 'package:chess_tactics_master/src/services/shogi_rank_service.dart';
 
 part 'user.freezed.dart';
 part 'user.g.dart';
@@ -30,7 +30,8 @@ class UserModel with _$UserModel {
 }
 
 /// ShogiRankをJSON変換するためのコンバーター
-class _ShogiRankConverter implements JsonConverter<ShogiRank?, Map<String, dynamic>?> {
+class _ShogiRankConverter
+    implements JsonConverter<ShogiRank?, Map<String, dynamic>?> {
   const _ShogiRankConverter();
 
   @override

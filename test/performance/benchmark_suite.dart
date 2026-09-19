@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/performance_service.dart';
-import 'package:chess/src/models/rating_progression.dart';
+import 'package:chess_tactics_master/src/services/performance_service.dart';
+import 'package:chess_tactics_master/src/models/rating_progression.dart';
 
 /// Benchmark results structure
 class BenchmarkResult {
@@ -25,7 +25,8 @@ class BenchmarkResult {
 
 /// Performance benchmark suite for core services
 class PerformanceBenchmarkSuite {
-  static const String suiteName = 'Chess Tactics Master - Performance Benchmarks';
+  static const String suiteName =
+      'Chess Tactics Master - Performance Benchmarks';
   static const Duration defaultTimeout = Duration(seconds: 30);
   static const Duration defaultWarnThreshold = Duration(seconds: 5);
 
@@ -86,7 +87,8 @@ class PerformanceBenchmarkSuite {
     buffer.writeln('  Total Benchmarks: ${results.length}');
     buffer.writeln('  Passed: ${results.where((r) => r.passed).length}');
     buffer.writeln('  Failed: ${results.where((r) => !r.passed).length}');
-    buffer.writeln('  Total Time: ${_sumDuration(results.map((r) => r.duration))}ms');
+    buffer.writeln(
+        '  Total Time: ${_sumDuration(results.map((r) => r.duration))}ms');
     buffer.writeln('');
 
     buffer.writeln('Results:');
@@ -234,7 +236,8 @@ void main() {
       final suite =
           PerformanceBenchmarkSuite(customThresholds: customThresholds);
 
-      expect(suite.thresholds, containsPair('custom_test', Duration(milliseconds: 100)));
+      expect(suite.thresholds,
+          containsPair('custom_test', Duration(milliseconds: 100)));
     });
 
     test('reset clears results', () {

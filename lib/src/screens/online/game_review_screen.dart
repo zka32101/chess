@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 
 /// Screen for reviewing/replaying completed games
 class GameReviewScreen extends ConsumerStatefulWidget {
@@ -81,7 +81,8 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text('vs', style: TextStyle(fontWeight: FontWeight.bold)),
+                child:
+                    Text('vs', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
               Expanded(
                 child: _buildPlayerCard(
@@ -372,8 +373,7 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
             child: Text(
               moveStr,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected ? Colors.blue[900] : null,
                   ),
             ),
@@ -456,8 +456,8 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
             _buildInfoRow(
               'Duration',
               _formatDuration(
-                widget.game.endedAt
-                        ?.difference(widget.game.startedAt ?? widget.game.createdAt) ??
+                widget.game.endedAt?.difference(
+                        widget.game.startedAt ?? widget.game.createdAt) ??
                     Duration.zero,
               ),
             ),

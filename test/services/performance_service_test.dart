@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/performance_service.dart';
+import 'package:chess_tactics_master/src/services/performance_service.dart';
 
 void main() {
   group('PerformanceService', () {
@@ -76,7 +76,8 @@ void main() {
           if (results[i] == results[i - 1]) {
             currentStreak++;
             if (results[i]) {
-              maxWinStreak = currentStreak > maxWinStreak ? currentStreak : maxWinStreak;
+              maxWinStreak =
+                  currentStreak > maxWinStreak ? currentStreak : maxWinStreak;
             }
           } else {
             currentStreak = 1;
@@ -107,7 +108,8 @@ void main() {
           'rapid': 48,
         };
 
-        final strongest = performance.entries.reduce((a, b) => a.value > b.value ? a : b);
+        final strongest =
+            performance.entries.reduce((a, b) => a.value > b.value ? a : b);
         expect(strongest.key, equals('bullet'));
         expect(strongest.value, equals(65));
       });
@@ -119,7 +121,8 @@ void main() {
           'rapid': 48,
         };
 
-        final weakest = performance.entries.reduce((a, b) => a.value < b.value ? a : b);
+        final weakest =
+            performance.entries.reduce((a, b) => a.value < b.value ? a : b);
         expect(weakest.key, equals('rapid'));
         expect(weakest.value, equals(48));
       });

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/models/rating_progression.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/models/rating_progression.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 /// Information about streaks
 class StreakInfo {
@@ -39,16 +39,15 @@ class PerformanceService {
           .orderBy('playedAt', descending: true)
           .get();
 
-      final matches = snapshot.docs
-          .map((doc) => MatchRecord.fromJson(doc.data()))
-          .toList();
+      final matches =
+          snapshot.docs.map((doc) => MatchRecord.fromJson(doc.data())).toList();
 
       // Group by date and calculate daily progression
       final progressionMap = <DateTime, RatingProgression>{};
 
       for (final match in matches) {
-        final date =
-            DateTime(match.playedAt.year, match.playedAt.month, match.playedAt.day);
+        final date = DateTime(
+            match.playedAt.year, match.playedAt.month, match.playedAt.day);
 
         // Get or initialize progression for this date
         final existing = progressionMap[date];
@@ -97,15 +96,14 @@ class PerformanceService {
         .orderBy('playedAt', descending: true)
         .snapshots()
         .asyncMap((snapshot) async {
-      final matches = snapshot.docs
-          .map((doc) => MatchRecord.fromJson(doc.data()))
-          .toList();
+      final matches =
+          snapshot.docs.map((doc) => MatchRecord.fromJson(doc.data())).toList();
 
       final progressionMap = <DateTime, RatingProgression>{};
 
       for (final match in matches) {
-        final date =
-            DateTime(match.playedAt.year, match.playedAt.month, match.playedAt.day);
+        final date = DateTime(
+            match.playedAt.year, match.playedAt.month, match.playedAt.day);
 
         final existing = progressionMap[date];
         if (existing == null) {
@@ -131,7 +129,8 @@ class PerformanceService {
       progression.sort((a, b) => a.date.compareTo(b.date));
 
       return progression;
-    }).handleError((e) => throw Exception('Failed to watch rating progression: $e'));
+    }).handleError(
+            (e) => throw Exception('Failed to watch rating progression: $e'));
   }
 
   /// Calculate current win rate
@@ -170,7 +169,8 @@ class PerformanceService {
 
       for (final doc in snapshot.docs) {
         final match = MatchRecord.fromJson(doc.data());
-        final opponentRank = match.opponentId; // Would need rank from user collection
+        final opponentRank =
+            match.opponentId; // Would need rank from user collection
 
         if (!performanceByRank.containsKey(opponentRank)) {
           performanceByRank[opponentRank] = [];
@@ -213,8 +213,7 @@ class PerformanceService {
           performanceByTimeControl[match.timeControl] = [];
         }
 
-        performanceByTimeControl[match.timeControl]!
-            .add(match.result == 'win');
+        performanceByTimeControl[match.timeControl]!.add(match.result == 'win');
       }
 
       // Calculate win rates
@@ -252,9 +251,8 @@ class PerformanceService {
         );
       }
 
-      final matches = snapshot.docs
-          .map((doc) => MatchRecord.fromJson(doc.data()))
-          .toList();
+      final matches =
+          snapshot.docs.map((doc) => MatchRecord.fromJson(doc.data())).toList();
 
       int currentStreak = 0;
       int longestWin = 0;
@@ -272,7 +270,8 @@ class PerformanceService {
         } else {
           // Streak ended
           if (lastWasWin) {
-            longestWin = longestWin > currentStreak ? longestWin : currentStreak;
+            longestWin =
+                longestWin > currentStreak ? longestWin : currentStreak;
           } else {
             longestLoss =
                 longestLoss < currentStreak ? longestLoss : currentStreak;

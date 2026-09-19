@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'package:chess/src/models/online_game.dart';
+import 'package:chess_tactics_master/src/models/online_game.dart';
 
 /// Manages matchmaking queue and player pairing
 class MatchmakingService {
@@ -13,10 +13,10 @@ class MatchmakingService {
 
   // Rating range expansion over time (in seconds)
   static const Map<int, int> _ratingRangeByWaitTime = {
-    0: 50,      // First 10 seconds: ±50
-    10: 100,    // 10-20 seconds: ±100
-    20: 200,    // 20-30 seconds: ±200
-    30: 300,    // 30+ seconds: ±300
+    0: 50, // First 10 seconds: ±50
+    10: 100, // 10-20 seconds: ±100
+    20: 200, // 20-30 seconds: ±200
+    30: 300, // 30+ seconds: ±300
   };
 
   MatchmakingService({FirebaseFirestore? firestore})
@@ -83,10 +83,8 @@ class MatchmakingService {
   /// Get current queue status
   Future<Map<String, dynamic>> getQueueStatus(String queueId) async {
     try {
-      final doc = await _firestore
-          .collection('matchmaking_queue')
-          .doc(queueId)
-          .get();
+      final doc =
+          await _firestore.collection('matchmaking_queue').doc(queueId).get();
 
       if (!doc.exists) {
         return {'status': 'not_found'};
@@ -179,7 +177,8 @@ class MatchmakingService {
 
     double total = 0;
     for (final doc in docs) {
-      final entry = MatchmakingQueueEntry.fromJson(doc.data() as Map<String, dynamic>);
+      final entry =
+          MatchmakingQueueEntry.fromJson(doc.data() as Map<String, dynamic>);
       total += entry.waitTimeSeconds;
     }
 

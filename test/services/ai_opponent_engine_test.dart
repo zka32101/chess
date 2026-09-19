@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/chess_engine_service.dart';
-import 'package:chess/src/services/ai_opponent_engine.dart';
+import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
 
 void main() {
   group('AIDifficulty', () {
@@ -120,7 +120,8 @@ void main() {
 
     test('material evaluation works correctly', () {
       // Remove black queen (value 9)
-      chess.loadFromFen('rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+      chess.loadFromFen(
+          'rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
       final score = evaluator.evaluate();
       expect(score, greaterThan(0)); // White should be ahead
       expect(score, greaterThanOrEqualTo(9)); // At least queen value
@@ -233,7 +234,8 @@ void main() {
 
     test('captures are prioritized in move ordering', () {
       // Position with capture available
-      chess.loadFromFen('rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 4');
+      chess.loadFromFen(
+          'rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 4');
 
       final move = engine.getBestMove();
       // The engine should find good moves (captures if available)
@@ -253,9 +255,8 @@ void main() {
         final fromSquare = move.substring(0, 2);
         final toSquare = move.substring(2, 4);
 
-        final isLegal = legalMoves.any((m) =>
-            m.fromAlgebraic == fromSquare &&
-            m.toAlgebraic == toSquare);
+        final isLegal = legalMoves.any(
+            (m) => m.fromAlgebraic == fromSquare && m.toAlgebraic == toSquare);
 
         expect(isLegal, true, reason: 'Move $move should be legal');
 
@@ -291,7 +292,8 @@ void main() {
 
     test('handles forced moves correctly', () {
       // Position where there's essentially only one good move
-      chess.loadFromFen('rnbqkb1r/pppppppp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 1');
+      chess.loadFromFen(
+          'rnbqkb1r/pppppppp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 1');
 
       final move = engine.getBestMove();
       expect(move, isNotNull);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/widgets/difficulty_selector.dart';
-import 'package:chess/src/services/ai_opponent_engine.dart';
+import 'package:chess_tactics_master/src/widgets/difficulty_selector.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
 
 void main() {
   group('DifficultySelector', () {
@@ -21,7 +21,8 @@ void main() {
       expect(find.text('Hard'), findsWidgets);
     });
 
-    testWidgets('displays difficulty descriptions', (WidgetTester tester) async {
+    testWidgets('displays difficulty descriptions',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -32,8 +33,10 @@ void main() {
         ),
       );
 
-      expect(find.text('Perfect for beginners. AI plays basic moves.'), findsOneWidget);
-      expect(find.text('Good challenge. AI plays with strategy.'), findsOneWidget);
+      expect(find.text('Perfect for beginners. AI plays basic moves.'),
+          findsOneWidget);
+      expect(
+          find.text('Good challenge. AI plays with strategy.'), findsOneWidget);
       expect(find.text('Very challenging. AI plays strongly.'), findsOneWidget);
     });
 
@@ -82,7 +85,8 @@ void main() {
       expect(find.byType(Radio<AIDifficulty>), findsWidgets);
     });
 
-    testWidgets('calls callback when difficulty selected', (WidgetTester tester) async {
+    testWidgets('calls callback when difficulty selected',
+        (WidgetTester tester) async {
       AIDifficulty? selectedDifficulty;
 
       await tester.pumpWidget(
@@ -99,8 +103,8 @@ void main() {
 
       // Select Hard difficulty
       final hardRadio = find.byWidgetPredicate(
-        (widget) => widget is Radio<AIDifficulty> &&
-            widget.value == AIDifficulty.hard,
+        (widget) =>
+            widget is Radio<AIDifficulty> && widget.value == AIDifficulty.hard,
       );
       await tester.tap(hardRadio.first);
       await tester.pumpAndSettle();
@@ -112,7 +116,8 @@ void main() {
       expect(selectedDifficulty, AIDifficulty.hard);
     });
 
-    testWidgets('closes dialog when Cancel is tapped', (WidgetTester tester) async {
+    testWidgets('closes dialog when Cancel is tapped',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -126,7 +131,8 @@ void main() {
       expect(find.byType(DifficultySelector), findsOneWidget);
     });
 
-    testWidgets('updates selection when radio button tapped', (WidgetTester tester) async {
+    testWidgets('updates selection when radio button tapped',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -138,8 +144,8 @@ void main() {
       );
 
       final easyRadio = find.byWidgetPredicate(
-        (widget) => widget is Radio<AIDifficulty> &&
-            widget.value == AIDifficulty.easy,
+        (widget) =>
+            widget is Radio<AIDifficulty> && widget.value == AIDifficulty.easy,
       );
 
       await tester.tap(easyRadio.first);
@@ -149,7 +155,8 @@ void main() {
       expect(find.byType(Radio<AIDifficulty>), findsWidgets);
     });
 
-    testWidgets('updates selection when card tapped', (WidgetTester tester) async {
+    testWidgets('updates selection when card tapped',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

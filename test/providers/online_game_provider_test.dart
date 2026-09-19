@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/providers/online_game_provider.dart';
+import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
 
 void main() {
   group('ELO Rating Calculation', () {

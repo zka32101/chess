@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:chess/src/screens/analytics/performance_analytics_screen.dart';
+import 'package:chess_tactics_master/src/screens/analytics/performance_analytics_screen.dart';
 
 void main() {
   group('PerformanceAnalyticsScreen', () {
@@ -24,7 +24,8 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('displays refresh button in AppBar', (WidgetTester tester) async {
+    testWidgets('displays refresh button in AppBar',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -41,7 +42,8 @@ void main() {
       expect(find.byIcon(Icons.refresh), findsOneWidget);
     });
 
-    testWidgets('displays streak information section with indicator', (WidgetTester tester) async {
+    testWidgets('displays streak information section with indicator',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -58,7 +60,8 @@ void main() {
       expect(find.text('連勝中'), findsWidgets);
     });
 
-    testWidgets('displays rating progression section with chart', (WidgetTester tester) async {
+    testWidgets('displays rating progression section with chart',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -95,7 +98,8 @@ void main() {
       expect(find.text('365日'), findsOneWidget);
     });
 
-    testWidgets('displays time control performance section', (WidgetTester tester) async {
+    testWidgets('displays time control performance section',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -112,7 +116,8 @@ void main() {
       expect(find.text('時間制別パフォーマンス'), findsOneWidget);
     });
 
-    testWidgets('displays rank performance section', (WidgetTester tester) async {
+    testWidgets('displays rank performance section',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(

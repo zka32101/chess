@@ -4,19 +4,20 @@ import 'package:chess/chess.dart' as chess_lib;
 class DrawDetectionService {
   /// Check if position is in stalemate
   static bool isStalemate(chess_lib.Chess chess) {
-    return chess.in_stalemate();
+    return chess.in_stalemate;
   }
+
+  static const _files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
   /// Check if position has insufficient material for checkmate
   static bool isInsufficientMaterial(chess_lib.Chess chess) {
     try {
-      final board = chess.board;
+      // Count all pieces on the board (piece.type.name is the single-letter
+      // code, e.g. 'k', 'n', 'b' — see chess_lib.PieceType).
       final pieces = <String>[];
-
-      // Count all pieces on the board
-      for (int rank = 0; rank < 8; rank++) {
-        for (int file = 0; file < 8; file++) {
-          final piece = board[rank][file];
+      for (final file in _files) {
+        for (var rank = 1; rank <= 8; rank++) {
+          final piece = chess.get('$file$rank');
           if (piece != null) {
             pieces.add(piece.type.name);
           }
@@ -29,23 +30,23 @@ class DrawDetectionService {
       }
 
       // Insufficient material: K vs K, K+N vs K, K+B vs K
-      if (pieces.every((p) => p == 'king' || p == 'knight')) {
+      if (pieces.every((p) => p == 'k' || p == 'n')) {
         return true;
       }
 
-      if (pieces.every((p) => p == 'king' || p == 'bishop')) {
+      if (pieces.every((p) => p == 'k' || p == 'b')) {
         return true;
       }
 
       // King and knight vs king
-      if (pieces.where((p) => p == 'king').length == 2 &&
-          pieces.where((p) => p == 'knight').length == 1) {
+      if (pieces.where((p) => p == 'k').length == 2 &&
+          pieces.where((p) => p == 'n').length == 1) {
         return true;
       }
 
       // King and bishop vs king
-      if (pieces.where((p) => p == 'king').length == 2 &&
-          pieces.where((p) => p == 'bishop').length == 1) {
+      if (pieces.where((p) => p == 'k').length == 2 &&
+          pieces.where((p) => p == 'b').length == 1) {
         return true;
       }
 
@@ -70,7 +71,8 @@ class DrawDetectionService {
   }
 
   /// Check if threefold repetition draw is applicable
-  static bool isThreefoldRepetition(List<Map<String, dynamic>> moves, String currentFen) {
+  static bool isThreefoldRepetition(
+      List<Map<String, dynamic>> moves, String currentFen) {
     try {
       if (moves.isEmpty) return false;
 
@@ -84,13 +86,13 @@ class DrawDetectionService {
         final to = moveData['to'] as String;
         final promotion = moveData['promotion'] as String?;
 
-        final move = chess_lib.Move(
-          fromAlgebraic: from,
-          toAlgebraic: to,
-          promotion: promotion,
-        );
+        final moveMap = <String, String>{
+          'from': from,
+          'to': to,
+          if (promotion != null) 'promotion': promotion,
+        };
 
-        if (!chess.move(move)) {
+        if (!chess.move(moveMap)) {
           break;
         }
         fenHistory.add(chess.fen);

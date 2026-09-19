@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/chess_engine_service.dart';
+import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
 
 void main() {
   group('ChessEngineService', () {
@@ -18,7 +18,8 @@ void main() {
       });
 
       test('initializes game with custom FEN', () {
-        const customFen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+        const customFen =
+            'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
         chess.initGame(fen: customFen);
         expect(chess.getCurrentFen(), customFen);
       });

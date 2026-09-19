@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Represents an online multiplayer game
 class OnlineGame {
@@ -34,7 +34,8 @@ class OnlineGame {
 
   /// Game result
   final String? result; // white_win, black_win, draw
-  final String? resultReason; // checkmate, resignation, timeout, draw_agreement, abandonment
+  final String?
+      resultReason; // checkmate, resignation, timeout, draw_agreement, abandonment
   final String? abandonedBy;
 
   /// Rating changes
@@ -126,8 +127,9 @@ class OnlineGame {
       startedAt: json['startedAt'] != null
           ? (json['startedAt'] as Timestamp).toDate()
           : null,
-      endedAt:
-          json['endedAt'] != null ? (json['endedAt'] as Timestamp).toDate() : null,
+      endedAt: json['endedAt'] != null
+          ? (json['endedAt'] as Timestamp).toDate()
+          : null,
       whitePlayerId: json['whitePlayerId'] as String,
       blackPlayerId: json['blackPlayerId'] as String,
       whitePlayerName: json['whitePlayerName'] as String,
@@ -213,10 +215,8 @@ class OnlineGame {
       moves: moves ?? this.moves,
       timeControl: timeControl ?? this.timeControl,
       timeControlMs: timeControlMs ?? this.timeControlMs,
-      whiteTimeRemainingMs:
-          whiteTimeRemainingMs ?? this.whiteTimeRemainingMs,
-      blackTimeRemainingMs:
-          blackTimeRemainingMs ?? this.blackTimeRemainingMs,
+      whiteTimeRemainingMs: whiteTimeRemainingMs ?? this.whiteTimeRemainingMs,
+      blackTimeRemainingMs: blackTimeRemainingMs ?? this.blackTimeRemainingMs,
       lastMoveTimestamp: lastMoveTimestamp ?? this.lastMoveTimestamp,
       whiteLastActivityTimestamp:
           whiteLastActivityTimestamp ?? this.whiteLastActivityTimestamp,
@@ -364,8 +364,7 @@ class MatchmakingQueueEntry {
   }
 
   /// Wait time in seconds
-  int get waitTimeSeconds =>
-      DateTime.now().difference(queuedAt).inSeconds;
+  int get waitTimeSeconds => DateTime.now().difference(queuedAt).inSeconds;
 
   /// Is expired?
   bool get isExpired => DateTime.now().isAfter(timeoutAt);

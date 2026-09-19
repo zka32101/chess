@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/player_comparison_service.dart';
 import '../services/rating_prediction_service.dart';
 import '../services/performance_trend_service.dart';
@@ -8,15 +8,18 @@ import '../services/performance_trend_service.dart';
 /// Provides reactive access to player comparison, rating prediction, and performance analysis
 
 // Service Providers
-final playerComparisonServiceProvider = Provider<PlayerComparisonService>((ref) {
+final playerComparisonServiceProvider =
+    Provider<PlayerComparisonService>((ref) {
   return PlayerComparisonService(firestore: FirebaseFirestore.instance);
 });
 
-final ratingPredictionServiceProvider = Provider<RatingPredictionService>((ref) {
+final ratingPredictionServiceProvider =
+    Provider<RatingPredictionService>((ref) {
   return RatingPredictionService(firestore: FirebaseFirestore.instance);
 });
 
-final performanceTrendServiceProvider = Provider<PerformanceTrendService>((ref) {
+final performanceTrendServiceProvider =
+    Provider<PerformanceTrendService>((ref) {
   return PerformanceTrendService(firestore: FirebaseFirestore.instance);
 });
 
@@ -24,7 +27,8 @@ final performanceTrendServiceProvider = Provider<PerformanceTrendService>((ref) 
 
 /// Get head-to-head comparison between two players
 final headToHeadComparisonProvider =
-    FutureProvider.family<HeadToHeadComparison, (String, String)>((ref, params) {
+    FutureProvider.family<HeadToHeadComparison, (String, String)>(
+        (ref, params) {
   final service = ref.watch(playerComparisonServiceProvider);
   return service.getHeadToHeadComparison(params.$1, params.$2);
 });
@@ -46,8 +50,9 @@ final playerMatchupsProvider =
 // Rating Prediction Providers
 
 /// Predict player's rating N days in the future
-final futureRatingPredictionProvider = FutureProvider.family<RatingForecast,
-    ({String playerId, int daysAhead})>((ref, params) {
+final futureRatingPredictionProvider =
+    FutureProvider.family<RatingForecast, ({String playerId, int daysAhead})>(
+        (ref, params) {
   final service = ref.watch(ratingPredictionServiceProvider);
   return service.predictFutureRating(
     params.playerId,
@@ -94,9 +99,8 @@ final performanceMetricsForPeriodProvider =
 });
 
 /// Analyze performance breakdown by day of week
-final performanceByDayOfWeekProvider = FutureProvider.family<
-    Map<String, DayPerformance>,
-    String>((ref, playerId) {
+final performanceByDayOfWeekProvider =
+    FutureProvider.family<Map<String, DayPerformance>, String>((ref, playerId) {
   final service = ref.watch(performanceTrendServiceProvider);
   return service.analyzePerformanceByDayOfWeek(playerId);
 });

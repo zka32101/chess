@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/subscription_service.dart';
+import 'package:chess_tactics_master/src/services/subscription_service.dart';
 
 void main() {
   group('SubscriptionService', () {
@@ -38,7 +38,8 @@ void main() {
 
       test('premium plan has most features except priority support', () {
         expect(
-          PremiumFeature.unlimitedPuzzles.isAvailableIn(SubscriptionPlan.premium),
+          PremiumFeature.unlimitedPuzzles
+              .isAvailableIn(SubscriptionPlan.premium),
           isTrue,
         );
         expect(
@@ -50,7 +51,8 @@ void main() {
           isTrue,
         );
         expect(
-          PremiumFeature.prioritySupport.isAvailableIn(SubscriptionPlan.premium),
+          PremiumFeature.prioritySupport
+              .isAvailableIn(SubscriptionPlan.premium),
           isFalse,
         );
       });

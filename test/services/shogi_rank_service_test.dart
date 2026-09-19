@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/shogi_rank_service.dart';
+import 'package:chess_tactics_master/src/services/shogi_rank_service.dart';
 
 void main() {
   group('ShogiRankService', () {
@@ -7,136 +7,166 @@ void main() {
       test('should return 20級 for very low ELO (< 500)', () {
         final rank = ShogiRankService.calculateRank(400);
         expect(rank, isA<_Kyu>());
-        expect(rank.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(20));
+        expect(
+            rank.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(20));
       });
 
       test('should return 15級 for low ELO (500-600)', () {
         final rank = ShogiRankService.calculateRank(550);
         expect(rank, isA<_Kyu>());
-        expect(rank.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(15));
+        expect(
+            rank.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(15));
       });
 
       test('should return 10級 for beginner ELO (600-700)', () {
         final rank = ShogiRankService.calculateRank(650);
         expect(rank, isA<_Kyu>());
-        expect(rank.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(10));
+        expect(
+            rank.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(10));
       });
 
       test('should return 5級 for intermediate ELO (700-800)', () {
         final rank = ShogiRankService.calculateRank(750);
         expect(rank, isA<_Kyu>());
-        expect(rank.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(5));
+        expect(
+            rank.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(5));
       });
 
       test('should return 3級 for intermediate-high ELO (800-900)', () {
         final rank = ShogiRankService.calculateRank(850);
         expect(rank, isA<_Kyu>());
-        expect(rank.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(3));
+        expect(
+            rank.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(3));
       });
 
       test('should return 1級 for advanced ELO (800+)', () {
         final rank = ShogiRankService.calculateRank(800);
         expect(rank, isA<_Kyu>());
-        expect(rank.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(1));
+        expect(
+            rank.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(1));
       });
 
       test('should return 1段 for dan level ELO (900+)', () {
         final rank = ShogiRankService.calculateRank(900);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(1));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(1));
       });
 
       test('should return 2段 for ELO 1000+', () {
         final rank = ShogiRankService.calculateRank(1000);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(2));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(2));
       });
 
       test('should return 3段 for ELO 1100+', () {
         final rank = ShogiRankService.calculateRank(1100);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(3));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(3));
       });
 
       test('should return 4段 for ELO 1200+', () {
         final rank = ShogiRankService.calculateRank(1200);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(4));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(4));
       });
 
       test('should return 5段 for ELO 1400+', () {
         final rank = ShogiRankService.calculateRank(1400);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(5));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(5));
       });
 
       test('should return 6段 for ELO 1550+', () {
         final rank = ShogiRankService.calculateRank(1550);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(6));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(6));
       });
 
       test('should return 7段 for ELO 1750+', () {
         final rank = ShogiRankService.calculateRank(1750);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(7));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(7));
       });
 
       test('should return 8段 for ELO 1900+', () {
         final rank = ShogiRankService.calculateRank(1900);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(8));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(8));
       });
 
       test('should return 8段 for very high ELO (2000+)', () {
         final rank = ShogiRankService.calculateRank(2000);
         expect(rank, isA<_Dan>());
-        expect(rank.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(8));
+        expect(
+            rank.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(8));
       });
     });
 
@@ -250,10 +280,12 @@ void main() {
         final restored = ShogiRank.fromJson(json);
 
         expect(restored, isA<_Dan>());
-        expect(restored.maybeMap(
-          dan: (d) => d.level,
-          orElse: () => -1,
-        ), equals(5));
+        expect(
+            restored.maybeMap(
+              dan: (d) => d.level,
+              orElse: () => -1,
+            ),
+            equals(5));
       });
 
       test('should deserialize kyu rank from JSON', () {
@@ -262,10 +294,12 @@ void main() {
         final restored = ShogiRank.fromJson(json);
 
         expect(restored, isA<_Kyu>());
-        expect(restored.maybeMap(
-          kyu: (k) => k.level,
-          orElse: () => -1,
-        ), equals(3));
+        expect(
+            restored.maybeMap(
+              kyu: (k) => k.level,
+              orElse: () => -1,
+            ),
+            equals(3));
       });
     });
 
@@ -275,8 +309,10 @@ void main() {
         final rank400 = ShogiRankService.calculateRank(400);
         final rank800 = ShogiRankService.calculateRank(800);
 
-        expect(rank400.maybeMap(kyu: (k) => k.level, orElse: () => -1), equals(20));
-        expect(rank800.maybeMap(kyu: (k) => k.level, orElse: () => -1), equals(1));
+        expect(rank400.maybeMap(kyu: (k) => k.level, orElse: () => -1),
+            equals(20));
+        expect(
+            rank800.maybeMap(kyu: (k) => k.level, orElse: () => -1), equals(1));
       });
 
       test('should show progression through dan ranks', () {
@@ -284,8 +320,10 @@ void main() {
         final rank900 = ShogiRankService.calculateRank(900);
         final rank2000 = ShogiRankService.calculateRank(2000);
 
-        expect(rank900.maybeMap(dan: (d) => d.level, orElse: () => -1), equals(1));
-        expect(rank2000.maybeMap(dan: (d) => d.level, orElse: () => -1), equals(8));
+        expect(
+            rank900.maybeMap(dan: (d) => d.level, orElse: () => -1), equals(1));
+        expect(rank2000.maybeMap(dan: (d) => d.level, orElse: () => -1),
+            equals(8));
       });
 
       test('should transition from 1級 to 1段 at correct ELO', () {
@@ -293,10 +331,12 @@ void main() {
         final rank900 = ShogiRankService.calculateRank(900);
 
         // Below 900 should be 1級
-        expect(rank799.maybeMap(kyu: (k) => k.level, orElse: () => -1), equals(1));
+        expect(
+            rank799.maybeMap(kyu: (k) => k.level, orElse: () => -1), equals(1));
 
         // At 900+ should be 1段
-        expect(rank900.maybeMap(dan: (d) => d.level, orElse: () => -1), equals(1));
+        expect(
+            rank900.maybeMap(dan: (d) => d.level, orElse: () => -1), equals(1));
       });
     });
 

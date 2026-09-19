@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/services/comparison_service.dart';
-import 'package:chess/src/models/head_to_head_stats.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/services/comparison_service.dart';
+import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 /// Provider for comparison service
 final comparisonServiceProvider = Provider((ref) {
@@ -9,8 +9,7 @@ final comparisonServiceProvider = Provider((ref) {
 });
 
 /// Head-to-head stats provider for two players
-final headToHeadStatsProvider = StreamProvider.family<
-    HeadToHeadStats,
+final headToHeadStatsProvider = StreamProvider.family<HeadToHeadStats,
     ({String player1Id, String player2Id})>(
   (ref, params) async* {
     final service = ref.watch(comparisonServiceProvider);
@@ -19,8 +18,7 @@ final headToHeadStatsProvider = StreamProvider.family<
 );
 
 /// Recent matches provider for two players
-final recentMatchesProvider = FutureProvider.family<
-    List<MatchRecord>,
+final recentMatchesProvider = FutureProvider.family<List<MatchRecord>,
     ({String player1Id, String player2Id})>(
   (ref, params) async {
     final service = ref.watch(comparisonServiceProvider);

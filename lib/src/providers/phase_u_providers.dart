@@ -1,4 +1,4 @@
-import 'package:riverpod/riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../services/season_management_service.dart';
@@ -245,8 +245,7 @@ class RewardHistoryParams {
           limit == other.limit;
 
   @override
-  int get hashCode =>
-      playerId.hashCode ^ seasonId.hashCode ^ limit.hashCode;
+  int get hashCode => playerId.hashCode ^ seasonId.hashCode ^ limit.hashCode;
 }
 
 @immutable
@@ -322,16 +321,15 @@ final currentSeasonProvider = FutureProvider<Season?>((ref) {
 });
 
 /// Get season by ID
-final seasonByIdProvider = FutureProvider.family<Season?, String>(
-    (ref, seasonId) {
+final seasonByIdProvider =
+    FutureProvider.family<Season?, String>((ref, seasonId) {
   final service = ref.watch(seasonManagementServiceProvider);
   return service.getSeasonById(seasonId);
 });
 
 /// Get player's seasonal progress
 final playerSeasonProgressProvider =
-    FutureProvider.family<PlayerSeasonProgress?, String>(
-        (ref, playerId) async {
+    FutureProvider.family<PlayerSeasonProgress?, String>((ref, playerId) async {
   final service = ref.watch(seasonManagementServiceProvider);
   final currentSeason = await ref.watch(currentSeasonProvider.future);
 
@@ -372,16 +370,16 @@ final currentBattlePassProvider = FutureProvider<BattlePass?>((ref) async {
 });
 
 /// Get battle pass by ID
-final battlePassProvider = FutureProvider.family<BattlePass?, String>(
-    (ref, battlePassId) {
+final battlePassProvider =
+    FutureProvider.family<BattlePass?, String>((ref, battlePassId) {
   final service = ref.watch(battlePassServiceProvider);
   return service.getBattlePass(battlePassId);
 });
 
 /// Get player's battle pass progress
 final playerBattlePassProvider =
-    FutureProvider.family<PlayerBattlePassProgress?,
-  SeasonChallengesParams>((ref, params) {
+    FutureProvider.family<PlayerBattlePassProgress?, SeasonChallengesParams>(
+        (ref, params) {
   final service = ref.watch(battlePassServiceProvider);
   return service.getPlayerBattlePassProgress(params.playerId, params.seasonId);
 });
@@ -436,8 +434,8 @@ final challengesByDifficultyProvider =
 
 /// Get player's challenge progress
 final playerChallengeProgressProvider =
-    FutureProvider.family<PlayerChallengeProgress?,
-  PlayerChallengeParams>((ref, params) {
+    FutureProvider.family<PlayerChallengeProgress?, PlayerChallengeParams>(
+        (ref, params) {
   final service = ref.watch(seasonChallengeServiceProvider);
   return service.getPlayerChallengeProgress(
     params.playerId,
@@ -464,9 +462,8 @@ final eventChallengesProvider =
 });
 
 /// Get all player challenges for season
-final playerSeasonChallengesProvider =
-    FutureProvider.family<List<PlayerChallengeProgress>,
-  SeasonChallengesParams>((ref, params) {
+final playerSeasonChallengesProvider = FutureProvider.family<
+    List<PlayerChallengeProgress>, SeasonChallengesParams>((ref, params) {
   final service = ref.watch(seasonChallengeServiceProvider);
   return service.getPlayerSeasonChallenges(
     params.playerId,
@@ -490,8 +487,8 @@ final rewardsByTypeProvider =
 
 /// Get player's reward history
 final playerRewardHistoryProvider =
-    FutureProvider.family<List<PlayerRewardHistory>,
-  RewardHistoryParams>((ref, params) {
+    FutureProvider.family<List<PlayerRewardHistory>, RewardHistoryParams>(
+        (ref, params) {
   final service = ref.watch(seasonalRewardServiceProvider);
   return service.getPlayerRewardHistory(
     playerId: params.playerId,
@@ -514,13 +511,12 @@ final seasonEndRewardsProvider =
 
 /// Check if player has redeemed code
 final playerCodeRedemptionProvider =
-    FutureProvider.family<bool, RewardCodeParams>(
-  (ref, params) {
-    final service = ref.watch(seasonalRewardServiceProvider);
-    return service.hasPlayerRedeemedCode(
-      playerId: params.playerId,
-      code: params.code,
-    );
+    FutureProvider.family<bool, RewardCodeParams>((ref, params) {
+  final service = ref.watch(seasonalRewardServiceProvider);
+  return service.hasPlayerRedeemedCode(
+    playerId: params.playerId,
+    code: params.code,
+  );
 });
 
 // Event Providers
@@ -543,8 +539,8 @@ final eventDetailsProvider = FutureProvider.family<SeasonalEvent?, String>(
 
 /// Get player's event participation
 final playerEventProgressProvider =
-    FutureProvider.family<EventParticipation?,
-  EventParticipationParams>((ref, params) {
+    FutureProvider.family<EventParticipation?, EventParticipationParams>(
+        (ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
   return service.getPlayerEventProgress(
     params.playerId,
@@ -554,8 +550,8 @@ final playerEventProgressProvider =
 
 /// Get event leaderboard
 final eventLeaderboardProvider =
-    FutureProvider.family<List<EventLeaderboardEntry>,
-  EventLeaderboardParams>((ref, params) {
+    FutureProvider.family<List<EventLeaderboardEntry>, EventLeaderboardParams>(
+        (ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
   return service.getEventLeaderboard(
     params.eventId,
@@ -565,8 +561,8 @@ final eventLeaderboardProvider =
 
 /// Get top event participants
 final topEventParticipantsProvider =
-    FutureProvider.family<List<EventParticipation>,
-  TopEventParticipantsParams>((ref, params) {
+    FutureProvider.family<List<EventParticipation>, TopEventParticipantsParams>(
+        (ref, params) {
   final service = ref.watch(seasonalEventServiceProvider);
   return service.getTopEventParticipants(params.eventId, limit: params.limit);
 });
@@ -582,33 +578,31 @@ final eventRewardsProvider = FutureProvider.family<List<EventReward>, String>(
 // State Management Providers
 
 /// State notifier for battle pass reward claiming
-final battlePassClaimNotifierProvider = StateNotifierProvider<
-    BattlePassClaimNotifier,
-    BattlePassClaimState>((ref) {
+final battlePassClaimNotifierProvider =
+    StateNotifierProvider<BattlePassClaimNotifier, BattlePassClaimState>((ref) {
   final service = ref.watch(battlePassServiceProvider);
   return BattlePassClaimNotifier(service);
 });
 
 /// State notifier for challenge completion
-final challengeCompleteNotifierProvider = StateNotifierProvider<
-    ChallengeCompleteNotifier,
-    ChallengeCompleteState>((ref) {
+final challengeCompleteNotifierProvider =
+    StateNotifierProvider<ChallengeCompleteNotifier, ChallengeCompleteState>(
+        (ref) {
   final service = ref.watch(seasonChallengeServiceProvider);
   return ChallengeCompleteNotifier(service);
 });
 
 /// State notifier for event participation
-final eventParticipationNotifierProvider = StateNotifierProvider<
-    EventParticipationNotifier,
-    EventParticipationState>((ref) {
+final eventParticipationNotifierProvider =
+    StateNotifierProvider<EventParticipationNotifier, EventParticipationState>(
+        (ref) {
   final service = ref.watch(seasonalEventServiceProvider);
   return EventParticipationNotifier(service);
 });
 
 /// State notifier for reward claiming
-final rewardClaimNotifierProvider = StateNotifierProvider<
-    RewardClaimNotifier,
-    RewardClaimState>((ref) {
+final rewardClaimNotifierProvider =
+    StateNotifierProvider<RewardClaimNotifier, RewardClaimState>((ref) {
   final service = ref.watch(seasonalRewardServiceProvider);
   return RewardClaimNotifier(service);
 });
@@ -618,8 +612,7 @@ final rewardClaimNotifierProvider = StateNotifierProvider<
 class BattlePassClaimNotifier extends StateNotifier<BattlePassClaimState> {
   final BattlePassService _service;
 
-  BattlePassClaimNotifier(this._service)
-      : super(const BattlePassClaimState());
+  BattlePassClaimNotifier(this._service) : super(const BattlePassClaimState());
 
   Future<void> claimReward({
     required String playerId,
@@ -770,9 +763,8 @@ class EventParticipationNotifier
         eventId: eventId,
       );
 
-      final updated = state.joinedEventIds
-          .where((id) => id != eventId)
-          .toList();
+      final updated =
+          state.joinedEventIds.where((id) => id != eventId).toList();
       state = state.copyWith(
         isLoading: false,
         joinedEventIds: updated,
@@ -790,8 +782,7 @@ class EventParticipationNotifier
 class RewardClaimNotifier extends StateNotifier<RewardClaimState> {
   final SeasonalRewardService _service;
 
-  RewardClaimNotifier(this._service)
-      : super(const RewardClaimState());
+  RewardClaimNotifier(this._service) : super(const RewardClaimState());
 
   Future<bool> redeemCode({
     required String playerId,

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/services/performance_metrics_service.dart';
+import 'package:chess_tactics_master/src/services/performance_metrics_service.dart';
 
 void main() {
   group('AppSizeMetrics', () {
@@ -181,7 +181,8 @@ void main() {
         regressionType: 'buildTime',
       );
 
-      expect(result.detectedAt.isAfter(now.subtract(Duration(seconds: 1))), isTrue);
+      expect(result.detectedAt.isAfter(now.subtract(Duration(seconds: 1))),
+          isTrue);
     });
 
     test('toString formats output correctly', () {

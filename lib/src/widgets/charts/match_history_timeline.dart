@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chess/src/models/match_record.dart';
+import 'package:chess_tactics_master/src/models/match_record.dart';
 
 /// Visual timeline representation of recent matches
 class MatchHistoryTimeline extends StatelessWidget {
@@ -49,7 +49,8 @@ class MatchHistoryTimeline extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineItem(BuildContext context, MatchRecord match, int index) {
+  Widget _buildTimelineItem(
+      BuildContext context, MatchRecord match, int index) {
     final isWin = match.playerWon;
     final isDraw = !isWin && match.opponentWon == false;
 

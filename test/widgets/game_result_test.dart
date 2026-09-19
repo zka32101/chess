@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/widgets/game_result.dart';
+import 'package:chess_tactics_master/src/widgets/game_result.dart';
 
 void main() {
   group('GameResult', () {
@@ -133,7 +133,8 @@ void main() {
       expect(find.text('42'), findsOneWidget);
     });
 
-    testWidgets('displays game duration in seconds', (WidgetTester tester) async {
+    testWidgets('displays game duration in seconds',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -152,7 +153,8 @@ void main() {
       expect(find.text('45s'), findsOneWidget);
     });
 
-    testWidgets('displays game duration in minutes and seconds', (WidgetTester tester) async {
+    testWidgets('displays game duration in minutes and seconds',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -188,7 +190,8 @@ void main() {
       expect(find.text('👑'), findsOneWidget);
     });
 
-    testWidgets('shows home button when callback provided', (WidgetTester tester) async {
+    testWidgets('shows home button when callback provided',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -206,7 +209,8 @@ void main() {
       expect(find.text('Home'), findsOneWidget);
     });
 
-    testWidgets('shows new game button when callback provided', (WidgetTester tester) async {
+    testWidgets('shows new game button when callback provided',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -224,7 +228,8 @@ void main() {
       expect(find.text('New Game'), findsOneWidget);
     });
 
-    testWidgets('shows analyze button when callback provided', (WidgetTester tester) async {
+    testWidgets('shows analyze button when callback provided',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -242,7 +247,8 @@ void main() {
       expect(find.text('Analyze'), findsOneWidget);
     });
 
-    testWidgets('calls home callback when home button pressed', (WidgetTester tester) async {
+    testWidgets('calls home callback when home button pressed',
+        (WidgetTester tester) async {
       bool homePressed = false;
 
       await tester.pumpWidget(
@@ -267,7 +273,8 @@ void main() {
       expect(homePressed, true);
     });
 
-    testWidgets('calls new game callback when new game button pressed', (WidgetTester tester) async {
+    testWidgets('calls new game callback when new game button pressed',
+        (WidgetTester tester) async {
       bool newGamePressed = false;
 
       await tester.pumpWidget(

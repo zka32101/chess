@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/src/screens/premium/premium_screen.dart';
-import 'package:chess/src/services/subscription_service.dart';
+import 'package:chess_tactics_master/src/screens/premium/premium_screen.dart';
+import 'package:chess_tactics_master/src/services/subscription_service.dart';
 
 void main() {
   group('PremiumScreen Widget Tests', () {
@@ -63,7 +63,8 @@ void main() {
       expect(find.text('\$2.92'), findsOneWidget);
     });
 
-    testWidgets('displays subscription info section', (WidgetTester tester) async {
+    testWidgets('displays subscription info section',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -83,7 +84,8 @@ void main() {
       );
     });
 
-    testWidgets('has subscribe buttons for each plan', (WidgetTester tester) async {
+    testWidgets('has subscribe buttons for each plan',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(

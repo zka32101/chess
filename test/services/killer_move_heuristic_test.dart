@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/killer_move_heuristic.dart';
+import 'package:chess_tactics_master/src/services/killer_move_heuristic.dart';
 
 void main() {
   group('KillerMoveHeuristic', () {
@@ -229,7 +229,8 @@ void main() {
         // Setup position with captures available
         chess.move(chess_lib.Move(fromAlgebraic: 'e2', toAlgebraic: 'e4'));
         chess.move(chess_lib.Move(fromAlgebraic: 'd7', toAlgebraic: 'd5'));
-        chess.move(chess_lib.Move(fromAlgebraic: 'e4', toAlgebraic: 'd5')); // Capture
+        chess.move(
+            chess_lib.Move(fromAlgebraic: 'e4', toAlgebraic: 'd5')); // Capture
         chess.move(chess_lib.Move(fromAlgebraic: 'c7', toAlgebraic: 'c6'));
 
         final legalMoves = chess.moves() as List<chess_lib.Move>;
@@ -249,7 +250,8 @@ void main() {
     group('recordMove', () {
       test('records move in history', () {
         manager.recordMove('e2e4', 10);
-        expect(manager.killerMoves.getMoveScore('e2e4'), equals(0)); // History != killer score
+        expect(manager.killerMoves.getMoveScore('e2e4'),
+            equals(0)); // History != killer score
       });
 
       test('accumulates score for repeated moves', () {

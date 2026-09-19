@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess/src/services/zobrist_hashing.dart';
+import 'package:chess_tactics_master/src/services/zobrist_hashing.dart';
 
 void main() {
   group('ZobristHash', () {
@@ -82,7 +82,8 @@ void main() {
         final chess2 = chess_lib.Chess();
         chess2.move(chess_lib.Move(fromAlgebraic: 'e2', toAlgebraic: 'e4'));
         chess2.move(chess_lib.Move(fromAlgebraic: 'd7', toAlgebraic: 'd5'));
-        chess2.move(chess_lib.Move(fromAlgebraic: 'e4', toAlgebraic: 'd5')); // Capture
+        chess2.move(
+            chess_lib.Move(fromAlgebraic: 'e4', toAlgebraic: 'd5')); // Capture
         final hash2 = ZobristHash.hashPosition(chess2);
 
         expect(hash1, isNot(equals(hash2)));
@@ -119,7 +120,8 @@ void main() {
         chess.move(chess_lib.Move(fromAlgebraic: 'e2', toAlgebraic: 'e4'));
         chess.move(chess_lib.Move(fromAlgebraic: 'a7', toAlgebraic: 'a5'));
         chess.move(chess_lib.Move(fromAlgebraic: 'd2', toAlgebraic: 'd4'));
-        chess.move(chess_lib.Move(fromAlgebraic: 'd7', toAlgebraic: 'd5')); // En passant possible
+        chess.move(chess_lib.Move(
+            fromAlgebraic: 'd7', toAlgebraic: 'd5')); // En passant possible
 
         final hash = ZobristHash.hashPosition(chess);
         expect(hash, isNot(0));

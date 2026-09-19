@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:chess/src/screens/comparison/player_comparison_screen.dart';
+import 'package:chess_tactics_master/src/screens/comparison/player_comparison_screen.dart';
 
 void main() {
   group('PlayerComparisonScreen', () {
-    testWidgets('displays both player names and ratings', (WidgetTester tester) async {
+    testWidgets('displays both player names and ratings',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -29,7 +30,8 @@ void main() {
       expect(find.text('レーティング: 1550'), findsOneWidget);
     });
 
-    testWidgets('displays vs text between players', (WidgetTester tester) async {
+    testWidgets('displays vs text between players',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -93,7 +95,8 @@ void main() {
       expect(find.text('対戦成績'), findsOneWidget);
     });
 
-    testWidgets('displays player avatars with initials', (WidgetTester tester) async {
+    testWidgets('displays player avatars with initials',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -116,7 +119,8 @@ void main() {
       expect(find.text('B'), findsOneWidget); // Bob's initial
     });
 
-    testWidgets('displays refresh button in AppBar', (WidgetTester tester) async {
+    testWidgets('displays refresh button in AppBar',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -137,7 +141,8 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('displays correct layout structure', (WidgetTester tester) async {
+    testWidgets('displays correct layout structure',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
