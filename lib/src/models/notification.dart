@@ -36,7 +36,7 @@ class AppNotification with _$AppNotification {
     String? gameId,
     String? ratingDelta,
     String? actionUrl,
-    NotificationPriority priority = NotificationPriority.normal,
+    @Default(NotificationPriority.normal) NotificationPriority priority,
   }) = _AppNotification;
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
