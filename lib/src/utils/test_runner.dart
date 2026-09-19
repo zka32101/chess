@@ -274,7 +274,7 @@ class TestRunner {
 ║ Passed: ${stats['totalPassed'].toString().padRight(54)}║
 ║ Failed: ${stats['totalFailed'].toString().padRight(54)}║
 ║ Pass Rate: ${(stats['passRate'] as double).toStringAsFixed(1)}%${' '.padRight(43)}║
-║ Total Duration: ${(stats['totalDurationMs'] as int ~/ 1000)}s${' '.padRight(45)}║
+║ Total Duration: ${(stats['totalDurationMs'] as int) ~/ 1000}s${' '.padRight(45)}║
 ║ Test Suites: ${stats['suites'].toString().padRight(51)}║
 ╠══════════════════════════════════════════════════════════════════╣
 ║ SUITE RESULTS:
