@@ -176,7 +176,7 @@ void main() {
         final maxMoves = stats['maxMoves'] as int;
         final averageMoveOptions = stats['averageMoveOptions'] as double;
 
-        expect(maxMoves, greaterThanOrEqualTo(averageMoveOptions.toInt());
+        expect(maxMoves, greaterThanOrEqualTo(averageMoveOptions.toInt()));
       });
     });
 

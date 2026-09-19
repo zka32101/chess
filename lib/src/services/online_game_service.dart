@@ -1,3 +1,5 @@
+import 'dart:math' show pow;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:chess/src/models/online_game.dart';
@@ -445,6 +447,3 @@ class OnlineGameService {
     };
   }
 }
-
-// Helper import for pow function
-import 'dart:math' show pow;
