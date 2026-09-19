@@ -24,6 +24,8 @@ enum NotificationPriority { low, normal, high }
 /// Game notification model
 @freezed
 class AppNotification with _$AppNotification {
+  const AppNotification._();
+
   const factory AppNotification({
     required String notificationId,
     required String userId,
@@ -207,6 +209,8 @@ class AppNotification with _$AppNotification {
 /// Notification batch for multiple notifications
 @freezed
 class NotificationBatch with _$NotificationBatch {
+  const NotificationBatch._();
+
   const factory NotificationBatch({
     required List<AppNotification> notifications,
     required int unreadCount,
