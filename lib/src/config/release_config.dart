@@ -1,4 +1,8 @@
 /// Release configuration for Chess Tactics Master
+
+/// Environment configuration
+enum Environment { development, staging, production }
+
 class ReleaseConfig {
   /// App version
   static const String appVersion = '1.0.0';
@@ -25,9 +29,6 @@ class ReleaseConfig {
     'enablePremiumFeatures': true,
     'enableBetaFeatures': false,
   };
-
-  /// Environment configuration
-  enum Environment { development, staging, production }
 
   static const Environment currentEnvironment = Environment.production;
 
