@@ -12,19 +12,17 @@ class FenCalculatorService {
     try {
       final chess = chess_lib.Chess.fromFEN(currentFen);
 
-      final move = chess_lib.Move(
-        fromAlgebraic: fromSquare,
-        toAlgebraic: toSquare,
-        promotion: promotion,
-      );
-
       // Validate move is legal
-      if (!_isLegalMove(chess, move)) {
+      if (!_isLegalMove(chess, fromSquare, toSquare, promotion)) {
         throw Exception('Illegal move: $fromSquare to $toSquare');
       }
 
       // Make the move
-      chess.move(move);
+      chess.move({
+        'from': fromSquare,
+        'to': toSquare,
+        if (promotion != null) 'promotion': promotion,
+      });
 
       // Return new FEN
       return chess.fen;
@@ -36,7 +34,8 @@ class FenCalculatorService {
   /// Calculate FEN from list of moves (replay position)
   static String calculateFenFromMoves(
     List<Map<String, dynamic>> moves, {
-    String startingFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    String startingFen =
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   }) {
     try {
       var chess = chess_lib.Chess.fromFEN(startingFen);
@@ -46,13 +45,11 @@ class FenCalculatorService {
         final to = moveData['to'] as String;
         final promotion = moveData['promotion'] as String?;
 
-        final move = chess_lib.Move(
-          fromAlgebraic: from,
-          toAlgebraic: to,
-          promotion: promotion,
-        );
-
-        if (!chess.move(move)) {
+        if (!chess.move({
+          'from': from,
+          'to': to,
+          if (promotion != null) 'promotion': promotion,
+        })) {
           throw Exception('Invalid move in sequence: $from to $to');
         }
       }
@@ -112,13 +109,19 @@ class FenCalculatorService {
   }
 
   /// Helper to validate move legality
-  static bool _isLegalMove(chess_lib.Chess chess, chess_lib.Move move) {
+  static bool _isLegalMove(
+    chess_lib.Chess chess,
+    String fromSquare,
+    String toSquare,
+    String? promotion,
+  ) {
     try {
-      final legalMoves = chess.moves() as List<chess_lib.Move>;
+      final legalMoves =
+          chess.moves({'asObjects': true}).cast<chess_lib.Move>();
       return legalMoves.any((m) =>
-          m.fromAlgebraic == move.fromAlgebraic &&
-          m.toAlgebraic == move.toAlgebraic &&
-          (move.promotion == null || m.promotion == move.promotion));
+          m.fromAlgebraic == fromSquare &&
+          m.toAlgebraic == toSquare &&
+          (promotion == null || m.promotion?.name == promotion));
     } catch (e) {
       return false;
     }
