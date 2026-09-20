@@ -30,6 +30,9 @@ dependencies:
   google_fonts: ^5.1.0
   flutter_svg: ^2.0.0
 
+  # Audio
+  just_audio: ^0.9.36
+
   # Chess Engine
   chess: ^0.7.0
   stockfish: ^1.7.0

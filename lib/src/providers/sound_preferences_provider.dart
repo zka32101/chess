@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 /// Sound categories for granular control
 enum SoundCategory {
-  gamePlay,      // Piece movement, capture, check, checkmate
-  gameEnd,       // Game over
-  ui,            // Button taps, swipes
+  gamePlay, // Piece movement, capture, check, checkmate
+  gameEnd, // Game over
+  ui, // Button taps, swipes
   notifications, // Notifications, success, error
 }
 
@@ -41,7 +41,7 @@ extension SoundCategoryExt on SoundCategory {
   IconData get icon {
     switch (this) {
       case SoundCategory.gamePlay:
-        return Icons.chess_pawn;
+        return Icons.videogame_asset;
       case SoundCategory.gameEnd:
         return Icons.flag;
       case SoundCategory.ui:
@@ -94,7 +94,8 @@ class SoundPreferences {
       'soundMasterEnabled': soundMasterEnabled,
       'categoryEnabled': {
         for (final category in SoundCategory.values)
-          category.toString().split('.').last: categoryEnabled[category] ?? true,
+          category.toString().split('.').last:
+              categoryEnabled[category] ?? true,
       },
       'volume': volume,
       'lastUpdated': FieldValue.serverTimestamp(),

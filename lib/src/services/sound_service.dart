@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../providers/sound_preferences_provider.dart';
+
 /// Sound effects available in the app
 enum SoundEffect {
   movePiece,
@@ -66,6 +68,27 @@ extension SoundEffectExt on SoundEffect {
         return 'UI Swipe';
     }
   }
+
+  /// The user-facing sound category this effect belongs to, matching the
+  /// groupings in [SoundCategory]'s own documentation.
+  SoundCategory get category {
+    switch (this) {
+      case SoundEffect.movePiece:
+      case SoundEffect.capture:
+      case SoundEffect.check:
+      case SoundEffect.checkmate:
+        return SoundCategory.gamePlay;
+      case SoundEffect.gameOver:
+        return SoundCategory.gameEnd;
+      case SoundEffect.buttonTap:
+      case SoundEffect.uiSwipe:
+        return SoundCategory.ui;
+      case SoundEffect.notification:
+      case SoundEffect.success:
+      case SoundEffect.error:
+        return SoundCategory.notifications;
+    }
+  }
 }
 
 /// Sound service for managing audio playback with just_audio
@@ -79,6 +102,11 @@ class SoundService {
 
   // Map of sound effects to audio players
   late final Map<SoundEffect, AudioPlayer> _players;
+
+  // Per-category enable state, mirroring the user's sound preferences
+  final Map<SoundCategory, bool> _categoryEnabled = {
+    for (final category in SoundCategory.values) category: true,
+  };
 
   static final SoundService _instance = SoundService._internal();
 
@@ -104,7 +132,8 @@ class SoundService {
       _initialized = true;
 
       if (kDebugMode) {
-        print('[SOUND] SoundService initialized with ${_players.length} audio players');
+        print(
+            '[SOUND] SoundService initialized with ${_players.length} audio players');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -118,8 +147,21 @@ class SoundService {
     _soundEnabled = enabled;
   }
 
+  /// Set the master sound toggle (alias of [setSoundEnabled], matching the
+  /// naming used by [SoundPreferences.soundMasterEnabled]).
+  void setSoundMasterEnabled(bool enabled) => setSoundEnabled(enabled);
+
   /// Get current sound enabled state
   bool get isSoundEnabled => _soundEnabled;
+
+  /// Enable or disable a specific sound category
+  void setCategoryEnabled(SoundCategory category, bool enabled) {
+    _categoryEnabled[category] = enabled;
+  }
+
+  /// Check if a specific sound category is enabled
+  bool isCategoryEnabled(SoundCategory category) =>
+      _categoryEnabled[category] ?? true;
 
   /// Set global volume (0.0 - 1.0)
   Future<void> setVolume(double volume) async {
@@ -136,7 +178,9 @@ class SoundService {
 
   /// Play a sound effect with global volume
   Future<void> play(SoundEffect sound) async {
-    if (!_soundEnabled || !_initialized) return;
+    if (!_soundEnabled || !_initialized || !isCategoryEnabled(sound.category)) {
+      return;
+    }
 
     try {
       final player = _players[sound];
@@ -157,7 +201,9 @@ class SoundService {
 
   /// Play a sound with specific volume override
   Future<void> playWithVolume(SoundEffect sound, double volumeOverride) async {
-    if (!_soundEnabled || !_initialized) return;
+    if (!_soundEnabled || !_initialized || !isCategoryEnabled(sound.category)) {
+      return;
+    }
 
     try {
       final player = _players[sound];
@@ -182,7 +228,8 @@ class SoundService {
         );
 
         if (kDebugMode) {
-          print('[SOUND] Playing: ${sound.displayName} (volume: ${volumeOverride.toStringAsFixed(2)})');
+          print(
+              '[SOUND] Playing: ${sound.displayName} (volume: ${volumeOverride.toStringAsFixed(2)})');
         }
       }
     } catch (e) {
