@@ -71,12 +71,12 @@ extension AIDifficultyExt on AIDifficulty {
 /// Material values for position evaluation
 class MaterialValues {
   static const Map<String, int> values = {
-    'p': 1,      // Pawn
-    'n': 3,      // Knight
-    'b': 3,      // Bishop
-    'r': 5,      // Rook
-    'q': 9,      // Queen
-    'k': 0,      // King (not included in material count)
+    'p': 1, // Pawn
+    'n': 3, // Knight
+    'b': 3, // Bishop
+    'r': 5, // Rook
+    'q': 9, // Queen
+    'k': 0, // King (not included in material count)
   };
 
   static int getValueBySymbol(String? symbol) {
@@ -86,7 +86,7 @@ class MaterialValues {
 
   static int getValueByType(chess_lib.PieceType? type) {
     if (type == null) return 0;
-    return values[type.symbol] ?? 0;
+    return values[type.name] ?? 0;
   }
 }
 
@@ -169,9 +169,10 @@ class PositionEvaluator {
     final allMoves = chess.getLegalMoves();
 
     // More legal moves = better position (simplified evaluation)
-    // Count moves for white (positive) and black (negative)
+    // Count moves for white (positive) and black (negative). Move.piece is
+    // the PieceType that moved (no color); Move.color is the side to move.
     for (final move in allMoves) {
-      if (move.piece?.color == chess_lib.Color.WHITE) {
+      if (move.color == chess_lib.Color.WHITE) {
         score += 1;
       } else {
         score -= 1;
@@ -191,7 +192,7 @@ class PositionEvaluator {
     for (int rank = 0; rank < 8; rank++) {
       for (int file = 0; file < 8; file++) {
         final piece = board[rank][file];
-        if (piece?.type != chess_lib.PieceType.pawn) continue;
+        if (piece?.type != chess_lib.PieceType.PAWN) continue;
 
         // Bonus for advanced pawns
         if (piece!.color == chess_lib.Color.WHITE && rank < 4) {
@@ -273,7 +274,7 @@ class AIOpponentEngine {
     }
 
     // Check opening book for known good moves
-    final bookMoves = OpeningBook.getRecommendedMoves(chess.fen());
+    final bookMoves = OpeningBook.getRecommendedMoves(chess.getCurrentFen());
     if (bookMoves.isNotEmpty) {
       // Filter book moves to only legal moves
       final legalBookMoves = bookMoves
@@ -284,8 +285,8 @@ class AIOpponentEngine {
         // Use the first (strongest) book move, with some randomness for variety
         if (difficulty == AIDifficulty.easy) {
           // Easy: pick randomly from first 3 moves (more variety)
-          final moveIndex = _random.nextInt(
-              (legalBookMoves.length < 3 ? legalBookMoves.length : 3));
+          final moveIndex = _random
+              .nextInt((legalBookMoves.length < 3 ? legalBookMoves.length : 3));
           return legalBookMoves[moveIndex];
         } else {
           // Medium/Hard: mostly play the best move, sometimes alternatives
@@ -293,7 +294,8 @@ class AIOpponentEngine {
           if (shouldPlayBest && legalBookMoves.length > 1) {
             return legalBookMoves[0];
           } else if (legalBookMoves.length > 1) {
-            return legalBookMoves[_random.nextInt(legalBookMoves.length - 1) + 1];
+            return legalBookMoves[
+                _random.nextInt(legalBookMoves.length - 1) + 1];
           } else {
             return legalBookMoves[0];
           }
@@ -307,7 +309,7 @@ class AIOpponentEngine {
     // Try each move and evaluate resulting position
     for (final move in _orderMoves(legalMoves)) {
       chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-          promotion: move.promotion);
+          promotion: move.promotion?.name);
 
       final score = _minimax(
         difficulty.searchDepth - 1,
@@ -382,7 +384,7 @@ class AIOpponentEngine {
 
       for (final move in _orderMoves(legalMoves)) {
         chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-            promotion: move.promotion);
+            promotion: move.promotion?.name);
 
         final eval = _minimax(depth - 1, alpha, beta, false);
 
@@ -405,7 +407,7 @@ class AIOpponentEngine {
 
       for (final move in _orderMoves(legalMoves)) {
         chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-            promotion: move.promotion);
+            promotion: move.promotion?.name);
 
         final eval = _minimax(depth - 1, alpha, beta, true);
 
@@ -432,13 +434,13 @@ class AIOpponentEngine {
       int score = 0;
 
       // Captures first (MVV/LVA ordering)
-      if (move.flags.contains('c')) {
+      if ((move.flags & chess_lib.Chess.BITS_CAPTURE) != 0) {
         score += 100;
       }
 
       // Checks second
       chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-          promotion: move.promotion);
+          promotion: move.promotion?.name);
       if (chess.isCheck()) {
         score += 50;
       }
@@ -456,7 +458,7 @@ class AIOpponentEngine {
   String _moveToUCI(chess_lib.Move move) {
     String uci = move.fromAlgebraic + move.toAlgebraic;
     if (move.promotion != null) {
-      uci += move.promotion!;
+      uci += move.promotion!.name;
     }
     return uci;
   }

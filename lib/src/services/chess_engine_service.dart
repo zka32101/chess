@@ -11,6 +11,10 @@ class ChessEngineService {
     _chess = chess_lib.Chess();
   }
 
+  /// The underlying chess_lib.Chess instance, for callers (e.g. Zobrist
+  /// hashing) that need to operate on the raw position directly.
+  chess_lib.Chess get rawChess => _chess;
+
   /// Initialize a new game with optional FEN string
   void initGame({String? fen}) {
     if (fen != null) {
