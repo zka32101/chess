@@ -59,14 +59,14 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
           }
 
           final opponentName = currentUser.value?.uid == game.whitePlayerId
-              ? game.blackPlayerName ?? 'Opponent'
-              : game.whitePlayerName ?? 'Opponent';
+              ? game.blackPlayerName
+              : game.whitePlayerName;
           final opponentRating = currentUser.value?.uid == game.whitePlayerId
               ? game.blackRating
               : game.whiteRating;
 
           final isPlayerWhite = currentUser.value?.uid == game.whitePlayerId;
-          final isPlayerTurn = isPlayerWhite == (game.moves!.length % 2 == 0);
+          final isPlayerTurn = isPlayerWhite == (game.moves.length % 2 == 0);
 
           return SafeArea(
             child: SingleChildScrollView(

@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Represents an online multiplayer game
 class OnlineGame {

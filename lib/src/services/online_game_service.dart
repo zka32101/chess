@@ -3,7 +3,6 @@ import 'dart:math' show pow;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Manages online multiplayer games in real-time
 class OnlineGameService {
@@ -194,8 +193,6 @@ class OnlineGameService {
     int? blackRatingDelta,
   }) async {
     try {
-      final now = DateTime.now();
-
       // Get current game to calculate new ratings if needed
       final gameDoc =
           await _firestore.collection(_gamesCollection).doc(gameId).get();
