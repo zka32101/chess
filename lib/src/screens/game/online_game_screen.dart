@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../widgets/chess_board.dart';
 import '../../providers/online_game_provider.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class OnlineGameScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -59,14 +59,14 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
           }
 
           final opponentName = currentUser.value?.uid == game.whitePlayerId
-              ? game.blackPlayerName ?? 'Opponent'
-              : game.whitePlayerName ?? 'Opponent';
+              ? game.blackPlayerName
+              : game.whitePlayerName;
           final opponentRating = currentUser.value?.uid == game.whitePlayerId
               ? game.blackRating
               : game.whiteRating;
 
           final isPlayerWhite = currentUser.value?.uid == game.whitePlayerId;
-          final isPlayerTurn = isPlayerWhite == (game.moves!.length % 2 == 0);
+          final isPlayerTurn = isPlayerWhite == (game.moves.length % 2 == 0);
 
           return SafeArea(
             child: SingleChildScrollView(
@@ -130,8 +130,7 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.handshake,
-                                  color: Colors.amber),
+                              const Icon(Icons.handshake, color: Colors.amber),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: const Text(
@@ -141,17 +140,16 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
                               ),
                               TextButton(
                                 onPressed: () => ref
-                                    .read(onlineGameStateProvider(
-                                        widget.gameId)
-                                    .notifier)
+                                    .read(onlineGameStateProvider(widget.gameId)
+                                        .notifier)
                                     .acceptDraw(),
                                 child: const Text('Accept'),
                               ),
                               const SizedBox(width: 8),
                               TextButton(
                                 onPressed: () async {
-                                  final service = ref.read(
-                                      onlineGameServiceProvider);
+                                  final service =
+                                      ref.read(onlineGameServiceProvider);
                                   await service.declineDraw(widget.gameId);
                                 },
                                 child: const Text('Decline'),
@@ -207,9 +205,9 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
                             child: FilledButton.tonal(
                               onPressed: isPlayerTurn
                                   ? () => ref
-                                      .read(onlineGameStateProvider(
-                                          widget.gameId)
-                                      .notifier)
+                                      .read(
+                                          onlineGameStateProvider(widget.gameId)
+                                              .notifier)
                                       .offerDraw()
                                   : null,
                               child: const Text('Offer Draw'),
@@ -359,15 +357,15 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                    else
-                      const Text(
-                        'Active',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                  else
+                    const Text(
+                      'Active',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
                       ),
+                    ),
                 ],
               ),
               Column(
@@ -515,8 +513,8 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resign Game'),
-        content:
-            const Text('Are you sure you want to resign? This cannot be undone.'),
+        content: const Text(
+            'Are you sure you want to resign? This cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -524,9 +522,7 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
           ),
           FilledButton(
             onPressed: () {
-              ref
-                  .read(onlineGameStateProvider(gameId).notifier)
-                  .resign();
+              ref.read(onlineGameStateProvider(gameId).notifier).resign();
               Navigator.pop(context);
             },
             child: const Text('Resign'),

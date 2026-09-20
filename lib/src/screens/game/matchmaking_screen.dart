@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/matchmaking_provider.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../utils/animations.dart';
 import 'online_game_screen.dart';
 
@@ -35,7 +35,9 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
         _queueEntryId = queueEntryId;
       });
 
-      ref.read(matchmakingStatusProvider.notifier).setStatus(MatchmakingStatus.searching);
+      ref
+          .read(matchmakingStatusProvider.notifier)
+          .setStatus(MatchmakingStatus.searching);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +68,9 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
   Future<void> _acceptMatch(String matchId) async {
     try {
       await ref.read(matchmakingServiceProvider).acceptMatch(matchId);
-      ref.read(matchmakingStatusProvider.notifier).setStatus(MatchmakingStatus.found);
+      ref
+          .read(matchmakingStatusProvider.notifier)
+          .setStatus(MatchmakingStatus.found);
 
       if (mounted) {
         // Navigate to online game screen
@@ -88,12 +92,16 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
   Future<void> _declineMatch(String matchId) async {
     try {
       await ref.read(matchmakingServiceProvider).declineMatch(matchId);
-      ref.read(matchmakingStatusProvider.notifier).setStatus(MatchmakingStatus.declined);
+      ref
+          .read(matchmakingStatusProvider.notifier)
+          .setStatus(MatchmakingStatus.declined);
 
       // Continue searching after a short delay
       await Future.delayed(const Duration(seconds: 2));
       if (mounted && _queueEntryId != null) {
-        ref.read(matchmakingStatusProvider.notifier).setStatus(MatchmakingStatus.searching);
+        ref
+            .read(matchmakingStatusProvider.notifier)
+            .setStatus(MatchmakingStatus.searching);
       }
     } catch (e) {
       if (mounted) {
@@ -127,7 +135,8 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                 children: [
                   // Status indicator
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: _getStatusColor(matchmakingStatus),
                       borderRadius: BorderRadius.circular(12),
@@ -223,14 +232,16 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => _declineMatch(match?['matchId'] ?? ''),
+                          onPressed: () =>
+                              _declineMatch(match?['matchId'] ?? ''),
                           child: const Text('Decline'),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: FilledButton(
-                          onPressed: () => _acceptMatch(match?['matchId'] ?? ''),
+                          onPressed: () =>
+                              _acceptMatch(match?['matchId'] ?? ''),
                           child: const Text('Accept'),
                         ),
                       ),
@@ -333,12 +344,14 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
       );
     }
 
-    final opponentName = match['whiteId'] == ref.read(currentUserProvider).value?.uid
-        ? match['blackName']
-        : match['whiteName'];
-    final opponentRating = match['whiteId'] == ref.read(currentUserProvider).value?.uid
-        ? match['blackRating']
-        : match['whiteRating'];
+    final opponentName =
+        match['whiteId'] == ref.read(currentUserProvider).value?.uid
+            ? match['blackName']
+            : match['whiteName'];
+    final opponentRating =
+        match['whiteId'] == ref.read(currentUserProvider).value?.uid
+            ? match['blackRating']
+            : match['whiteRating'];
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -369,7 +382,8 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                 radius: 40,
                 backgroundColor: Colors.blue.shade100,
                 child: Text(
-                  (opponentName as String?)?.substring(0, 1).toUpperCase() ?? '?',
+                  (opponentName as String?)?.substring(0, 1).toUpperCase() ??
+                      '?',
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,

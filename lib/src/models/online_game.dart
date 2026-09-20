@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Represents an online multiplayer game
 class OnlineGame {
@@ -44,6 +43,9 @@ class OnlineGame {
   final int? whiteNewRating;
   final int? blackNewRating;
 
+  /// Player ID of whoever currently has an outstanding draw offer, if any.
+  final String? drawOfferedBy;
+
   OnlineGame({
     required this.gameId,
     required this.type,
@@ -74,6 +76,7 @@ class OnlineGame {
     this.blackRatingDelta,
     this.whiteNewRating,
     this.blackNewRating,
+    this.drawOfferedBy,
   });
 
   /// Convert to Firestore JSON
@@ -114,6 +117,7 @@ class OnlineGame {
       'blackRatingDelta': blackRatingDelta,
       'whiteNewRating': whiteNewRating,
       'blackNewRating': blackNewRating,
+      'drawOfferedBy': drawOfferedBy,
     };
   }
 
@@ -162,6 +166,7 @@ class OnlineGame {
       blackRatingDelta: json['blackRatingDelta'] as int?,
       whiteNewRating: json['whiteNewRating'] as int?,
       blackNewRating: json['blackNewRating'] as int?,
+      drawOfferedBy: json['drawOfferedBy'] as String?,
     );
   }
 
@@ -196,6 +201,8 @@ class OnlineGame {
     int? blackRatingDelta,
     int? whiteNewRating,
     int? blackNewRating,
+    String? drawOfferedBy,
+    bool clearDrawOffer = false,
   }) {
     return OnlineGame(
       gameId: gameId ?? this.gameId,
@@ -229,6 +236,8 @@ class OnlineGame {
       blackRatingDelta: blackRatingDelta ?? this.blackRatingDelta,
       whiteNewRating: whiteNewRating ?? this.whiteNewRating,
       blackNewRating: blackNewRating ?? this.blackNewRating,
+      drawOfferedBy:
+          clearDrawOffer ? null : (drawOfferedBy ?? this.drawOfferedBy),
     );
   }
 

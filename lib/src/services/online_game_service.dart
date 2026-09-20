@@ -3,7 +3,6 @@ import 'dart:math' show pow;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Manages online multiplayer games in real-time
 class OnlineGameService {
@@ -194,8 +193,6 @@ class OnlineGameService {
     int? blackRatingDelta,
   }) async {
     try {
-      final now = DateTime.now();
-
       // Get current game to calculate new ratings if needed
       final gameDoc =
           await _firestore.collection(_gamesCollection).doc(gameId).get();
@@ -252,6 +249,54 @@ class OnlineGameService {
       _logger.i('Player $playerId resigned from game $gameId');
     } catch (e, st) {
       _logger.e('Failed to resign game', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Offer a draw to the opponent
+  Future<void> offerDraw(String gameId, String playerId) async {
+    try {
+      await _firestore.collection(_gamesCollection).doc(gameId).update({
+        'drawOfferedBy': playerId,
+      });
+
+      _logger.i('Player $playerId offered a draw in game $gameId');
+    } catch (e, st) {
+      _logger.e('Failed to offer draw', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Decline the outstanding draw offer
+  Future<void> declineDraw(String gameId) async {
+    try {
+      await _firestore.collection(_gamesCollection).doc(gameId).update({
+        'drawOfferedBy': null,
+      });
+
+      _logger.i('Draw offer declined in game $gameId');
+    } catch (e, st) {
+      _logger.e('Failed to decline draw', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Accept the outstanding draw offer, ending the game as a draw
+  Future<void> acceptDraw(String gameId) async {
+    try {
+      await _endGameWithResult(
+        gameId: gameId,
+        result: 'draw',
+        resultReason: 'draw_agreement',
+      );
+
+      await _firestore.collection(_gamesCollection).doc(gameId).update({
+        'drawOfferedBy': null,
+      });
+
+      _logger.i('Draw accepted in game $gameId');
+    } catch (e, st) {
+      _logger.e('Failed to accept draw', error: e, stackTrace: st);
       rethrow;
     }
   }
