@@ -19,7 +19,7 @@ class AIAnalysisOptimizer {
   Future<GameAnalysis> analyzeGameOptimized(
     String userId,
     String gameId,
-    Game game,
+    GameModel game,
   ) async {
     // Check cache first
     final cached = _analysisCache[gameId];
@@ -28,7 +28,8 @@ class AIAnalysisOptimizer {
     }
 
     // Parse moves once
-    final moves = game.pgn.split(' ').where((m) => m.isNotEmpty).toList();
+    final pgn = game.pgn ?? '';
+    final moves = pgn.split(' ').where((m) => m.isNotEmpty).toList();
 
     // Parallelize move analysis
     final moveAnalyses = await Future.wait(
@@ -41,21 +42,37 @@ class AIAnalysisOptimizer {
 
     // Aggregate results in single pass
     final aggregated = _aggregateMoveAnalysis(moveAnalyses, game);
+    final goodMoves = moveAnalyses
+        .where((m) =>
+            m.analysisType == AnalysisType.goodMove ||
+            m.analysisType == AnalysisType.excellentMove ||
+            m.analysisType == AnalysisType.bestMove)
+        .length;
 
     final analysis = GameAnalysis(
+      id: gameId,
       userId: userId,
       gameId: gameId,
-      pgn: game.pgn,
-      moveAnalyses: moveAnalyses,
-      accuracy: aggregated.accuracy,
+      analysisDate: DateTime.now(),
+      overallAccuracy: aggregated.accuracy,
+      totalMoves: moves.length,
       blunders: aggregated.blunders,
       mistakes: aggregated.mistakes,
       inaccuracies: aggregated.inaccuracies,
-      bestMoves: aggregated.bestMoves,
+      goodMoves: goodMoves,
+      moveAnalyses: moveAnalyses,
       identifiedWeaknesses: aggregated.weaknesses,
-      recommendedLessons: [],
-      analysisType: AIContentType.gameAnalysis,
-      createdAt: DateTime.now(),
+      openingsPlayed: const [],
+      tacticPatternsEncountered: moveAnalyses
+          .map((m) => m.tacticPattern)
+          .where((p) => p.isNotEmpty)
+          .toSet()
+          .toList(),
+      overallAssessment: _generateOverallAssessment(
+        aggregated.accuracy,
+        aggregated.blunders,
+      ),
+      suggestedLessons: const [],
     );
 
     // Cache result
@@ -67,7 +84,7 @@ class AIAnalysisOptimizer {
   /// Analyze single move efficiently
   /// Reuses cached positions to avoid recomputation
   Future<MoveAnalysis> _analyzeMoveOptimized(
-    Game game,
+    GameModel game,
     List<String> moves,
     int moveIndex,
   ) async {
@@ -82,18 +99,30 @@ class AIAnalysisOptimizer {
       return MoveAnalysis(
         moveNumber: moveIndex + 1,
         move: moves[moveIndex],
+        currentFen: position.fen,
         analysisType: moveQuality,
-        explanation: _explainMove(moveQuality, tactics),
         evaluationDifference: _calculateEvalDifference(moveQuality),
+        bestMove: moves[moveIndex],
+        explanation: _explainMove(moveQuality, tactics),
+        tacticPattern: tactics.isNotEmpty ? tactics.first : '',
+        isBlunder: moveQuality == AnalysisType.blunder,
+        isMistake: moveQuality == AnalysisType.mistake,
+        isInaccuracy: moveQuality == AnalysisType.inaccuracy,
       );
     } catch (e) {
       // Return empty analysis on error
       return MoveAnalysis(
         moveNumber: moveIndex + 1,
         move: moves[moveIndex],
+        currentFen: '',
         analysisType: AnalysisType.goodMove,
-        explanation: 'Unable to analyze move',
         evaluationDifference: 0.0,
+        bestMove: moves[moveIndex],
+        explanation: 'Unable to analyze move',
+        tacticPattern: '',
+        isBlunder: false,
+        isMistake: false,
+        isInaccuracy: false,
       );
     }
   }
@@ -126,7 +155,7 @@ class AIAnalysisOptimizer {
   /// Aggregate move analysis results
   _AggregatedAnalysis _aggregateMoveAnalysis(
     List<MoveAnalysis> moveAnalyses,
-    Game game,
+    GameModel game,
   ) {
     int blunders = 0;
     int mistakes = 0;
@@ -212,6 +241,17 @@ class AIAnalysisOptimizer {
       AnalysisType.excellentMove => 'Excellent move - strong advantage',
       AnalysisType.bestMove => 'Best move - perfect continuation',
     };
+  }
+
+  /// Generate a short overall assessment from accuracy/blunder counts
+  String _generateOverallAssessment(double accuracy, int blunders) {
+    if (accuracy > 85 && blunders == 0) {
+      return 'Excellent game with very few errors.';
+    } else if (accuracy > 70) {
+      return 'Good game overall, room for improvement in tactics.';
+    } else {
+      return 'Several mistakes found. Focus on pattern recognition.';
+    }
   }
 
   /// Calculate evaluation difference
