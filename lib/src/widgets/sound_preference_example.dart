@@ -61,12 +61,16 @@ class SoundPreferenceExample extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _buildPreferenceRow('Master Sound', prefs.soundMasterEnabled),
-            _buildPreferenceRow('Volume', '${(prefs.volume * 100).toStringAsFixed(0)}%'),
+            _buildPreferenceRow(
+                'Volume', '${(prefs.volume * 100).toStringAsFixed(0)}%'),
             const Divider(),
             const SizedBox(height: 8),
             const Text(
               'Category Status:',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey),
             ),
             const SizedBox(height: 8),
             for (final category in SoundCategory.values)
@@ -81,9 +85,8 @@ class SoundPreferenceExample extends ConsumerWidget {
   }
 
   Widget _buildPreferenceRow(String label, dynamic value) {
-    final valueText = value is bool
-        ? (value ? '✓ Enabled' : '✗ Disabled')
-        : value.toString();
+    final valueText =
+        value is bool ? (value ? '✓ Enabled' : '✗ Disabled') : value.toString();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -125,7 +128,7 @@ class SoundPreferenceExample extends ConsumerWidget {
           children: [
             ElevatedButton.icon(
               onPressed: () => soundManager.play(SoundEffect.movePiece),
-              icon: const Icon(Icons.chess_pawn),
+              icon: const Icon(Icons.videogame_asset),
               label: const Text('Move'),
             ),
             ElevatedButton.icon(
@@ -214,7 +217,8 @@ bool isGamePlaySoundEnabled =
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey),
+          style: const TextStyle(
+              fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey),
         ),
         const SizedBox(height: 4),
         Container(
