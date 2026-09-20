@@ -30,7 +30,7 @@ extension NotificationSeverityExt on NotificationSeverity {
       case NotificationSeverity.success:
         return Icons.check_circle_outline;
       case NotificationSeverity.warning:
-        return Icons.warning_outline;
+        return Icons.warning_amber_outlined;
       case NotificationSeverity.error:
         return Icons.error_outline;
     }
@@ -102,7 +102,8 @@ class NotificationService {
   }
 
   /// Show an error notification
-  void showError(String message, {Duration? duration, String? actionLabel, VoidCallback? onAction}) {
+  void showError(String message,
+      {Duration? duration, String? actionLabel, VoidCallback? onAction}) {
     show(AppNotification(
       message: message,
       severity: NotificationSeverity.error,
@@ -156,13 +157,15 @@ class NotificationNotifier extends StateNotifier<List<AppNotification>> {
   void showInfo(String message) => _service.showInfo(message);
   void showSuccess(String message) => _service.showSuccess(message);
   void showWarning(String message) => _service.showWarning(message);
-  void showError(String message, {String? actionLabel, VoidCallback? onAction}) =>
+  void showError(String message,
+          {String? actionLabel, VoidCallback? onAction}) =>
       _service.showError(message, actionLabel: actionLabel, onAction: onAction);
   void clearAll() => _service.clearAll();
 }
 
 /// Riverpod provider for notifications state
-final notificationsProvider = StateNotifierProvider<NotificationNotifier, List<AppNotification>>(
+final notificationsProvider =
+    StateNotifierProvider<NotificationNotifier, List<AppNotification>>(
   (ref) => NotificationNotifier(ref.watch(notificationServiceProvider)),
 );
 
