@@ -256,6 +256,54 @@ class OnlineGameService {
     }
   }
 
+  /// Offer a draw to the opponent
+  Future<void> offerDraw(String gameId, String playerId) async {
+    try {
+      await _firestore.collection(_gamesCollection).doc(gameId).update({
+        'drawOfferedBy': playerId,
+      });
+
+      _logger.i('Player $playerId offered a draw in game $gameId');
+    } catch (e, st) {
+      _logger.e('Failed to offer draw', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Decline the outstanding draw offer
+  Future<void> declineDraw(String gameId) async {
+    try {
+      await _firestore.collection(_gamesCollection).doc(gameId).update({
+        'drawOfferedBy': null,
+      });
+
+      _logger.i('Draw offer declined in game $gameId');
+    } catch (e, st) {
+      _logger.e('Failed to decline draw', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
+  /// Accept the outstanding draw offer, ending the game as a draw
+  Future<void> acceptDraw(String gameId) async {
+    try {
+      await _endGameWithResult(
+        gameId: gameId,
+        result: 'draw',
+        resultReason: 'draw_agreement',
+      );
+
+      await _firestore.collection(_gamesCollection).doc(gameId).update({
+        'drawOfferedBy': null,
+      });
+
+      _logger.i('Draw accepted in game $gameId');
+    } catch (e, st) {
+      _logger.e('Failed to accept draw', error: e, stackTrace: st);
+      rethrow;
+    }
+  }
+
   /// Abandon game (player disconnected/timeout)
   Future<void> abandonGame(String gameId, String playerId) async {
     try {
