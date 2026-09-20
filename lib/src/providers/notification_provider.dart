@@ -4,7 +4,8 @@ import '../models/notification.dart';
 import 'auth_provider.dart';
 
 /// Firebase notifications provider
-final firebaseNotificationsProvider = StreamProvider.family<NotificationBatch?, String>((ref, userId) {
+final firebaseNotificationsProvider =
+    StreamProvider.family<NotificationBatch?, String>((ref, userId) {
   final firestore = FirebaseFirestore.instance;
 
   return firestore
@@ -38,7 +39,8 @@ final firebaseNotificationsProvider = StreamProvider.family<NotificationBatch?, 
 });
 
 /// Current user notifications provider
-final currentUserNotificationsProvider = StreamProvider<NotificationBatch?>((ref) {
+final currentUserNotificationsProvider =
+    StreamProvider<NotificationBatch?>((ref) {
   final userAsync = ref.watch(currentUserProvider);
 
   return userAsync.when(
@@ -48,11 +50,11 @@ final currentUserNotificationsProvider = StreamProvider<NotificationBatch?>((ref
       if (user == null) {
         return Stream.value(null);
       }
-      return ref.watch(firebaseNotificationsProvider(user.id)).when(
-        loading: () => Stream.value(null),
-        error: (err, stack) => Stream.value(null),
-        data: (batch) => Stream.value(batch),
-      );
+      return ref.watch(firebaseNotificationsProvider(user.uid)).when(
+            loading: () => Stream.value(null),
+            error: (err, stack) => Stream.value(null),
+            data: (batch) => Stream.value(batch),
+          );
     },
   );
 });
@@ -67,7 +69,7 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
     data: (user) {
       if (user == null) return 0;
 
-      final batchAsync = ref.watch(firebaseNotificationsProvider(user.id));
+      final batchAsync = ref.watch(firebaseNotificationsProvider(user.uid));
       return batchAsync.when(
         loading: () => 0,
         error: (err, stack) => 0,
@@ -174,7 +176,8 @@ class NotificationActionNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> markAsRead(String userId, String notificationId) async {
     state = const AsyncValue.loading();
     final service = ref.watch(notificationServiceProvider);
-    state = await AsyncValue.guard(() => service.markAsRead(userId, notificationId));
+    state = await AsyncValue.guard(
+        () => service.markAsRead(userId, notificationId));
   }
 
   /// Mark all as read
@@ -188,13 +191,15 @@ class NotificationActionNotifier extends StateNotifier<AsyncValue<void>> {
   Future<void> deleteNotification(String userId, String notificationId) async {
     state = const AsyncValue.loading();
     final service = ref.watch(notificationServiceProvider);
-    state = await AsyncValue.guard(() => service.deleteNotification(userId, notificationId));
+    state = await AsyncValue.guard(
+        () => service.deleteNotification(userId, notificationId));
   }
 
   /// Delete all notifications
   Future<void> deleteAllNotifications(String userId) async {
     state = const AsyncValue.loading();
     final service = ref.watch(notificationServiceProvider);
-    state = await AsyncValue.guard(() => service.deleteAllNotifications(userId));
+    state =
+        await AsyncValue.guard(() => service.deleteAllNotifications(userId));
   }
 }
