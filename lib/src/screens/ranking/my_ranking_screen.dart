@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/leaderboard_provider.dart';
+import '../../models/user.dart';
+import '../../services/shogi_rank_service.dart';
 import '../../widgets/shogi_rank_display.dart';
 import 'player_detail_screen.dart';
 
@@ -24,7 +26,8 @@ class MyRankingScreen extends ConsumerWidget {
     }
 
     final userRankAsync = ref.watch(userRankProvider(currentUser.uid));
-    final nearbyRankingsAsync = ref.watch(nearbyRankingsProvider(currentUser.uid));
+    final nearbyRankingsAsync =
+        ref.watch(nearbyRankingsProvider(currentUser.uid));
     final userAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
@@ -36,7 +39,9 @@ class MyRankingScreen extends ConsumerWidget {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               ref.read(userRankProvider(currentUser.uid).notifier).refresh();
-              ref.read(nearbyRankingsProvider(currentUser.uid).notifier).refresh();
+              ref
+                  .read(nearbyRankingsProvider(currentUser.uid).notifier)
+                  .refresh();
             },
             tooltip: '更新',
           ),
@@ -84,14 +89,15 @@ class MyRankingScreen extends ConsumerWidget {
                     children: [
                       Text(
                         '周辺のプレイヤー',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 12.0),
                       nearbyRankingsAsync.when(
-                        data: (rankings) =>
-                            _buildNearbyPlayersList(context, rankings, currentUser.uid),
+                        data: (rankings) => _buildNearbyPlayersList(
+                            context, rankings, currentUser.uid),
                         loading: () => const SizedBox(
                           height: 300,
                           child: Center(child: CircularProgressIndicator()),
@@ -172,7 +178,8 @@ class MyRankingScreen extends ConsumerWidget {
                       const SizedBox(height: 8.0),
                       if (user.shogiRank != null)
                         ShogiRankDisplay(
-                          rankString: user.shogiRank!.displayName(),
+                          rank: user.shogiRank!,
+                          eloRating: user.rating,
                           compact: false,
                         ),
                     ],
@@ -255,7 +262,10 @@ class MyRankingScreen extends ConsumerWidget {
                     builder: (context) => PlayerDetailScreen(
                       uid: user.uid,
                       displayName: user.displayName ?? 'プレイヤー',
-                      shogiRankString: user.shogiRank.displayName(),
+                      shogiRankString: ShogiRankService.displayName(
+                        user.shogiRank ??
+                            ShogiRankService.calculateRank(user.rating),
+                      ),
                       rating: user.rating,
                       gamesPlayed: user.gamesPlayed,
                       wins: user.wins,
@@ -304,9 +314,7 @@ class MyRankingScreen extends ConsumerWidget {
   /// Build win rate progress bar
   Widget _buildWinRateBar(BuildContext context, UserModel user) {
     final theme = Theme.of(context);
-    final winRate = user.gamesPlayed > 0
-        ? user.wins / user.gamesPlayed
-        : 0.0;
+    final winRate = user.gamesPlayed > 0 ? user.wins / user.gamesPlayed : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

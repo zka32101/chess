@@ -1,13 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/user.dart';
 import '../services/ranking_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+export '../services/ranking_service.dart'
+    show RankingService, RankingEntry, RankingStats;
 
 /// Leaderboard filter type
 enum LeaderboardFilter {
-  global,      // Global rankings by ELO
-  byShogi,     // Filtered by shogi rank
-  monthly,     // Monthly rankings
+  global, // Global rankings by ELO
+  byShogi, // Filtered by shogi rank
+  monthly, // Monthly rankings
 }
 
 /// Leaderboard view state
@@ -18,8 +19,9 @@ class LeaderboardState {
   final String? error;
   final int currentPage;
   final LeaderboardFilter filter;
-  final String? shogiRankFilter;  // Used when filter == LeaderboardFilter.byShogi
-  final String? monthKeyFilter;   // Used when filter == LeaderboardFilter.monthly
+  final String?
+      shogiRankFilter; // Used when filter == LeaderboardFilter.byShogi
+  final String? monthKeyFilter; // Used when filter == LeaderboardFilter.monthly
   final DateTime? lastRefreshed;
 
   LeaderboardState({
@@ -175,7 +177,8 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
         }
         break;
       case LeaderboardFilter.monthly:
-        await loadMonthlyRanking(monthKey: state.monthKeyFilter, page: nextPage);
+        await loadMonthlyRanking(
+            monthKey: state.monthKeyFilter, page: nextPage);
         break;
     }
   }
@@ -194,7 +197,8 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
           }
           break;
         case LeaderboardFilter.monthly:
-          await loadMonthlyRanking(monthKey: state.monthKeyFilter, page: prevPage);
+          await loadMonthlyRanking(
+              monthKey: state.monthKeyFilter, page: prevPage);
           break;
       }
     }
@@ -220,11 +224,12 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
 }
 
 /// User rank notifier for tracking individual user rank
-class UserRankNotifier extends StateNotifier<int?> {
+class UserRankNotifier extends StateNotifier<AsyncValue<int?>> {
   final RankingService rankingService;
   final String uid;
 
-  UserRankNotifier(this.rankingService, this.uid) : super(null) {
+  UserRankNotifier(this.rankingService, this.uid)
+      : super(const AsyncValue.loading()) {
     _initialize();
   }
 
@@ -233,11 +238,12 @@ class UserRankNotifier extends StateNotifier<int?> {
   }
 
   Future<void> loadUserRank() async {
+    state = const AsyncValue.loading();
     try {
       final rank = await rankingService.getUserRank(uid);
-      state = rank;
-    } catch (e) {
-      // Handle error silently, state remains null
+      state = AsyncValue.data(rank);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 
@@ -247,12 +253,13 @@ class UserRankNotifier extends StateNotifier<int?> {
 }
 
 /// Nearby rankings notifier
-class NearbyRankingsNotifier extends StateNotifier<List<RankingEntry>> {
+class NearbyRankingsNotifier
+    extends StateNotifier<AsyncValue<List<RankingEntry>>> {
   final RankingService rankingService;
   final String uid;
 
   NearbyRankingsNotifier(this.rankingService, this.uid)
-      : super([]) {
+      : super(const AsyncValue.loading()) {
     _initialize();
   }
 
@@ -261,14 +268,15 @@ class NearbyRankingsNotifier extends StateNotifier<List<RankingEntry>> {
   }
 
   Future<void> loadNearbyRankings() async {
+    state = const AsyncValue.loading();
     try {
       final rankings = await rankingService.getNearbyRankings(
         uid,
         proximityCount: 5,
       );
-      state = rankings;
-    } catch (e) {
-      // Handle error silently
+      state = AsyncValue.data(rankings);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
     }
   }
 
@@ -279,12 +287,12 @@ class NearbyRankingsNotifier extends StateNotifier<List<RankingEntry>> {
 
 /// RankingService provider
 final rankingServiceProvider = Provider((ref) {
-  final firestore = FirebaseFirestore.instance;
-  return RankingService(firestore);
+  return RankingService();
 });
 
 /// Main leaderboard provider
-final leaderboardProvider = StateNotifierProvider<LeaderboardNotifier, LeaderboardState>((ref) {
+final leaderboardProvider =
+    StateNotifierProvider<LeaderboardNotifier, LeaderboardState>((ref) {
   final rankingService = ref.watch(rankingServiceProvider);
   return LeaderboardNotifier(rankingService);
 });
@@ -296,25 +304,23 @@ final globalRankingStreamProvider = StreamProvider<List<RankingEntry>>((ref) {
 });
 
 /// User rank provider (with auto-refresh)
-final userRankProvider = StateNotifierProvider.family<
-    UserRankNotifier,
-    int?,
-    String>((ref, uid) {
+final userRankProvider =
+    StateNotifierProvider.family<UserRankNotifier, AsyncValue<int?>, String>(
+        (ref, uid) {
   final rankingService = ref.watch(rankingServiceProvider);
   return UserRankNotifier(rankingService, uid);
 });
 
 /// Nearby rankings provider
 final nearbyRankingsProvider = StateNotifierProvider.family<
-    NearbyRankingsNotifier,
-    List<RankingEntry>,
-    String>((ref, uid) {
+    NearbyRankingsNotifier, AsyncValue<List<RankingEntry>>, String>((ref, uid) {
   final rankingService = ref.watch(rankingServiceProvider);
   return NearbyRankingsNotifier(rankingService, uid);
 });
 
 /// Watch user's own ranking (real-time)
-final watchUserRankingProvider = StreamProvider.family<RankingEntry?, String>((ref, uid) {
+final watchUserRankingProvider =
+    StreamProvider.family<RankingEntry?, String>((ref, uid) {
   final rankingService = ref.watch(rankingServiceProvider);
   return rankingService.watchUserRanking(uid);
 });

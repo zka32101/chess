@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/leaderboard_provider.dart';
+import '../../services/shogi_rank_service.dart';
 import '../../widgets/shogi_rank_display.dart';
 import 'package:intl/intl.dart';
 
@@ -116,7 +117,8 @@ class PlayerDetailScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ShogiRankDisplay(
-                rankString: shogiRankString,
+                rank: ShogiRankService.calculateRank(rating),
+                eloRating: rating,
                 compact: false,
               ),
             ],
