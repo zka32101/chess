@@ -1,16 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/ai_lesson.dart';
 import '../models/game.dart';
-import 'ai_lesson_generation_service.dart';
 
-/// Implementation of AILessonGenerationService
-/// Handles AI-powered analysis and lesson generation
-class AILessonGenerationServiceImpl implements AILessonGenerationService {
+/// AI-powered game analysis and lesson generation.
+///
+/// This is a separate, richer implementation from
+/// `ai_lesson_generation_service.dart` (which is the one actually wired up
+/// via `phase_j_providers.dart`): the two were built against different data
+/// models and are not interchangeable, so this class stands on its own
+/// rather than implementing that unrelated service's interface.
+class AILessonGenerationServiceImpl {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   AILessonGenerationServiceImpl._();
 
-  @override
   Future<GameAnalysis> analyzeGame(String userId, String gameId) async {
     try {
       // Fetch game from Firestore
@@ -25,7 +28,8 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
         throw Exception('Game not found');
       }
 
-      final game = Game.fromJson(gameDoc.data() as Map<String, dynamic>);
+      final game = GameModel.fromJson(gameDoc.data() as Map<String, dynamic>);
+      final pgn = game.pgn ?? '';
 
       // Analyze each move in the game
       final moveAnalyses = <MoveAnalysis>[];
@@ -36,14 +40,14 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
       final Set<String> weaknesses = {};
 
       // Parse PGN and analyze moves
-      final moves = game.pgn.split(' ').where((m) => m.isNotEmpty).toList();
+      final moves = pgn.split(' ').where((m) => m.isNotEmpty).toList();
 
       for (int i = 0; i < moves.length; i++) {
         final move = moves[i];
         final analysisType = _classifyMove(move, i);
-        final bestMove = _findBestMove(game.pgn, i);
+        final bestMove = _findBestMove(pgn, i);
         final explanation = _generateMoveExplanation(move, analysisType);
-        final tacticPattern = _identifyTacticPattern(game.pgn, i);
+        final tacticPattern = _identifyTacticPattern(pgn, i);
 
         final evaluationDiff = _calculateEvaluationDifference(move, bestMove);
 
@@ -51,7 +55,7 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
           MoveAnalysis(
             moveNumber: i + 1,
             move: move,
-            currentFen: _calculateFenAtMove(game.pgn, i),
+            currentFen: _calculateFenAtMove(pgn, i),
             analysisType: analysisType,
             evaluationDifference: evaluationDiff,
             bestMove: bestMove,
@@ -80,14 +84,14 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
       }
 
       // Calculate overall accuracy
-      final overallAccuracy = moveAnalyses.isNotEmpty
-          ? totalAccuracy / moveAnalyses.length
-          : 100.0;
+      final overallAccuracy =
+          moveAnalyses.isNotEmpty ? totalAccuracy / moveAnalyses.length : 100.0;
 
       // Identify weaknesses
       if (blunders > 0) weaknesses.add('Blunder control');
       if (mistakes > moves.length * 0.3) weaknesses.add('Move accuracy');
-      if (inaccuracies > moves.length * 0.5) weaknesses.add('Position evaluation');
+      if (inaccuracies > moves.length * 0.5)
+        weaknesses.add('Position evaluation');
 
       // Generate suggested lessons
       final suggestedLessons = await _generateSuggestedLessons(
@@ -133,7 +137,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<List<AIOpeningRecommendation>> generateOpeningRecommendations(
     String userId,
   ) async {
@@ -193,7 +196,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<ImprovementPath> generateImprovementPath(String userId) async {
     try {
       final profile = await generatePlayerProfile(userId);
@@ -223,10 +225,9 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
         generatedAt: DateTime.now(),
       );
 
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .set({'improvement_path': improvementPath.toJson()}, SetOptions(merge: true));
+      await _firestore.collection('users').doc(userId).set(
+          {'improvement_path': improvementPath.toJson()},
+          SetOptions(merge: true));
 
       return improvementPath;
     } catch (e) {
@@ -234,7 +235,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<List<AIGeneratedLesson>> getAIGeneratedLessons(
     String userId, {
     AIContentType? contentType,
@@ -251,8 +251,8 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
       }
 
       if (skillLevel != null) {
-        query = query.where('recommendedLevel',
-            isEqualTo: skillLevel.toString());
+        query =
+            query.where('recommendedLevel', isEqualTo: skillLevel.toString());
       }
 
       query = query.orderBy('generatedAt', descending: true);
@@ -268,7 +268,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<void> rateLessonUsefulness(
     String userId,
     String lessonId,
@@ -289,7 +288,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<PlayerProfile> generatePlayerProfile(String userId) async {
     try {
       final gamesSnapshot = await _firestore
@@ -373,7 +371,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<List<EndgameInsight>> analyzeEndgameWeaknesses(String userId) async {
     try {
       final analysesSnapshot = await _firestore
@@ -387,7 +384,7 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
       for (final doc in analysesSnapshot.docs) {
         final analysis =
             GameAnalysis.fromJson(doc.data() as Map<String, dynamic>);
-        
+
         // Find moves in endgame (last 20 moves)
         final endgameMoves = analysis.moveAnalyses.skip(
           (analysis.moveAnalyses.length * 0.8).toInt(),
@@ -418,7 +415,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<List<AIInsight>> getRecentInsights(String userId) async {
     try {
       final recentGamesSnapshot = await _firestore
@@ -441,8 +437,7 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
             AIInsight(
               id: '${userId}_${analysis.id}_weakness',
               userId: userId,
-              title:
-                  'Focus: ${analysis.identifiedWeaknesses.first}',
+              title: 'Focus: ${analysis.identifiedWeaknesses.first}',
               description: 'From game analysis',
               contentType: AIContentType.improvementArea,
               relatedGameId: analysis.gameId,
@@ -461,7 +456,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<void> respondToLesson(
     String userId,
     String lessonId,
@@ -482,7 +476,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<Map<String, dynamic>> getPerformanceProgressAnalytics(
     String userId,
   ) async {
@@ -518,7 +511,6 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     }
   }
 
-  @override
   Future<void> clearCachedAnalysis(String userId) async {
     try {
       final batch = _firestore.batch();
@@ -605,10 +597,8 @@ class AILessonGenerationServiceImpl implements AILessonGenerationService {
     List<String> tactics,
   ) async {
     // Get relevant lessons from database
-    final lessonsSnapshot = await _firestore
-        .collection('chess_lessons')
-        .limit(3)
-        .get();
+    final lessonsSnapshot =
+        await _firestore.collection('chess_lessons').limit(3).get();
 
     return lessonsSnapshot.docs
         .map((doc) => AIGeneratedLesson(
