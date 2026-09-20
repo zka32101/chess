@@ -75,7 +75,8 @@ class IterativeDeepeningEngine {
       // Iteratively deepen the search
       for (int depth = 1; depth <= 10; depth++) {
         // Check if we've exceeded time limit
-        final elapsedMs = DateTime.now().difference(_searchStart).inMilliseconds;
+        final elapsedMs =
+            DateTime.now().difference(_searchStart).inMilliseconds;
         if (elapsedMs > timeLimitMs && depth > 1) {
           hitTimeLimit = true;
           break;
@@ -136,7 +137,7 @@ class IterativeDeepeningEngine {
     // Try each move and evaluate to the specified depth
     for (final move in legalMoves) {
       chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-          promotion: move.promotion);
+          promotion: move.promotion?.name);
 
       final score = _minimax(
         depth - 1,
@@ -199,14 +200,14 @@ class IterativeDeepeningEngine {
 
     final legalMoves = chess.getLegalMoves();
     if (legalMoves.isEmpty) {
-      return chess.isInCheck() ? (isMaximizing ? -9000 : 9000) : 0;
+      return chess.isCheck() ? (isMaximizing ? -9000 : 9000) : 0;
     }
 
     if (isMaximizing) {
       var maxEval = -9999;
       for (final move in legalMoves) {
         chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-            promotion: move.promotion);
+            promotion: move.promotion?.name);
         final eval = _minimax(depth - 1, alpha, beta, false);
         chess.undoMove();
 
@@ -219,7 +220,7 @@ class IterativeDeepeningEngine {
       var minEval = 9999;
       for (final move in legalMoves) {
         chess.makeMove(move.fromAlgebraic, move.toAlgebraic,
-            promotion: move.promotion);
+            promotion: move.promotion?.name);
         final eval = _minimax(depth - 1, alpha, beta, true);
         chess.undoMove();
 
@@ -243,11 +244,14 @@ class IterativeDeepeningEngine {
 
     // Material count
     int score = 0;
-    for (int i = 0; i < 64; i++) {
-      final piece = chess.getPieceAt(i);
-      if (piece != null) {
-        final value = _getPieceValue(piece.type);
-        score += piece.color == chess_lib.Color.WHITE ? value : -value;
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    for (final file in files) {
+      for (var rank = 1; rank <= 8; rank++) {
+        final piece = chess.getPieceAt('$file$rank');
+        if (piece != null) {
+          final value = _getPieceValue(piece.type);
+          score += piece.color == chess_lib.Color.WHITE ? value : -value;
+        }
       }
     }
 
@@ -256,6 +260,8 @@ class IterativeDeepeningEngine {
 
   /// Get material value of a piece type
   int _getPieceValue(chess_lib.PieceType type) {
+    // PieceType is a plain class with static const instances, not a real
+    // Dart enum, so the analyzer can't prove this switch is exhaustive.
     switch (type) {
       case chess_lib.PieceType.PAWN:
         return 1;
@@ -268,6 +274,8 @@ class IterativeDeepeningEngine {
         return 9;
       case chess_lib.PieceType.KING:
         return 0;
+      default:
+        throw ArgumentError('Unknown piece type: $type');
     }
   }
 
@@ -281,7 +289,7 @@ class IterativeDeepeningEngine {
   String _moveToUCI(chess_lib.Move move) {
     String promotion = '';
     if (move.promotion != null) {
-      promotion = move.promotion!.symbol;
+      promotion = move.promotion!.name;
     }
     return '${move.fromAlgebraic}${move.toAlgebraic}$promotion';
   }

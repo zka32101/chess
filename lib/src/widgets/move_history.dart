@@ -18,16 +18,17 @@ class MoveHistory extends StatelessWidget {
   String _moveToNotation(chess_lib.Move move) {
     String notation = '';
 
-    // Add piece symbol (omit for pawns)
-    if (move.piece?.type != chess_lib.PieceType.pawn) {
-      notation += move.piece?.type.symbol.toUpperCase() ?? '';
+    // Add piece symbol (omit for pawns). Move.piece is the PieceType of the
+    // piece that moved (no color info), not a Piece with a nested .type.
+    if (move.piece != chess_lib.PieceType.PAWN) {
+      notation += move.piece.name.toUpperCase();
     }
 
     // Add move coordinates
     notation += move.fromAlgebraic;
 
-    // Add capture indicator
-    if (move.flags.contains('c')) {
+    // Add capture indicator. flags is an int bitmask, not a String.
+    if ((move.flags & chess_lib.Chess.BITS_CAPTURE) != 0) {
       notation += 'x';
     } else {
       notation += '-';
@@ -37,7 +38,7 @@ class MoveHistory extends StatelessWidget {
 
     // Add promotion
     if (move.promotion != null) {
-      notation += '=${move.promotion!.toUpperCase()}';
+      notation += '=${move.promotion!.name.toUpperCase()}';
     }
 
     return notation;
@@ -50,8 +51,8 @@ class MoveHistory extends StatelessWidget {
         child: Text(
           'No moves yet',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.grey,
-          ),
+                color: Colors.grey,
+              ),
         ),
       );
     }
@@ -141,8 +142,8 @@ class _MoveButton extends StatelessWidget {
         child: Text(
           notation,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
           textAlign: TextAlign.center,
         ),
       ),

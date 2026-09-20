@@ -72,7 +72,8 @@ class CPUGameService {
         'blackPlayerName': isPlayerWhite ? 'Chess Engine' : 'You',
         'whiteRating': 1600,
         'blackRating': 1600,
-        'currentFen': 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        'currentFen':
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
         'moves': [],
         'pgn': '',
         'timeControl': timeControl,
@@ -129,7 +130,8 @@ class CPUGameService {
       if (!gameDoc.exists) throw Exception('Game not found');
 
       final gameData = gameDoc.data() as Map<String, dynamic>;
-      final currentMoves = List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
+      final currentMoves =
+          List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
 
       // Create move record
       final moveRecord = {
@@ -160,7 +162,8 @@ class CPUGameService {
   }) async {
     try {
       // Get best moves based on difficulty
-      final bestMoves = engine.getBestMoves(depth: _getDifficultyDepth(difficulty));
+      final bestMoves =
+          engine.getBestMoves(depth: _getDifficultyDepth(difficulty));
 
       if (bestMoves.isEmpty) {
         // Game is over
@@ -180,7 +183,8 @@ class CPUGameService {
       if (!gameDoc.exists) throw Exception('Game not found');
 
       final gameData = gameDoc.data() as Map<String, dynamic>;
-      final currentMoves = List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
+      final currentMoves =
+          List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
 
       // Create move record
       final moveRecord = {
@@ -243,7 +247,8 @@ class CPUGameService {
 
   /// Helper: parse time control string to milliseconds
   int _parseTimeControl(String timeControl) {
-    final value = int.tryParse(timeControl.replaceAll(RegExp(r'[^0-9]'), '')) ?? 5;
+    final value =
+        int.tryParse(timeControl.replaceAll(RegExp(r'[^0-9]'), '')) ?? 5;
 
     if (timeControl.contains('h')) {
       return value * 60 * 60 * 1000;
@@ -301,7 +306,8 @@ final cpuGameServiceProvider = Provider((ref) {
 
 /// CPU game state provider
 final cpuGameStateProvider =
-    StateNotifierProvider.family<CPUGameStateNotifier, CPUGameState, String>((ref, gameId) {
+    StateNotifierProvider.family<CPUGameStateNotifier, CPUGameState, String>(
+        (ref, gameId) {
   return CPUGameStateNotifier(gameId, ref);
 });
 
@@ -436,7 +442,7 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
     _aiEngine = AIOpponentEngine(_chess, difficulty);
 
     state = CpuGameState(
-      gameState: _chess._chess,
+      gameState: _chess.rawChess,
       difficulty: difficulty,
       moves: [],
       startTime: DateTime.now(),
@@ -455,9 +461,9 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
     final allMoves = _chess.getLegalMoves();
     if (allMoves.isNotEmpty) {
       // Get the last move from legal moves (the one we just made)
-      final lastMove = allMoves.where((m) =>
-          m.fromAlgebraic == from &&
-          m.toAlgebraic == to).firstOrNull;
+      final lastMove = allMoves
+          .where((m) => m.fromAlgebraic == from && m.toAlgebraic == to)
+          .firstOrNull;
       if (lastMove != null) {
         newMoves.add(lastMove);
       }
@@ -516,9 +522,9 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
       if (parts.length >= 4) {
         final from = bestMove.substring(0, 2);
         final to = bestMove.substring(2, 4);
-        final lastMove = allMoves.where((m) =>
-            m.fromAlgebraic == from &&
-            m.toAlgebraic == to).firstOrNull;
+        final lastMove = allMoves
+            .where((m) => m.fromAlgebraic == from && m.toAlgebraic == to)
+            .firstOrNull;
         if (lastMove != null) {
           newMoves.add(lastMove);
         }
@@ -545,7 +551,7 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
 
     final newMoves = state.moves.length >= 2
         ? state.moves.sublist(0, state.moves.length - 2)
-        : [];
+        : <chess_lib.Move>[];
 
     _updateGameState(newMoves);
   }
@@ -581,7 +587,7 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
     _aiEngine = AIOpponentEngine(_chess, state.difficulty);
 
     state = CpuGameState(
-      gameState: _chess._chess,
+      gameState: _chess.rawChess,
       difficulty: state.difficulty,
       moves: [],
       startTime: DateTime.now(),
@@ -592,7 +598,7 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
   /// Helper: Update game state after a move
   void _updateGameState(List<chess_lib.Move> newMoves) {
     state = state.copyWith(
-      gameState: _chess._chess,
+      gameState: _chess.rawChess,
       moves: newMoves,
     );
   }

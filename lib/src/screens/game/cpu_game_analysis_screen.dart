@@ -140,9 +140,17 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CPU vs Player'),
-        subtitle:
-            Text('${widget.difficulty.displayName} - ${_getMoveCount()} moves'),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('CPU vs Player'),
+            Text(
+              '${widget.difficulty.displayName} - ${_getMoveCount()} moves',
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -408,11 +416,11 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
                     [
                       (
                         'Killer Cutoffs',
-                        '${(lastEngineStats['killerStats'] as Map?)['totalCutoffs'] ?? 0}'
+                        '${(lastEngineStats['killerStats'] as Map?)?['totalCutoffs'] ?? 0}'
                       ),
                       (
                         'Countermove Cutoffs',
-                        '${(lastEngineStats['countermoveStats'] as Map?)['totalCutoffs'] ?? 0}'
+                        '${(lastEngineStats['countermoveStats'] as Map?)?['totalCutoffs'] ?? 0}'
                       ),
                       ('Adaptive Settings', widget.difficulty.displayName),
                     ],
@@ -485,8 +493,8 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
     };
 
     final symbol = piece.color == chess_lib.Color.WHITE
-        ? piece.type.symbol.toUpperCase()
-        : piece.type.symbol.toLowerCase();
+        ? piece.type.name.toUpperCase()
+        : piece.type.name.toLowerCase();
 
     return symbols[symbol] ?? '?';
   }
