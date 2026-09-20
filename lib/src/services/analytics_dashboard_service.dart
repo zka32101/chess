@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 
 /// Service for comprehensive analytics dashboard
 class AnalyticsDashboardService {
-  static final AnalyticsDashboardService _instance = AnalyticsDashboardService._();
+  static final AnalyticsDashboardService _instance =
+      AnalyticsDashboardService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -53,7 +54,8 @@ class AnalyticsDashboardService {
       final users = await _firestore
           .collection('users')
           .where('createdAt',
-              isLessThan: Timestamp.fromDate(now.subtract(const Duration(days: 30))))
+              isLessThan:
+                  Timestamp.fromDate(now.subtract(const Duration(days: 30))))
           .count()
           .get();
 
@@ -73,10 +75,7 @@ class AnalyticsDashboardService {
   /// Get conversion metrics
   Future<ConversionMetrics> _getConversionMetrics() async {
     try {
-      final allUsers = await _firestore
-          .collection('users')
-          .count()
-          .get();
+      final allUsers = await _firestore.collection('users').count().get();
 
       final subscribers = await _firestore
           .collection('users')
@@ -84,18 +83,19 @@ class AnalyticsDashboardService {
           .count()
           .get();
 
-      final conversionRate = allUsers.count > 0
-          ? subscribers.count / allUsers.count
+      final conversionRate = (allUsers.count ?? 0) > 0
+          ? (subscribers.count ?? 0) / (allUsers.count ?? 0)
           : 0.0;
 
       return ConversionMetrics(
-        totalUsers: allUsers.count,
-        subscribers: subscribers.count,
+        totalUsers: allUsers.count ?? 0,
+        subscribers: subscribers.count ?? 0,
         conversionRate: conversionRate,
       );
     } catch (e) {
       debugPrint('Error calculating conversion: $e');
-      return ConversionMetrics(totalUsers: 0, subscribers: 0, conversionRate: 0.0);
+      return ConversionMetrics(
+          totalUsers: 0, subscribers: 0, conversionRate: 0.0);
     }
   }
 
@@ -122,13 +122,13 @@ class AnalyticsDashboardService {
           .count()
           .get();
 
-      final crashFreeRate = sessions.count > 0
-          ? 1.0 - (crashes.count / sessions.count)
+      final crashFreeRate = (sessions.count ?? 0) > 0
+          ? 1.0 - ((crashes.count ?? 0) / (sessions.count ?? 0))
           : 1.0;
 
       return CrashMetrics(
-        crashes: crashes.count,
-        sessions: sessions.count,
+        crashes: crashes.count ?? 0,
+        sessions: sessions.count ?? 0,
         crashFreeRate: crashFreeRate,
       );
     } catch (e) {
@@ -165,8 +165,8 @@ class AnalyticsDashboardService {
       }
 
       return EngagementMetrics(
-        avgSessionLength:
-            Duration(milliseconds: (totalDuration / sessions.docs.length).toInt()),
+        avgSessionLength: Duration(
+            milliseconds: (totalDuration / sessions.docs.length).toInt()),
         sessionsPerDay: sessions.docs.length / 7.0,
         totalSessions: sessions.docs.length,
       );
@@ -183,14 +183,11 @@ class AnalyticsDashboardService {
   /// Get ARPU (Average Revenue Per User)
   Future<double> _getARPU() async {
     try {
-      final allUsers = await _firestore
-          .collection('users')
-          .count()
-          .get();
+      final allUsers = await _firestore.collection('users').count().get();
 
       // Simplified - real implementation would track revenue
       // Assuming average $1.25 ARPU
-      return allUsers.count > 0 ? 1.25 : 0.0;
+      return (allUsers.count ?? 0) > 0 ? 1.25 : 0.0;
     } catch (e) {
       debugPrint('Error calculating ARPU: $e');
       return 0.0;
@@ -200,11 +197,8 @@ class AnalyticsDashboardService {
   /// Get install count
   Future<int> _getInstallCount() async {
     try {
-      final result = await _firestore
-          .collection('users')
-          .count()
-          .get();
-      return result.count;
+      final result = await _firestore.collection('users').count().get();
+      return result.count ?? 0;
     } catch (e) {
       debugPrint('Error getting install count: $e');
       return 0;
@@ -225,10 +219,8 @@ class AnalyticsDashboardService {
           .where('timestamp', isGreaterThan: weekAgo)
           .get();
 
-      final uniqueUsers = result.docs
-          .map((doc) => doc['userId'])
-          .toSet()
-          .length;
+      final uniqueUsers =
+          result.docs.map((doc) => doc['userId']).toSet().length;
 
       return uniqueUsers;
     } catch (e) {
@@ -264,7 +256,8 @@ class AnalyticsDashboardService {
       );
     } catch (e) {
       debugPrint('Error analyzing funnel: $e');
-      return FunnelAnalysis(funnelName: funnelName, steps: {}, conversionRate: 0.0);
+      return FunnelAnalysis(
+          funnelName: funnelName, steps: {}, conversionRate: 0.0);
     }
   }
 
@@ -308,18 +301,20 @@ class AnalyticsDashboardService {
             .then((result) =>
                 result.docs.map((doc) => doc['userId']).toSet().length);
 
-        retention[dayOffset] =
-            cohortUsers.count > 0 ? activeCount / cohortUsers.count : 0.0;
+        retention[dayOffset] = (cohortUsers.count ?? 0) > 0
+            ? activeCount / (cohortUsers.count ?? 0)
+            : 0.0;
       }
 
       return CohortAnalysis(
         cohortDate: cohortDate,
-        cohortSize: cohortUsers.count,
+        cohortSize: cohortUsers.count ?? 0,
         retention: retention,
       );
     } catch (e) {
       debugPrint('Error analyzing cohort: $e');
-      return CohortAnalysis(cohortDate: cohortDate, cohortSize: 0, retention: {});
+      return CohortAnalysis(
+          cohortDate: cohortDate, cohortSize: 0, retention: {});
     }
   }
 
@@ -375,19 +370,20 @@ class DashboardSummary {
   });
 
   factory DashboardSummary.empty() => DashboardSummary(
-    timestamp: DateTime.now(),
-    installations: 0,
-    activeUsers: 0,
-    retention: RetentionMetrics(d1: 0.0, d7: 0.0, d14: 0.0, d30: 0.0),
-    conversion: ConversionMetrics(totalUsers: 0, subscribers: 0, conversionRate: 0.0),
-    crashes: CrashMetrics(crashes: 0, sessions: 0, crashFreeRate: 1.0),
-    engagement: EngagementMetrics(
-      avgSessionLength: Duration.zero,
-      sessionsPerDay: 0.0,
-      totalSessions: 0,
-    ),
-    arpu: 0.0,
-  );
+        timestamp: DateTime.now(),
+        installations: 0,
+        activeUsers: 0,
+        retention: RetentionMetrics(d1: 0.0, d7: 0.0, d14: 0.0, d30: 0.0),
+        conversion: ConversionMetrics(
+            totalUsers: 0, subscribers: 0, conversionRate: 0.0),
+        crashes: CrashMetrics(crashes: 0, sessions: 0, crashFreeRate: 1.0),
+        engagement: EngagementMetrics(
+          avgSessionLength: Duration.zero,
+          sessionsPerDay: 0.0,
+          totalSessions: 0,
+        ),
+        arpu: 0.0,
+      );
 }
 
 /// Retention metrics
