@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/leaderboard_provider.dart';
+import '../../services/shogi_rank_service.dart';
 import '../../widgets/shogi_rank_display.dart';
 import 'package:intl/intl.dart';
 
@@ -28,7 +29,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     // If initial shogi rank provided, load those rankings
     if (widget.initialShogiRank != null) {
       Future.microtask(() {
-        ref.read(leaderboardProvider.notifier)
+        ref
+            .read(leaderboardProvider.notifier)
             .loadRankingByShogi(widget.initialShogiRank!);
       });
     }
@@ -68,9 +70,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
           // Leaderboard content
           Expanded(
-            child: leaderboardState.isLoading && leaderboardState.entries.isEmpty
+            child: leaderboardState.isLoading &&
+                    leaderboardState.entries.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : leaderboardState.error != null && leaderboardState.entries.isEmpty
+                : leaderboardState.error != null &&
+                        leaderboardState.entries.isEmpty
                     ? _buildErrorWidget(context, leaderboardState.error!)
                     : RefreshIndicator(
                         onRefresh: () =>
@@ -136,9 +140,34 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   /// Show shogi rank filter dialog
   void _showShogiRankFilter(BuildContext context) {
     final ranks = [
-      '20級', '19級', '18級', '17級', '16級', '15級', '14級', '13級', '12級', '11級',
-      '10級', '9級', '8級', '7級', '6級', '5級', '4級', '3級', '2級', '1級',
-      '初段', '2段', '3段', '4段', '5段', '6段', '7段', '8段',
+      '20級',
+      '19級',
+      '18級',
+      '17級',
+      '16級',
+      '15級',
+      '14級',
+      '13級',
+      '12級',
+      '11級',
+      '10級',
+      '9級',
+      '8級',
+      '7級',
+      '6級',
+      '5級',
+      '4級',
+      '3級',
+      '2級',
+      '1級',
+      '初段',
+      '2段',
+      '3段',
+      '4段',
+      '5段',
+      '6段',
+      '7段',
+      '8段',
     ];
 
     showDialog(
@@ -153,7 +182,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             itemBuilder: (context, index) => ListTile(
               title: Text(ranks[index]),
               onTap: () {
-                ref.read(leaderboardProvider.notifier)
+                ref
+                    .read(leaderboardProvider.notifier)
                     .loadRankingByShogi(ranks[index]);
                 Navigator.pop(context);
               },
@@ -250,7 +280,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   /// Build pagination controls
-  Widget _buildPaginationControls(BuildContext context, LeaderboardState state) {
+  Widget _buildPaginationControls(
+      BuildContext context, LeaderboardState state) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -392,7 +423,8 @@ class RankCard extends ConsumerWidget {
                     children: [
                       // Shogi rank badge
                       ShogiRankDisplay(
-                        rankString: entry.shogiRankString,
+                        rank: ShogiRankService.calculateRank(entry.rating),
+                        eloRating: entry.rating,
                         compact: true,
                       ),
                       const SizedBox(width: 8.0),
