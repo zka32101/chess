@@ -27,9 +27,9 @@ class NotificationsScreen extends ConsumerWidget {
                 onSelected: (value) async {
                   final service = ref.read(notificationServiceProvider);
                   if (value == 'mark_all_read') {
-                    await service.markAllAsRead(user.id);
+                    await service.markAllAsRead(user.uid);
                   } else if (value == 'delete_all') {
-                    _showDeleteAllDialog(context, ref, user.id);
+                    _showDeleteAllDialog(context, ref, user.uid);
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -60,13 +60,14 @@ class NotificationsScreen extends ConsumerWidget {
               child: Text('Please log in to view notifications'),
             );
           }
-          return _buildNotificationsList(context, ref, user.id);
+          return _buildNotificationsList(context, ref, user.uid);
         },
       ),
     );
   }
 
-  Widget _buildNotificationsList(BuildContext context, WidgetRef ref, String userId) {
+  Widget _buildNotificationsList(
+      BuildContext context, WidgetRef ref, String userId) {
     final notificationsAsync = ref.watch(firebaseNotificationsProvider(userId));
 
     return notificationsAsync.when(
@@ -129,9 +130,7 @@ class NotificationsScreen extends ConsumerWidget {
     final service = ref.read(notificationServiceProvider);
 
     return Material(
-      color: notification.isRead
-          ? Colors.transparent
-          : Colors.blue[50],
+      color: notification.isRead ? Colors.transparent : Colors.blue[50],
       child: InkWell(
         onTap: () async {
           if (!notification.isRead) {
@@ -177,11 +176,12 @@ class NotificationsScreen extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  fontWeight: notification.isRead
-                                      ? FontWeight.w500
-                                      : FontWeight.w700,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: notification.isRead
+                                          ? FontWeight.w500
+                                          : FontWeight.w700,
+                                    ),
                           ),
                         ),
                         if (!notification.isRead)
@@ -191,7 +191,9 @@ class NotificationsScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: Color(
                                 int.parse(
-                                  notification.getColor().replaceFirst('#', '0xff'),
+                                  notification
+                                      .getColor()
+                                      .replaceFirst('#', '0xff'),
                                 ),
                               ),
                               shape: BoxShape.circle,
@@ -214,9 +216,10 @@ class NotificationsScreen extends ConsumerWidget {
                       children: [
                         Text(
                           _formatTime(notification.createdAt),
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Colors.grey[500],
-                              ),
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.grey[500],
+                                  ),
                         ),
                         Row(
                           children: [
@@ -232,7 +235,8 @@ class NotificationsScreen extends ConsumerWidget {
                                 label: const Text('Mark read'),
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
                               ),
                             TextButton.icon(
@@ -288,7 +292,8 @@ class NotificationsScreen extends ConsumerWidget {
     );
   }
 
-  void _showDeleteAllDialog(BuildContext context, WidgetRef ref, String userId) {
+  void _showDeleteAllDialog(
+      BuildContext context, WidgetRef ref, String userId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
