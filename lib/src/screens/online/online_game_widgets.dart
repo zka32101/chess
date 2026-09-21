@@ -166,9 +166,10 @@ class MatchmakingStatusWidget extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildStatusRow('Queue Position', '#$position'),
-          _buildStatusRow('Time Control', timeControl),
+          _buildStatusRow(context, 'Queue Position', '#$position'),
+          _buildStatusRow(context, 'Time Control', timeControl),
           _buildStatusRow(
+            context,
             'Est. Wait Time',
             _formatDuration(estimatedWaitTime),
           ),
@@ -177,7 +178,7 @@ class MatchmakingStatusWidget extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusRow(String label, String value) {
+  Widget _buildStatusRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
