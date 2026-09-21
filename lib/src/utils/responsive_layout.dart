@@ -148,8 +148,8 @@ class ResponsiveGridView extends StatelessWidget {
 
     return GridView.count(
       crossAxisCount: columns,
-      spacing: spacing,
-      runSpacing: runSpacing,
+      crossAxisSpacing: spacing,
+      mainAxisSpacing: runSpacing,
       children: children,
     );
   }
@@ -174,7 +174,8 @@ class ResponsiveContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final responsivePadding = padding ?? ResponsiveBreakpoints.getResponsivePadding(context);
+    final responsivePadding =
+        padding ?? ResponsiveBreakpoints.getResponsivePadding(context);
 
     return Center(
       child: Container(
