@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'dart:async';
+import 'dart:io';
 
 /// Error severity levels
 enum ErrorSeverity {
@@ -74,7 +75,8 @@ typedef ErrorRecoveryHandler = Future<bool> Function(AppError error);
 
 /// Global error handling manager
 class ErrorHandlingManager {
-  static final ErrorHandlingManager _instance = ErrorHandlingManager._internal();
+  static final ErrorHandlingManager _instance =
+      ErrorHandlingManager._internal();
 
   final _errorLog = <AppError>[];
   final _recoveryHandlers = <ErrorSeverity, List<ErrorRecoveryHandler>>{};
@@ -123,7 +125,8 @@ class ErrorHandlingManager {
 
       // Log critical errors
       if (appError.isCritical) {
-        debugPrint('[ErrorHandlingManager] CRITICAL ERROR: ${appError.message}');
+        debugPrint(
+            '[ErrorHandlingManager] CRITICAL ERROR: ${appError.message}');
         if (stackTrace != null) {
           debugPrint('Stack trace:\n$stackTrace');
         }
@@ -185,7 +188,8 @@ class ErrorHandlingManager {
       _errorLog.where((e) => e.severity == severity).toList();
 
   /// Get critical errors
-  List<AppError> getCriticalErrors() => getErrorsBySeverity(ErrorSeverity.critical);
+  List<AppError> getCriticalErrors() =>
+      getErrorsBySeverity(ErrorSeverity.critical);
 
   /// Get recent errors
   List<AppError> getRecentErrors({int limit = 10}) {
@@ -211,7 +215,8 @@ class ErrorHandlingManager {
 
     final bySeverity = <ErrorSeverity, int>{};
     for (final severity in ErrorSeverity.values) {
-      bySeverity[severity] = _errorLog.where((e) => e.severity == severity).length;
+      bySeverity[severity] =
+          _errorLog.where((e) => e.severity == severity).length;
     }
 
     buffer.writeln('║ By Severity:');
@@ -233,7 +238,8 @@ class ErrorHandlingManager {
       );
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 
