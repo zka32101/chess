@@ -48,25 +48,22 @@ class TournamentService {
         participantIds: [],
       );
 
-      await _firestore
-          .collection('tournaments')
-          .doc(tournamentId)
-          .set({
-            'tournamentId': tournamentId,
-            'name': name,
-            'description': description,
-            'status': 'registration',
-            'startDate': FieldValue.serverTimestamp(),
-            'endDate': FieldValue.serverTimestamp(),
-            'format': format,
-            'maxParticipants': maxParticipants,
-            'currentParticipants': 0,
-            'timeControl': timeControl,
-            'entryFee': entryFee,
-            'prizePool': prizePool,
-            'createdBy': createdBy,
-            'participantIds': [],
-          });
+      await _firestore.collection('tournaments').doc(tournamentId).set({
+        'tournamentId': tournamentId,
+        'name': name,
+        'description': description,
+        'status': 'registration',
+        'startDate': FieldValue.serverTimestamp(),
+        'endDate': FieldValue.serverTimestamp(),
+        'format': format,
+        'maxParticipants': maxParticipants,
+        'currentParticipants': 0,
+        'timeControl': timeControl,
+        'entryFee': entryFee,
+        'prizePool': prizePool,
+        'createdBy': createdBy,
+        'participantIds': [],
+      });
 
       return tournament;
     } catch (e) {
@@ -83,8 +80,7 @@ class TournamentService {
     int seedRating,
   ) async {
     try {
-      final participantId =
-          DateTime.now().millisecondsSinceEpoch.toString();
+      final participantId = DateTime.now().millisecondsSinceEpoch.toString();
 
       await _firestore.runTransaction((transaction) async {
         // Add participant
@@ -110,12 +106,11 @@ class TournamentService {
             });
 
         // Update tournament participant count
-        transaction.update(
-            _firestore.collection('tournaments').doc(tournamentId),
-            {
-              'currentParticipants': FieldValue.increment(1),
-              'participantIds': FieldValue.arrayUnion([userId]),
-            });
+        transaction
+            .update(_firestore.collection('tournaments').doc(tournamentId), {
+          'currentParticipants': FieldValue.increment(1),
+          'participantIds': FieldValue.arrayUnion([userId]),
+        });
       });
 
       _tournamentCache.remove(tournamentId);
@@ -149,7 +144,8 @@ class TournamentService {
 
       // Simple pairing for round 1
       for (int i = 0; i < participants.length - 1; i += 2) {
-        final matchId = DateTime.now().millisecondsSinceEpoch.toString() + '_$i';
+        final matchId =
+            DateTime.now().millisecondsSinceEpoch.toString() + '_$i';
 
         matches.add(TournamentMatch(
           matchId: matchId,
@@ -175,19 +171,19 @@ class TournamentService {
             .collection('matches')
             .doc(match.matchId)
             .set({
-              'matchId': match.matchId,
-              'tournamentId': match.tournamentId,
-              'round': match.round,
-              'player1Id': match.player1Id,
-              'player2Id': match.player2Id,
-              'status': 'scheduled',
-              'scheduledAt': FieldValue.serverTimestamp(),
-              'startedAt': null,
-              'completedAt': null,
-              'winnerId': null,
-              'loserId': null,
-              'gameId': null,
-            });
+          'matchId': match.matchId,
+          'tournamentId': match.tournamentId,
+          'round': match.round,
+          'player1Id': match.player1Id,
+          'player2Id': match.player2Id,
+          'status': 'scheduled',
+          'scheduledAt': FieldValue.serverTimestamp(),
+          'startedAt': null,
+          'completedAt': null,
+          'winnerId': null,
+          'loserId': null,
+          'gameId': null,
+        });
       }
 
       _matchCache.remove(tournamentId);
@@ -291,24 +287,20 @@ class TournamentService {
           .orderBy('wins', descending: true)
           .get();
 
-      final rankings = participantsSnapshot.docs
-          .asMap()
-          .entries
-          .map((entry) {
-            final doc = entry.value.data();
-            return TournamentRanking(
-              position: entry.key + 1,
-              userId: doc['userId'],
-              username: doc['username'],
-              points: doc['points'] ?? 0,
-              wins: doc['wins'] ?? 0,
-              losses: doc['losses'] ?? 0,
-              draws: doc['draws'] ?? 0,
-              buchholz: 0.0,
-              performance: 0,
-            );
-          })
-          .toList();
+      final rankings = participantsSnapshot.docs.asMap().entries.map((entry) {
+        final doc = entry.value.data();
+        return TournamentRanking(
+          position: entry.key + 1,
+          userId: doc['userId'],
+          username: doc['username'],
+          points: doc['points'] ?? 0,
+          wins: doc['wins'] ?? 0,
+          losses: doc['losses'] ?? 0,
+          draws: doc['draws'] ?? 0,
+          buchholz: 0.0,
+          performance: 0,
+        );
+      }).toList();
 
       final standings = TournamentStandings(
         tournamentId: tournamentId,
@@ -330,7 +322,7 @@ class TournamentService {
     int? round,
   }) async {
     try {
-      Query query = _firestore
+      Query<Map<String, dynamic>> query = _firestore
           .collection('tournaments')
           .doc(tournamentId)
           .collection('matches')
@@ -376,20 +368,17 @@ class TournamentService {
       final standings = await getStandings(tournamentId);
       final tournament = await getTournament(tournamentId);
 
-      final prizeDistribution =
-          _calculatePrizeDistribution(tournament.prizePool, standings.rankings.length);
+      final prizeDistribution = _calculatePrizeDistribution(
+          tournament.prizePool, standings.rankings.length);
 
       for (int i = 0; i < standings.rankings.length && i < 3; i++) {
         final ranking = standings.rankings[i];
         final prizeAmount = prizeDistribution[i];
 
-        await _firestore
-            .collection('user_rewards')
-            .doc(ranking.userId)
-            .update({
-              'totalPrizeWinnings': FieldValue.increment(prizeAmount),
-              'tournaments': FieldValue.increment(1),
-            });
+        await _firestore.collection('user_rewards').doc(ranking.userId).update({
+          'totalPrizeWinnings': FieldValue.increment(prizeAmount),
+          'tournaments': FieldValue.increment(1),
+        });
       }
 
       // Mark tournament as completed

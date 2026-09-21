@@ -205,20 +205,18 @@ class PlayerConnectionService {
     try {
       final snapshot = await _firestore
           .collection(_playersCollection)
-          .whereArrayContains('sentRequestIds', playerId)
+          .where('sentRequestIds', arrayContains: playerId)
           .get();
 
-      return snapshot.docs
-          .expand((doc) {
-            final requests = (doc['sent_requests'] as List?)
+      return snapshot.docs.expand((doc) {
+        final requests = (doc['sent_requests'] as List?)
                 ?.where((req) => req['fromPlayerId'] == playerId)
                 .map((req) => FriendRequest.fromJson(
                     Map<String, dynamic>.from(req as Map)))
                 .toList() ??
-                [];
-            return requests;
-          })
-          .toList();
+            [];
+        return requests;
+      }).toList();
     } catch (e, st) {
       _logger.e('Failed to get sent requests', error: e, stackTrace: st);
       rethrow;

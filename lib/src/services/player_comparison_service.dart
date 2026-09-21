@@ -53,11 +53,8 @@ class PlayerComparisonService {
       final player2Profile = await _getPlayerProfile(player2Id);
 
       // Calculate recent performance (last 5 games)
-      final recentGames = games.isNotEmpty
-          ? games
-              .take(5)
-              .toList()
-          : [];
+      final recentGames =
+          games.isNotEmpty ? games.take(5).toList() : <Map<String, dynamic>>[];
 
       return HeadToHeadComparison(
         player1Id: player1Id,
@@ -70,25 +67,24 @@ class PlayerComparisonService {
         player1Wins: player1Wins,
         player2Wins: player2Wins,
         draws: draws,
-        player1WinRate: games.isNotEmpty
-            ? (player1Wins / games.length * 100)
-            : 0.0,
-        player2WinRate: games.isNotEmpty
-            ? (player2Wins / games.length * 100)
-            : 0.0,
-        drawRate: games.isNotEmpty
-            ? (draws / games.length * 100)
-            : 0.0,
+        player1WinRate:
+            games.isNotEmpty ? (player1Wins / games.length * 100) : 0.0,
+        player2WinRate:
+            games.isNotEmpty ? (player2Wins / games.length * 100) : 0.0,
+        drawRate: games.isNotEmpty ? (draws / games.length * 100) : 0.0,
         recentGames: recentGames,
         player1Elo: player1Profile['rating'] as int? ?? 1200,
         player2Elo: player2Profile['rating'] as int? ?? 1200,
-        eloDifference: (player1Profile['rating'] as int? ?? 1200) - (player2Profile['rating'] as int? ?? 1200),
+        eloDifference: (player1Profile['rating'] as int? ?? 1200) -
+            (player2Profile['rating'] as int? ?? 1200),
         lastMeetDate: games.isNotEmpty
-            ? DateTime.parse(games.first['createdAt'] as String? ?? DateTime.now().toIso8601String())
+            ? DateTime.parse(games.first['createdAt'] as String? ??
+                DateTime.now().toIso8601String())
             : null,
       );
     } catch (e, st) {
-      _logger.e('Failed to get head-to-head comparison', error: e, stackTrace: st);
+      _logger.e('Failed to get head-to-head comparison',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -120,7 +116,7 @@ class PlayerComparisonService {
         final result = game['result'] as String?;
         final accuracy = game['accuracy'] as double? ?? 0.0;
 
-        if (result == 'white_win' ||result == 'black_win') {
+        if (result == 'white_win' || result == 'black_win') {
           if ((result == 'white_win' && game['whitePlayerId'] == playerId) ||
               (result == 'black_win' && game['blackPlayerId'] == playerId)) {
             wins++;
@@ -134,9 +130,8 @@ class PlayerComparisonService {
         totalAccuracy += accuracy;
       }
 
-      double avgAccuracy = recentGames.isNotEmpty
-          ? totalAccuracy / recentGames.length
-          : 0.0;
+      double avgAccuracy =
+          recentGames.isNotEmpty ? totalAccuracy / recentGames.length : 0.0;
 
       // Determine play style based on win rates
       String playStyle = _determinePlayStyle(wins, losses, draws);
@@ -174,9 +169,8 @@ class PlayerComparisonService {
         playStyle: playStyle,
         strengths: strengths,
         weaknesses: weaknesses,
-        winRate: recentGames.isNotEmpty
-            ? (wins / recentGames.length * 100)
-            : 0.0,
+        winRate:
+            recentGames.isNotEmpty ? (wins / recentGames.length * 100) : 0.0,
       );
     } catch (e, st) {
       _logger.e('Failed to analyze player profile', error: e, stackTrace: st);
@@ -235,9 +229,7 @@ class PlayerComparisonService {
           playerWins: stats['wins'] as int,
           playerLosses: stats['losses'] as int,
           draws: stats['draws'] as int,
-          winRate: totalGames > 0
-              ? (stats['wins'] / totalGames * 100)
-              : 0.0,
+          winRate: totalGames > 0 ? (stats['wins'] / totalGames * 100) : 0.0,
         ));
       }
 
@@ -318,7 +310,8 @@ class PlayerComparisonService {
   }
 
   Future<Map<String, dynamic>> _getPlayerProfile(String playerId) async {
-    final doc = await _firestore.collection(_usersCollection).doc(playerId).get();
+    final doc =
+        await _firestore.collection(_usersCollection).doc(playerId).get();
 
     if (!doc.exists) {
       return {

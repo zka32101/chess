@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
+import 'dart:async' show TimeoutException;
 import 'dart:io' show SocketException;
 import '../models/game.dart';
 import 'error_logging_service.dart';
@@ -48,7 +49,8 @@ class UnifiedGameHistoryService {
         _auth = auth ?? FirebaseAuth.instance;
 
   /// Get current user ID
-  String get _userId => _auth.currentUser?.uid ??
+  String get _userId =>
+      _auth.currentUser?.uid ??
       (throw GameHistoryException(
         'No user logged in',
         code: 'auth_required',
@@ -90,10 +92,12 @@ class UnifiedGameHistoryService {
         'Fetch match history',
       );
 
-      final matches = snapshot.docs.map((doc) => {
-        'gameId': doc.id,
-        ...doc.data() as Map<String, dynamic>,
-      }).toList();
+      final matches = snapshot.docs
+          .map((doc) => {
+                'gameId': doc.id,
+                ...doc.data() as Map<String, dynamic>,
+              })
+          .toList();
 
       _logger.d('Fetched ${matches.length} matches');
       return matches;
@@ -129,19 +133,19 @@ class UnifiedGameHistoryService {
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => {
-              'gameId': doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            })
+                  'gameId': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                })
             .toList())
         .handleError((e, stackTrace) async {
-          await ErrorLoggingService.logError(
-            e,
-            stackTrace as StackTrace,
-            context: 'watchMatchHistory',
-            reason: 'Stream error while watching match history',
-          );
-          return [];
-        });
+      await ErrorLoggingService.logError(
+        e,
+        stackTrace as StackTrace,
+        context: 'watchMatchHistory',
+        reason: 'Stream error while watching match history',
+      );
+      return [];
+    });
   }
 
   /// Filter games by multiple criteria
@@ -196,16 +200,19 @@ class UnifiedGameHistoryService {
         'Filter games',
       );
 
-      var games = snapshot.docs.map((doc) => {
-        'gameId': doc.id,
-        ...doc.data() as Map<String, dynamic>,
-      }).toList();
+      var games = snapshot.docs
+          .map((doc) => {
+                'gameId': doc.id,
+                ...doc.data() as Map<String, dynamic>,
+              })
+          .toList();
 
       // Post-filter on client side for rating range (Firestore limitation)
       if (minRating != null || maxRating != null) {
         games = games.where((game) {
           final isWhite = game['whitePlayerId'] == _userId;
-          final playerRating = isWhite ? game['whiteRating'] : game['blackRating'];
+          final playerRating =
+              isWhite ? game['whiteRating'] : game['blackRating'];
 
           if (minRating != null && playerRating < minRating) return false;
           if (maxRating != null && playerRating > maxRating) return false;
@@ -330,8 +337,10 @@ class UnifiedGameHistoryService {
         final isWhite = game['whitePlayerId'] == _userId;
         final result = game['result'] as String?;
         final ratingDelta = isWhite
-            ? (game['whiteRatingAfter'] as int? ?? 0) - (game['whiteRatingBefore'] as int? ?? 0)
-            : (game['blackRatingAfter'] as int? ?? 0) - (game['blackRatingBefore'] as int? ?? 0);
+            ? (game['whiteRatingAfter'] as int? ?? 0) -
+                (game['whiteRatingBefore'] as int? ?? 0)
+            : (game['blackRatingAfter'] as int? ?? 0) -
+                (game['blackRatingBefore'] as int? ?? 0);
 
         if (result == 'white_win') {
           if (isWhite) {
@@ -357,9 +366,13 @@ class UnifiedGameHistoryService {
         'wins': wins,
         'losses': losses,
         'draws': draws,
-        'winRate': totalGames > 0 ? (wins / totalGames * 100).toStringAsFixed(1) : '0.0',
+        'winRate': totalGames > 0
+            ? (wins / totalGames * 100).toStringAsFixed(1)
+            : '0.0',
         'totalRatingGain': totalRatingGain,
-        'averageRatingGain': totalGames > 0 ? (totalRatingGain / totalGames).toStringAsFixed(1) : '0.0',
+        'averageRatingGain': totalGames > 0
+            ? (totalRatingGain / totalGames).toStringAsFixed(1)
+            : '0.0',
       };
 
       _logger.d('Player stats: $stats');
@@ -402,18 +415,24 @@ class UnifiedGameHistoryService {
       );
 
       final buffer = StringBuffer();
-      buffer.writeln('Date,Opponent,Color,Result,Rating Change,Time Control,Moves');
+      buffer.writeln(
+          'Date,Opponent,Color,Result,Rating Change,Time Control,Moves');
 
       for (final doc in snapshot.docs) {
         final game = doc.data();
         final isWhite = game['whitePlayerId'] == _userId;
-        final opponentName = isWhite ? game['blackPlayerName'] : game['whitePlayerName'];
-        final ratingBefore = isWhite ? game['whiteRatingBefore'] : game['blackRatingBefore'];
-        final ratingAfter = isWhite ? game['whiteRatingAfter'] : game['blackRatingAfter'];
-        final ratingChange = (ratingAfter as int? ?? 0) - (ratingBefore as int? ?? 0);
+        final opponentName =
+            isWhite ? game['blackPlayerName'] : game['whitePlayerName'];
+        final ratingBefore =
+            isWhite ? game['whiteRatingBefore'] : game['blackRatingBefore'];
+        final ratingAfter =
+            isWhite ? game['whiteRatingAfter'] : game['blackRatingAfter'];
+        final ratingChange =
+            (ratingAfter as int? ?? 0) - (ratingBefore as int? ?? 0);
         final result = game['result'];
         final timeControl = game['timeControl'] ?? '-';
-        final moves = game['moves'] != null ? (game['moves'] as List).length : 0;
+        final moves =
+            game['moves'] != null ? (game['moves'] as List).length : 0;
 
         buffer.writeln(
           '${game['endedAt']},'
@@ -460,12 +479,14 @@ class UnifiedGameHistoryService {
         'Fetch rating history',
       );
 
-      final history = snapshot.docs.map((doc) => {
-        'timestamp': doc['timestamp'],
-        'rating': doc['rating'],
-        'gameId': doc['gameId'],
-        'delta': doc['delta'],
-      }).toList();
+      final history = snapshot.docs
+          .map((doc) => {
+                'timestamp': doc['timestamp'],
+                'rating': doc['rating'],
+                'gameId': doc['gameId'],
+                'delta': doc['delta'],
+              })
+          .toList();
 
       _logger.d('Fetched ${history.length} rating history entries');
       return history;
