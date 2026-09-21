@@ -84,9 +84,7 @@ class AnalyticsDebugService {
 
   /// Get events by name
   List<Map<String, dynamic>> getEventsByName(String eventName) {
-    return _eventLog
-        .where((event) => event['eventName'] == eventName)
-        .toList();
+    return _eventLog.where((event) => event['eventName'] == eventName).toList();
   }
 
   /// Get events by time range
@@ -117,10 +115,11 @@ class AnalyticsDebugService {
   /// Export event log as JSON
   String exportEventLogAsJson() {
     // Simple JSON export - in production use json_serializable
-    final events = _eventLog.map((e) => '{\n'
+    final events = _eventLog
+        .map((e) => '{\n'
             '  "eventName": "${e['eventName']}",\n'
             '  "timestamp": "${e['timestamp']}",\n'
-            '  "parameters": ${_parametersToJsonString(e['parameters'] as Map)}\n'
+            '  "parameters": ${_parametersToJsonString(e['parameters'] as Map<String, dynamic>)}\n'
             '}')
         .join(',\n');
 
