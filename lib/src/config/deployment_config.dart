@@ -102,14 +102,14 @@ Send feedback: support@chessmaster.app
 
   /// iOS App Store information
   static const String iosAppStoreUrl =
-    'https://apps.apple.com/app/chess-tactics-master/id1234567890';
+      'https://apps.apple.com/app/chess-tactics-master/id1234567890';
 
   static const String iosTeamId = 'ABCD12EF34';
   static const String iosBundleId = 'com.yourwish.chess';
 
   /// Android Google Play information
   static const String androidPlayStoreUrl =
-    'https://play.google.com/store/apps/details?id=com.yourwish.chess';
+      'https://play.google.com/store/apps/details?id=com.yourwish.chess';
 
   static const String androidPackageName = 'com.yourwish.chess';
   static const String androidApplicationId = 'com.yourwish.chess';
@@ -120,24 +120,24 @@ Send feedback: support@chessmaster.app
 
   /// Key performance targets for launch
   static const Map<String, dynamic> launchTargets = {
-    'crashRate': 0.001,           // <0.1%
-    'appRating': 4.0,             // ≥4.0 stars
-    'installRate': 100,           // 100+ per day
-    'uninstallRate': 0.05,        // <5%
-    'sessionLength': 300,         // >5 minutes (seconds)
-    'retentionD1': 0.40,          // >40%
-    'retentionD7': 0.25,          // >25%
-    'dau': 500,                   // ≥500 DAU
+    'crashRate': 0.001, // <0.1%
+    'appRating': 4.0, // ≥4.0 stars
+    'installRate': 100, // 100+ per day
+    'uninstallRate': 0.05, // <5%
+    'sessionLength': 300, // >5 minutes (seconds)
+    'retentionD1': 0.40, // >40%
+    'retentionD7': 0.25, // >25%
+    'dau': 500, // ≥500 DAU
   };
 
   /// Critical alert thresholds
   static const Map<String, dynamic> alertThresholds = {
-    'crashRate': 0.005,           // >0.5%
-    'appRating': 3.5,             // <3.5 stars
-    'anrRate': 0.001,             // >0.1%
-    'errorCount': 10,             // Any spike
-    'uninstallRate': 0.10,        // >10%
-    'sessionDropoff': 0.50,       // >50% session drop
+    'crashRate': 0.005, // >0.5%
+    'appRating': 3.5, // <3.5 stars
+    'anrRate': 0.001, // >0.1%
+    'errorCount': 10, // Any spike
+    'uninstallRate': 0.10, // >10%
+    'sessionDropoff': 0.50, // >50% session drop
   };
 
   // ============================================================================
@@ -153,9 +153,9 @@ Send feedback: support@chessmaster.app
 
   /// When to consider escalating to next phase
   static const Map<String, dynamic> phaseEscalationCriteria = {
-    'crashRate': 0.003,           // <0.3% to escalate
-    'rating': 3.7,                // >3.7 to escalate
-    'appHang': 0.0005,            // <0.05% to escalate
+    'crashRate': 0.003, // <0.3% to escalate
+    'rating': 3.7, // >3.7 to escalate
+    'appHang': 0.0005, // <0.05% to escalate
   };
 
   // ============================================================================
@@ -231,7 +231,10 @@ Send feedback: support@chessmaster.app
   static bool shouldUpdate(String installedVersion) {
     final installed = _parseVersion(installedVersion);
     final current = _parseVersion(appVersion);
-    return current.compareTo(installed) > 0;
+    for (var i = 0; i < current.length && i < installed.length; i++) {
+      if (current[i] != installed[i]) return current[i] > installed[i];
+    }
+    return current.length > installed.length;
   }
 
   /// Parse semantic version for comparison

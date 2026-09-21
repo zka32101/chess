@@ -38,8 +38,8 @@ final performanceMonitorProvider = Provider((ref) {
 // ========== Paginated Leaderboard Providers ==========
 
 /// Global leaderboard with pagination
-final globalLeaderboardPaginatedProvider =
-    FutureProvider.family<PaginatedResult<LeaderboardEntry>, (int, DocumentSnapshot?)>(
+final globalLeaderboardPaginatedProvider = FutureProvider.family<
+    PaginatedResult<LeaderboardEntry>, (int, DocumentSnapshot?)>(
   (ref, params) async {
     final (pageSize, startAfter) = params;
     final service = ref.watch(leaderboardServiceOptimizedProvider);
@@ -52,8 +52,7 @@ final globalLeaderboardPaginatedProvider =
 
 /// Regional leaderboard with pagination
 final regionalLeaderboardPaginatedProvider = FutureProvider.family<
-    PaginatedResult<LeaderboardEntry>,
-    (String, int, DocumentSnapshot?)>(
+    PaginatedResult<LeaderboardEntry>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (region, pageSize, startAfter) = params;
     final service = ref.watch(leaderboardServiceOptimizedProvider);
@@ -74,7 +73,7 @@ final headToHeadStatsOptimizedProvider =
     final monitor = ref.watch(performanceMonitorProvider);
 
     return monitor.measureAsync(
-      'headToHeadStats_$userId1_$userId2',
+      'headToHeadStats_${userId1}_$userId2',
       () => service.getHeadToHeadStatsOptimized(userId1, userId2),
     );
   },
@@ -97,8 +96,8 @@ final rankingStatsBatchProvider =
 // ========== Paginated Friend Providers ==========
 
 /// Friend list with pagination
-final userFriendsPaginatedProvider =
-    FutureProvider.family<PaginatedResult<Friend>, (String, int, DocumentSnapshot?)>(
+final userFriendsPaginatedProvider = FutureProvider.family<
+    PaginatedResult<Friend>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(friendServiceOptimizedProvider);
@@ -113,8 +112,7 @@ final userFriendsPaginatedProvider =
 
 /// Pending friend requests with pagination
 final pendingFriendRequestsPaginatedProvider = FutureProvider.family<
-    PaginatedResult<FriendRequest>,
-    (String, int, DocumentSnapshot?)>(
+    PaginatedResult<FriendRequest>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(friendServiceOptimizedProvider);
@@ -129,8 +127,7 @@ final pendingFriendRequestsPaginatedProvider = FutureProvider.family<
 
 /// Activity feed with pagination
 final activityFeedPaginatedProvider = FutureProvider.family<
-    PaginatedResult<FriendActivity>,
-    (String, int, DocumentSnapshot?)>(
+    PaginatedResult<FriendActivity>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(friendServiceOptimizedProvider);
@@ -165,8 +162,8 @@ final mutualFriendsProvider =
 // ========== Paginated Challenge Providers ==========
 
 /// Pending challenges with pagination
-final pendingChallengesPaginatedProvider =
-    FutureProvider.family<PaginatedResult<Challenge>, (String, int, DocumentSnapshot?)>(
+final pendingChallengesPaginatedProvider = FutureProvider.family<
+    PaginatedResult<Challenge>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(friendChallengeServiceOptimizedProvider);
@@ -180,8 +177,8 @@ final pendingChallengesPaginatedProvider =
 );
 
 /// Active challenges with pagination
-final activeChallengesPaginatedProvider =
-    FutureProvider.family<PaginatedResult<Challenge>, (String, int, DocumentSnapshot?)>(
+final activeChallengesPaginatedProvider = FutureProvider.family<
+    PaginatedResult<Challenge>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(friendChallengeServiceOptimizedProvider);
@@ -195,8 +192,8 @@ final activeChallengesPaginatedProvider =
 );
 
 /// Challenge history with pagination
-final challengeHistoryPaginatedProvider =
-    FutureProvider.family<PaginatedResult<Challenge>, (String, int, DocumentSnapshot?)>(
+final challengeHistoryPaginatedProvider = FutureProvider.family<
+    PaginatedResult<Challenge>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(friendChallengeServiceOptimizedProvider);
@@ -219,7 +216,8 @@ final userChallengeStreakOptimizedProvider =
 );
 
 /// Top challenge streaks (cached)
-final topChallengeStreaksOptimizedProvider = FutureProvider<List<ChallengeStreak>>(
+final topChallengeStreaksOptimizedProvider =
+    FutureProvider<List<ChallengeStreak>>(
   (ref) async {
     final service = ref.watch(friendChallengeServiceOptimizedProvider);
     return service.getTopStreaksOptimized();
@@ -251,8 +249,8 @@ final userRecentChallengesProvider =
 // ========== Paginated Tournament Providers ==========
 
 /// Active tournaments with pagination
-final activeTournamentsPaginatedProvider =
-    FutureProvider.family<PaginatedResult<Tournament>, (int, DocumentSnapshot?)>(
+final activeTournamentsPaginatedProvider = FutureProvider.family<
+    PaginatedResult<Tournament>, (int, DocumentSnapshot?)>(
   (ref, params) async {
     final (pageSize, startAfter) = params;
     final service = ref.watch(tournamentServiceOptimizedProvider);
@@ -275,8 +273,7 @@ final tournamentStandingsOptimizedProvider =
 
 /// Tournament matches with pagination
 final tournamentMatchesPaginatedProvider = FutureProvider.family<
-    PaginatedResult<TournamentMatch>,
-    (String, int?, int, DocumentSnapshot?)>(
+    PaginatedResult<TournamentMatch>, (String, int?, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (tournamentId, round, pageSize, startAfter) = params;
     final service = ref.watch(tournamentServiceOptimizedProvider);
@@ -291,8 +288,8 @@ final tournamentMatchesPaginatedProvider = FutureProvider.family<
 );
 
 /// User's upcoming matches with pagination
-final userUpcomingMatchesPaginatedProvider =
-    FutureProvider.family<PaginatedResult<TournamentMatch>, (String, int, DocumentSnapshot?)>(
+final userUpcomingMatchesPaginatedProvider = FutureProvider.family<
+    PaginatedResult<TournamentMatch>, (String, int, DocumentSnapshot?)>(
   (ref, params) async {
     final (userId, pageSize, startAfter) = params;
     final service = ref.watch(tournamentServiceOptimizedProvider);
@@ -306,8 +303,7 @@ final userUpcomingMatchesPaginatedProvider =
 );
 
 /// Tournament participant count (cached)
-final tournamentParticipantCountProvider =
-    FutureProvider.family<int, String>(
+final tournamentParticipantCountProvider = FutureProvider.family<int, String>(
   (ref, tournamentId) async {
     final service = ref.watch(tournamentServiceOptimizedProvider);
     return service.getTournamentParticipantCount(tournamentId);

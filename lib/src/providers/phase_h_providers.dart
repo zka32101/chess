@@ -29,25 +29,29 @@ final analyticsDashboardServiceProvider = Provider((ref) {
 // ========== Monitoring Providers ==========
 
 /// Get performance summary for a time period
-final performanceSummaryProvider = FutureProvider.family<PerformanceSummary, Duration>((ref, period) async {
+final performanceSummaryProvider =
+    FutureProvider.family<PerformanceSummary, Duration>((ref, period) async {
   final monitoring = ref.watch(monitoringServiceProvider);
   return monitoring.getPerformanceSummary(period);
 });
 
 /// Get crash rate for period
-final crashRateProvider = FutureProvider.family<double, Duration>((ref, period) async {
+final crashRateProvider =
+    FutureProvider.family<double, Duration>((ref, period) async {
   final monitoring = ref.watch(monitoringServiceProvider);
   return monitoring.getCrashRate(period);
 });
 
 /// Get ANR rate for period
-final anrRateProvider = FutureProvider.family<double, Duration>((ref, period) async {
+final anrRateProvider =
+    FutureProvider.family<double, Duration>((ref, period) async {
   final monitoring = ref.watch(monitoringServiceProvider);
   return monitoring.getANRRate(period);
 });
 
 /// Get average performance metric
-final averageMetricProvider = FutureProvider.family<int, (String, Duration)>((ref, args) async {
+final averageMetricProvider =
+    FutureProvider.family<int, (String, Duration)>((ref, args) async {
   final monitoring = ref.watch(monitoringServiceProvider);
   return monitoring.getAverageMetric(args.$1, args.$2);
 });
@@ -55,19 +59,22 @@ final averageMetricProvider = FutureProvider.family<int, (String, Duration)>((re
 // ========== Feedback Analysis Providers ==========
 
 /// Analyze sentiment of feedback text
-final feedbackSentimentProvider = FutureProvider.family<SentimentAnalysis, String>((ref, text) async {
+final feedbackSentimentProvider =
+    FutureProvider.family<SentimentAnalysis, String>((ref, text) async {
   final analysis = ref.watch(feedbackAnalysisServiceProvider);
   return analysis.analyzeFeedbackSentiment(text);
 });
 
 /// Get aggregated feedback report for period
-final feedbackReportProvider = FutureProvider.family<FeedbackReport, Duration>((ref, period) async {
+final feedbackReportProvider =
+    FutureProvider.family<FeedbackReport, Duration>((ref, period) async {
   final analysis = ref.watch(feedbackAnalysisServiceProvider);
   return analysis.aggregateFeedback(period);
 });
 
 /// Get sentiment trend
-final sentimentTrendProvider = FutureProvider.family<double, Duration>((ref, period) async {
+final sentimentTrendProvider =
+    FutureProvider.family<double, Duration>((ref, period) async {
   final analysis = ref.watch(feedbackAnalysisServiceProvider);
   // Use public method instead of private implementation
   final report = await analysis.aggregateFeedback(period);
@@ -77,20 +84,23 @@ final sentimentTrendProvider = FutureProvider.family<double, Duration>((ref, per
 // ========== A/B Testing Providers ==========
 
 /// Get user's variant for experiment
-final userVariantProvider = FutureProvider.family<String, (String, String)>((ref, args) async {
+final userVariantProvider =
+    FutureProvider.family<String, (String, String)>((ref, args) async {
   final aBTesting = ref.watch(abTestingServiceProvider);
   return aBTesting.getUserVariant(args.$1, args.$2);
 });
 
 /// Get variant-specific value
-final variantValueProvider = FutureProvider.family<T?, (String, String, Type)>((ref, args) async {
+final variantValueProvider =
+    FutureProvider.family<dynamic, (String, String, Type)>((ref, args) async {
   final aBTesting = ref.watch(abTestingServiceProvider);
   // Type system limitation - simplified version
   return null;
 });
 
 /// Get experiment results
-final experimentResultsProvider = FutureProvider.family<ExperimentResults, String>((ref, experimentId) async {
+final experimentResultsProvider =
+    FutureProvider.family<ExperimentResults, String>((ref, experimentId) async {
   final aBTesting = ref.watch(abTestingServiceProvider);
   return aBTesting.analyzeResults(experimentId);
 });
@@ -111,7 +121,8 @@ final retentionMetricsProvider = FutureProvider<RetentionMetrics>((ref) async {
 });
 
 /// Get conversion metrics
-final conversionMetricsProvider = FutureProvider<ConversionMetrics>((ref) async {
+final conversionMetricsProvider =
+    FutureProvider<ConversionMetrics>((ref) async {
   final dashboard = ref.watch(analyticsDashboardServiceProvider);
   final summary = await dashboard.getDashboardSummary();
   return summary.conversion;
@@ -125,26 +136,30 @@ final crashMetricsProvider = FutureProvider<CrashMetrics>((ref) async {
 });
 
 /// Get engagement metrics
-final engagementMetricsProvider = FutureProvider<EngagementMetrics>((ref) async {
+final engagementMetricsProvider =
+    FutureProvider<EngagementMetrics>((ref) async {
   final dashboard = ref.watch(analyticsDashboardServiceProvider);
   final summary = await dashboard.getDashboardSummary();
   return summary.engagement;
 });
 
 /// Analyze funnel conversion
-final funnelAnalysisProvider = FutureProvider.family<FunnelAnalysis, String>((ref, funnelName) async {
+final funnelAnalysisProvider =
+    FutureProvider.family<FunnelAnalysis, String>((ref, funnelName) async {
   final dashboard = ref.watch(analyticsDashboardServiceProvider);
   return dashboard.analyzeFunnel(funnelName);
 });
 
 /// Analyze cohort retention
-final cohortAnalysisProvider = FutureProvider.family<CohortAnalysis, DateTime>((ref, cohortDate) async {
+final cohortAnalysisProvider =
+    FutureProvider.family<CohortAnalysis, DateTime>((ref, cohortDate) async {
   final dashboard = ref.watch(analyticsDashboardServiceProvider);
   return dashboard.analyzeCohort(cohortDate);
 });
 
 /// Get KPI trend
-final kpiTrendProvider = FutureProvider.family<KPITrend, (String, Duration)>((ref, args) async {
+final kpiTrendProvider =
+    FutureProvider.family<KPITrend, (String, Duration)>((ref, args) async {
   final dashboard = ref.watch(analyticsDashboardServiceProvider);
   return dashboard.getKPITrend(args.$1, args.$2);
 });
@@ -239,7 +254,8 @@ final optimizationRecommendationsProvider =
   final recommendations = <String>[];
 
   if (summary.crashes.crashFreeRate < 0.99) {
-    recommendations.add('Investigate crash rate: ${summary.crashes.crashFreeRate}');
+    recommendations
+        .add('Investigate crash rate: ${summary.crashes.crashFreeRate}');
   }
 
   if (summary.engagement.sessionsPerDay < 1.5) {
