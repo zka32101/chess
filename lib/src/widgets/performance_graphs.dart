@@ -112,11 +112,11 @@ class _PerformanceGraphsState extends State<PerformanceGraphs> {
     }
 
     final maxValue = data.fold<double>(0, (max, val) => val > max ? val : max);
-    final minValue = data.fold<double>(double.infinity, (min, val) => val < min ? val : min);
+    final minValue =
+        data.fold<double>(double.infinity, (min, val) => val < min ? val : min);
     final range = maxValue - minValue;
-    final normalizedData = data
-        .map((val) => range > 0 ? (val - minValue) / range : 0.5)
-        .toList();
+    final normalizedData =
+        data.map((val) => range > 0 ? (val - minValue) / range : 0.5).toList();
 
     return CustomPaint(
       painter: GraphPainter(
@@ -200,9 +200,13 @@ class _PerformanceGraphsState extends State<PerformanceGraphs> {
       case PerformanceMetric.timePerMove:
         return widget.moveMetrics.map((m) => m.timeMs.toDouble()).toList();
       case PerformanceMetric.killerEffectiveness:
-        return widget.moveMetrics.map((m) => m.killerCutoffs.toDouble()).toList();
+        return widget.moveMetrics
+            .map((m) => m.killerCutoffs.toDouble())
+            .toList();
       case PerformanceMetric.countermoveEffectiveness:
-        return widget.moveMetrics.map((m) => m.countermoveCutoffs.toDouble()).toList();
+        return widget.moveMetrics
+            .map((m) => m.countermoveCutoffs.toDouble())
+            .toList();
     }
   }
 
@@ -391,11 +395,14 @@ class MoveMetrics {
       nodesEvaluated: stats['nodesEvaluated'] as int? ?? 0,
       timeMs: timeMs,
       depth: stats['depth'] as int? ?? 0,
-      cacheHitRate: double.tryParse(stats['zobristHitRate'] as String? ?? '0') ?? 0,
+      cacheHitRate:
+          double.tryParse(stats['zobristHitRate'] as String? ?? '0') ?? 0,
       zobristHits: stats['zobristHits'] as int? ?? 0,
       zobristMisses: stats['zobristMisses'] as int? ?? 0,
-      killerCutoffs: (stats['killerStats'] as Map?)['totalCutoffs'] as int? ?? 0,
-      countermoveCutoffs: (stats['countermoveStats'] as Map?)['totalCutoffs'] as int? ?? 0,
+      killerCutoffs:
+          (stats['killerStats'] as Map?)?['totalCutoffs'] as int? ?? 0,
+      countermoveCutoffs:
+          (stats['countermoveStats'] as Map?)?['totalCutoffs'] as int? ?? 0,
       gamePhase: _determineGamePhase(moveNumber),
     );
   }
