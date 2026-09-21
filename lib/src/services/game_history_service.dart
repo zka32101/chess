@@ -1,5 +1,6 @@
 import 'package:chess_tactics_master/src/models/game_history.dart';
 import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/widgets/performance_graphs.dart';
 
 /// Service for managing game history and statistics
 ///
