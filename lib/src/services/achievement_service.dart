@@ -36,8 +36,11 @@ class AchievementService {
     }
 
     try {
-      final snapshot =
-          await _firestore.collection('achievements').doc('definitions').collection('all').get();
+      final snapshot = await _firestore
+          .collection('achievements')
+          .doc('definitions')
+          .collection('all')
+          .get();
 
       final achievements = snapshot.docs
           .map((doc) => AchievementDefinition.fromJson(doc.data()))
@@ -111,13 +114,15 @@ class AchievementService {
       final nearby = <NearbyAchievement>[];
 
       for (final achievement in allAchievements) {
-        final progress = await getAchievementProgress(userId, achievement.achievementId);
-        
+        final progress =
+            await getAchievementProgress(userId, achievement.achievementId);
+
         if (!progress.isUnlocked) {
           final progressPercent = progress.targetValue > 0
-              ? (progress.currentValue / progress.targetValue * 100).clamp(0, 100)
+              ? (progress.currentValue / progress.targetValue * 100)
+                  .clamp(0.0, 100.0)
               : 0.0;
-          
+
           if (progressPercent >= 75) {
             nearby.add(NearbyAchievement(
               achievement: achievement,
@@ -158,7 +163,7 @@ class AchievementService {
       String userId, String achievementId) async {
     try {
       final userDoc = await _firestore.collection('users').doc(userId).get();
-      
+
       // Placeholder: Calculate based on achievement type
       switch (achievementId) {
         case 'first_win':
