@@ -25,11 +25,11 @@ class LeaderboardService {
           .collection('entries')
           .orderBy('rating', descending: true)
           .orderBy('wins', descending: true)
-          .limit(limit)
-          .offset(offset)
+          .limit(limit + offset)
           .get();
 
       return snapshot.docs
+          .skip(offset)
           .map((doc) => LeaderboardEntry.fromJson(doc.data()))
           .toList();
     } catch (e) {
@@ -112,10 +112,10 @@ class LeaderboardService {
           .collection('leaderboards')
           .doc('global')
           .collection('entries')
-          .count
+          .count()
           .get();
 
-      final totalCount = totalUsers.count;
+      final totalCount = totalUsers.count ?? 0;
       if (totalCount == 0) return 0;
 
       return ((totalCount - userRank) / totalCount * 100).toInt();
@@ -132,10 +132,8 @@ class LeaderboardService {
     }
 
     try {
-      final doc = await _firestore
-          .collection('ranking_stats')
-          .doc(userId)
-          .get();
+      final doc =
+          await _firestore.collection('ranking_stats').doc(userId).get();
 
       if (!doc.exists) {
         return RankingStats(
