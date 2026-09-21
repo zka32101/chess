@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 
 /// Service for AI-powered game analysis and personalized lesson generation
 class AILessonGenerationService {
-  static final AILessonGenerationService _instance = AILessonGenerationService._();
+  static final AILessonGenerationService _instance =
+      AILessonGenerationService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -23,19 +24,16 @@ class AILessonGenerationService {
     }
 
     try {
-      final doc = await _firestore
-          .collection('games')
-          .doc(gameId)
-          .get();
+      final doc = await _firestore.collection('games').doc(gameId).get();
 
       if (!doc.exists) throw Exception('Game not found');
 
       final gameData = doc.data() as Map<String, dynamic>;
-      
+
       // Simulate engine analysis
       final moves = _analyzeMoves(gameData['moves'] as List? ?? []);
       final accuracy = _calculateAccuracy(moves);
-      
+
       final analysis = GameAnalysis(
         gameId: gameId,
         result: gameData['result'] as String? ?? 'unknown',
@@ -54,7 +52,7 @@ class AILessonGenerationService {
       );
 
       _gameAnalysisCache[gameId] = analysis;
-      
+
       // Store in Firestore
       await _firestore
           .collection('game_analyses')
@@ -74,9 +72,9 @@ class AILessonGenerationService {
   ) async {
     try {
       final profile = await generatePlayerProfile(userId);
-      
+
       final recommendations = <AIOpeningRecommendation>[];
-      
+
       // Recommend openings aligned with play style
       if (profile.playStyle == 'Tactical') {
         recommendations.addAll([
@@ -115,10 +113,10 @@ class AILessonGenerationService {
   Future<ImprovementPath> generateImprovementPath(String userId) async {
     try {
       final profile = await generatePlayerProfile(userId);
-      
+
       final priorityAreas = _rankPriorityAreas(profile);
       final estimatedTimes = _estimateCompletionTimes(priorityAreas);
-      
+
       return ImprovementPath(
         userId: userId,
         priorityAreas: priorityAreas,
@@ -161,7 +159,8 @@ class AILessonGenerationService {
           recommendedDifficulty: difficulty,
           relevanceScore: (data['relevanceScore'] as num? ?? 0).toDouble(),
           userFeedback: data['userFeedback'] as int? ?? 0,
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt:
+              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
       }).toList();
     } catch (e) {
@@ -204,7 +203,7 @@ class AILessonGenerationService {
           .get();
 
       final games = gamesQuery.docs.map((doc) => doc.data()).toList();
-      
+
       if (games.isEmpty) {
         return PlayerProfile(
           userId: userId,
@@ -253,13 +252,15 @@ class AILessonGenerationService {
   ) async {
     try {
       final profile = await generatePlayerProfile(userId);
-      
+
       return [
         EndgameInsight(
           technique: 'King and Pawn Endgames',
           proficiencyLevel: profile.endgameStrength,
           keyPrinciples: 'Opposition, zugzwang, triangulation',
-          practicePositions: ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'],
+          practicePositions: [
+            'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+          ],
           relevanceToBattleStyle: 'Critical for ${profile.playStyle} players',
         ),
         EndgameInsight(
@@ -297,7 +298,8 @@ class AILessonGenerationService {
           contentType: data['contentType'] as String? ?? '',
           relevanceRank: data['relevanceRank'] as int? ?? 0,
           isRead: data['isRead'] as bool? ?? false,
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt:
+              (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
         );
       }).toList();
     } catch (e) {
@@ -482,7 +484,7 @@ class AILessonGenerationService {
     return 150.0; // Estimated rating points
   }
 
-  double _calculateAverageAccuracy(List<MoveAnalysis> moves) {
+  double _calculateAverageAccuracyFromMoveAnalysis(List<MoveAnalysis> moves) {
     return 75.0;
   }
 
