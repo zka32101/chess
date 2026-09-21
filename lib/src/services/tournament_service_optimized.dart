@@ -51,10 +51,8 @@ class TournamentServiceOptimized {
         startAfter: startAfter,
       );
 
-      var query = _firestore
-          .collection('tournaments')
-          .where('status', whereIn: ['registration', 'in-progress'])
-          .orderBy('startDate');
+      var query = _firestore.collection('tournaments').where('status',
+          whereIn: ['registration', 'in-progress']).orderBy('startDate');
 
       query = QueryOptimizer.applyPagination(
         query as Query<Map<String, dynamic>>,
@@ -100,8 +98,7 @@ class TournamentServiceOptimized {
           .orderBy('scheduledAt');
 
       if (round != null) {
-        query = (query as Query<Map<String, dynamic>>).where('round', isEqualTo: round)
-            as Query;
+        query = query.where('round', isEqualTo: round);
       }
 
       query = QueryOptimizer.applyPagination(
@@ -158,10 +155,10 @@ class TournamentServiceOptimized {
           .collection('tournaments')
           .doc(tournamentId)
           .collection('participants')
-          .count
+          .count()
           .get();
 
-      final count = countSnapshot.count;
+      final count = countSnapshot.count ?? 0;
       _participantCountCache.set(tournamentId, count);
       return count;
     } catch (e) {
@@ -210,10 +207,8 @@ class TournamentServiceOptimized {
   /// Database fetchers
   Future<Tournament> _getTournamentFromDb(String tournamentId) async {
     try {
-      final doc = await _firestore
-          .collection('tournaments')
-          .doc(tournamentId)
-          .get();
+      final doc =
+          await _firestore.collection('tournaments').doc(tournamentId).get();
 
       if (!doc.exists) {
         throw Exception('Tournament not found');
@@ -236,24 +231,20 @@ class TournamentServiceOptimized {
           .orderBy('wins', descending: true)
           .get();
 
-      final rankings = snapshot.docs
-          .asMap()
-          .entries
-          .map((entry) {
-            final doc = entry.value.data();
-            return TournamentRanking(
-              position: entry.key + 1,
-              userId: doc['userId'] ?? '',
-              username: doc['username'] ?? '',
-              points: doc['points'] ?? 0,
-              wins: doc['wins'] ?? 0,
-              losses: doc['losses'] ?? 0,
-              draws: doc['draws'] ?? 0,
-              buchholz: 0.0,
-              performance: 0,
-            );
-          })
-          .toList();
+      final rankings = snapshot.docs.asMap().entries.map((entry) {
+        final doc = entry.value.data();
+        return TournamentRanking(
+          position: entry.key + 1,
+          userId: doc['userId'] ?? '',
+          username: doc['username'] ?? '',
+          points: doc['points'] ?? 0,
+          wins: doc['wins'] ?? 0,
+          losses: doc['losses'] ?? 0,
+          draws: doc['draws'] ?? 0,
+          buchholz: 0.0,
+          performance: 0,
+        );
+      }).toList();
 
       return TournamentStandings(
         tournamentId: tournamentId,
