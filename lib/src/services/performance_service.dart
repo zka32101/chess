@@ -243,7 +243,7 @@ class PerformanceService {
           .limit(100) // Look at last 100 games
           .get();
 
-      if (snapshot.empty) {
+      if (snapshot.docs.isEmpty) {
         return StreakInfo(
           current: 0,
           longestWin: 0,
@@ -283,7 +283,7 @@ class PerformanceService {
       }
 
       // Update final streak
-      if (lastWasWin) {
+      if (lastWasWin == true) {
         longestWin = longestWin > currentStreak ? longestWin : currentStreak;
       } else {
         longestLoss = longestLoss < currentStreak ? longestLoss : currentStreak;
