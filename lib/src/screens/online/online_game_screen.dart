@@ -116,11 +116,11 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: GameBoard(
             gameState: gameState,
-            moveHistory: game.moves.isNotEmpty
-                ? game.moves
-                    .map((move) => chess_lib.Move(from: move.from, to: move.to))
-                    .toList()
-                : [],
+            // Online games don't support undo, so the real move history
+            // (needed only to enable/disable the undo button) isn't wired
+            // through - GameMove doesn't carry enough data to reconstruct
+            // real chess_lib.Move objects (piece, color, flags, capture).
+            moveHistory: const [],
             onMove: isPlayerTurn && game.status == 'active'
                 ? (from, to, {promotion}) => _submitMove(game, from, to)
                 : null,
@@ -613,9 +613,9 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
     try {
       // Validate move is legal
       final gameState = chess_lib.Chess.fromFEN(game.currentFen);
-      final moveResult = gameState.move({'from': from, 'to': to});
+      final moveSucceeded = gameState.move({'from': from, 'to': to});
 
-      if (moveResult == null) {
+      if (!moveSucceeded) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Invalid move')),
@@ -623,6 +623,8 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
         }
         return;
       }
+
+      final wasCapture = gameState.history.last.move.captured != null;
 
       // Record move in backend
       final notifier = ref.read(onlineGameNotifierProvider.notifier);
@@ -635,13 +637,13 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
         to: to,
         playerId: currentPlayerId,
         updatedFen: gameState.fen,
-        updatedPgn: gameState.pgn,
+        updatedPgn: gameState.pgn(),
       );
 
       // Play appropriate sound based on move type and game state
       final soundService = ref.read(soundServiceProvider);
 
-      if (moveResult.flags.contains('c')) {
+      if (wasCapture) {
         // Capture move
         await soundService.play(SoundEffect.capture);
       } else {
