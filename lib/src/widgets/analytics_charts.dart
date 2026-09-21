@@ -46,7 +46,10 @@ class PerformanceLineChart extends StatelessWidget {
                             children: [
                               Text(
                                 _getMetricValue(trends[i]).toString(),
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
@@ -91,7 +94,9 @@ class PerformanceLineChart extends StatelessWidget {
     final maxHeight = 120.0;
     if (total == 0) return 0;
     final value = _getMetricValue(trends[index]).toDouble();
-    final maxValue = trends.map((t) => _getMetricValue(t).toDouble()).reduce((a, b) => a > b ? a : b);
+    final maxValue = trends
+        .map((t) => _getMetricValue(t).toDouble())
+        .reduce((a, b) => a > b ? a : b);
     if (maxValue == 0) return 0;
     return (value / maxValue) * maxHeight;
   }
@@ -351,7 +356,8 @@ class EngagementMetricsCard extends StatelessWidget {
                       metrics.churnedUser ? 'Churned' : 'Active',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: metrics.churnedUser ? Colors.red : Colors.green,
+                            color:
+                                metrics.churnedUser ? Colors.red : Colors.green,
                           ),
                     ),
                   ],
@@ -374,7 +380,7 @@ class EngagementMetricsCard extends StatelessWidget {
                     .map(
                       (e) => Chip(
                         label: Text('${e.key}: ${e.value}'),
-                        compact: true,
+                        visualDensity: VisualDensity.compact,
                       ),
                     )
                     .toList(),
@@ -428,13 +434,19 @@ class KPICard extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: value,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
                           TextSpan(
                             text: ' $unit',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   color: Colors.grey[600],
                                 ),
                           ),
@@ -445,7 +457,8 @@ class KPICard extends StatelessWidget {
                 ),
                 if (trend != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: (trendColor ?? Colors.grey).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),

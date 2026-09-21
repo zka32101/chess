@@ -61,7 +61,8 @@ class DeviceCompatibilityTester {
   Future<List<CompatibilityTestResult>> runAllTests() async {
     _testResults.clear();
 
-    debugPrint('[DeviceCompatibilityTester] Starting all compatibility tests...');
+    debugPrint(
+        '[DeviceCompatibilityTester] Starting all compatibility tests...');
 
     // Run test categories
     await _testOSCompatibility();
@@ -69,7 +70,8 @@ class DeviceCompatibilityTester {
     await _testDisplayCompatibility();
     await _testPerformanceRequirements();
 
-    debugPrint('[DeviceCompatibilityTester] All tests completed. Total: ${_testResults.length}');
+    debugPrint(
+        '[DeviceCompatibilityTester] All tests completed. Total: ${_testResults.length}');
     return _testResults;
   }
 
@@ -89,8 +91,13 @@ class DeviceCompatibilityTester {
               testName: 'iOS Minimum Version (14.0+)',
               category: CompatibilityTestCategory.os,
               passed: passed,
-              failureReason: !passed ? 'iOS ${deviceInfo.osVersion} is below minimum 14.0' : null,
-              details: {'osVersion': deviceInfo.osVersion, 'minRequired': '14.0'},
+              failureReason: !passed
+                  ? 'iOS ${deviceInfo.osVersion} is below minimum 14.0'
+                  : null,
+              details: {
+                'osVersion': deviceInfo.osVersion,
+                'minRequired': '14.0'
+              },
             ),
           );
         }
@@ -99,7 +106,8 @@ class DeviceCompatibilityTester {
       // Android minimum API level check
       if (deviceInfo.platform == 'Android') {
         if (deviceInfo.osVersion.contains('API')) {
-          final apiMatch = RegExp(r'API (\d+)').firstMatch(deviceInfo.osVersion);
+          final apiMatch =
+              RegExp(r'API (\d+)').firstMatch(deviceInfo.osVersion);
           if (apiMatch != null) {
             final apiLevel = int.tryParse(apiMatch.group(1) ?? '') ?? 0;
             final passed = apiLevel >= 24;
@@ -108,7 +116,9 @@ class DeviceCompatibilityTester {
                 testName: 'Android Minimum API Level (24+)',
                 category: CompatibilityTestCategory.os,
                 passed: passed,
-                failureReason: !passed ? 'Android API $apiLevel is below minimum 24' : null,
+                failureReason: !passed
+                    ? 'Android API $apiLevel is below minimum 24'
+                    : null,
                 details: {'apiLevel': apiLevel, 'minRequired': 24},
               ),
             );
@@ -122,12 +132,15 @@ class DeviceCompatibilityTester {
           testName: 'Physical Device Verification',
           category: CompatibilityTestCategory.hardware,
           passed: deviceInfo.isPhysicalDevice,
-          failureReason: !deviceInfo.isPhysicalDevice ? 'Running on emulator/simulator' : null,
+          failureReason: !deviceInfo.isPhysicalDevice
+              ? 'Running on emulator/simulator'
+              : null,
           details: {'isPhysical': deviceInfo.isPhysicalDevice},
         ),
       );
     } catch (e) {
-      debugPrint('[DeviceCompatibilityTester] Error in OS compatibility test: $e');
+      debugPrint(
+          '[DeviceCompatibilityTester] Error in OS compatibility test: $e');
       _testResults.add(
         CompatibilityTestResult(
           testName: 'OS Compatibility Check',
@@ -151,11 +164,15 @@ class DeviceCompatibilityTester {
           testName: 'Memory Requirements',
           category: CompatibilityTestCategory.memory,
           passed: true,
-          details: {'minRecommended': '2GB', 'note': 'Detailed memory check would require native code'},
+          details: {
+            'minRecommended': '2GB',
+            'note': 'Detailed memory check would require native code'
+          },
         ),
       );
     } catch (e) {
-      debugPrint('[DeviceCompatibilityTester] Error in memory compatibility test: $e');
+      debugPrint(
+          '[DeviceCompatibilityTester] Error in memory compatibility test: $e');
       _testResults.add(
         CompatibilityTestResult(
           testName: 'Memory Compatibility Check',
@@ -178,7 +195,10 @@ class DeviceCompatibilityTester {
           testName: 'Display Size Requirements',
           category: CompatibilityTestCategory.display,
           passed: true,
-          details: {'minDiagonal': '3.5 inches', 'note': 'Responsive design supports all sizes'},
+          details: {
+            'minDiagonal': '3.5 inches',
+            'note': 'Responsive design supports all sizes'
+          },
         ),
       );
 
@@ -192,7 +212,8 @@ class DeviceCompatibilityTester {
         ),
       );
     } catch (e) {
-      debugPrint('[DeviceCompatibilityTester] Error in display compatibility test: $e');
+      debugPrint(
+          '[DeviceCompatibilityTester] Error in display compatibility test: $e');
       _testResults.add(
         CompatibilityTestResult(
           testName: 'Display Compatibility Check',
@@ -215,7 +236,7 @@ class DeviceCompatibilityTester {
       // Simulate some work
       for (int i = 0; i < 1000000; i++) {
         // Simple calculation
-        _ = i * 2;
+        i * 2;
       }
 
       stopwatch.stop();
@@ -229,12 +250,18 @@ class DeviceCompatibilityTester {
           testName: 'CPU Performance Baseline',
           category: CompatibilityTestCategory.performance,
           passed: passed,
-          failureReason: !passed ? 'Performance baseline took ${duration.toStringAsFixed(0)}ms' : null,
-          details: {'executionTime': '${duration.toStringAsFixed(2)}ms', 'threshold': '500ms'},
+          failureReason: !passed
+              ? 'Performance baseline took ${duration.toStringAsFixed(0)}ms'
+              : null,
+          details: {
+            'executionTime': '${duration.toStringAsFixed(2)}ms',
+            'threshold': '500ms'
+          },
         ),
       );
     } catch (e) {
-      debugPrint('[DeviceCompatibilityTester] Error in performance compatibility test: $e');
+      debugPrint(
+          '[DeviceCompatibilityTester] Error in performance compatibility test: $e');
       _testResults.add(
         CompatibilityTestResult(
           testName: 'Performance Compatibility Check',
@@ -247,7 +274,8 @@ class DeviceCompatibilityTester {
   }
 
   /// Get test results by category
-  List<CompatibilityTestResult> getResultsByCategory(CompatibilityTestCategory category) {
+  List<CompatibilityTestResult> getResultsByCategory(
+      CompatibilityTestCategory category) {
     return _testResults.where((r) => r.category == category).toList();
   }
 
@@ -258,7 +286,8 @@ class DeviceCompatibilityTester {
   int get failedCount => _testResults.where((r) => !r.passed).length;
 
   /// Get all test results
-  List<CompatibilityTestResult> get allResults => List.unmodifiable(_testResults);
+  List<CompatibilityTestResult> get allResults =>
+      List.unmodifiable(_testResults);
 
   /// Get compatibility score (0-100)
   int get compatibilityScore {
@@ -286,18 +315,21 @@ class DeviceCompatibilityTester {
     for (final category in categories) {
       final categoryResults = getResultsByCategory(category);
       if (categoryResults.isNotEmpty) {
-        buffer.writeln('║ ${category.toString().split('.').last.toUpperCase().padRight(62)}║');
+        buffer.writeln(
+            '║ ${category.toString().split('.').last.toUpperCase().padRight(62)}║');
         for (final result in categoryResults) {
           final status = result.passed ? '✓ PASS' : '✗ FAIL';
           buffer.writeln('║   $status: ${result.testName.padRight(47)}║');
           if (result.failureReason != null) {
-            buffer.writeln('║      Reason: ${result.failureReason!.padRight(50)}║');
+            buffer.writeln(
+                '║      Reason: ${result.failureReason!.padRight(50)}║');
           }
         }
       }
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 
