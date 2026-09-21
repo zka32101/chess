@@ -19,13 +19,19 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class DefaultFirebaseOptions {
   /// Get Firebase options from environment or use development defaults
   static FirebaseOptions get currentPlatform {
-    final apiKey = dotenv.env['FIREBASE_API_KEY'] ?? 'AIzaSyDn5Bk0Xz9W2j7K4L5M6N7O8P9Q0R1S2T';
-    final appId = dotenv.env['FIREBASE_APP_ID'] ?? '1:234567890:web:abcdef1234567890ghij';
-    final messagingSenderId = dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '234567890';
+    final apiKey = dotenv.env['FIREBASE_API_KEY'] ??
+        'AIzaSyDn5Bk0Xz9W2j7K4L5M6N7O8P9Q0R1S2T';
+    final appId =
+        dotenv.env['FIREBASE_APP_ID'] ?? '1:234567890:web:abcdef1234567890ghij';
+    final messagingSenderId =
+        dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '234567890';
     final projectId = dotenv.env['FIREBASE_PROJECT_ID'] ?? 'yourwish-chess';
-    final authDomain = dotenv.env['FIREBASE_AUTH_DOMAIN'] ?? 'yourwish-chess.firebaseapp.com';
-    final databaseURL = dotenv.env['FIREBASE_DATABASE_URL'] ?? 'https://yourwish-chess.firebaseio.com';
-    final storageBucket = dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? 'yourwish-chess.appspot.com';
+    final authDomain =
+        dotenv.env['FIREBASE_AUTH_DOMAIN'] ?? 'yourwish-chess.firebaseapp.com';
+    final databaseURL = dotenv.env['FIREBASE_DATABASE_URL'] ??
+        'https://yourwish-chess.firebaseio.com';
+    final storageBucket =
+        dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? 'yourwish-chess.appspot.com';
 
     return FirebaseOptions(
       apiKey: apiKey,
@@ -36,7 +42,6 @@ class DefaultFirebaseOptions {
       databaseURL: databaseURL,
       storageBucket: storageBucket,
       iosBundleId: dotenv.env['FIREBASE_IOS_BUNDLE_ID'] ?? 'com.yourwish.chess',
-      androidPackageName: dotenv.env['FIREBASE_ANDROID_PACKAGE_NAME'] ?? 'com.yourwish.chess',
     );
   }
 }
