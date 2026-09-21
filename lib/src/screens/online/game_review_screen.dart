@@ -146,7 +146,7 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
         _buildMetadataItem('Type', widget.game.type),
         _buildMetadataItem('Time', widget.game.timeControl),
         _buildMetadataItem('Moves', '${widget.game.moves.length}'),
-        _buildMetadataItem('Result', widget.game.resultReason),
+        _buildMetadataItem('Result', widget.game.resultReason ?? ''),
       ],
     );
   }
@@ -451,8 +451,8 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
             _buildInfoRow('Game ID', widget.game.gameId),
             _buildInfoRow('Type', widget.game.type),
             _buildInfoRow('Time Control', widget.game.timeControl),
-            _buildInfoRow('Result', widget.game.result),
-            _buildInfoRow('Result Reason', widget.game.resultReason),
+            _buildInfoRow('Result', widget.game.result ?? ''),
+            _buildInfoRow('Result Reason', widget.game.resultReason ?? ''),
             _buildInfoRow(
               'Duration',
               _formatDuration(
