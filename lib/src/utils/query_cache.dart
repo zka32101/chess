@@ -108,11 +108,11 @@ class CompositeCache<K, V> {
   CompositeCache({
     required int tiers,
     required List<Duration> ttls,
-  }) : assert(tiers == ttls.length, 'Number of tiers must match TTLs'),
-       _tiers = List.generate(
-         tiers,
-         (i) => QueryCache<K, V>(defaultTtl: ttls[i]),
-       );
+  })  : assert(tiers == ttls.length, 'Number of tiers must match TTLs'),
+        _tiers = List.generate(
+          tiers,
+          (i) => QueryCache<K, V>(defaultTtl: ttls[i]),
+        );
 
   V? get(K key) {
     for (final tier in _tiers) {
@@ -151,7 +151,8 @@ class CacheStats {
   double get hitRate => (hits + misses) == 0 ? 0 : hits / (hits + misses);
 
   @override
-  String toString() => 'CacheStats(hits: $hits, misses: $misses, evictions: $evictions, hitRate: ${(hitRate * 100).toStringAsFixed(1)}%)';
+  String toString() =>
+      'CacheStats(hits: $hits, misses: $misses, evictions: $evictions, hitRate: ${(hitRate * 100).toStringAsFixed(1)}%)';
 
   void reset() {
     hits = 0;
@@ -165,7 +166,7 @@ class MonitoredCache<K, V> {
   final CacheStats _stats = CacheStats();
 
   MonitoredCache({Duration cacheTtl = const Duration(minutes: 5)})
-    : _cache = QueryCache(defaultTtl: cacheTtl);
+      : _cache = QueryCache(defaultTtl: cacheTtl);
 
   V? get(K key) {
     final value = _cache.get(key);
@@ -183,6 +184,11 @@ class MonitoredCache<K, V> {
 
   void remove(K key) {
     _cache.remove(key);
+    _stats.evictions++;
+  }
+
+  void removeWhere(bool Function(K key) predicate) {
+    _cache.removeWhere(predicate);
     _stats.evictions++;
   }
 
