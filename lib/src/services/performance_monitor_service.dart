@@ -6,7 +6,7 @@ class PerformanceMonitorService {
   static final PerformanceMonitorService _instance =
       PerformanceMonitorService._internal();
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore _firestore;
 
   factory PerformanceMonitorService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
@@ -93,7 +93,8 @@ class PerformanceMonitorService {
   }
 
   /// Track battery usage
-  Future<void> trackBatteryUsage(double batteryPercentage, String sessionId) async {
+  Future<void> trackBatteryUsage(
+      double batteryPercentage, String sessionId) async {
     try {
       final metric = PerformanceMetric(
         id: _firestore.collection('performance_metrics').doc().id,
@@ -194,8 +195,8 @@ class PerformanceMonitorService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              CrashReport.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => CrashReport.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching crash reports: $e');
@@ -222,8 +223,7 @@ class PerformanceMonitorService {
         final values = entry.value;
         if (values.isEmpty) continue;
 
-        final average =
-            values.reduce((a, b) => a + b) / values.length;
+        final average = values.reduce((a, b) => a + b) / values.length;
         final max = values.reduce((a, b) => a > b ? a : b);
 
         // Suggest optimization if max is significantly higher than average
