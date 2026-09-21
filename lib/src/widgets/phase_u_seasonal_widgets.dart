@@ -139,17 +139,27 @@ class BattlePassProgressCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsync = ref.watch(
-      playerBattlePassProvider((playerId: playerId, seasonId: seasonId)),
+      playerBattlePassProvider(
+        SeasonChallengesParams(playerId: playerId, seasonId: seasonId),
+      ),
     );
     final currentBPAsync = ref.watch(currentBattlePassProvider);
     final claimedFreeAsync = ref.watch(
       claimedBattlePassRewardsProvider(
-        (playerId: playerId, seasonId: seasonId, isPremium: false),
+        BattlePassRewardsParams(
+          playerId: playerId,
+          seasonId: seasonId,
+          isPremium: false,
+        ),
       ),
     );
     final claimedPremiumAsync = ref.watch(
       claimedBattlePassRewardsProvider(
-        (playerId: playerId, seasonId: seasonId, isPremium: true),
+        BattlePassRewardsParams(
+          playerId: playerId,
+          seasonId: seasonId,
+          isPremium: true,
+        ),
       ),
     );
 
@@ -157,14 +167,13 @@ class BattlePassProgressCard extends ConsumerWidget {
       data: (progress) => currentBPAsync.when(
         data: (bp) => claimedFreeAsync.when(
           data: (freeRewards) => claimedPremiumAsync.when(
-            data: (premiumRewards) =>
-                _buildBattlePassCard(
-                  context,
-                  progress,
-                  bp,
-                  freeRewards,
-                  premiumRewards,
-                ),
+            data: (premiumRewards) => _buildBattlePassCard(
+              context,
+              progress,
+              bp,
+              freeRewards,
+              premiumRewards,
+            ),
             loading: () => const BattlePassLoadingWidget(),
             error: (e, st) => BattlePassErrorWidget(error: e.toString()),
           ),
@@ -216,9 +225,7 @@ class BattlePassProgressCard extends ConsumerWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: progress.hasPremiumPass
-                        ? Colors.amber
-                        : Colors.grey,
+                    color: progress.hasPremiumPass ? Colors.amber : Colors.grey,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -295,7 +302,7 @@ class BattlePassProgressCard extends ConsumerWidget {
 class ChallengeTrackerCard extends ConsumerWidget {
   final String playerId;
   final String seasonId;
-  final String? challengeType;  // daily, weekly, seasonal, event
+  final String? challengeType; // daily, weekly, seasonal, event
 
   const ChallengeTrackerCard({
     Key? key,
@@ -308,7 +315,7 @@ class ChallengeTrackerCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final challengesAsync = ref.watch(
       activeChallengesProvider(
-        (seasonId: seasonId, type: challengeType),
+        ChallengesParams(seasonId: seasonId, type: challengeType),
       ),
     );
 
@@ -363,7 +370,10 @@ class ChallengeTrackerCard extends ConsumerWidget {
   ) {
     final progressAsync = ref.watch(
       playerChallengeProgressProvider(
-        (playerId: playerId, challengeId: challenge.challengeId),
+        PlayerChallengeParams(
+          playerId: playerId,
+          challengeId: challenge.challengeId,
+        ),
       ),
     );
 
@@ -786,8 +796,7 @@ class ChallengeLoadingWidget extends StatelessWidget {
 class ChallengeErrorWidget extends StatelessWidget {
   final String error;
 
-  const ChallengeErrorWidget({Key? key, required this.error})
-      : super(key: key);
+  const ChallengeErrorWidget({Key? key, required this.error}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
