@@ -45,10 +45,8 @@ class AnalyticsDashboardService {
 
   /// Get game statistics for a player
   Future<GameStats> _getGameStats(String userId) async {
-    final gamesRef = _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('games');
+    final gamesRef =
+        _firestore.collection('users').doc(userId).collection('games');
 
     final snapshot = await gamesRef.get();
     final games = snapshot.docs;
@@ -62,8 +60,10 @@ class AnalyticsDashboardService {
       final data = game.data();
       final result = data['result'] as String?;
 
-      if (result == 'win') wins++;
-      else if (result == 'loss') losses++;
+      if (result == 'win')
+        wins++;
+      else if (result == 'loss')
+        losses++;
       else if (result == 'draw') draws++;
 
       totalAccuracy += (data['accuracy'] as num?)?.toDouble() ?? 0;
@@ -76,9 +76,8 @@ class AnalyticsDashboardService {
     }
 
     final totalGames = games.length;
-    final winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
-    final avgAccuracy =
-        totalGames > 0 ? totalAccuracy / totalGames : 0;
+    final winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0.0;
+    final avgAccuracy = totalGames > 0 ? totalAccuracy / totalGames : 0.0;
 
     return GameStats(
       totalGames: totalGames,
@@ -100,8 +99,9 @@ class AnalyticsDashboardService {
     return StreakInfo(
       currentWinStreak: (data['currentWinStreak'] as int?) ?? 0,
       longestWinStreak: (data['longestWinStreak'] as int?) ?? 0,
-      longestStreakDate: ((data['longestStreakDate'] as Timestamp?)?.toDate()) ??
-          DateTime.now(),
+      longestStreakDate:
+          ((data['longestStreakDate'] as Timestamp?)?.toDate()) ??
+              DateTime.now(),
       currentLossStreak: (data['currentLossStreak'] as int?) ?? 0,
       longestLossStreak: (data['longestLossStreak'] as int?) ?? 0,
     );
@@ -141,13 +141,13 @@ class AnalyticsDashboardService {
     }
 
     final trendDirection =
-        validMetrics > 1 ? metrics.last.accuracy - metrics.first.accuracy : 0;
+        validMetrics > 1 ? metrics.last.accuracy - metrics.first.accuracy : 0.0;
 
     return PerformanceTrend(
       metrics: metrics,
       trendDirection: trendDirection,
-      averageAccuracy: validMetrics > 0 ? totalAccuracy / validMetrics : 0,
-      averageRating: validMetrics > 0 ? totalRating / validMetrics : 0,
+      averageAccuracy: validMetrics > 0 ? totalAccuracy / validMetrics : 0.0,
+      averageRating: validMetrics > 0 ? totalRating / validMetrics : 0.0,
       totalDataPoints: validMetrics,
     );
   }
@@ -177,9 +177,8 @@ class AnalyticsDashboardService {
       }
 
       final totalGames = games.length;
-      final winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
-      final avgAccuracy =
-          totalGames > 0 ? totalAccuracy / totalGames : 0;
+      final winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0.0;
+      final avgAccuracy = totalGames > 0 ? totalAccuracy / totalGames : 0.0;
 
       stats.add(DifficultyBreakdown(
         difficulty: difficulty,
