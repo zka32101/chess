@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import 'package:chess_tactics_master/src/models/game_history.dart';
 import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
+import 'package:chess_tactics_master/src/services/game_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Firebase implementation of game history service
