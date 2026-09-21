@@ -250,7 +250,7 @@ class MoveQualityScorer {
   /// - 50-64: Mediocre move (slight disadvantage)
   /// - 0-49: Blunder (losing move)
   static int scoreMove({
-    required chess_lib.Game position,
+    required chess_lib.Chess position,
     required String moveFrom,
     required String moveTo,
     required int evaluation,
@@ -292,8 +292,7 @@ class MoveQualityScorer {
     if (moveQualities.isEmpty) return 0.0;
 
     // Count good (75+) and excellent (85+) moves
-    final goodMoves =
-        moveQualities.where((q) => q >= 75).length;
+    final goodMoves = moveQualities.where((q) => q >= 75).length;
 
     return (goodMoves / moveQualities.length) * 100;
   }
