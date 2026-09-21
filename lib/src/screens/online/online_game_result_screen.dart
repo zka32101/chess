@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
 import 'package:chess_tactics_master/src/providers/auth_provider.dart';
 
 /// Displays the result of a completed online game
@@ -17,8 +16,6 @@ class OnlineGameResultScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(currentUserProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Game Result'),
@@ -31,9 +28,9 @@ class OnlineGameResultScreen extends ConsumerWidget {
           children: [
             _buildResultHeader(context, ref),
             const SizedBox(height: 24),
-            _buildRatingChanges(),
+            _buildRatingChanges(context),
             const SizedBox(height: 24),
-            _buildGameStatistics(),
+            _buildGameStatistics(context),
             const SizedBox(height: 32),
             _buildActionButtons(context, ref),
           ],
@@ -87,7 +84,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            game.resultReason.replaceAll('_', ' ').toUpperCase(),
+            (game.resultReason ?? '').replaceAll('_', ' ').toUpperCase(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: textColor,
                   fontWeight: FontWeight.w500,
@@ -99,7 +96,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
   }
 
   /// Display rating changes for both players
-  Widget _buildRatingChanges() {
+  Widget _buildRatingChanges(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -118,6 +115,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _buildRatingChangeRow(
+            context: context,
             playerName: game.whitePlayerName,
             oldRating: game.whiteRating,
             ratingDelta: game.whiteRatingDelta ?? 0,
@@ -125,6 +123,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _buildRatingChangeRow(
+            context: context,
             playerName: game.blackPlayerName,
             oldRating: game.blackRating,
             ratingDelta: game.blackRatingDelta ?? 0,
@@ -137,6 +136,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
 
   /// Build individual rating change row
   Widget _buildRatingChangeRow({
+    required BuildContext context,
     required String playerName,
     required int oldRating,
     required int ratingDelta,
@@ -187,7 +187,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
   }
 
   /// Display game statistics
-  Widget _buildGameStatistics() {
+  Widget _buildGameStatistics(BuildContext context) {
     final duration = game.endedAt?.difference(game.startedAt ?? game.createdAt);
     final durationText = duration != null
         ? '${duration.inMinutes}m ${duration.inSeconds % 60}s'
@@ -209,18 +209,22 @@ class OnlineGameResultScreen extends ConsumerWidget {
                 ),
           ),
           const SizedBox(height: 16),
-          _buildStatRow('Game Type', game.type),
-          _buildStatRow('Time Control', '${game.timeControl}'),
-          _buildStatRow('Total Moves', '${game.moves.length}'),
-          _buildStatRow('Duration', durationText),
-          _buildStatRow('Reason', game.resultReason.replaceAll('_', ' ')),
+          _buildStatRow(context, 'Game Type', game.type),
+          _buildStatRow(context, 'Time Control', '${game.timeControl}'),
+          _buildStatRow(context, 'Total Moves', '${game.moves.length}'),
+          _buildStatRow(context, 'Duration', durationText),
+          _buildStatRow(
+            context,
+            'Reason',
+            (game.resultReason ?? '').replaceAll('_', ' '),
+          ),
         ],
       ),
     );
   }
 
   /// Build individual stat row
-  Widget _buildStatRow(String label, String value) {
+  Widget _buildStatRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
