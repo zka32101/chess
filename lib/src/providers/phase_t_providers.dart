@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/player_connection_service.dart';
 import '../services/leaderboard_service.dart';
 import '../services/achievement_service.dart';
-import '../models/phase_k_models.dart';
+import '../models/phase_k_models.dart' hide FriendRequest;
 
 /// Phase T - Social & Community Features Providers
 /// Provides reactive access to social connections, leaderboards, and achievements
