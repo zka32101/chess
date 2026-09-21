@@ -19,8 +19,9 @@ final cohortAnalyticsServiceProvider = Provider<CohortAnalyticsService>((ref) {
 });
 
 // Performance trend providers
-final queryPerformanceTrendsProvider =
-    FutureProvider.family<List<QueryPerformanceTrend>, ({String queryType, int days})>((ref, params) async {
+final queryPerformanceTrendsProvider = FutureProvider.family<
+    List<QueryPerformanceTrend>,
+    ({String queryType, int days})>((ref, params) async {
   final service = ref.watch(analyticsServiceProvider);
   return service.getPerformanceTrends(
     queryType: params.queryType,
@@ -29,7 +30,8 @@ final queryPerformanceTrendsProvider =
 });
 
 final performanceRegressionProvider =
-    FutureProvider.family<bool, ({String queryType, int currentP50})>((ref, params) async {
+    FutureProvider.family<bool, ({String queryType, int currentP50})>(
+        (ref, params) async {
   final service = ref.watch(trendAggregationServiceProvider);
   return service.identifyPerformanceRegression(
     queryType: params.queryType,
@@ -38,7 +40,8 @@ final performanceRegressionProvider =
 });
 
 final trendReportProvider =
-    FutureProvider.family<Map<String, dynamic>, ({String queryType, int days})>((ref, params) async {
+    FutureProvider.family<Map<String, dynamic>, ({String queryType, int days})>(
+        (ref, params) async {
   final service = ref.watch(trendAggregationServiceProvider);
   return service.generateTrendReport(
     queryType: params.queryType,
@@ -60,13 +63,15 @@ final retentionMetricsProvider =
 });
 
 final churnAnalyticsProvider =
-    FutureProvider.family<List<UserEngagementMetrics>, int>((ref, inactiveDays) async {
+    FutureProvider.family<List<UserEngagementMetrics>, int>(
+        (ref, inactiveDays) async {
   final service = ref.watch(cohortAnalyticsServiceProvider);
   return service.getChurnAnalytics(inactiveDays: inactiveDays);
 });
 
 final cohortReportProvider =
-    FutureProvider.family<Map<String, dynamic>, String>((ref, cohortDate) async {
+    FutureProvider.family<Map<String, dynamic>, String>(
+        (ref, cohortDate) async {
   final service = ref.watch(cohortAnalyticsServiceProvider);
   return service.generateCohortReport(cohortDate: cohortDate);
 });
@@ -86,16 +91,16 @@ final cacheAnalyticsProvider =
 
 // Competitive features providers
 final competitiveFeatureStatsProvider =
-    FutureProvider.family<List<CompetitiveFeatureStats>, int>((ref, days) async {
+    FutureProvider.family<List<CompetitiveFeatureStats>, int>(
+        (ref, days) async {
   final service = ref.watch(analyticsServiceProvider);
   return service.getCompetitiveFeatureUsage(days: days);
 });
 
 // Dashboard KPI providers
 final dashboardKPIsProvider = FutureProvider<List<DashboardKPI>>((ref) async {
-  final engagement = await ref.watch(userEngagementMetricsProvider(''));
-  final cache = await ref.watch(cacheAnalyticsProvider(7));
-  final features = await ref.watch(competitiveFeatureStatsProvider(7));
+  final cache = await ref.watch(cacheAnalyticsProvider(7).future);
+  final features = await ref.watch(competitiveFeatureStatsProvider(7).future);
 
   return [
     DashboardKPI(
@@ -107,7 +112,9 @@ final dashboardKPIsProvider = FutureProvider<List<DashboardKPI>>((ref) async {
     ),
     DashboardKPI(
       label: 'Cache Hit Rate',
-      value: cache.isNotEmpty ? '${(cache.first.hitRate * 100).toStringAsFixed(1)}%' : '70%',
+      value: cache.isNotEmpty
+          ? '${(cache.first.hitRate * 100).toStringAsFixed(1)}%'
+          : '70%',
       unit: '%',
       trend: '+5%',
       trendPercent: '5',
@@ -134,28 +141,27 @@ final performanceComparisonProvider =
     FutureProvider.family<Map<String, dynamic>, int>((ref, days) async {
   final leaderboard = await ref.watch(
     queryPerformanceTrendsProvider((queryType: 'leaderboard', days: days))
+        .future,
   );
   final friends = await ref.watch(
-    queryPerformanceTrendsProvider((queryType: 'friends', days: days))
+    queryPerformanceTrendsProvider((queryType: 'friends', days: days)).future,
   );
   final challenges = await ref.watch(
     queryPerformanceTrendsProvider((queryType: 'challenges', days: days))
+        .future,
   );
 
   return {
-    'leaderboard': leaderboard.isNotEmpty
-        ? leaderboard.first.p50Latency
-        : 150,
+    'leaderboard': leaderboard.isNotEmpty ? leaderboard.first.p50Latency : 150,
     'friends': friends.isNotEmpty ? friends.first.p50Latency : 120,
-    'challenges': challenges.isNotEmpty
-        ? challenges.first.p50Latency
-        : 80,
+    'challenges': challenges.isNotEmpty ? challenges.first.p50Latency : 80,
   };
 });
 
 // User segment comparison provider
 final userSegmentComparisonProvider =
-    FutureProvider.family<Map<String, dynamic>, String>((ref, segmentField) async {
+    FutureProvider.family<Map<String, dynamic>, String>(
+        (ref, segmentField) async {
   final service = ref.watch(cohortAnalyticsServiceProvider);
   return service.comparePerformanceBySegment(segmentField: segmentField);
 });
