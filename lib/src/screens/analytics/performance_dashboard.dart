@@ -134,7 +134,7 @@ class _PerformanceTrendsSection extends ConsumerWidget {
 class _QueryTypeComparisonSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final comparison = ref.watch(performanceComparisonProvider);
+    final comparison = ref.watch(performanceComparisonProvider(7));
 
     return comparison.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -161,18 +161,21 @@ class _QueryTypeComparisonSection extends ConsumerWidget {
                             .entries
                             .map(
                               (entry) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
                                 child: Column(
                                   children: [
                                     Text(
                                       entry.value,
-                                      style: Theme.of(context).textTheme.bodySmall,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
                                     ),
                                     const SizedBox(height: 8),
                                     Container(
                                       width: 40,
-                                      height: ((data['latencies'] as List<int>?)
-                                                  ?[entry.key] as int? ??
+                                      height: ((data['latencies']
+                                                      as List<int>?)?[entry.key]
+                                                  as int? ??
                                               100)
                                           .toDouble(),
                                       color: Colors.blue,
@@ -180,7 +183,10 @@ class _QueryTypeComparisonSection extends ConsumerWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       '${(data['latencies'] as List<int>?)?[entry.key]}ms',
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
                                             fontWeight: FontWeight.bold,
                                           ),
                                     ),
@@ -231,8 +237,13 @@ class _RegressionDetectionSection extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isRegression ? 'Performance Regression Detected' : 'Performance Healthy',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        isRegression
+                            ? 'Performance Regression Detected'
+                            : 'Performance Healthy',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: isRegression ? Colors.red : Colors.green,
                             ),
