@@ -105,8 +105,8 @@ class GameInfoPanel extends StatelessWidget {
                 Text(
                   'Game Information',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Chip(
                   avatar: Icon(
@@ -137,22 +137,26 @@ class GameInfoPanel extends StatelessWidget {
               crossAxisSpacing: 12,
               childAspectRatio: 1.5,
               children: [
-                _buildInfoCard(context,
+                _buildInfoCard(
+                  context,
                   icon: Icons.category,
                   label: 'Type',
                   value: gameType,
                 ),
-                _buildInfoCard(context,
+                _buildInfoCard(
+                  context,
                   icon: Icons.schedule,
                   label: 'Time Control',
                   value: timeControl,
                 ),
-                _buildInfoCard(context,
+                _buildInfoCard(
+                  context,
                   icon: Icons.layers,
                   label: 'Moves',
                   value: totalMoves.toString(),
                 ),
-                _buildInfoCard(context,
+                _buildInfoCard(
+                  context,
                   icon: Icons.timer,
                   label: 'Elapsed',
                   value: _formatElapsedTime(elapsedSeconds),
@@ -165,8 +169,8 @@ class GameInfoPanel extends StatelessWidget {
             Text(
               'Players',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const SizedBox(height: 8),
             _buildPlayerRow('White', whitePlayerName),
@@ -176,7 +180,8 @@ class GameInfoPanel extends StatelessWidget {
             if (currentTurn != null) ...[
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -208,7 +213,8 @@ class GameInfoPanel extends StatelessWidget {
   }
 
   /// Build info card widget
-  Widget _buildInfoCard(BuildContext context, {
+  Widget _buildInfoCard(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
@@ -261,20 +267,24 @@ class GameInfoPanel extends StatelessWidget {
           width: 20,
           height: 20,
           decoration: BoxDecoration(
-            color: color.toLowerCase() == 'white' ? Colors.grey[300] : Colors.grey[800],
+            color: color.toLowerCase() == 'white'
+                ? Colors.grey[300]
+                : Colors.grey[800],
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Colors.grey[400]!),
           ),
         ),
         const SizedBox(width: 12),
-        Text(
-          color,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
-          ),
+        SizedBox(
           width: 50,
+          child: Text(
+            color,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
         ),
         Expanded(
           child: Text(

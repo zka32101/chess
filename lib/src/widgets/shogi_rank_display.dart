@@ -50,7 +50,7 @@ class ShogiRankDisplay extends StatelessWidget {
     );
   }
 
-  Widget _buildRankBadge() {
+  Widget _buildRankBadge(BuildContext context) {
     final color = _getRankColor();
     final displayName = ShogiRankService.displayName(rank);
 
@@ -113,7 +113,7 @@ class ShogiRankDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildRankBadge();
+    return _buildRankBadge(context);
   }
 }
 
