@@ -166,10 +166,10 @@ class FriendServiceOptimized {
           .collection('friends')
           .doc(userId)
           .collection('list')
-          .count
+          .count()
           .get();
 
-      final count = countSnapshot.count;
+      final count = countSnapshot.count ?? 0;
       _friendCountCache.set(userId, count);
       return count;
     } catch (e) {
@@ -221,12 +221,12 @@ class FriendServiceOptimized {
       final friends1 = await getUserFriendsOptimized(userId1);
       final friends2 = await getUserFriendsOptimized(userId2);
 
-      final ids1 = friends1.map((f) => f.friendUserId).toSet();
-      final ids2 = friends2.map((f) => f.friendUserId).toSet();
+      final ids1 = friends1.map((f) => f.friendId).toSet();
+      final ids2 = friends2.map((f) => f.friendId).toSet();
 
       final mutualIds = ids1.intersection(ids2);
 
-      return friends1.where((f) => mutualIds.contains(f.friendUserId)).toList();
+      return friends1.where((f) => mutualIds.contains(f.friendId)).toList();
     } catch (e) {
       debugPrint('Error fetching mutual friends: $e');
       return [];
@@ -244,9 +244,7 @@ class FriendServiceOptimized {
           .orderBy('connectedAt', descending: true)
           .get();
 
-      return snapshot.docs
-          .map((doc) => Friend.fromJson(doc.data()))
-          .toList();
+      return snapshot.docs.map((doc) => Friend.fromJson(doc.data())).toList();
     } catch (e) {
       debugPrint('Error fetching friends from db: $e');
       return [];
