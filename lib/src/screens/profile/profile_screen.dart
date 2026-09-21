@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/user_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/game_provider.dart';
+import '../../models/user.dart';
+import '../../models/game.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final String? userId;
@@ -325,7 +327,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           _buildStatCard(
             title: 'Member Since',
             value: user.createdAt?.year.toString() ?? '2024',
-            description: 'Joined on ${user.createdAt?.toString().split(' ')[0] ?? 'N/A'}',
+            description:
+                'Joined on ${user.createdAt?.toString().split(' ')[0] ?? 'N/A'}',
           ),
         ],
       ),
@@ -422,7 +425,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              isDraw ? 'Draw' : isWhiteWin ? '1-0' : '0-1',
+              isDraw
+                  ? 'Draw'
+                  : isWhiteWin
+                      ? '1-0'
+                      : '0-1',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: isDraw
