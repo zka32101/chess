@@ -6,7 +6,7 @@ class FeatureRoadmapService {
   static final FeatureRoadmapService _instance =
       FeatureRoadmapService._internal();
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore _firestore;
 
   factory FeatureRoadmapService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
@@ -51,7 +51,8 @@ class FeatureRoadmapService {
   }
 
   /// Update roadmap item status
-  Future<void> updateRoadmapItemStatus(String itemId, RoadmapStatus status) async {
+  Future<void> updateRoadmapItemStatus(
+      String itemId, RoadmapStatus status) async {
     try {
       final updateData = {'status': status.name};
       if (status == RoadmapStatus.completed) {
@@ -75,7 +76,8 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching roadmap items: $e');
@@ -92,7 +94,8 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching roadmap by priority: $e');
@@ -109,7 +112,8 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching roadmap by timeline: $e');
@@ -126,7 +130,8 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching roadmap by status: $e');
@@ -138,13 +143,10 @@ class FeatureRoadmapService {
   Future<void> publishRoadmap() async {
     try {
       final items = await getRoadmapItems();
-      await _firestore
-          .collection('settings')
-          .doc('public_roadmap')
-          .set({
-            'items': items.map((e) => e.toJson()).toList(),
-            'publishedAt': DateTime.now().toIso8601String(),
-          });
+      await _firestore.collection('settings').doc('public_roadmap').set({
+        'items': items.map((e) => e.toJson()).toList(),
+        'publishedAt': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       print('Error publishing roadmap: $e');
       rethrow;

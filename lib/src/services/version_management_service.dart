@@ -6,7 +6,7 @@ class VersionManagementService {
   static final VersionManagementService _instance =
       VersionManagementService._internal();
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore _firestore;
   String? _currentVersion = '1.0.0';
   int? _currentBuildNumber = 1;
 
@@ -17,7 +17,8 @@ class VersionManagementService {
     return _instance;
   }
 
-  VersionManagementService._internal() : _firestore = FirebaseFirestore.instance;
+  VersionManagementService._internal()
+      : _firestore = FirebaseFirestore.instance;
 
   /// Get current version
   String getCurrentVersion() => _currentVersion ?? '1.0.0';
@@ -36,11 +37,12 @@ class VersionManagementService {
 
       if (querySnapshot.docs.isEmpty) return null;
 
-      final latestVersion =
-          AppVersion.fromJson(querySnapshot.docs.first.data() as Map<String, dynamic>);
+      final latestVersion = AppVersion.fromJson(
+          querySnapshot.docs.first.data() as Map<String, dynamic>);
 
       // Compare versions
-      if (_isNewerVersion(latestVersion.versionNumber, _currentVersion ?? '1.0.0')) {
+      if (_isNewerVersion(
+          latestVersion.versionNumber, _currentVersion ?? '1.0.0')) {
         return latestVersion;
       }
 

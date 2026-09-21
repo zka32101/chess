@@ -5,7 +5,7 @@ import '../models/community.dart';
 class CommunityService {
   static final CommunityService _instance = CommunityService._internal();
 
-  final FirebaseFirestore _firestore;
+  FirebaseFirestore _firestore;
 
   factory CommunityService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
@@ -32,7 +32,8 @@ class CommunityService {
   /// Get user profile
   Future<UserProfile?> getUserProfile(String userId) async {
     try {
-      final doc = await _firestore.collection('user_profiles').doc(userId).get();
+      final doc =
+          await _firestore.collection('user_profiles').doc(userId).get();
       if (!doc.exists) return null;
       return UserProfile.fromJson(doc.data() as Map<String, dynamic>);
     } catch (e) {
@@ -42,7 +43,8 @@ class CommunityService {
   }
 
   /// Update user profile
-  Future<void> updateUserProfile(String userId, Map<String, dynamic> updates) async {
+  Future<void> updateUserProfile(
+      String userId, Map<String, dynamic> updates) async {
     try {
       await _firestore.collection('user_profiles').doc(userId).update(updates);
     } catch (e) {
@@ -97,13 +99,10 @@ class CommunityService {
   /// Join community group
   Future<void> joinCommunityGroup(String userId, String groupId) async {
     try {
-      await _firestore
-          .collection('community_groups')
-          .doc(groupId)
-          .update({
-            'members': FieldValue.arrayUnion([userId]),
-            'memberCount': FieldValue.increment(1),
-          });
+      await _firestore.collection('community_groups').doc(groupId).update({
+        'members': FieldValue.arrayUnion([userId]),
+        'memberCount': FieldValue.increment(1),
+      });
     } catch (e) {
       print('Group join error: $e');
       rethrow;
@@ -195,8 +194,8 @@ class CommunityService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              UserProfile.fromJson(doc.data() as Map<String, dynamic>))
+          .map(
+              (doc) => UserProfile.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
     } catch (e) {
       print('Error fetching leaderboard: $e');
@@ -221,10 +220,10 @@ class CommunityService {
           .collection('follows')
           .doc('${userId}_$targetUserId')
           .set({
-            'follower': userId,
-            'following': targetUserId,
-            'timestamp': DateTime.now().toIso8601String(),
-          });
+        'follower': userId,
+        'following': targetUserId,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       print('Follow error: $e');
       rethrow;
