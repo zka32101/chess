@@ -11,11 +11,13 @@ final liveStreamsProvider = FutureProvider((ref) {
   return ref.watch(streamingServiceProvider).getLiveStreams();
 });
 
-final videoTutorialsProvider = FutureProvider.family<List<VideoContent>, int>((ref, limit) {
+final videoTutorialsProvider =
+    FutureProvider.family<List<VideoContent>, int>((ref, limit) {
   return ref.watch(streamingServiceProvider).getVideoTutorials(limit);
 });
 
-final streamAnalyticsProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, streamId) {
+final streamAnalyticsProvider =
+    FutureProvider.family<Map<String, dynamic>, String>((ref, streamId) {
   return ref.watch(streamingServiceProvider).getStreamAnalytics(streamId);
 });
 
@@ -29,7 +31,8 @@ final cacheManagerProvider = Provider<CacheManagerService>((ref) {
 });
 
 /// Firestore result cache service
-final firestoreResultCacheProvider = Provider<FirestoreResultCacheService>((ref) {
+final firestoreResultCacheProvider =
+    Provider<FirestoreResultCacheService>((ref) {
   return FirestoreResultCacheService();
 });
 
@@ -56,9 +59,8 @@ final periodicCacheCleanupProvider = FutureProvider<void>((ref) async {
 });
 
 /// Manual cache invalidation provider for collection-level operations
-final cacheInvalidationProvider = StateNotifierProvider<
-    CacheInvalidationNotifier,
-    List<String>>((ref) {
+final cacheInvalidationProvider =
+    StateNotifierProvider<CacheInvalidationNotifier, List<String>>((ref) {
   final cache = ref.watch(firestoreResultCacheProvider);
   return CacheInvalidationNotifier(cache);
 });
@@ -99,7 +101,7 @@ final performanceMetricsProvider = StateProvider<PerformanceMetrics>((ref) {
   return PerformanceMetrics(
     cacheUtilization: double.parse(stats.utilizationPercent),
     totalCacheEntries: stats.totalEntries,
-    maxCacheSize: stats.maxCacheSize,
+    maxCacheSize: stats.maxSize,
   );
 });
 

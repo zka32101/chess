@@ -303,7 +303,7 @@ class _DashboardContent extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.grey[100].withOpacity(isDarkMode ? 0.1 : 1),
+        color: Colors.grey[100]!.withOpacity(isDarkMode ? 0.1 : 1),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
