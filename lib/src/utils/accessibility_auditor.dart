@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
@@ -45,7 +47,8 @@ enum AccessibilitySeverity {
 
 /// Comprehensive accessibility auditor
 class AccessibilityAuditor {
-  static final AccessibilityAuditor _instance = AccessibilityAuditor._internal();
+  static final AccessibilityAuditor _instance =
+      AccessibilityAuditor._internal();
 
   final _issues = <AccessibilityIssue>[];
 
@@ -69,7 +72,8 @@ class AccessibilityAuditor {
     await _auditFocus();
     await _auditLabels();
 
-    debugPrint('[AccessibilityAuditor] Audit complete. Issues found: ${_issues.length}');
+    debugPrint(
+        '[AccessibilityAuditor] Audit complete. Issues found: ${_issues.length}');
     return _issues;
   }
 
@@ -90,12 +94,14 @@ class AccessibilityAuditor {
           _issues.add(
             AccessibilityIssue(
               title: 'Insufficient Color Contrast',
-              description: '$description has contrast ratio of ${ratio.toStringAsFixed(2)}:1',
+              description:
+                  '$description has contrast ratio of ${ratio.toStringAsFixed(2)}:1',
               severity: ratio < 3.0
                   ? AccessibilitySeverity.critical
                   : AccessibilitySeverity.major,
               wcagCriteria: 'WCAG 2.1 1.4.3 Contrast (Minimum)',
-              suggestion: 'Increase contrast by adjusting colors. Target 4.5:1 or higher.',
+              suggestion:
+                  'Increase contrast by adjusting colors. Target 4.5:1 or higher.',
             ),
           );
         }
@@ -122,7 +128,8 @@ class AccessibilityAuditor {
       ];
 
       for (final (name, requiredSize) in elements) {
-        debugPrint('[AccessibilityAuditor] Touch target $name: checking for min $requiredSize dp');
+        debugPrint(
+            '[AccessibilityAuditor] Touch target $name: checking for min $requiredSize dp');
       }
 
       debugPrint('[AccessibilityAuditor] Touch target audit complete');
@@ -146,7 +153,8 @@ class AccessibilityAuditor {
       ];
 
       for (final (styleName, minSize) in styles) {
-        debugPrint('[AccessibilityAuditor] Text size $styleName: min $minSize sp');
+        debugPrint(
+            '[AccessibilityAuditor] Text size $styleName: min $minSize sp');
       }
 
       debugPrint('[AccessibilityAuditor] Text size audit complete');
@@ -161,10 +169,12 @@ class AccessibilityAuditor {
       _issues.add(
         AccessibilityIssue(
           title: 'Semantic Labeling Required',
-          description: 'All interactive elements should have semantic labels for screen readers',
+          description:
+              'All interactive elements should have semantic labels for screen readers',
           severity: AccessibilitySeverity.major,
           wcagCriteria: 'WCAG 2.1 1.3.1 Info and Relationships',
-          suggestion: 'Use Semantics widget, MergeSemantics, and meaningful labels',
+          suggestion:
+              'Use Semantics widget, MergeSemantics, and meaningful labels',
         ),
       );
 
@@ -183,7 +193,8 @@ class AccessibilityAuditor {
           description: 'Verify animations respect prefers-reduced-motion',
           severity: AccessibilitySeverity.major,
           wcagCriteria: 'WCAG 2.1 2.3.3 Animation from Interactions',
-          suggestion: 'Check MediaQuery.of(context).disableAnimations and adjust durations',
+          suggestion:
+              'Check MediaQuery.of(context).disableAnimations and adjust durations',
         ),
       );
 
@@ -202,7 +213,8 @@ class AccessibilityAuditor {
           description: 'Ensure focus order is logical and focus is visible',
           severity: AccessibilitySeverity.major,
           wcagCriteria: 'WCAG 2.1 2.4.3 Focus Order',
-          suggestion: 'Implement proper focus nodes and visual focus indicators',
+          suggestion:
+              'Implement proper focus nodes and visual focus indicators',
         ),
       );
 
@@ -221,7 +233,8 @@ class AccessibilityAuditor {
           description: 'All controls need clear, descriptive labels',
           severity: AccessibilitySeverity.major,
           wcagCriteria: 'WCAG 2.1 1.3.1 Info and Relationships',
-          suggestion: 'Use Tooltip, tooltip property, or semantic labels for all controls',
+          suggestion:
+              'Use Tooltip, tooltip property, or semantic labels for all controls',
         ),
       );
 
@@ -237,9 +250,9 @@ class AccessibilityAuditor {
     final g = color.green / 255.0;
     final b = color.blue / 255.0;
 
-    final rLin = r <= 0.03928 ? r / 12.92 : ((r + 0.055) / 1.055).pow(2.4);
-    final gLin = g <= 0.03928 ? g / 12.92 : ((g + 0.055) / 1.055).pow(2.4);
-    final bLin = b <= 0.03928 ? b / 12.92 : ((b + 0.055) / 1.055).pow(2.4);
+    final rLin = r <= 0.03928 ? r / 12.92 : math.pow((r + 0.055) / 1.055, 2.4);
+    final gLin = g <= 0.03928 ? g / 12.92 : math.pow((g + 0.055) / 1.055, 2.4);
+    final bLin = b <= 0.03928 ? b / 12.92 : math.pow((b + 0.055) / 1.055, 2.4);
 
     return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
   }
@@ -259,7 +272,8 @@ class AccessibilityAuditor {
   List<AccessibilityIssue> getAllIssues() => List.unmodifiable(_issues);
 
   /// Get issues by severity
-  List<AccessibilityIssue> getIssuesBySeverity(AccessibilitySeverity severity) =>
+  List<AccessibilityIssue> getIssuesBySeverity(
+          AccessibilitySeverity severity) =>
       _issues.where((i) => i.severity == severity).toList();
 
   /// Get critical issues
@@ -279,7 +293,8 @@ class AccessibilityAuditor {
 
     final bySeverity = <AccessibilitySeverity, int>{};
     for (final severity in AccessibilitySeverity.values) {
-      bySeverity[severity] = _issues.where((i) => i.severity == severity).length;
+      bySeverity[severity] =
+          _issues.where((i) => i.severity == severity).length;
     }
 
     buffer.writeln('║ By Severity:');
@@ -295,14 +310,16 @@ class AccessibilityAuditor {
     ''');
 
     for (final issue in _issues) {
-      buffer.writeln('║ [${issue.severity.toString().split('.').last.toUpperCase()}] ${issue.title}');
+      buffer.writeln(
+          '║ [${issue.severity.toString().split('.').last.toUpperCase()}] ${issue.title}');
       buffer.writeln('║   WCAG: ${issue.wcagCriteria ?? 'N/A'}');
       if (issue.suggestion != null) {
         buffer.writeln('║   Fix: ${issue.suggestion}');
       }
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 
