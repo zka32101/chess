@@ -27,7 +27,8 @@ class MonitoringService {
   static MonitoringService get instance => _instance;
 
   /// Record breadcrumb for session tracking
-  Future<void> recordBreadcrumb(String message, Map<String, dynamic> data) async {
+  Future<void> recordBreadcrumb(
+      String message, Map<String, dynamic> data) async {
     try {
       _crashlytics.log('[$message] ${data.toString()}');
     } catch (e) {
@@ -119,7 +120,8 @@ class MonitoringService {
 
       // Alert if critical
       if (severity == SEVERITY_FATAL) {
-        await _alertCriticalIssue('Critical crash detected', exception.toString());
+        await _alertCriticalIssue(
+            'Critical crash detected', exception.toString());
       }
     } catch (e) {
       debugPrint('Error recording crash: $e');
@@ -176,8 +178,10 @@ class MonitoringService {
           .count()
           .get();
 
-      if (sessions.count == 0) return 1.0;
-      return 1.0 - (crashes.count / sessions.count);
+      final crashCount = crashes.count ?? 0;
+      final sessionCount = sessions.count ?? 0;
+      if (sessionCount == 0) return 1.0;
+      return 1.0 - (crashCount / sessionCount);
     } catch (e) {
       debugPrint('Error calculating crash rate: $e');
       return 1.0;
@@ -207,8 +211,10 @@ class MonitoringService {
           .count()
           .get();
 
-      if (sessions.count == 0) return 0.0;
-      return anrs.count / sessions.count;
+      final anrCount = anrs.count ?? 0;
+      final sessionCount = sessions.count ?? 0;
+      if (sessionCount == 0) return 0.0;
+      return anrCount / sessionCount;
     } catch (e) {
       debugPrint('Error calculating ANR rate: $e');
       return 0.0;
@@ -249,7 +255,8 @@ class MonitoringService {
     try {
       final startupTime = await getAverageMetric('startup', period);
       final navigationTime = await getAverageMetric('navigation', period);
-      final moveExecutionTime = await getAverageMetric('move_execution', period);
+      final moveExecutionTime =
+          await getAverageMetric('move_execution', period);
       final crashRate = await getCrashRate(period);
       final anrRate = await getANRRate(period);
 
@@ -370,8 +377,10 @@ class PerformanceSummary {
     required this.period,
   });
 
-  bool get startupExceedsTarget => startupTimeMs > MonitoringService.STARTUP_TARGET;
-  bool get navigationExceedsTarget => navigationTimeMs > MonitoringService.NAVIGATION_TARGET;
+  bool get startupExceedsTarget =>
+      startupTimeMs > MonitoringService.STARTUP_TARGET;
+  bool get navigationExceedsTarget =>
+      navigationTimeMs > MonitoringService.NAVIGATION_TARGET;
   bool get moveExecutionExceedsTarget =>
       moveExecutionTimeMs > MonitoringService.MOVE_EXECUTION_TARGET;
   bool get crashRateUnhealthy => crashFreeRate < 0.99;
