@@ -17,7 +17,8 @@ class ChessLessonsService {
   static ChessLessonsService get instance => _instance;
 
   /// Get lessons filtered by type and difficulty
-  Future<List<ChessLesson>> getLessonsByType(String type, int difficulty) async {
+  Future<List<ChessLesson>> getLessonsByType(
+      String type, int difficulty) async {
     try {
       final query = await _firestore
           .collection('chess_lessons')
@@ -57,7 +58,6 @@ class ChessLessonsService {
         id: doc.id,
         title: data['name'] as String? ?? '',
         description: data['strategicIdeas'] as String? ?? '',
-        contentType: 'opening',
         difficulty: data['difficulty'] as int? ?? 1,
         pgn: data['mainLines'] != null ? (data['mainLines'] as List).first : '',
         keyPoints: List<String>.from(data['typicalPlans'] as List? ?? []),
@@ -68,10 +68,13 @@ class ChessLessonsService {
         statistics: data['statistics'] as Map<String, dynamic>? ?? {},
         ecoCode: ecoCode,
         mainLines: List<String>.from(data['mainLines'] as List? ?? []),
-        alternativeLines: List<String>.from(data['alternatives'] as List? ?? []),
-        winRates: _parseWinRates(data['statistics'] as Map<String, dynamic>? ?? {}),
+        alternativeLines:
+            List<String>.from(data['alternatives'] as List? ?? []),
+        winRates:
+            _parseWinRates(data['statistics'] as Map<String, dynamic>? ?? {}),
         typicalPlans: List<String>.from(data['typicalPlans'] as List? ?? []),
-        historicalNotes: List<String>.from(data['historicalNotes'] as List? ?? []),
+        historicalNotes:
+            List<String>.from(data['historicalNotes'] as List? ?? []),
         totalGames: data['totalGames'] as int? ?? 0,
       );
 
@@ -100,13 +103,13 @@ class ChessLessonsService {
           id: doc.id,
           title: data['name'] as String? ?? '',
           description: data['description'] as String? ?? '',
-          contentType: 'tactics',
           difficulty: difficulty,
           pgn: '',
           keyPoints: List<String>.from(data['motifs'] as List? ?? []),
           commonMistakes: [],
           prerequisites: '',
-          relatedTopics: List<String>.from(data['relatedPatterns'] as List? ?? []),
+          relatedTopics:
+              List<String>.from(data['relatedPatterns'] as List? ?? []),
           estimatedDuration: const Duration(minutes: 10),
           statistics: {},
           motifs: List<String>.from(data['motifs'] as List? ?? []),
@@ -211,9 +214,11 @@ class ChessLessonsService {
           userId: userId,
           lessonId: doc.id,
           status: data['status'] as String? ?? 'not_started',
-          percentageComplete: (data['percentageComplete'] as num? ?? 0).toDouble(),
+          percentageComplete:
+              (data['percentageComplete'] as num? ?? 0).toDouble(),
           timesReviewed: data['timesReviewed'] as int? ?? 0,
-          lastAccessed: (data['lastAccessed'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          lastAccessed:
+              (data['lastAccessed'] as Timestamp?)?.toDate() ?? DateTime.now(),
           selfAssessmentScore: data['selfAssessmentScore'] as int? ?? 0,
           userNotes: List<String>.from(data['userNotes'] as List? ?? []),
           totalTimeSpent: Duration(
@@ -237,7 +242,8 @@ class ChessLessonsService {
       final stats = await getLearningStats(userId);
 
       // Recommend lessons at next difficulty level
-      final recommendedDifficulty = (stats.averageDifficulty + 1).ceil().clamp(1, 5);
+      final recommendedDifficulty =
+          (stats.averageDifficulty + 1).ceil().clamp(1, 5);
 
       final query = await _firestore
           .collection('chess_lessons')
@@ -289,11 +295,13 @@ class ChessLessonsService {
         totalTimeSpent:
             Duration(milliseconds: data['totalTimeSpent'] as int? ?? 0),
         currentStreak: data['currentStreak'] as int? ?? 0,
-        averageDifficulty: (data['averageDifficulty'] as num? ?? 1.0).toDouble(),
-        topicsMastered: List<String>.from(data['topicsMastered'] as List? ?? []),
-        topicsToImprove: List<String>.from(data['topicsToImprove'] as List? ?? []),
-        overallProgress:
-            (data['overallProgress'] as num? ?? 0.0).toDouble(),
+        averageDifficulty:
+            (data['averageDifficulty'] as num? ?? 1.0).toDouble(),
+        topicsMastered:
+            List<String>.from(data['topicsMastered'] as List? ?? []),
+        topicsToImprove:
+            List<String>.from(data['topicsToImprove'] as List? ?? []),
+        overallProgress: (data['overallProgress'] as num? ?? 0.0).toDouble(),
       );
     } catch (e) {
       debugPrint('Error getting learning stats: $e');
@@ -370,16 +378,15 @@ class ChessLessonsService {
     try {
       final progress = await getUserProgress(userId);
 
-      final completed =
-          progress.where((p) => p.status == 'completed').length;
+      final completed = progress.where((p) => p.status == 'completed').length;
       final started = progress.where((p) => p.status != 'not_started').length;
 
       double avgDifficulty = 0;
       if (started > 0) {
-        final difficulties = progress
-            .map((p) => _getDifficultyFromLesson(p.lessonId))
-            .toList();
-        avgDifficulty = difficulties.reduce((a, b) => a + b) / difficulties.length;
+        final difficulties =
+            progress.map((p) => _getDifficultyFromLesson(p.lessonId)).toList();
+        avgDifficulty =
+            difficulties.reduce((a, b) => a + b) / difficulties.length;
       }
 
       final totalTime = progress.fold<int>(
@@ -523,19 +530,19 @@ class OpeningExplanation extends ChessLesson {
     required this.historicalNotes,
     required this.totalGames,
   }) : super(
-    id: id,
-    title: title,
-    description: description,
-    contentType: 'opening',
-    difficulty: difficulty,
-    pgn: pgn,
-    keyPoints: keyPoints,
-    commonMistakes: commonMistakes,
-    prerequisites: prerequisites,
-    relatedTopics: relatedTopics,
-    estimatedDuration: estimatedDuration,
-    statistics: statistics,
-  );
+          id: id,
+          title: title,
+          description: description,
+          contentType: 'opening',
+          difficulty: difficulty,
+          pgn: pgn,
+          keyPoints: keyPoints,
+          commonMistakes: commonMistakes,
+          prerequisites: prerequisites,
+          relatedTopics: relatedTopics,
+          estimatedDuration: estimatedDuration,
+          statistics: statistics,
+        );
 }
 
 /// TacticsPattern extends ChessLesson
@@ -564,19 +571,19 @@ class TacticsPattern extends ChessLesson {
     required this.frequency,
     required this.complexity,
   }) : super(
-    id: id,
-    title: title,
-    description: description,
-    contentType: 'tactics',
-    difficulty: difficulty,
-    pgn: pgn,
-    keyPoints: keyPoints,
-    commonMistakes: commonMistakes,
-    prerequisites: prerequisites,
-    relatedTopics: relatedTopics,
-    estimatedDuration: estimatedDuration,
-    statistics: statistics,
-  );
+          id: id,
+          title: title,
+          description: description,
+          contentType: 'tactics',
+          difficulty: difficulty,
+          pgn: pgn,
+          keyPoints: keyPoints,
+          commonMistakes: commonMistakes,
+          prerequisites: prerequisites,
+          relatedTopics: relatedTopics,
+          estimatedDuration: estimatedDuration,
+          statistics: statistics,
+        );
 }
 
 /// User's lesson progress tracking
