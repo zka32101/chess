@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:logger/logger.dart';
+import 'dart:async' show TimeoutException;
 import 'dart:io' show SocketException;
 import '../models/user.dart';
 import 'validation_service.dart';
@@ -252,7 +253,8 @@ class FirebaseAuthService {
           );
 
           _rateLimiting.recordSuccess('signInWithGoogle');
-          _logger.i('User document created from Google sign-in: ${firebaseUser.uid}');
+          _logger.i(
+              'User document created from Google sign-in: ${firebaseUser.uid}');
           return newUser;
         } else {
           // User already exists, retrieve from Firestore
@@ -277,7 +279,8 @@ class FirebaseAuthService {
       _logger.w('Network error during Google sign-in: ${e.message}');
       rethrow;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase auth error during Google sign-in: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase auth error during Google sign-in: ${e.code} - ${e.message}');
       rethrow;
     } catch (e) {
       _logger.e('Error signing in with Google: $e');
@@ -319,8 +322,8 @@ class FirebaseAuthService {
         final credential = await _handleNetworkCall(
           () => SignInWithApple.getAppleIDCredential(
             scopes: [
-              AppleIDSignInScopes.email,
-              AppleIDSignInScopes.fullName,
+              AppleIDAuthorizationScopes.email,
+              AppleIDAuthorizationScopes.fullName,
             ],
           ),
           'Request Apple Sign-In credentials',
@@ -359,7 +362,8 @@ class FirebaseAuthService {
         }
 
         // Get email from credential (Apple may not provide it on first sign-in)
-        final email = credential.email ?? firebaseUser.email ?? 'no-email@apple.com';
+        final email =
+            credential.email ?? firebaseUser.email ?? 'no-email@apple.com';
 
         _logger.i('Display name: $displayName, Email: $email');
 
@@ -392,7 +396,8 @@ class FirebaseAuthService {
           );
 
           _rateLimiting.recordSuccess('signInWithApple');
-          _logger.i('User document created from Apple sign-in: ${firebaseUser.uid}');
+          _logger.i(
+              'User document created from Apple sign-in: ${firebaseUser.uid}');
           return newUser;
         } else {
           // User already exists, retrieve from Firestore
@@ -417,7 +422,8 @@ class FirebaseAuthService {
       _logger.w('Network error during Apple sign-in: ${e.message}');
       rethrow;
     } on FirebaseAuthException catch (e) {
-      _logger.e('Firebase auth error during Apple sign-in: ${e.code} - ${e.message}');
+      _logger.e(
+          'Firebase auth error during Apple sign-in: ${e.code} - ${e.message}');
       rethrow;
     } catch (e) {
       _logger.e('Error signing in with Apple: $e');
