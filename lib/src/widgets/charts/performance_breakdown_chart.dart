@@ -140,11 +140,9 @@ class PerformanceBreakdownChart extends StatelessWidget {
                 barTouchData: BarTouchData(
                   handleBuiltInTouches: true,
                   touchTooltipData: BarTouchTooltipData(
-                    tooltipBgColor: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withOpacity(0.9),
-                    tooltipBorder: Border.all(
+                    tooltipBgColor:
+                        Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                    tooltipBorder: BorderSide(
                       color: Theme.of(context).colorScheme.outline,
                     ),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {

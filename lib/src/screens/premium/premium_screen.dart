@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/subscription_service.dart';
-import '../../services/analytics_service.dart';
+import '../../models/subscription.dart' show PremiumFeature;
+import '../../providers/premium_provider.dart';
 import '../../utils/animations.dart';
+
+/// A purchasable premium plan (mirrors the tiers [UserSubscription] supports)
+class _PremiumPlan {
+  final String tier;
+  final String displayName;
+  final double monthlyPrice;
+
+  const _PremiumPlan({
+    required this.tier,
+    required this.displayName,
+    required this.monthlyPrice,
+  });
+}
+
+const _proPlan =
+    _PremiumPlan(tier: 'pro', displayName: 'Pro', monthlyPrice: 4.99);
+const _premiumPlan =
+    _PremiumPlan(tier: 'premium', displayName: 'Premium', monthlyPrice: 9.99);
 
 class PremiumScreen extends ConsumerStatefulWidget {
   const PremiumScreen({Key? key}) : super(key: key);
@@ -14,35 +32,21 @@ class PremiumScreen extends ConsumerStatefulWidget {
 class _PremiumScreenState extends ConsumerState<PremiumScreen> {
   bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Log premium page view
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(analyticsServiceProvider).logEvent(AnalyticsEvent.premiumPageViewed);
-    });
-  }
-
-  Future<void> _handlePurchase(SubscriptionPlan plan) async {
+  Future<void> _handlePurchase(_PremiumPlan plan) async {
     setState(() => _isLoading = true);
 
     try {
       // TODO: Integrate with RevenueCat SDK
       // final revenueCat = Purchases.shared;
       // final offerings = await revenueCat.getOfferings();
-      // final package = offerings.current?.getPackage(plan.planId);
+      // final package = offerings.current?.getPackage(plan.tier);
       // final purchaserInfo = await revenueCat.purchasePackage(package!);
 
       // For now, simulate purchase
       await Future.delayed(const Duration(seconds: 1));
 
       if (mounted) {
-        // Log subscription started
-        ref.read(analyticsServiceProvider).logSubscriptionEvent(
-              eventType: 'started',
-              planId: plan.planId,
-              price: plan.monthlyPrice,
-            );
+        ref.invalidate(userSubscriptionProvider);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -69,7 +73,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final subscriptionStatus = ref.watch(subscriptionStatusProvider);
+    final subscriptionStatus = ref.watch(userSubscriptionProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -96,7 +100,8 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                 // Header section
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -125,7 +130,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                               color: Colors.white70,
                             ),
                       ),
-                      if (status.isPremium)
+                      if (status.isPro || status.isPremium)
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: Container(
@@ -139,7 +144,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                               border: Border.all(color: Colors.green),
                             ),
                             child: Text(
-                              'Currently on ${status.currentPlan.displayName}',
+                              'Currently on ${status.isPremium ? _premiumPlan.displayName : _proPlan.displayName}',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -191,16 +196,16 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                       ),
                       const SizedBox(height: 16),
                       _buildPricingCard(
-                        plan: SubscriptionPlan.premium,
-                        isSelected: status.currentPlan == SubscriptionPlan.premium,
-                        onTap: () => _handlePurchase(SubscriptionPlan.premium),
+                        plan: _proPlan,
+                        isSelected: status.tier == _proPlan.tier,
+                        onTap: () => _handlePurchase(_proPlan),
                         isLoading: _isLoading,
                       ),
                       const SizedBox(height: 12),
                       _buildPricingCard(
-                        plan: SubscriptionPlan.premiumPlus,
-                        isSelected: status.currentPlan == SubscriptionPlan.premiumPlus,
-                        onTap: () => _handlePurchase(SubscriptionPlan.premiumPlus),
+                        plan: _premiumPlan,
+                        isSelected: status.tier == _premiumPlan.tier,
+                        onTap: () => _handlePurchase(_premiumPlan),
                         isLoading: _isLoading,
                         isPopular: true,
                       ),
@@ -256,12 +261,14 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                 // Restore button
                 if (!status.isPremium)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     child: TextButton(
                       onPressed: () async {
                         try {
-                          final service = ref.read(subscriptionServiceProvider);
+                          final service = ref.read(paywallServiceProvider);
                           await service.restorePurchases();
+                          ref.invalidate(userSubscriptionProvider);
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -340,7 +347,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
   }
 
   Widget _buildPricingCard({
-    required SubscriptionPlan plan,
+    required _PremiumPlan plan,
     required bool isSelected,
     required VoidCallback onTap,
     required bool isLoading,
