@@ -28,11 +28,30 @@ class PaywallService {
         return;
       }
 
+      _subscription = _inAppPurchase.purchaseStream.listen(
+        _handlePurchaseUpdates,
+        onError: (Object error) => print('Purchase stream error: $error'),
+      );
+
       print('PaywallService initialized');
     } catch (e) {
       print('Error initializing paywall: $e');
     }
   }
+
+  /// Complete any purchases that are still pending completion
+  Future<void> _handlePurchaseUpdates(
+    List<PurchaseDetails> purchaseDetailsList,
+  ) async {
+    for (final purchaseDetails in purchaseDetailsList) {
+      if (purchaseDetails.pendingCompletePurchase) {
+        await _inAppPurchase.completePurchase(purchaseDetails);
+      }
+    }
+  }
+
+  /// Restore previously made purchases (triggers updates on [purchaseStream])
+  Future<void> restorePurchases() => _inAppPurchase.restorePurchases();
 
   /// Get available products
   Future<List<ProductDetails>> getProducts(List<String> productIds) async {
@@ -57,7 +76,8 @@ class PaywallService {
     }
 
     try {
-      final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
+      final PurchaseParam purchaseParam =
+          PurchaseParam(productDetails: product);
       return await _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
     } catch (e) {
       print('Error purchasing product: $e');
@@ -117,7 +137,7 @@ class PaywallService {
 
   /// Dispose resources
   void dispose() {
-    // Cleanup
+    _subscription.cancel();
   }
 }
 

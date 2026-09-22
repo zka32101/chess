@@ -33,7 +33,8 @@ class DeviceTestingHelper {
         final androidInfo = await _deviceInfo.androidInfo;
         return DeviceInfo(
           platform: 'Android',
-          osVersion: '${androidInfo.version.release} (API ${androidInfo.version.sdkInt})',
+          osVersion:
+              '${androidInfo.version.release} (API ${androidInfo.version.sdkInt})',
           deviceModel: androidInfo.model,
           deviceName: androidInfo.device,
           appVersion: packageInfo.version,
@@ -69,17 +70,20 @@ class DeviceTestingHelper {
         if (versionParts.isNotEmpty) {
           final majorVersion = int.tryParse(versionParts[0]) ?? 0;
           if (majorVersion < 14) {
-            issues.add('iOS version must be 14.0 or higher (current: ${deviceInfo.osVersion})');
+            issues.add(
+                'iOS version must be 14.0 or higher (current: ${deviceInfo.osVersion})');
           }
         }
       } else if (defaultTargetPlatform == TargetPlatform.android) {
         // Extract API level from version string
         if (deviceInfo.osVersion.contains('API')) {
-          final apiMatch = RegExp(r'API (\d+)').firstMatch(deviceInfo.osVersion);
+          final apiMatch =
+              RegExp(r'API (\d+)').firstMatch(deviceInfo.osVersion);
           if (apiMatch != null) {
             final apiLevel = int.tryParse(apiMatch.group(1) ?? '') ?? 0;
             if (apiLevel < 24) {
-              issues.add('Android API level must be 24 or higher (current: $apiLevel)');
+              issues.add(
+                  'Android API level must be 24 or higher (current: $apiLevel)');
             }
           }
         }
@@ -103,7 +107,7 @@ class DeviceTestingHelper {
 ║ Platform:          ${deviceInfo.platform.padRight(45)}║
 ║ OS Version:        ${deviceInfo.osVersion.padRight(45)}║
 ║ Device Model:      ${deviceInfo.deviceModel.padRight(45)}║
-║ Device Name:       ${deviceInfo.deviceName.padRight(45)}║
+║ Device Name:       ${(deviceInfo.deviceName ?? 'Unknown').padRight(45)}║
 ║ App Version:       ${deviceInfo.appVersion.padRight(45)}║
 ║ Build Number:      ${deviceInfo.buildNumber.padRight(45)}║
 ║ Physical Device:   ${(deviceInfo.isPhysicalDevice ? 'Yes' : 'No').padRight(45)}║
@@ -246,13 +250,13 @@ class PerformanceMetrics {
             '║',
       );
       debugPrint(
-        '║ '.padRight(30) +
-            '║ Count: $count'.padRight(20) +
-            '║',
+        '║ '.padRight(30) + '║ Count: $count'.padRight(20) + '║',
       );
-      debugPrint('╠═══════════════════════════════════════════════════════════════╣');
+      debugPrint(
+          '╠═══════════════════════════════════════════════════════════════╣');
     }
 
-    debugPrint('╚═══════════════════════════════════════════════════════════════╝');
+    debugPrint(
+        '╚═══════════════════════════════════════════════════════════════╝');
   }
 }

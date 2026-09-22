@@ -214,7 +214,7 @@ class RatingProgressionChart extends ConsumerWidget {
                   touchTooltipData: LineTouchTooltipData(
                     tooltipBgColor:
                         Theme.of(context).colorScheme.surface.withOpacity(0.9),
-                    tooltipBorder: Border.all(
+                    tooltipBorder: BorderSide(
                       color: Theme.of(context).colorScheme.outline,
                     ),
                     getTooltipItems: (touchedSpots) {
