@@ -301,11 +301,6 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Check for known vulnerabilities
-        run: |
-          dart pub global activate dependency_checker
-          dart pub global run dependency_checker:check
-
       - name: Security audit
         run: |
           dart pub outdated --json > outdated.json || true

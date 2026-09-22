@@ -44,7 +44,7 @@ final activeGamesProvider = StreamProvider<List<GameModel>>((ref) async* {
       context: 'activeGamesProvider',
       reason: 'Failed to fetch active games from Firestore',
     );
-    yield [];  // Graceful fallback while error is logged
+    yield []; // Graceful fallback while error is logged
   }
 });
 
@@ -86,19 +86,18 @@ final gameHistoryProvider = StreamProvider<List<GameModel>>((ref) async* {
       context: 'gameHistoryProvider',
       reason: 'Failed to fetch game history from Firestore',
     );
-    yield [];  // Graceful fallback while error is logged
+    yield []; // Graceful fallback while error is logged
   }
 });
 
 // Get specific game by ID
-final gameByIdProvider = StreamProvider.family<GameModel?, String>((ref, gameId) async* {
+final gameByIdProvider =
+    StreamProvider.family<GameModel?, String>((ref, gameId) async* {
   final firestore = ref.watch(firestoreProvider);
 
   try {
-    await for (final snapshot in firestore
-        .collection('games')
-        .doc(gameId)
-        .snapshots()) {
+    await for (final snapshot
+        in firestore.collection('games').doc(gameId).snapshots()) {
       if (snapshot.exists) {
         yield GameModel.fromJson({
           ...snapshot.data()!,
@@ -115,7 +114,7 @@ final gameByIdProvider = StreamProvider.family<GameModel?, String>((ref, gameId)
       context: 'gameByIdProvider',
       reason: 'Failed to fetch game $gameId from Firestore',
     );
-    yield null;  // Graceful fallback while error is logged
+    yield null; // Graceful fallback while error is logged
   }
 });
 
@@ -150,8 +149,10 @@ class GameService {
 
       final whitePlayerId = currentUser.uid;
       final blackPlayerId = opponentId;
-      final whiteRating = (currentUserData['onlineRating'] as num? ?? 1600).toInt();
-      final blackRating = (opponentData['onlineRating'] as num? ?? 1600).toInt();
+      final whiteRating =
+          (currentUserData['onlineRating'] as num? ?? 1600).toInt();
+      final blackRating =
+          (opponentData['onlineRating'] as num? ?? 1600).toInt();
 
       // Parse time control to milliseconds
       final timeControlMs = _parseTimeControl(timeControl);
@@ -212,7 +213,8 @@ class GameService {
       if (!gameDoc.exists) throw Exception('Game not found');
 
       final gameData = gameDoc.data() as Map<String, dynamic>;
-      final currentMoves = List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
+      final currentMoves =
+          List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
 
       // Validate it's the current player's turn
       final isWhiteToMove = currentMoves.length % 2 == 0;
@@ -233,7 +235,7 @@ class GameService {
 
       currentMoves.add(moveRecord);
 
-      // Calculate new FEN based on the move
+      // Compute the resulting FEN via FenCalculatorService (validates legality)
       String newFen;
       try {
         newFen = FenCalculatorService.calculateNewFen(
@@ -311,7 +313,8 @@ class GameService {
   // Helper method to parse time control string
   int _parseTimeControl(String timeControl) {
     // Formats: "10min", "5min", "3min", "1h", "30s"
-    final value = int.tryParse(timeControl.replaceAll(RegExp(r'[^0-9]'), '')) ?? 10;
+    final value =
+        int.tryParse(timeControl.replaceAll(RegExp(r'[^0-9]'), '')) ?? 10;
 
     if (timeControl.contains('h')) {
       return value * 60 * 60 * 1000; // Convert hours to milliseconds
@@ -338,7 +341,8 @@ class GameService {
       final blackRating = gameData['blackRating'] as int;
 
       // Calculate new ratings using ELO system
-      final ratingDeltas = RatingCalculationService.calculateBothPlayersRatingDelta(
+      final ratingDeltas =
+          RatingCalculationService.calculateBothPlayersRatingDelta(
         whiteRating,
         blackRating,
         result,
@@ -375,7 +379,8 @@ class GameService {
         'lastGameRatedAt': FieldValue.serverTimestamp(),
       });
 
-      print('Rating updated - White: $whiteRating→$newWhiteRating (${whiteRatingDelta > 0 ? '+' : ''}$whiteRatingDelta), '
+      print(
+          'Rating updated - White: $whiteRating→$newWhiteRating (${whiteRatingDelta > 0 ? '+' : ''}$whiteRatingDelta), '
           'Black: $blackRating→$newBlackRating (${blackRatingDelta > 0 ? '+' : ''}$blackRatingDelta)');
     } catch (e) {
       print('Error updating ratings: $e');

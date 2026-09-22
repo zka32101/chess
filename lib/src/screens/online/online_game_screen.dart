@@ -466,7 +466,10 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
       final soundService = ref.read(soundServiceProvider);
       await soundService.play(SoundEffect.notification);
 
-      // TODO: Implement actual draw offer logic with backend
+      await ref
+          .read(onlineGameServiceProvider)
+          .offerDraw(_gameId, _getCurrentPlayerId());
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
