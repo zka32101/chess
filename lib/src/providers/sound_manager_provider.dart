@@ -55,7 +55,8 @@ final soundManagerProvider = FutureProvider((ref) async {
 
 /// Convenience provider for playing sounds (use this in your app)
 /// Example: ref.read(soundPlayProvider(SoundEffect.buttonTap));
-final soundPlayProvider = FutureProvider.family((ref, SoundEffect sound) async {
+final soundPlayProvider =
+    FutureProvider.family<void, SoundEffect>((ref, sound) async {
   final manager = await ref.watch(soundManagerProvider.future);
   return manager.play(sound);
 });
