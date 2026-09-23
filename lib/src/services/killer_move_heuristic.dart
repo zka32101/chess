@@ -11,6 +11,13 @@ import 'package:chess/chess.dart' as chess_lib;
 /// Stores killer moves (moves that cause cutoffs) for each depth.
 /// Two killer moves are tracked per depth level (best and second-best).
 class KillerMoveHeuristic {
+  KillerMoveHeuristic({int maxDepth = 12}) : _maxDepth = maxDepth {
+    _killerMoves = List.generate(
+      maxDepth,
+      (i) => [null, null],
+    );
+  }
+
   /// Maximum search depth to track (typical: 10-20)
   final int _maxDepth;
 
@@ -24,13 +31,6 @@ class KillerMoveHeuristic {
   /// Statistics
   int _totalCutoffs = 0;
   int _killerMovesCutoffs = 0;
-
-  KillerMoveHeuristic({int maxDepth = 12}) : _maxDepth = maxDepth {
-    _killerMoves = List.generate(
-      maxDepth,
-      (i) => [null, null],
-    );
-  }
 
   /// Record a killer move (move that caused a beta cutoff)
   void recordKiller(int depth, String moveUci) {
@@ -83,9 +83,7 @@ class KillerMoveHeuristic {
 
   /// Get priority/score for move ordering
   /// Higher score = should be tried earlier
-  int getMoveScore(String moveUci) {
-    return _moveScores[moveUci] ?? 0;
-  }
+  int getMoveScore(String moveUci) => _moveScores[moveUci] ?? 0;
 
   /// Clear all killer move history (useful for new search)
   void clear() {
@@ -113,18 +111,17 @@ class KillerMoveHeuristic {
   }
 
   /// Get statistics about killer moves
-  Map<String, dynamic> getStatistics() {
-    return {
-      'totalCutoffs': _totalCutoffs,
-      'killerCutoffs': _killerMovesCutoffs,
-      'cutoffRate':
-          _totalCutoffs > 0 ? (_killerMovesCutoffs / _totalCutoffs * 100) : 0.0,
-      'uniqueKillers': _moveScores.length,
-      'topKiller':
-          _moveScores.isEmpty ? null : _getTopMoves(1).firstOrNull?['move'],
-      'topKillers': _getTopMoves(5),
-    };
-  }
+  Map<String, dynamic> getStatistics() => {
+        'totalCutoffs': _totalCutoffs,
+        'killerCutoffs': _killerMovesCutoffs,
+        'cutoffRate': _totalCutoffs > 0
+            ? (_killerMovesCutoffs / _totalCutoffs * 100)
+            : 0.0,
+        'uniqueKillers': _moveScores.length,
+        'topKiller':
+            _moveScores.isEmpty ? null : _getTopMoves(1).firstOrNull?['move'],
+        'topKillers': _getTopMoves(5),
+      };
 
   /// Get top killer moves by score
   List<Map<String, dynamic>> _getTopMoves(int count) {
@@ -149,11 +146,10 @@ class KillerMoveHeuristic {
 /// 3. Killer moves
 /// 4. History heuristic (move frequency)
 class MoveOrderingManager {
-  final KillerMoveHeuristic killerMoves;
-  final Map<String, int> _moveHistory = {};
-
   MoveOrderingManager({KillerMoveHeuristic? killerMoves})
       : killerMoves = killerMoves ?? KillerMoveHeuristic();
+  final KillerMoveHeuristic killerMoves;
+  final Map<String, int> _moveHistory = {};
 
   /// Order moves for better search efficiency
   /// Returns moves sorted by estimated strength (captures first, then killers, etc.)
@@ -240,14 +236,12 @@ class MoveOrderingManager {
   }
 
   /// Get statistics about move ordering
-  Map<String, dynamic> getStatistics() {
-    return {
-      'killerMoveStats': killerMoves.getStatistics(),
-      'uniqueMovesInHistory': _moveHistory.length,
-      'totalHistoryScore':
-          _moveHistory.values.fold<int>(0, (sum, val) => sum + val),
-    };
-  }
+  Map<String, dynamic> getStatistics() => {
+        'killerMoveStats': killerMoves.getStatistics(),
+        'uniqueMovesInHistory': _moveHistory.length,
+        'totalHistoryScore':
+            _moveHistory.values.fold<int>(0, (sum, val) => sum + val),
+      };
 
   /// Convert move to UCI notation
   String _moveToUci(chess_lib.Move move) {
@@ -280,7 +274,7 @@ class ButterflyHeuristic {
   /// Get cutoff rate for move
   double getCutoffRate(String moveUci) {
     final attempts = _totalAttempts[moveUci] ?? 0;
-    if (attempts == 0) return 0.0;
+    if (attempts == 0) return 0;
     final cutoffs = _cutoffCounts[moveUci] ?? 0;
     return cutoffs / attempts;
   }
@@ -299,8 +293,8 @@ class ButterflyHeuristic {
         'rate': (rate * 100).toStringAsFixed(2),
       };
     }).toList()
-      ..sort((a, b) => double.parse(b['rate'] as String)
-          .compareTo(double.parse(a['rate'] as String)));
+      ..sort((a, b) => double.parse(b['rate']! as String)
+          .compareTo(double.parse(a['rate']! as String)));
 
     return entries.take(count).toList();
   }
@@ -312,14 +306,12 @@ class ButterflyHeuristic {
   }
 
   /// Get statistics
-  Map<String, dynamic> getStatistics() {
-    return {
-      'totalAttempts':
-          _totalAttempts.values.fold<int>(0, (sum, val) => sum + val),
-      'totalCutoffs':
-          _cutoffCounts.values.fold<int>(0, (sum, val) => sum + val),
-      'uniqueMoves': _totalAttempts.length,
-      'topMoves': getTopMoves(10),
-    };
-  }
+  Map<String, dynamic> getStatistics() => {
+        'totalAttempts':
+            _totalAttempts.values.fold<int>(0, (sum, val) => sum + val),
+        'totalCutoffs':
+            _cutoffCounts.values.fold<int>(0, (sum, val) => sum + val),
+        'uniqueMoves': _totalAttempts.length,
+        'topMoves': getTopMoves(10),
+      };
 }

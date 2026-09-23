@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
-import 'package:chess_tactics_master/src/widgets/game_board.dart';
-import 'package:chess_tactics_master/src/widgets/time_clock.dart';
-import 'package:chess_tactics_master/src/widgets/game_info_panel.dart';
-import 'package:chess_tactics_master/src/utils/animations.dart';
-import 'package:chess_tactics_master/src/services/sound_service.dart';
+import '../../models/online_game.dart';
+import '../../providers/online_game_provider.dart';
+import '../../widgets/game_board.dart';
+import '../../widgets/time_clock.dart';
+import '../../widgets/game_info_panel.dart';
+import '../../services/sound_service.dart';
 
 /// Screen for playing online multiplayer chess games
 class OnlineGameScreen extends ConsumerStatefulWidget {
-  final String gameId;
-
   const OnlineGameScreen({
-    Key? key,
     required this.gameId,
+    Key? key,
   }) : super(key: key);
+  final String gameId;
 
   @override
   ConsumerState<OnlineGameScreen> createState() => _OnlineGameScreenState();
@@ -113,7 +111,7 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
 
       return SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: GameBoard(
             gameState: gameState,
             // Online games don't support undo, so the real move history
@@ -202,58 +200,54 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
   }
 
   /// Build game action buttons
-  Widget _buildGameActions(BuildContext context, OnlineGame game) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Resign button
-          OutlinedButton.icon(
-            onPressed: () => _showResignConfirmation(context, game),
-            icon: const Icon(Icons.flag),
-            label: const Text('Resign'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
+  Widget _buildGameActions(BuildContext context, OnlineGame game) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Resign button
+            OutlinedButton.icon(
+              onPressed: () => _showResignConfirmation(context, game),
+              icon: const Icon(Icons.flag),
+              label: const Text('Resign'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
             ),
-          ),
 
-          // Offer Draw button
-          OutlinedButton.icon(
-            onPressed: () => _offerDraw(game),
-            icon: const Icon(Icons.handshake),
-            label: const Text('Offer Draw'),
-          ),
+            // Offer Draw button
+            OutlinedButton.icon(
+              onPressed: () => _offerDraw(game),
+              icon: const Icon(Icons.handshake),
+              label: const Text('Offer Draw'),
+            ),
 
-          // Claim Draw button
-          OutlinedButton.icon(
-            onPressed: () => _claimDraw(game),
-            icon: const Icon(Icons.check),
-            label: const Text('Claim Draw'),
-          ),
-        ],
-      ),
-    );
-  }
+            // Claim Draw button
+            OutlinedButton.icon(
+              onPressed: () => _claimDraw(game),
+              icon: const Icon(Icons.check),
+              label: const Text('Claim Draw'),
+            ),
+          ],
+        ),
+      );
 
   /// Build error state
-  Widget _buildErrorState(Object error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-          const SizedBox(height: 16),
-          Text('Error loading game: $error'),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Go Back'),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildErrorState(Object error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text('Error loading game: $error'),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Go Back'),
+            ),
+          ],
+        ),
+      );
 
   /// Show game menu options
   void _showGameMenu(BuildContext context) {
@@ -372,7 +366,7 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
                 timeControl: game.timeControl,
                 totalMoves: game.moves.length,
                 elapsedSeconds: game.createdAt != null
-                    ? DateTime.now().difference(game.createdAt!).inSeconds
+                    ? DateTime.now().difference(game.createdAt).inSeconds
                     : 0,
                 whitePlayerName: game.whitePlayerName,
                 blackPlayerName: game.blackPlayerName,
@@ -429,18 +423,16 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
   }
 
   /// Build info row for dialogs
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value),
-        ],
-      ),
-    );
-  }
+  Widget _buildInfoRow(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text(value),
+          ],
+        ),
+      );
 
   /// Resign from game
   Future<void> _resign(OnlineGame game) async {

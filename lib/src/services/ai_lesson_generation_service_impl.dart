@@ -10,9 +10,8 @@ import '../models/game.dart';
 /// models and are not interchangeable, so this class stands on its own
 /// rather than implementing that unrelated service's interface.
 class AILessonGenerationServiceImpl {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   AILessonGenerationServiceImpl._();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<GameAnalysis> analyzeGame(String userId, String gameId) async {
     try {
@@ -28,12 +27,12 @@ class AILessonGenerationServiceImpl {
         throw Exception('Game not found');
       }
 
-      final game = GameModel.fromJson(gameDoc.data() as Map<String, dynamic>);
+      final game = GameModel.fromJson(gameDoc.data()!);
       final pgn = game.pgn ?? '';
 
       // Analyze each move in the game
       final moveAnalyses = <MoveAnalysis>[];
-      double totalAccuracy = 0.0;
+      double totalAccuracy = 0;
       int blunders = 0, mistakes = 0, inaccuracies = 0, goodMoves = 0;
       final Set<String> openingsEncountered = {};
       final Set<String> tacticPatternsFound = {};
@@ -90,8 +89,9 @@ class AILessonGenerationServiceImpl {
       // Identify weaknesses
       if (blunders > 0) weaknesses.add('Blunder control');
       if (mistakes > moves.length * 0.3) weaknesses.add('Move accuracy');
-      if (inaccuracies > moves.length * 0.5)
+      if (inaccuracies > moves.length * 0.5) {
         weaknesses.add('Position evaluation');
+      }
 
       // Generate suggested lessons
       final suggestedLessons = await _generateSuggestedLessons(
@@ -261,7 +261,7 @@ class AILessonGenerationServiceImpl {
 
       return snapshot.docs
           .map((doc) =>
-              AIGeneratedLesson.fromJson(doc.data() as Map<String, dynamic>))
+              AIGeneratedLesson.fromJson(doc.data()! as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw Exception('Error fetching AI-generated lessons: $e');
@@ -300,7 +300,7 @@ class AILessonGenerationServiceImpl {
         return PlayerProfile(
           userId: userId,
           totalGamesAnalyzed: 0,
-          averageAccuracy: 0.0,
+          averageAccuracy: 0,
           mainWeaknesses: [],
           mainStrengths: [],
           preferredOpenings: [],
@@ -318,7 +318,7 @@ class AILessonGenerationServiceImpl {
           .collection('game_analyses')
           .get();
 
-      double totalAccuracy = 0.0;
+      double totalAccuracy = 0;
       final Set<String> weaknesses = {};
       final Set<String> strengths = {};
       final Set<String> openings = {};
@@ -326,8 +326,7 @@ class AILessonGenerationServiceImpl {
       int tacticCount = 0;
 
       for (final doc in analysesSnapshot.docs) {
-        final analysis =
-            GameAnalysis.fromJson(doc.data() as Map<String, dynamic>);
+        final analysis = GameAnalysis.fromJson(doc.data());
         totalAccuracy += analysis.overallAccuracy;
         weaknesses.addAll(analysis.identifiedWeaknesses);
         openings.addAll(analysis.openingsPlayed);
@@ -349,8 +348,7 @@ class AILessonGenerationServiceImpl {
           .get();
 
       final recommendedLessons = lessonsSnapshot.docs
-          .map((doc) =>
-              AIGeneratedLesson.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => AIGeneratedLesson.fromJson(doc.data()))
           .toList();
 
       return PlayerProfile(
@@ -382,8 +380,7 @@ class AILessonGenerationServiceImpl {
       final insights = <EndgameInsight>[];
 
       for (final doc in analysesSnapshot.docs) {
-        final analysis =
-            GameAnalysis.fromJson(doc.data() as Map<String, dynamic>);
+        final analysis = GameAnalysis.fromJson(doc.data());
 
         // Find moves in endgame (last 20 moves)
         final endgameMoves = analysis.moveAnalyses.skip(
@@ -428,8 +425,7 @@ class AILessonGenerationServiceImpl {
       final insights = <AIInsight>[];
 
       for (final doc in recentGamesSnapshot.docs) {
-        final analysis =
-            GameAnalysis.fromJson(doc.data() as Map<String, dynamic>);
+        final analysis = GameAnalysis.fromJson(doc.data());
 
         // Create insight from analysis
         if (analysis.identifiedWeaknesses.isNotEmpty) {
@@ -491,10 +487,8 @@ class AILessonGenerationServiceImpl {
         return {'message': 'Insufficient data for analysis'};
       }
 
-      final first = GameAnalysis.fromJson(
-          analysesSnapshot.docs.first.data() as Map<String, dynamic>);
-      final latest = GameAnalysis.fromJson(
-          analysesSnapshot.docs.last.data() as Map<String, dynamic>);
+      final first = GameAnalysis.fromJson(analysesSnapshot.docs.first.data());
+      final latest = GameAnalysis.fromJson(analysesSnapshot.docs.last.data());
 
       return {
         'accuracyImprovement': latest.overallAccuracy - first.overallAccuracy,
@@ -565,9 +559,8 @@ class AILessonGenerationServiceImpl {
     return 'pin';
   }
 
-  double _calculateEvaluationDifference(String move, String bestMove) {
-    return move == bestMove ? 0.0 : -0.5;
-  }
+  double _calculateEvaluationDifference(String move, String bestMove) =>
+      move == bestMove ? 0.0 : -0.5;
 
   String _calculateFenAtMove(String pgn, int moveIndex) {
     // Simplified FEN calculation
@@ -577,17 +570,17 @@ class AILessonGenerationServiceImpl {
   double _calculateMoveAccuracy(AnalysisType type) {
     switch (type) {
       case AnalysisType.bestMove:
-        return 100.0;
+        return 100;
       case AnalysisType.excellentMove:
-        return 95.0;
+        return 95;
       case AnalysisType.goodMove:
-        return 85.0;
+        return 85;
       case AnalysisType.inaccuracy:
-        return 70.0;
+        return 70;
       case AnalysisType.mistake:
-        return 40.0;
+        return 40;
       case AnalysisType.blunder:
-        return 0.0;
+        return 0;
     }
   }
 
@@ -643,22 +636,21 @@ class AILessonGenerationServiceImpl {
     String weakness,
     RecommendationLevel skillLevel,
     String playStyle,
-  ) {
-    return AIOpeningRecommendation(
-      id: '${userId}_${DateTime.now().millisecondsSinceEpoch}',
-      userId: userId,
-      ecoCode: 'C45',
-      openingName: 'Italian Game',
-      reasoning: 'Recommended to address weakness: $weakness',
-      compatibilityScore: 0.85,
-      skillLevel: skillLevel,
-      mainLines: ['1.e4 e5 2.Nf3 Nc6 3.Bc4'],
-      tacticalThemes: ['pins', 'forks', 'discovered attacks'],
-      strategicIdeas: ['center control', 'piece development'],
-      winRates: {'white': 0.52, 'black': 0.48},
-      recommendedAt: DateTime.now(),
-    );
-  }
+  ) =>
+      AIOpeningRecommendation(
+        id: '${userId}_${DateTime.now().millisecondsSinceEpoch}',
+        userId: userId,
+        ecoCode: 'C45',
+        openingName: 'Italian Game',
+        reasoning: 'Recommended to address weakness: $weakness',
+        compatibilityScore: 0.85,
+        skillLevel: skillLevel,
+        mainLines: ['1.e4 e5 2.Nf3 Nc6 3.Bc4'],
+        tacticalThemes: ['pins', 'forks', 'discovered attacks'],
+        strategicIdeas: ['center control', 'piece development'],
+        winRates: {'white': 0.52, 'black': 0.48},
+        recommendedAt: DateTime.now(),
+      );
 
   Future<List<AIGeneratedLesson>> _getRecommendedLessons(
     String userId,
@@ -692,34 +684,24 @@ class AILessonGenerationServiceImpl {
     return lessons;
   }
 
-  int _estimateDaysToImprovement(int weaknessCount, int lessonCount) {
-    return (weaknessCount * 3 + lessonCount * 2) ~/ 2;
-  }
+  int _estimateDaysToImprovement(int weaknessCount, int lessonCount) =>
+      (weaknessCount * 3 + lessonCount * 2) ~/ 2;
 
   String _generatePersonalizedAdvice(
     PlayerProfile profile,
     List<String> priorityAreas,
-  ) {
-    return 'Focus on: ${priorityAreas.join(", ")}. Study related openings and practice tactical patterns.';
-  }
+  ) =>
+      'Focus on: ${priorityAreas.join(", ")}. Study related openings and practice tactical patterns.';
 
-  List<String> _identifyStrengths(List<QueryDocumentSnapshot> docs) {
-    return ['Opening knowledge', 'Tactical awareness'];
-  }
+  List<String> _identifyStrengths(List<QueryDocumentSnapshot> docs) =>
+      ['Opening knowledge', 'Tactical awareness'];
 
-  String _determinePlayStyle(List<QueryDocumentSnapshot> docs) {
-    return 'Tactical';
-  }
+  String _determinePlayStyle(List<QueryDocumentSnapshot> docs) => 'Tactical';
 
-  String _classifyEndgame(String fen) {
-    return 'Rook and Pawn';
-  }
+  String _classifyEndgame(String fen) => 'Rook and Pawn';
 
-  String _identifyEndgameTechnique(String fen) {
-    return 'Zugzwang';
-  }
+  String _identifyEndgameTechnique(String fen) => 'Zugzwang';
 
-  List<String> _extractEndgamePrinciples(String fen) {
-    return ['King activity', 'Pawn promotion', 'Opposition'];
-  }
+  List<String> _extractEndgamePrinciples(String fen) =>
+      ['King activity', 'Pawn promotion', 'Opposition'];
 }

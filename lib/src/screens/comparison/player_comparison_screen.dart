@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/providers/comparison_provider.dart';
-import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
-import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
+import '../../providers/comparison_provider.dart';
+import '../../models/head_to_head_stats.dart';
+import '../../widgets/animations/chart_entrance_animation.dart';
 
 /// Screen for displaying player-to-player comparison
 class PlayerComparisonScreen extends ConsumerWidget {
-  final String player1Id;
-  final String player1Name;
-  final int player1Rating;
-  final String player2Id;
-  final String player2Name;
-  final int player2Rating;
-
   const PlayerComparisonScreen({
-    Key? key,
     required this.player1Id,
     required this.player1Name,
     required this.player1Rating,
     required this.player2Id,
     required this.player2Name,
     required this.player2Rating,
+    Key? key,
   }) : super(key: key);
+  final String player1Id;
+  final String player1Name;
+  final int player1Rating;
+  final String player2Id;
+  final String player2Name;
+  final int player2Rating;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,102 +77,99 @@ class PlayerComparisonScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     HeadToHeadStats stats,
-  ) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Header with player names and ratings
-          _buildHeader(context),
-          const SizedBox(height: 24),
+  ) =>
+      SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header with player names and ratings
+            _buildHeader(context),
+            const SizedBox(height: 24),
 
-          // H2H Statistics
-          _buildH2HStats(context, stats),
-          const SizedBox(height: 24),
+            // H2H Statistics
+            _buildH2HStats(context, stats),
+            const SizedBox(height: 24),
 
-          // Recent Matches
-          _buildRecentMatches(context, ref, stats),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
+            // Recent Matches
+            _buildRecentMatches(context, ref, stats),
+            const SizedBox(height: 24),
+          ],
+        ),
+      );
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Theme.of(context).colorScheme.surfaceVariant,
-      child: Row(
-        children: [
-          // Player 1
-          Expanded(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.blue.withOpacity(0.3),
-                  child: Text(
-                    player1Name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 24),
+  Widget _buildHeader(BuildContext context) => Container(
+        padding: const EdgeInsets.all(16),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Row(
+          children: [
+            // Player 1
+            Expanded(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.blue.withOpacity(0.3),
+                    child: Text(
+                      player1Name[0].toUpperCase(),
+                      style: const TextStyle(fontSize: 24),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  player1Name,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'レーティング: $player1Rating',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-
-          // VS
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'vs',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-
-          // Player 2
-          Expanded(
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Colors.orange.withOpacity(0.3),
-                  child: Text(
-                    player2Name[0].toUpperCase(),
-                    style: const TextStyle(fontSize: 24),
+                  const SizedBox(height: 8),
+                  Text(
+                    player1Name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  player2Name,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'レーティング: $player2Rating',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    'レーティング: $player1Rating',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+
+            // VS
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'vs',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+
+            // Player 2
+            Expanded(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.orange.withOpacity(0.3),
+                    child: Text(
+                      player2Name[0].toUpperCase(),
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    player2Name,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'レーティング: $player2Rating',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
 
   Widget _buildH2HStats(BuildContext context, HeadToHeadStats stats) {
     final totalGames = stats.player1Wins + stats.player2Wins + stats.draws;
@@ -286,32 +282,31 @@ class PlayerComparisonScreen extends ConsumerWidget {
     String playerName,
     double winRate,
     Color color,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Text(
-            '${winRate.toStringAsFixed(1)}%',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '勝率',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
+  ) =>
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          border: Border.all(color: color),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Text(
+              '${winRate.toStringAsFixed(1)}%',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '勝率',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      );
 
   Widget _buildRecentMatches(
     BuildContext context,
@@ -333,7 +328,7 @@ class PlayerComparisonScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

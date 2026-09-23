@@ -1,18 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'dart:math';
 
 /// Tournament creation, management, and lifecycle
 class TournamentManagementService {
+  TournamentManagementService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _tournamentsCollection = 'tournaments';
   static const String _participantsSubcollection = 'participants';
   static const String _matchesSubcollection = 'matches';
-
-  TournamentManagementService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Create a new tournament
   Future<Tournament> createTournament({
@@ -27,7 +25,8 @@ class TournamentManagementService {
     required List<int> prizePool, // Prize amounts by placement
   }) async {
     try {
-      final tournamentId = _firestore.collection(_tournamentsCollection).doc().id;
+      final tournamentId =
+          _firestore.collection(_tournamentsCollection).doc().id;
       final now = DateTime.now();
 
       final tournament = Tournament(
@@ -284,16 +283,17 @@ class TournamentManagementService {
       final standings = participants
           .where((p) => p.status != 'eliminated')
           .map((p) => TournamentStanding(
-            participantId: p.participantId,
-            playerId: p.playerId,
-            playerName: p.playerName,
-            playerRating: p.playerRating,
-            wins: p.wins,
-            losses: p.losses,
-            draws: p.draws,
-            points: p.points,
-            buchholzScore: _calculateBuchholzScore(participants, p.playerId),
-          ))
+                participantId: p.participantId,
+                playerId: p.playerId,
+                playerName: p.playerName,
+                playerRating: p.playerRating,
+                wins: p.wins,
+                losses: p.losses,
+                draws: p.draws,
+                points: p.points,
+                buchholzScore:
+                    _calculateBuchholzScore(participants, p.playerId),
+              ))
           .toList();
 
       // Sort by points, then by Buchholz score
@@ -318,7 +318,9 @@ class TournamentManagementService {
     List<String> finalStandings,
   ) async {
     try {
-      for (int i = 0; i < finalStandings.length && i < tournament.prizePool.length; i++) {
+      for (int i = 0;
+          i < finalStandings.length && i < tournament.prizePool.length;
+          i++) {
         final participantId = finalStandings[i];
         final prizeAmount = tournament.prizePool[i];
 
@@ -362,23 +364,6 @@ class TournamentManagementService {
 
 /// Tournament data model
 class Tournament {
-  final String tournamentId;
-  final String name;
-  final String description;
-  final String format;
-  final String timeControl;
-  final int maxParticipants;
-  final int currentParticipants;
-  final String status;
-  final DateTime startDate;
-  final DateTime endDate;
-  final int entryFee;
-  final List<int> prizePool;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final DateTime? completedAt;
-  final List<String>? finalStandings;
-
   Tournament({
     required this.tournamentId,
     required this.name,
@@ -398,68 +383,68 @@ class Tournament {
     this.finalStandings,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'tournamentId': tournamentId,
-      'name': name,
-      'description': description,
-      'format': format,
-      'timeControl': timeControl,
-      'maxParticipants': maxParticipants,
-      'currentParticipants': currentParticipants,
-      'status': status,
-      'startDate': Timestamp.fromDate(startDate),
-      'endDate': Timestamp.fromDate(endDate),
-      'entryFee': entryFee,
-      'prizePool': prizePool,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-      'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
-      'finalStandings': finalStandings,
-    };
-  }
+  factory Tournament.fromJson(Map<String, dynamic> json) => Tournament(
+        tournamentId: json['tournamentId'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        format: json['format'] as String,
+        timeControl: json['timeControl'] as String,
+        maxParticipants: json['maxParticipants'] as int,
+        currentParticipants: json['currentParticipants'] as int,
+        status: json['status'] as String,
+        startDate: (json['startDate'] as Timestamp).toDate(),
+        endDate: (json['endDate'] as Timestamp).toDate(),
+        entryFee: json['entryFee'] as int,
+        prizePool: List<int>.from(json['prizePool'] as List),
+        createdAt: (json['createdAt'] as Timestamp).toDate(),
+        updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+        completedAt: json['completedAt'] != null
+            ? (json['completedAt'] as Timestamp).toDate()
+            : null,
+        finalStandings: json['finalStandings'] != null
+            ? List<String>.from(json['finalStandings'] as List)
+            : null,
+      );
+  final String tournamentId;
+  final String name;
+  final String description;
+  final String format;
+  final String timeControl;
+  final int maxParticipants;
+  final int currentParticipants;
+  final String status;
+  final DateTime startDate;
+  final DateTime endDate;
+  final int entryFee;
+  final List<int> prizePool;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? completedAt;
+  final List<String>? finalStandings;
 
-  factory Tournament.fromJson(Map<String, dynamic> json) {
-    return Tournament(
-      tournamentId: json['tournamentId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      format: json['format'] as String,
-      timeControl: json['timeControl'] as String,
-      maxParticipants: json['maxParticipants'] as int,
-      currentParticipants: json['currentParticipants'] as int,
-      status: json['status'] as String,
-      startDate: (json['startDate'] as Timestamp).toDate(),
-      endDate: (json['endDate'] as Timestamp).toDate(),
-      entryFee: json['entryFee'] as int,
-      prizePool: List<int>.from(json['prizePool'] as List),
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-      updatedAt: (json['updatedAt'] as Timestamp).toDate(),
-      completedAt: json['completedAt'] != null
-          ? (json['completedAt'] as Timestamp).toDate()
-          : null,
-      finalStandings: json['finalStandings'] != null
-          ? List<String>.from(json['finalStandings'] as List)
-          : null,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'tournamentId': tournamentId,
+        'name': name,
+        'description': description,
+        'format': format,
+        'timeControl': timeControl,
+        'maxParticipants': maxParticipants,
+        'currentParticipants': currentParticipants,
+        'status': status,
+        'startDate': Timestamp.fromDate(startDate),
+        'endDate': Timestamp.fromDate(endDate),
+        'entryFee': entryFee,
+        'prizePool': prizePool,
+        'createdAt': Timestamp.fromDate(createdAt),
+        'updatedAt': Timestamp.fromDate(updatedAt),
+        'completedAt':
+            completedAt != null ? Timestamp.fromDate(completedAt!) : null,
+        'finalStandings': finalStandings,
+      };
 }
 
 /// Tournament participant
 class TournamentParticipant {
-  final String participantId;
-  final String playerId;
-  final String playerName;
-  final int playerRating;
-  final String status;
-  int wins;
-  int losses;
-  int draws;
-  int points;
-  final DateTime registerDate;
-  int? prizeAmount;
-  int? placement;
-
   TournamentParticipant({
     required this.participantId,
     required this.playerId,
@@ -475,53 +460,52 @@ class TournamentParticipant {
     this.placement,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'participantId': participantId,
-      'playerId': playerId,
-      'playerName': playerName,
-      'playerRating': playerRating,
-      'status': status,
-      'wins': wins,
-      'losses': losses,
-      'draws': draws,
-      'points': points,
-      'registerDate': Timestamp.fromDate(registerDate),
-      'prizeAmount': prizeAmount,
-      'placement': placement,
-    };
-  }
-
-  factory TournamentParticipant.fromJson(Map<String, dynamic> json) {
-    return TournamentParticipant(
-      participantId: json['participantId'] as String,
-      playerId: json['playerId'] as String,
-      playerName: json['playerName'] as String,
-      playerRating: json['playerRating'] as int,
-      status: json['status'] as String,
-      wins: json['wins'] as int,
-      losses: json['losses'] as int,
-      draws: json['draws'] as int,
-      points: json['points'] as int,
-      registerDate: (json['registerDate'] as Timestamp).toDate(),
-      prizeAmount: json['prizeAmount'] as int?,
-      placement: json['placement'] as int?,
-    );
-  }
-}
-
-/// Tournament standing in standings list
-class TournamentStanding {
+  factory TournamentParticipant.fromJson(Map<String, dynamic> json) =>
+      TournamentParticipant(
+        participantId: json['participantId'] as String,
+        playerId: json['playerId'] as String,
+        playerName: json['playerName'] as String,
+        playerRating: json['playerRating'] as int,
+        status: json['status'] as String,
+        wins: json['wins'] as int,
+        losses: json['losses'] as int,
+        draws: json['draws'] as int,
+        points: json['points'] as int,
+        registerDate: (json['registerDate'] as Timestamp).toDate(),
+        prizeAmount: json['prizeAmount'] as int?,
+        placement: json['placement'] as int?,
+      );
   final String participantId;
   final String playerId;
   final String playerName;
   final int playerRating;
-  final int wins;
-  final int losses;
-  final int draws;
-  final int points;
-  final double buchholzScore;
+  final String status;
+  int wins;
+  int losses;
+  int draws;
+  int points;
+  final DateTime registerDate;
+  int? prizeAmount;
+  int? placement;
 
+  Map<String, dynamic> toJson() => {
+        'participantId': participantId,
+        'playerId': playerId,
+        'playerName': playerName,
+        'playerRating': playerRating,
+        'status': status,
+        'wins': wins,
+        'losses': losses,
+        'draws': draws,
+        'points': points,
+        'registerDate': Timestamp.fromDate(registerDate),
+        'prizeAmount': prizeAmount,
+        'placement': placement,
+      };
+}
+
+/// Tournament standing in standings list
+class TournamentStanding {
   TournamentStanding({
     required this.participantId,
     required this.playerId,
@@ -533,4 +517,13 @@ class TournamentStanding {
     required this.points,
     required this.buchholzScore,
   });
+  final String participantId;
+  final String playerId;
+  final String playerName;
+  final int playerRating;
+  final int wins;
+  final int losses;
+  final int draws;
+  final int points;
+  final double buchholzScore;
 }

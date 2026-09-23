@@ -39,8 +39,6 @@ class UserProfile with _$UserProfile {
   const factory UserProfile({
     required String userId,
     required String displayName,
-    String? avatar,
-    String? bio,
     required int rating,
     required int totalGamesPlayed,
     required int totalPuzzlesSolved,
@@ -49,6 +47,8 @@ class UserProfile with _$UserProfile {
     required Map<String, String> socialLinks,
     required int followers,
     required int following,
+    String? avatar,
+    String? bio,
   }) = _UserProfile;
 
   factory UserProfile.fromJson(Map<String, dynamic> json) =>

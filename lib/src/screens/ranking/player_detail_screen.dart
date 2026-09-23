@@ -3,21 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/leaderboard_provider.dart';
 import '../../services/shogi_rank_service.dart';
 import '../../widgets/shogi_rank_display.dart';
-import 'package:intl/intl.dart';
 
 /// Screen showing detailed player statistics and ranking
 class PlayerDetailScreen extends ConsumerWidget {
-  final String uid;
-  final String displayName;
-  final String shogiRankString;
-  final int rating;
-  final int gamesPlayed;
-  final int wins;
-  final int losses;
-  final int draws;
-
   const PlayerDetailScreen({
-    Key? key,
     required this.uid,
     required this.displayName,
     required this.shogiRankString,
@@ -26,7 +15,16 @@ class PlayerDetailScreen extends ConsumerWidget {
     required this.wins,
     required this.losses,
     required this.draws,
+    Key? key,
   }) : super(key: key);
+  final String uid;
+  final String displayName;
+  final String shogiRankString;
+  final int rating;
+  final int gamesPlayed;
+  final int wins;
+  final int losses;
+  final int draws;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +48,7 @@ class PlayerDetailScreen extends ConsumerWidget {
 
             // Rank position section
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: userRankAsync.when(
                 data: (rank) => _buildRankPositionCard(context, theme, rank),
                 loading: () => const SizedBox(
@@ -63,7 +61,7 @@ class PlayerDetailScreen extends ConsumerWidget {
 
             // Nearby players section
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -73,7 +71,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 12.0),
+                  const SizedBox(height: 12),
                   nearbyRankingsAsync.when(
                     data: (rankings) => _buildNearbyRankings(context, rankings),
                     loading: () => const SizedBox(
@@ -96,9 +94,9 @@ class PlayerDetailScreen extends ConsumerWidget {
     final winRate = gamesPlayed > 0 ? wins / gamesPlayed : 0.0;
 
     return Container(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant,
+        color: theme.colorScheme.surfaceContainerHighest,
       ),
       child: Column(
         children: [
@@ -110,7 +108,7 @@ class PlayerDetailScreen extends ConsumerWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16.0),
+          const SizedBox(height: 16),
 
           // Shogi rank
           Row(
@@ -123,7 +121,7 @@ class PlayerDetailScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20.0),
+          const SizedBox(height: 20),
 
           // Rating display
           Row(
@@ -135,7 +133,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                     'レーティング',
                     style: theme.textTheme.labelMedium,
                   ),
-                  const SizedBox(height: 4.0),
+                  const SizedBox(height: 4),
                   Text(
                     rating.toString(),
                     style: theme.textTheme.displaySmall?.copyWith(
@@ -145,14 +143,14 @@ class PlayerDetailScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: 40.0),
+              const SizedBox(width: 40),
               Column(
                 children: [
                   Text(
                     '勝率',
                     style: theme.textTheme.labelMedium,
                   ),
-                  const SizedBox(height: 4.0),
+                  const SizedBox(height: 4),
                   Text(
                     '${(winRate * 100).toStringAsFixed(1)}%',
                     style: theme.textTheme.displaySmall?.copyWith(
@@ -170,46 +168,44 @@ class PlayerDetailScreen extends ConsumerWidget {
   }
 
   /// Build stats cards
-  Widget _buildStatsCards(BuildContext context, ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        children: [
-          _buildStatCard(
-            context,
-            theme,
-            'ゲーム数',
-            gamesPlayed.toString(),
-            Icons.sports_esports,
-          ),
-          const SizedBox(width: 12.0),
-          _buildStatCard(
-            context,
-            theme,
-            '勝利',
-            wins.toString(),
-            Icons.thumb_up,
-          ),
-          const SizedBox(width: 12.0),
-          _buildStatCard(
-            context,
-            theme,
-            '敗北',
-            losses.toString(),
-            Icons.thumb_down,
-          ),
-          const SizedBox(width: 12.0),
-          _buildStatCard(
-            context,
-            theme,
-            '引き分け',
-            draws.toString(),
-            Icons.handshake,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildStatsCards(BuildContext context, ThemeData theme) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            _buildStatCard(
+              context,
+              theme,
+              'ゲーム数',
+              gamesPlayed.toString(),
+              Icons.sports_esports,
+            ),
+            const SizedBox(width: 12),
+            _buildStatCard(
+              context,
+              theme,
+              '勝利',
+              wins.toString(),
+              Icons.thumb_up,
+            ),
+            const SizedBox(width: 12),
+            _buildStatCard(
+              context,
+              theme,
+              '敗北',
+              losses.toString(),
+              Icons.thumb_down,
+            ),
+            const SizedBox(width: 12),
+            _buildStatCard(
+              context,
+              theme,
+              '引き分け',
+              draws.toString(),
+              Icons.handshake,
+            ),
+          ],
+        ),
+      );
 
   /// Build individual stat card
   Widget _buildStatCard(
@@ -218,35 +214,34 @@ class PlayerDetailScreen extends ConsumerWidget {
     String label,
     String value,
     IconData icon,
-  ) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(height: 8.0),
-            Text(
-              value,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+  ) =>
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 4.0),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall,
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: theme.textTheme.labelSmall,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Build rank position card
   Widget _buildRankPositionCard(
@@ -256,10 +251,10 @@ class PlayerDetailScreen extends ConsumerWidget {
   ) {
     if (rank == null) {
       return Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(8.0),
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
         ),
         child: const Center(
           child: Text('ランク情報を取得できません'),
@@ -268,10 +263,10 @@ class PlayerDetailScreen extends ConsumerWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(8.0),
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -283,7 +278,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                 '現在のランク',
                 style: theme.textTheme.labelMedium,
               ),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 8),
               Text(
                 '#$rank',
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -294,8 +289,8 @@ class PlayerDetailScreen extends ConsumerWidget {
             ],
           ),
           Container(
-            width: 80.0,
-            height: 80.0,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               shape: BoxShape.circle,
@@ -334,17 +329,17 @@ class PlayerDetailScreen extends ConsumerWidget {
         final isCurrentUser = entry.uid == uid;
 
         return Container(
-          margin: const EdgeInsets.only(bottom: 8.0),
-          padding: const EdgeInsets.all(12.0),
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isCurrentUser
                 ? theme.colorScheme.primary.withOpacity(0.1)
-                : theme.colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(8.0),
+                : theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
             border: isCurrentUser
                 ? Border.all(
                     color: theme.colorScheme.primary,
-                    width: 2.0,
+                    width: 2,
                   )
                 : null,
           ),
@@ -352,8 +347,8 @@ class PlayerDetailScreen extends ConsumerWidget {
             children: [
               // Rank
               Container(
-                width: 44.0,
-                height: 44.0,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
                   shape: BoxShape.circle,
@@ -368,7 +363,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12.0),
+              const SizedBox(width: 12),
 
               // Player info
               Expanded(
@@ -383,7 +378,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4.0),
+                    const SizedBox(height: 4),
                     Text(
                       entry.shogiRankString,
                       style: theme.textTheme.labelSmall,

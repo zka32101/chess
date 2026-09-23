@@ -5,16 +5,17 @@ import '../models/puzzle.dart';
 
 // Puzzle provider for loading and tracking puzzle solving
 class PuzzleService {
+  PuzzleService(this._firestore, this._auth);
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  PuzzleService(this._firestore, this._auth);
 
   // Get daily puzzle challenge for today
   Future<DailyChallengeModel?> getDailyChallenge() async {
     try {
-      final today = DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
-      final doc = await _firestore.collection('daily_challenges').doc(today).get();
+      final today =
+          DateTime.now().toString().split(' ')[0]; // YYYY-MM-DD format
+      final doc =
+          await _firestore.collection('daily_challenges').doc(today).get();
 
       if (doc.exists) {
         return DailyChallengeModel.fromJson({
@@ -48,7 +49,8 @@ class PuzzleService {
   }
 
   // Get puzzles by difficulty rating
-  Future<List<PuzzleModel>> getPuzzlesByRating(int minRating, int maxRating, {int limit = 20}) async {
+  Future<List<PuzzleModel>> getPuzzlesByRating(int minRating, int maxRating,
+      {int limit = 20}) async {
     try {
       final snapshot = await _firestore
           .collection('puzzles')
@@ -79,7 +81,8 @@ class PuzzleService {
     if (user == null) throw Exception('No user logged in');
 
     try {
-      final resultId = '${user.uid}_${puzzleId}_${DateTime.now().millisecondsSinceEpoch}';
+      final resultId =
+          '${user.uid}_${puzzleId}_${DateTime.now().millisecondsSinceEpoch}';
 
       await _firestore.collection('user_puzzle_results').doc(resultId).set({
         'userId': user.uid,
@@ -133,19 +136,22 @@ final puzzleServiceProvider = Provider((ref) {
 });
 
 // Get daily challenge
-final dailyChallengeProvider = FutureProvider<DailyChallengeModel?>((ref) async {
+final dailyChallengeProvider =
+    FutureProvider<DailyChallengeModel?>((ref) async {
   final puzzleService = ref.watch(puzzleServiceProvider);
   return puzzleService.getDailyChallenge();
 });
 
 // Get specific puzzle
-final puzzleByIdProvider = FutureProvider.family<PuzzleModel?, String>((ref, puzzleId) async {
+final puzzleByIdProvider =
+    FutureProvider.family<PuzzleModel?, String>((ref, puzzleId) async {
   final puzzleService = ref.watch(puzzleServiceProvider);
   return puzzleService.getPuzzleById(puzzleId);
 });
 
 // Get puzzles by rating range
-final puzzlesByRatingProvider = FutureProvider.family<List<PuzzleModel>, ({int minRating, int maxRating})>(
+final puzzlesByRatingProvider =
+    FutureProvider.family<List<PuzzleModel>, ({int minRating, int maxRating})>(
   (ref, params) async {
     final puzzleService = ref.watch(puzzleServiceProvider);
     return puzzleService.getPuzzlesByRating(params.minRating, params.maxRating);
@@ -153,7 +159,8 @@ final puzzlesByRatingProvider = FutureProvider.family<List<PuzzleModel>, ({int m
 );
 
 // Track user's puzzle statistics
-final userPuzzleStatsProvider = StreamProvider<Map<String, dynamic>>((ref) async* {
+final userPuzzleStatsProvider =
+    StreamProvider<Map<String, dynamic>>((ref) async* {
   final firestore = FirebaseFirestore.instance;
   final user = FirebaseAuth.instance.currentUser;
 
@@ -163,7 +170,8 @@ final userPuzzleStatsProvider = StreamProvider<Map<String, dynamic>>((ref) async
   }
 
   try {
-    await for (final snapshot in firestore.collection('users').doc(user.uid).snapshots()) {
+    await for (final snapshot
+        in firestore.collection('users').doc(user.uid).snapshots()) {
       if (snapshot.exists) {
         yield {
           'puzzlesSolved': snapshot.data()?['puzzlesSolved'] ?? 0,

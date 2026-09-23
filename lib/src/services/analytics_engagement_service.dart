@@ -5,17 +5,14 @@ import 'package:logger/logger.dart';
 ///
 /// Tracks user interactions like puzzle completions, games, and feature usage
 class AnalyticsEngagementService {
+  factory AnalyticsEngagementService() => _instance;
+
+  AnalyticsEngagementService._internal();
   static final AnalyticsEngagementService _instance =
       AnalyticsEngagementService._internal();
 
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   final Logger _logger = Logger();
-
-  AnalyticsEngagementService._internal();
-
-  factory AnalyticsEngagementService() {
-    return _instance;
-  }
 
   /// Track puzzle completion
   ///
@@ -374,8 +371,7 @@ class AnalyticsEngagementService {
     String? navigationSource,
   }) async {
     try {
-      _logger
-          .i('Tracking navigation: $fromScreen → $toScreen');
+      _logger.i('Tracking navigation: $fromScreen → $toScreen');
 
       await _analytics.logEvent(
         name: 'screen_view',

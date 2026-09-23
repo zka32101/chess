@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/auth/auth_wrapper.dart';
 import 'theme/chess_theme.dart';
 import 'providers/user_preferences_provider.dart';
-import 'services/notification_service.dart';
 
 class ChessTacticsMasterApp extends ConsumerWidget {
   const ChessTacticsMasterApp({Key? key}) : super(key: key);

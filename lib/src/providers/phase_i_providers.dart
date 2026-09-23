@@ -4,20 +4,21 @@ import '../services/chess_lessons_service.dart';
 
 // ========== Service Provider ==========
 
-final chessLessonsServiceProvider = Provider((ref) {
-  return ChessLessonsService.instance;
-});
+final chessLessonsServiceProvider =
+    Provider((ref) => ChessLessonsService.instance);
 
 // ========== Lesson Query Providers ==========
 
 /// Get all lessons by type and difficulty
-final lessonsByTypeProvider = FutureProvider.family<List<ChessLesson>, (String, int)>((ref, args) async {
+final lessonsByTypeProvider =
+    FutureProvider.family<List<ChessLesson>, (String, int)>((ref, args) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getLessonsByType(args.$1, args.$2);
 });
 
 /// Get opening lessons by difficulty
-final openingLessonsProvider = FutureProvider.family<List<ChessLesson>, int>((ref, difficulty) async {
+final openingLessonsProvider =
+    FutureProvider.family<List<ChessLesson>, int>((ref, difficulty) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getLessonsByType('opening', difficulty);
 });
@@ -36,7 +37,8 @@ final allOpeningsProvider = FutureProvider<List<ChessLesson>>((ref) async {
 });
 
 /// Get tactic lessons by difficulty
-final tacticLessonsProvider = FutureProvider.family<List<ChessLesson>, int>((ref, difficulty) async {
+final tacticLessonsProvider =
+    FutureProvider.family<List<ChessLesson>, int>((ref, difficulty) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getLessonsByType('tactics', difficulty);
 });
@@ -61,19 +63,22 @@ final strategyLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async {
 });
 
 /// Get specific opening by ECO code
-final openingByEcoProvider = FutureProvider.family<OpeningExplanation?, String>((ref, ecoCode) async {
+final openingByEcoProvider =
+    FutureProvider.family<OpeningExplanation?, String>((ref, ecoCode) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getOpeningByEco(ecoCode);
 });
 
 /// Get tactics patterns by difficulty
-final tacticsByDifficultyProvider = FutureProvider.family<List<TacticsPattern>, int>((ref, difficulty) async {
+final tacticsByDifficultyProvider =
+    FutureProvider.family<List<TacticsPattern>, int>((ref, difficulty) async {
   final service = ref.watch(chessLessonsServiceProvider);
   return service.getTacticsByDifficulty(difficulty);
 });
 
 /// Get recommended lessons for current user
-final recommendedLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async {
+final recommendedLessonsProvider =
+    FutureProvider<List<ChessLesson>>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
   final auth = FirebaseAuth.instance;
   final userId = auth.currentUser?.uid;
@@ -86,7 +91,8 @@ final recommendedLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async
 // ========== Progress Tracking Providers ==========
 
 /// Get user's complete lesson progress
-final userLessonProgressProvider = FutureProvider<List<UserLessonProgress>>((ref) async {
+final userLessonProgressProvider =
+    FutureProvider<List<UserLessonProgress>>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
   final auth = FirebaseAuth.instance;
   final userId = auth.currentUser?.uid;
@@ -97,7 +103,8 @@ final userLessonProgressProvider = FutureProvider<List<UserLessonProgress>>((ref
 });
 
 /// Get progress for specific lesson
-final lessonProgressProvider = FutureProvider.family<UserLessonProgress?, String>((ref, lessonId) async {
+final lessonProgressProvider =
+    FutureProvider.family<UserLessonProgress?, String>((ref, lessonId) async {
   final progress = await ref.watch(userLessonProgressProvider.future);
   try {
     return progress.firstWhere((p) => p.lessonId == lessonId);
@@ -107,7 +114,8 @@ final lessonProgressProvider = FutureProvider.family<UserLessonProgress?, String
 });
 
 /// Get user's learning statistics
-final userLearningStatsProvider = FutureProvider<LearningStatistics>((ref) async {
+final userLearningStatsProvider =
+    FutureProvider<LearningStatistics>((ref) async {
   final service = ref.watch(chessLessonsServiceProvider);
   final auth = FirebaseAuth.instance;
   final userId = auth.currentUser?.uid;
@@ -119,10 +127,10 @@ final userLearningStatsProvider = FutureProvider<LearningStatistics>((ref) async
       totalLessonsReviewed: 0,
       totalTimeSpent: Duration.zero,
       currentStreak: 0,
-      averageDifficulty: 0.0,
+      averageDifficulty: 0,
       topicsMastered: [],
       topicsToImprove: [],
-      overallProgress: 0.0,
+      overallProgress: 0,
     );
   }
 
@@ -132,34 +140,27 @@ final userLearningStatsProvider = FutureProvider<LearningStatistics>((ref) async
 // ========== State Management Providers ==========
 
 /// Track currently active lesson
-final activeLessonProvider = StateProvider<String?>((ref) {
-  return null;
-});
+final activeLessonProvider = StateProvider<String?>((ref) => null);
 
 /// Track lesson notes/annotations
-final lessonNotesProvider = StateProvider.family<String, String>((ref, lessonId) {
-  return '';
-});
+final lessonNotesProvider =
+    StateProvider.family<String, String>((ref, lessonId) => '');
 
 /// Track self-assessment score for lesson
-final selfAssessmentProvider = StateProvider.family<int, String>((ref, lessonId) {
-  return 0;
-});
+final selfAssessmentProvider =
+    StateProvider.family<int, String>((ref, lessonId) => 0);
 
 /// Track current lesson difficulty filter
-final lessonDifficultyFilterProvider = StateProvider<int>((ref) {
-  return 1;
-});
+final lessonDifficultyFilterProvider = StateProvider<int>((ref) => 1);
 
 /// Track current lesson type filter
-final lessonTypeFilterProvider = StateProvider<String>((ref) {
-  return 'opening';
-});
+final lessonTypeFilterProvider = StateProvider<String>((ref) => 'opening');
 
 // ========== Computed/Aggregated Providers ==========
 
 /// Check if user has started a specific lesson
-final hasStartedLessonProvider = FutureProvider.family<bool, String>((ref, lessonId) async {
+final hasStartedLessonProvider =
+    FutureProvider.family<bool, String>((ref, lessonId) async {
   final progress = await ref.watch(lessonProgressProvider(lessonId).future);
   return progress != null && progress.status != 'not_started';
 });
@@ -203,7 +204,8 @@ final filteredLessonsProvider = FutureProvider<List<ChessLesson>>((ref) async {
 });
 
 /// Get statistics summary for dashboard
-final lessonStatsSummaryProvider = FutureProvider<LessonStatsSummary>((ref) async {
+final lessonStatsSummaryProvider =
+    FutureProvider<LessonStatsSummary>((ref) async {
   final stats = await ref.watch(userLearningStatsProvider.future);
   final progress = await ref.watch(userLessonProgressProvider.future);
   final completed = await ref.watch(lessonsCompletedCountProvider.future);
@@ -223,23 +225,12 @@ final lessonStatsSummaryProvider = FutureProvider<LessonStatsSummary>((ref) asyn
 
 // ========== Helper Functions ==========
 
-int _getNextDifficulty(double currentDifficulty) {
-  return (currentDifficulty + 1).ceil().clamp(1, 5);
-}
+int _getNextDifficulty(double currentDifficulty) =>
+    (currentDifficulty + 1).ceil().clamp(1, 5);
 
 // ========== Data Classes ==========
 
 class LessonStatsSummary {
-  final int totalLessonsStarted;
-  final int totalLessonsCompleted;
-  final int currentStreak;
-  final double averageDifficulty;
-  final double overallProgress;
-  final int topicsMastered;
-  final int topicsToImprove;
-  final Duration totalTimeSpent;
-  final int nextRecommendedDifficulty;
-
   LessonStatsSummary({
     required this.totalLessonsStarted,
     required this.totalLessonsCompleted,
@@ -251,4 +242,13 @@ class LessonStatsSummary {
     required this.totalTimeSpent,
     required this.nextRecommendedDifficulty,
   });
+  final int totalLessonsStarted;
+  final int totalLessonsCompleted;
+  final int currentStreak;
+  final double averageDifficulty;
+  final double overallProgress;
+  final int topicsMastered;
+  final int topicsToImprove;
+  final Duration totalTimeSpent;
+  final int nextRecommendedDifficulty;
 }

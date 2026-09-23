@@ -1,26 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/rating_progression.dart';
-import 'package:chess_tactics_master/src/models/match_record.dart';
+import '../models/rating_progression.dart';
+import '../models/match_record.dart';
 
 /// Information about streaks
 class StreakInfo {
-  final int current; // positive = wins, negative = losses
-  final int longestWin;
-  final int longestLoss;
-
   StreakInfo({
     required this.current,
     required this.longestWin,
     required this.longestLoss,
   });
+  final int current; // positive = wins, negative = losses
+  final int longestWin;
+  final int longestLoss;
 }
 
 /// Service for managing player performance analytics
 class PerformanceService {
-  final FirebaseFirestore _firestore;
-
   PerformanceService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
 
   /// Get rating progression for different time ranges
   Future<List<RatingProgression>> getRatingProgression(
@@ -150,7 +148,7 @@ class PerformanceService {
         if (match.result == 'win') wins++;
       }
 
-      return (wins / snapshot.size * 100);
+      return wins / snapshot.size * 100;
     } catch (e) {
       throw Exception('Failed to get win rate: $e');
     }

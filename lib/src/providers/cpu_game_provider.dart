@@ -9,12 +9,6 @@ import '../services/stockfish_engine_service.dart';
 
 /// CPU game state
 class CPUGameState {
-  final String gameId;
-  final ChessEngineService engine;
-  final GameModel game;
-  final bool isThinking;
-  final String? error;
-
   CPUGameState({
     required this.gameId,
     required this.engine,
@@ -22,6 +16,11 @@ class CPUGameState {
     this.isThinking = false,
     this.error,
   });
+  final String gameId;
+  final ChessEngineService engine;
+  final GameModel game;
+  final bool isThinking;
+  final String? error;
 
   CPUGameState copyWith({
     String? gameId,
@@ -29,22 +28,20 @@ class CPUGameState {
     GameModel? game,
     bool? isThinking,
     String? error,
-  }) {
-    return CPUGameState(
-      gameId: gameId ?? this.gameId,
-      engine: engine ?? this.engine,
-      game: game ?? this.game,
-      isThinking: isThinking ?? this.isThinking,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      CPUGameState(
+        gameId: gameId ?? this.gameId,
+        engine: engine ?? this.engine,
+        game: game ?? this.game,
+        isThinking: isThinking ?? this.isThinking,
+        error: error ?? this.error,
+      );
 }
 
 /// CPU Game Service
 class CPUGameService {
-  final FirebaseFirestore _firestore;
-
   CPUGameService(this._firestore);
+  final FirebaseFirestore _firestore;
 
   /// Create a new CPU game
   Future<GameModel> createCPUGame({
@@ -129,7 +126,7 @@ class CPUGameService {
 
       if (!gameDoc.exists) throw Exception('Game not found');
 
-      final gameData = gameDoc.data() as Map<String, dynamic>;
+      final gameData = gameDoc.data()!;
       final currentMoves =
           List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
 
@@ -182,7 +179,7 @@ class CPUGameService {
 
       if (!gameDoc.exists) throw Exception('Game not found');
 
-      final gameData = gameDoc.data() as Map<String, dynamic>;
+      final gameData = gameDoc.data()!;
       final currentMoves =
           List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
 
@@ -231,7 +228,7 @@ class CPUGameService {
 
       if (!gameDoc.exists) throw Exception('Game not found');
 
-      final gameData = gameDoc.data() as Map<String, dynamic>;
+      final gameData = gameDoc.data()!;
 
       // CPU wins by resignation
       await _firestore.collection('games').doc(gameId).update({
@@ -307,15 +304,10 @@ final cpuGameServiceProvider = Provider((ref) {
 /// CPU game state provider
 final cpuGameStateProvider =
     StateNotifierProvider.family<CPUGameStateNotifier, CPUGameState, String>(
-        (ref, gameId) {
-  return CPUGameStateNotifier(gameId, ref);
-});
+        (ref, gameId) => CPUGameStateNotifier(gameId, ref));
 
 /// CPU game state notifier
 class CPUGameStateNotifier extends StateNotifier<CPUGameState> {
-  final String gameId;
-  final Ref ref;
-
   CPUGameStateNotifier(this.gameId, this.ref)
       : super(CPUGameState(
           gameId: gameId,
@@ -331,6 +323,8 @@ class CPUGameStateNotifier extends StateNotifier<CPUGameState> {
             moves: [],
           ),
         ));
+  final String gameId;
+  final Ref ref;
 
   /// Make a player move
   Future<void> makeMove(String from, String to, {String? promotion}) async {
@@ -417,9 +411,6 @@ final cpuGameStreamProvider =
 
 /// Game state notifier for CPU play (local state)
 class CpuGameNotifier extends StateNotifier<CpuGameState> {
-  late ChessEngineService _chess;
-  late AIOpponentEngine _aiEngine;
-
   CpuGameNotifier()
       : super(
           CpuGameState(
@@ -432,6 +423,8 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
     _chess = ChessEngineService();
     _aiEngine = AIOpponentEngine(_chess, state.difficulty);
   }
+  late ChessEngineService _chess;
+  late AIOpponentEngine _aiEngine;
 
   /// Initialize a new game
   void initGame({
@@ -633,7 +626,5 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
 }
 
 /// Riverpod provider for CPU game state (local/offline play)
-final cpuGameProvider =
-    StateNotifierProvider<CpuGameNotifier, CpuGameState>((ref) {
-  return CpuGameNotifier();
-});
+final cpuGameProvider = StateNotifierProvider<CpuGameNotifier, CpuGameState>(
+    (ref) => CpuGameNotifier());

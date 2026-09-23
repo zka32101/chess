@@ -1,9 +1,7 @@
 import 'dart:math' show Random;
 import 'package:chess/chess.dart' as chess_lib;
 import 'chess_engine_service.dart';
-import 'opening_book.dart';
 import 'zobrist_hashing.dart';
-import 'killer_move_heuristic.dart';
 import 'countermove_heuristic.dart';
 import 'heuristic_aging.dart';
 
@@ -107,10 +105,9 @@ class MaterialValues {
 
 /// Position evaluator (same as original)
 class PositionEvaluator {
+  PositionEvaluator(this.chess, this.difficulty);
   final ChessEngineService chess;
   final AIDifficulty difficulty;
-
-  PositionEvaluator(this.chess, this.difficulty);
 
   /// Evaluate the current position
   int evaluate() {
@@ -231,26 +228,6 @@ class PositionEvaluator {
 
 /// Enhanced AI opponent engine with all Phase III.1 optimizations
 class AIOpponentEngineEnhanced {
-  final ChessEngineService chess;
-  final AIDifficulty difficulty;
-  late final PositionEvaluator _evaluator;
-
-  // Phase III.1 Optimizations
-  late final AgedKillerMoveHeuristic _killerMoves;
-  late final AgedCountermoveHeuristic _countermoves;
-  late final AdaptiveHeuristicManager _adaptiveManager;
-  late final ZobristTranspositionTable _zobristTable;
-  late final AdvancedMoveOrderer _moveOrderer;
-
-  // Statistics
-  int _nodesEvaluated = 0;
-  int _zobristHits = 0;
-  int _zobristMisses = 0;
-  String? _lastOpponentMove;
-
-  // Random for opening book variation
-  final Random _random = Random();
-
   AIOpponentEngineEnhanced(this.chess, this.difficulty) {
     _evaluator = PositionEvaluator(chess, difficulty);
 
@@ -280,6 +257,25 @@ class AIOpponentEngineEnhanced {
     // Initialize Zobrist hashing
     ZobristHash.initialize();
   }
+  final ChessEngineService chess;
+  final AIDifficulty difficulty;
+  late final PositionEvaluator _evaluator;
+
+  // Phase III.1 Optimizations
+  late final AgedKillerMoveHeuristic _killerMoves;
+  late final AgedCountermoveHeuristic _countermoves;
+  late final AdaptiveHeuristicManager _adaptiveManager;
+  late final ZobristTranspositionTable _zobristTable;
+  late final AdvancedMoveOrderer _moveOrderer;
+
+  // Statistics
+  int _nodesEvaluated = 0;
+  int _zobristHits = 0;
+  int _zobristMisses = 0;
+  String? _lastOpponentMove;
+
+  // Random for opening book variation
+  final Random _random = Random();
 
   /// Get the best move for the current position (enhanced version)
   String? getBestMove() {
@@ -546,22 +542,20 @@ class AIOpponentEngineEnhanced {
   }
 
   /// Get comprehensive search statistics
-  Map<String, dynamic> getSearchStats() {
-    return {
-      'nodesEvaluated': _nodesEvaluated,
-      'depth': difficulty.searchDepth,
-      'difficulty': difficulty.displayName,
-      'zobristHits': _zobristHits,
-      'zobristMisses': _zobristMisses,
-      'zobristHitRate': _zobristMisses + _zobristHits > 0
-          ? (_zobristHits / (_zobristHits + _zobristMisses) * 100)
-              .toStringAsFixed(1)
-          : '0.0',
-      'adaptiveSettings': _adaptiveManager.getAdaptiveStatistics(),
-      'killerStats': _killerMoves.getStatistics(),
-      'countermoveStats': _countermoves.getStatistics(),
-    };
-  }
+  Map<String, dynamic> getSearchStats() => {
+        'nodesEvaluated': _nodesEvaluated,
+        'depth': difficulty.searchDepth,
+        'difficulty': difficulty.displayName,
+        'zobristHits': _zobristHits,
+        'zobristMisses': _zobristMisses,
+        'zobristHitRate': _zobristMisses + _zobristHits > 0
+            ? (_zobristHits / (_zobristHits + _zobristMisses) * 100)
+                .toStringAsFixed(1)
+            : '0.0',
+        'adaptiveSettings': _adaptiveManager.getAdaptiveStatistics(),
+        'killerStats': _killerMoves.getStatistics(),
+        'countermoveStats': _countermoves.getStatistics(),
+      };
 
   /// Clear all caches and tables
   void clearCache() {
@@ -573,7 +567,5 @@ class AIOpponentEngineEnhanced {
   }
 
   /// Get Zobrist table statistics
-  Map<String, dynamic> getTableStats() {
-    return _zobristTable.getStatistics();
-  }
+  Map<String, dynamic> getTableStats() => _zobristTable.getStatistics();
 }

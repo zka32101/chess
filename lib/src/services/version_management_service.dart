@@ -3,13 +3,6 @@ import '../models/version.dart';
 
 /// Version Management Service
 class VersionManagementService {
-  static final VersionManagementService _instance =
-      VersionManagementService._internal();
-
-  FirebaseFirestore _firestore;
-  String? _currentVersion = '1.0.0';
-  int? _currentBuildNumber = 1;
-
   factory VersionManagementService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
       _instance._firestore = firestore;
@@ -19,6 +12,12 @@ class VersionManagementService {
 
   VersionManagementService._internal()
       : _firestore = FirebaseFirestore.instance;
+  static final VersionManagementService _instance =
+      VersionManagementService._internal();
+
+  FirebaseFirestore _firestore;
+  String? _currentVersion = '1.0.0';
+  int? _currentBuildNumber = 1;
 
   /// Get current version
   String getCurrentVersion() => _currentVersion ?? '1.0.0';
@@ -37,8 +36,8 @@ class VersionManagementService {
 
       if (querySnapshot.docs.isEmpty) return null;
 
-      final latestVersion = AppVersion.fromJson(
-          querySnapshot.docs.first.data() as Map<String, dynamic>);
+      final latestVersion =
+          AppVersion.fromJson(querySnapshot.docs.first.data());
 
       // Compare versions
       if (_isNewerVersion(
@@ -63,8 +62,7 @@ class VersionManagementService {
 
       if (querySnapshot.docs.isEmpty) return null;
 
-      return AppVersion.fromJson(
-          querySnapshot.docs.first.data() as Map<String, dynamic>);
+      return AppVersion.fromJson(querySnapshot.docs.first.data());
     } catch (e) {
       print('Error fetching update details: $e');
       return null;
@@ -84,7 +82,7 @@ class VersionManagementService {
 
       for (final entry in versionDoc.changelog) {
         notes.writeln('**${entry.type.name.toUpperCase()}**: ${entry.title}');
-        notes.writeln('${entry.description}');
+        notes.writeln(entry.description);
         notes.writeln();
       }
 
@@ -108,9 +106,9 @@ class VersionManagementService {
       final stat = VersionStat(
         version: version,
         activeUsers: activeUsers ?? 0,
-        adoptionRate: 0.0,
-        updatePercentage: 0.0,
-        crashRate: 0.0,
+        adoptionRate: 0,
+        updatePercentage: 0,
+        crashRate: 0,
         timestamp: DateTime.now(),
       );
 

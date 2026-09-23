@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 /// Service for managing in-app purchases and subscriptions
 class PaywallService {
+  PaywallService._();
   static final PaywallService _instance = PaywallService._();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -12,8 +13,6 @@ class PaywallService {
 
   late StreamSubscription<List<PurchaseDetails>> _subscription;
   bool _isAvailable = false;
-
-  PaywallService._();
 
   static PaywallService get instance => _instance;
 
@@ -97,7 +96,7 @@ class PaywallService {
         return false;
       }
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data()!;
       final tier = data['subscriptionTier'] as String?;
 
       if (tier == null || tier == 'free') {
@@ -128,7 +127,7 @@ class PaywallService {
         return 'free';
       }
 
-      return (doc.data() as Map<String, dynamic>)['subscriptionTier'] ?? 'free';
+      return (doc.data()!)['subscriptionTier'] ?? 'free';
     } catch (e) {
       print('Error getting subscription tier: $e');
       return 'free';

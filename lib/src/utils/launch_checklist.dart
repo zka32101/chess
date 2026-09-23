@@ -13,14 +13,6 @@ enum LaunchPhase {
 
 /// Launch checklist item
 class LaunchChecklistItem {
-  final String id;
-  final String title;
-  final String description;
-  final LaunchPhase phase;
-  bool isCompleted;
-  String? notes;
-  final DateTime createdAt;
-
   LaunchChecklistItem({
     required this.title,
     required this.description,
@@ -30,6 +22,13 @@ class LaunchChecklistItem {
     DateTime? createdAt,
   })  : id = 'LCI_${DateTime.now().millisecondsSinceEpoch}',
         createdAt = createdAt ?? DateTime.now();
+  final String id;
+  final String title;
+  final String description;
+  final LaunchPhase phase;
+  bool isCompleted;
+  String? notes;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -47,61 +46,85 @@ class LaunchChecklistItem {
 
 /// Launch checklist
 class LaunchChecklist {
+  factory LaunchChecklist() => _instance;
+
+  LaunchChecklist._internal() {
+    _initializeChecklist();
+  }
   static final LaunchChecklist _instance = LaunchChecklist._internal();
 
   final _items = <LaunchChecklistItem>[];
   LaunchPhase _currentPhase = LaunchPhase.preAlpha;
 
-  factory LaunchChecklist() {
-    return _instance;
-  }
-
-  LaunchChecklist._internal() {
-    _initializeChecklist();
-  }
-
   /// Initialize launch checklist
   void _initializeChecklist() {
     // Pre-Alpha Phase
-    _addItem('Concept Approved', 'Product and design reviewed and approved', LaunchPhase.preAlpha);
-    _addItem('Core Features Complete', 'All core game features implemented', LaunchPhase.preAlpha);
-    _addItem('Basic Testing', 'Internal testing on core features complete', LaunchPhase.preAlpha);
+    _addItem('Concept Approved', 'Product and design reviewed and approved',
+        LaunchPhase.preAlpha);
+    _addItem('Core Features Complete', 'All core game features implemented',
+        LaunchPhase.preAlpha);
+    _addItem('Basic Testing', 'Internal testing on core features complete',
+        LaunchPhase.preAlpha);
 
     // Alpha Phase
-    _addItem('Full Feature Set', 'All features implemented and integrated', LaunchPhase.alpha);
-    _addItem('Alpha Testing', 'Comprehensive internal testing completed', LaunchPhase.alpha);
-    _addItem('Bug Fixes', 'Critical and high priority bugs resolved', LaunchPhase.alpha);
-    _addItem('Performance Baseline', 'Performance benchmarks established', LaunchPhase.alpha);
+    _addItem('Full Feature Set', 'All features implemented and integrated',
+        LaunchPhase.alpha);
+    _addItem('Alpha Testing', 'Comprehensive internal testing completed',
+        LaunchPhase.alpha);
+    _addItem('Bug Fixes', 'Critical and high priority bugs resolved',
+        LaunchPhase.alpha);
+    _addItem('Performance Baseline', 'Performance benchmarks established',
+        LaunchPhase.alpha);
 
     // Beta Phase
-    _addItem('Beta Build Released', 'Beta version released to select testers', LaunchPhase.beta);
-    _addItem('Feedback Collected', 'User feedback from beta testers collected', LaunchPhase.beta);
-    _addItem('Localization Complete', 'App localized for target markets', LaunchPhase.beta);
-    _addItem('Analytics Integration', 'Analytics fully configured and tested', LaunchPhase.beta);
+    _addItem('Beta Build Released', 'Beta version released to select testers',
+        LaunchPhase.beta);
+    _addItem('Feedback Collected', 'User feedback from beta testers collected',
+        LaunchPhase.beta);
+    _addItem('Localization Complete', 'App localized for target markets',
+        LaunchPhase.beta);
+    _addItem('Analytics Integration', 'Analytics fully configured and tested',
+        LaunchPhase.beta);
 
     // Beta Expanded Phase
-    _addItem('Expanded Beta', 'Beta expanded to larger user group', LaunchPhase.betaExpanded);
-    _addItem('Stability Testing', 'Stability and crash rate monitoring', LaunchPhase.betaExpanded);
-    _addItem('Load Testing', 'Server and infrastructure load tested', LaunchPhase.betaExpanded);
-    _addItem('Security Review', 'Security review and penetration testing', LaunchPhase.betaExpanded);
+    _addItem('Expanded Beta', 'Beta expanded to larger user group',
+        LaunchPhase.betaExpanded);
+    _addItem('Stability Testing', 'Stability and crash rate monitoring',
+        LaunchPhase.betaExpanded);
+    _addItem('Load Testing', 'Server and infrastructure load tested',
+        LaunchPhase.betaExpanded);
+    _addItem('Security Review', 'Security review and penetration testing',
+        LaunchPhase.betaExpanded);
 
     // Soft Launch Phase
-    _addItem('Soft Launch Markets', 'Release in selected markets first', LaunchPhase.softLaunch);
-    _addItem('Soft Launch Monitoring', 'Monitor soft launch metrics', LaunchPhase.softLaunch);
-    _addItem('Issue Resolution', 'Address issues discovered in soft launch', LaunchPhase.softLaunch);
-    _addItem('Readiness Sign-Off', 'Team sign-off for full launch', LaunchPhase.softLaunch);
+    _addItem('Soft Launch Markets', 'Release in selected markets first',
+        LaunchPhase.softLaunch);
+    _addItem('Soft Launch Monitoring', 'Monitor soft launch metrics',
+        LaunchPhase.softLaunch);
+    _addItem('Issue Resolution', 'Address issues discovered in soft launch',
+        LaunchPhase.softLaunch);
+    _addItem('Readiness Sign-Off', 'Team sign-off for full launch',
+        LaunchPhase.softLaunch);
 
     // Full Launch Phase
-    _addItem('Global Rollout', 'Release in all target markets', LaunchPhase.fullLaunch);
-    _addItem('Marketing Campaign', 'Launch marketing campaign', LaunchPhase.fullLaunch);
-    _addItem('Press Release', 'Issue press release and media coverage', LaunchPhase.fullLaunch);
-    _addItem('Launch Monitoring', 'Real-time monitoring during launch', LaunchPhase.fullLaunch);
+    _addItem('Global Rollout', 'Release in all target markets',
+        LaunchPhase.fullLaunch);
+    _addItem('Marketing Campaign', 'Launch marketing campaign',
+        LaunchPhase.fullLaunch);
+    _addItem('Press Release', 'Issue press release and media coverage',
+        LaunchPhase.fullLaunch);
+    _addItem('Launch Monitoring', 'Real-time monitoring during launch',
+        LaunchPhase.fullLaunch);
 
     // Post-Launch Phase
-    _addItem('Performance Monitoring', 'Continuous performance monitoring', LaunchPhase.postLaunch);
-    _addItem('User Support', 'Launch user support team', LaunchPhase.postLaunch);
-    _addItem('Analytics Review', 'Daily analytics review and optimization', LaunchPhase.postLaunch);
-    _addItem('Roadmap Planning', 'Plan features for next release', LaunchPhase.postLaunch);
+    _addItem('Performance Monitoring', 'Continuous performance monitoring',
+        LaunchPhase.postLaunch);
+    _addItem(
+        'User Support', 'Launch user support team', LaunchPhase.postLaunch);
+    _addItem('Analytics Review', 'Daily analytics review and optimization',
+        LaunchPhase.postLaunch);
+    _addItem('Roadmap Planning', 'Plan features for next release',
+        LaunchPhase.postLaunch);
 
     debugPrint('[LaunchChecklist] Initialized with ${_items.length} items');
   }
@@ -120,7 +143,8 @@ class LaunchChecklist {
   /// Set current phase
   void setCurrentPhase(LaunchPhase phase) {
     _currentPhase = phase;
-    debugPrint('[LaunchChecklist] Current phase: ${phase.toString().split('.').last}');
+    debugPrint(
+        '[LaunchChecklist] Current phase: ${phase.toString().split('.').last}');
   }
 
   /// Get current phase
@@ -133,10 +157,8 @@ class LaunchChecklist {
       orElse: () => null as dynamic,
     );
 
-    if (item != null) {
-      item.isCompleted = true;
-      item.notes = notes;
-    }
+    item.isCompleted = true;
+    item.notes = notes;
   }
 
   /// Get items by phase
@@ -150,19 +172,18 @@ class LaunchChecklist {
   /// Get completion percentage for phase
   double getPhaseCompletion(LaunchPhase phase) {
     final phaseItems = getItemsByPhase(phase);
-    if (phaseItems.isEmpty) return 0.0;
+    if (phaseItems.isEmpty) return 0;
 
     final completed = phaseItems.where((i) => i.isCompleted).length;
     return (completed / phaseItems.length) * 100;
   }
 
   /// Check if phase is complete
-  bool isPhaseComplete(LaunchPhase phase) =>
-      getPhaseCompletion(phase) == 100.0;
+  bool isPhaseComplete(LaunchPhase phase) => getPhaseCompletion(phase) == 100.0;
 
   /// Get overall completion
   double getOverallCompletion() {
-    if (_items.isEmpty) return 0.0;
+    if (_items.isEmpty) return 0;
     final completed = _items.where((i) => i.isCompleted).length;
     return (completed / _items.length) * 100;
   }
@@ -176,12 +197,13 @@ class LaunchChecklist {
       return false;
     }
 
-    final phases = LaunchPhase.values;
+    const phases = LaunchPhase.values;
     final currentIndex = phases.indexOf(_currentPhase);
 
     if (currentIndex < phases.length - 1) {
       _currentPhase = phases[currentIndex + 1];
-      debugPrint('[LaunchChecklist] Advanced to ${_currentPhase.toString().split('.').last}');
+      debugPrint(
+          '[LaunchChecklist] Advanced to ${_currentPhase.toString().split('.').last}');
       return true;
     }
 
@@ -210,7 +232,8 @@ class LaunchChecklist {
     for (final phase in LaunchPhase.values) {
       final completion = getPhaseCompletion(phase).toStringAsFixed(1);
       final isComplete = isPhaseComplete(phase) ? '✓' : '○';
-      buffer.writeln('║ $isComplete ${phase.toString().split('.').last.padRight(18)}: $completion%${' '.padRight(28)}║');
+      buffer.writeln(
+          '║ $isComplete ${phase.toString().split('.').last.padRight(18)}: $completion%${' '.padRight(28)}║');
 
       for (final item in getItemsByPhase(phase)) {
         final itemStatus = item.isCompleted ? '  ✓' : '  ○';

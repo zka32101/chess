@@ -4,6 +4,13 @@ import 'package:flutter/material.dart';
 ///
 /// Displays various performance metrics as visual charts
 class PerformanceGraphs extends StatefulWidget {
+  const PerformanceGraphs({
+    required this.moveMetrics,
+    Key? key,
+    this.selectedMetric = PerformanceMetric.nodesPerSecond,
+    this.onMetricChanged,
+  }) : super(key: key);
+
   /// List of game move data points
   final List<MoveMetrics> moveMetrics;
 
@@ -12,13 +19,6 @@ class PerformanceGraphs extends StatefulWidget {
 
   /// Callback when metric selection changes
   final Function(PerformanceMetric)? onMetricChanged;
-
-  const PerformanceGraphs({
-    Key? key,
-    required this.moveMetrics,
-    this.selectedMetric = PerformanceMetric.nodesPerSecond,
-    this.onMetricChanged,
-  }) : super(key: key);
 
   @override
   State<PerformanceGraphs> createState() => _PerformanceGraphsState();
@@ -244,12 +244,6 @@ class _PerformanceGraphsState extends State<PerformanceGraphs> {
 
 /// Custom painter for line graph
 class GraphPainter extends CustomPainter {
-  final List<double> data;
-  final double maxValue;
-  final double minValue;
-  final PerformanceMetric metric;
-  final Color color;
-
   GraphPainter({
     required this.data,
     required this.maxValue,
@@ -257,6 +251,11 @@ class GraphPainter extends CustomPainter {
     required this.metric,
     required this.color,
   });
+  final List<double> data;
+  final double maxValue;
+  final double minValue;
+  final PerformanceMetric metric;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -272,8 +271,8 @@ class GraphPainter extends CustomPainter {
       ..color = Colors.grey.withOpacity(0.2)
       ..strokeWidth = 0.5;
 
-    final pointRadius = 3.0;
-    final padding = 40.0;
+    const pointRadius = 3.0;
+    const padding = 40.0;
     final graphWidth = size.width - (padding * 2);
     final graphHeight = size.height - (padding * 2);
 
@@ -329,18 +328,17 @@ class GraphPainter extends CustomPainter {
     );
 
     canvas.drawLine(
-      Offset(padding, padding),
+      const Offset(padding, padding),
       Offset(padding, size.height - padding),
       axisPaint,
     );
   }
 
   @override
-  bool shouldRepaint(GraphPainter oldDelegate) {
-    return oldDelegate.data != data ||
-        oldDelegate.color != color ||
-        oldDelegate.maxValue != maxValue;
-  }
+  bool shouldRepaint(GraphPainter oldDelegate) =>
+      oldDelegate.data != data ||
+      oldDelegate.color != color ||
+      oldDelegate.maxValue != maxValue;
 }
 
 /// Performance metric types
@@ -360,16 +358,7 @@ enum PerformanceMetric {
 
 /// Move performance metrics data
 class MoveMetrics {
-  final int moveNumber;
-  final int nodesEvaluated;
-  final int timeMs;
-  final int depth;
-  final double cacheHitRate;
-  final int zobristHits;
-  final int zobristMisses;
-  final int killerCutoffs;
-  final int countermoveCutoffs;
-  final String gamePhase; // opening, midgame, endgame
+  // opening, midgame, endgame
 
   MoveMetrics({
     required this.moveNumber,
@@ -389,23 +378,32 @@ class MoveMetrics {
     required int moveNumber,
     required Map<String, dynamic> stats,
     required int timeMs,
-  }) {
-    return MoveMetrics(
-      moveNumber: moveNumber,
-      nodesEvaluated: stats['nodesEvaluated'] as int? ?? 0,
-      timeMs: timeMs,
-      depth: stats['depth'] as int? ?? 0,
-      cacheHitRate:
-          double.tryParse(stats['zobristHitRate'] as String? ?? '0') ?? 0,
-      zobristHits: stats['zobristHits'] as int? ?? 0,
-      zobristMisses: stats['zobristMisses'] as int? ?? 0,
-      killerCutoffs:
-          (stats['killerStats'] as Map?)?['totalCutoffs'] as int? ?? 0,
-      countermoveCutoffs:
-          (stats['countermoveStats'] as Map?)?['totalCutoffs'] as int? ?? 0,
-      gamePhase: _determineGamePhase(moveNumber),
-    );
-  }
+  }) =>
+      MoveMetrics(
+        moveNumber: moveNumber,
+        nodesEvaluated: stats['nodesEvaluated'] as int? ?? 0,
+        timeMs: timeMs,
+        depth: stats['depth'] as int? ?? 0,
+        cacheHitRate:
+            double.tryParse(stats['zobristHitRate'] as String? ?? '0') ?? 0,
+        zobristHits: stats['zobristHits'] as int? ?? 0,
+        zobristMisses: stats['zobristMisses'] as int? ?? 0,
+        killerCutoffs:
+            (stats['killerStats'] as Map?)?['totalCutoffs'] as int? ?? 0,
+        countermoveCutoffs:
+            (stats['countermoveStats'] as Map?)?['totalCutoffs'] as int? ?? 0,
+        gamePhase: _determineGamePhase(moveNumber),
+      );
+  final int moveNumber;
+  final int nodesEvaluated;
+  final int timeMs;
+  final int depth;
+  final double cacheHitRate;
+  final int zobristHits;
+  final int zobristMisses;
+  final int killerCutoffs;
+  final int countermoveCutoffs;
+  final String gamePhase;
 
   static String _determineGamePhase(int moveNumber) {
     if (moveNumber <= 12) return 'opening';

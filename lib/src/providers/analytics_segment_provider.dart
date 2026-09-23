@@ -136,17 +136,16 @@ final premiumAdoptionLevelProvider =
 
 /// Cohort for A/B testing
 class UserCohort {
-  final String id;
-  final String name;
-  final DateTime createdAt;
-  final String? experimentId;
-
   UserCohort({
     required this.id,
     required this.name,
     required this.createdAt,
     this.experimentId,
   });
+  final String id;
+  final String name;
+  final DateTime createdAt;
+  final String? experimentId;
 }
 
 /// User cohort assignment provider
@@ -167,15 +166,14 @@ final userCohortProvider = StreamProvider<UserCohort>((ref) async* {
 
 /// Geographic location for segmentation
 class UserLocation {
-  final String? country;
-  final String? region;
-  final String? timezone;
-
   UserLocation({
     this.country,
     this.region,
     this.timezone,
   });
+  final String? country;
+  final String? region;
+  final String? timezone;
 }
 
 /// User location provider
@@ -195,17 +193,16 @@ final userLocationProvider = FutureProvider<UserLocation>((ref) async {
 
 /// Device information for segmentation
 class DeviceInfo {
-  final String platform; // iOS or Android
-  final String osVersion;
-  final String appVersion;
-  final bool isTablet;
-
   DeviceInfo({
     required this.platform,
     required this.osVersion,
     required this.appVersion,
     required this.isTablet,
   });
+  final String platform; // iOS or Android
+  final String osVersion;
+  final String appVersion;
+  final bool isTablet;
 }
 
 /// Device info provider
@@ -229,17 +226,16 @@ final deviceInfoProvider = FutureProvider<DeviceInfo>((ref) async {
 
 /// User retention cohort
 class RetentionCohort {
-  final DateTime signupDate;
-  final int daysActive;
-  final double retention30d;
-  final double retention90d;
-
   RetentionCohort({
     required this.signupDate,
     required this.daysActive,
     required this.retention30d,
     required this.retention90d,
   });
+  final DateTime signupDate;
+  final int daysActive;
+  final double retention30d;
+  final double retention90d;
 }
 
 /// Retention cohort provider

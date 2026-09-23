@@ -8,10 +8,8 @@ import '../services/seasonal_event_service.dart';
 /// Main Seasonal Hub Screen
 /// Displays all seasonal features: seasons, battle pass, challenges, events
 class SeasonalHubScreen extends ConsumerStatefulWidget {
+  const SeasonalHubScreen({required this.playerId, Key? key}) : super(key: key);
   final String playerId;
-
-  const SeasonalHubScreen({Key? key, required this.playerId})
-      : super(key: key);
 
   @override
   ConsumerState<SeasonalHubScreen> createState() => _SeasonalHubScreenState();
@@ -86,178 +84,163 @@ class _SeasonalHubScreenState extends ConsumerState<SeasonalHubScreen>
     );
   }
 
-  Widget _buildSeasonTab(BuildContext context, Season season) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          SeasonProgressCard(
-            playerId: widget.playerId,
-            seasonId: season.seasonId,
-          ),
-          const SizedBox(height: 16),
-          SeasonStatisticsCard(
-            playerId: widget.playerId,
-            seasonId: season.seasonId,
-          ),
-          const SizedBox(height: 16),
-          _buildSeasonInfoCard(context, season),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSeasonInfoCard(BuildContext context, Season season) {
-    return Card(
-      child: Padding(
+  Widget _buildSeasonTab(BuildContext context, Season season) =>
+      SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            SeasonProgressCard(
+              playerId: widget.playerId,
+              seasonId: season.seasonId,
+            ),
+            const SizedBox(height: 16),
+            SeasonStatisticsCard(
+              playerId: widget.playerId,
+              seasonId: season.seasonId,
+            ),
+            const SizedBox(height: 16),
+            _buildSeasonInfoCard(context, season),
+          ],
+        ),
+      );
+
+  Widget _buildSeasonInfoCard(BuildContext context, Season season) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Season Information',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 12),
+              _buildInfoRow('Theme:', season.theme),
+              _buildInfoRow('Max Level:', '${season.maxLevel}'),
+              _buildInfoRow(
+                'Duration:',
+                '${season.startDate.toString().split(' ')[0]} - '
+                    '${season.endDate.toString().split(' ')[0]}',
+              ),
+              _buildInfoRow('Status:', season.status),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildInfoRow(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+
+  Widget _buildBattlePassTab(BuildContext context, Season season) =>
+      SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            BattlePassProgressCard(
+              playerId: widget.playerId,
+              seasonId: season.seasonId,
+            ),
+            const SizedBox(height: 16),
+            _buildBattlePassInfo(context),
+          ],
+        ),
+      );
+
+  Widget _buildBattlePassInfo(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Battle Pass Features',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 12),
+              _buildFeatureItem(
+                'Free Track',
+                'Earn rewards with free battle pass',
+              ),
+              _buildFeatureItem(
+                'Premium Track',
+                'Unlock exclusive rewards with premium',
+              ),
+              _buildFeatureItem(
+                'Weekly Rewards',
+                'Claim milestone rewards at each level',
+              ),
+              _buildFeatureItem(
+                'Progression',
+                'Earn XP from matches and challenges',
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildFeatureItem(String title, String description) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Season Information',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            _buildInfoRow('Theme:', season.theme),
-            _buildInfoRow('Max Level:', '${season.maxLevel}'),
-            _buildInfoRow(
-              'Duration:',
-              '${season.startDate.toString().split(' ')[0]} - '
-              '${season.endDate.toString().split(' ')[0]}',
-            ),
-            _buildInfoRow('Status:', season.status),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(description, style: const TextStyle(fontSize: 12)),
           ],
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBattlePassTab(BuildContext context, Season season) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          BattlePassProgressCard(
-            playerId: widget.playerId,
-            seasonId: season.seasonId,
-          ),
-          const SizedBox(height: 16),
-          _buildBattlePassInfo(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBattlePassInfo(BuildContext context) {
-    return Card(
-      child: Padding(
+  Widget _buildChallengesTab(BuildContext context, Season season) =>
+      SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            ChallengeTrackerCard(
+              playerId: widget.playerId,
+              seasonId: season.seasonId,
+            ),
+            const SizedBox(height: 16),
+            _buildChallengeFilters(context, season),
+          ],
+        ),
+      );
+
+  Widget _buildChallengeFilters(BuildContext context, Season season) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Challenge Types',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 12),
+              _buildFilterChip('Daily', 'Complete daily challenges'),
+              _buildFilterChip('Weekly', 'Complete weekly challenges'),
+              _buildFilterChip('Seasonal', 'Complete seasonal challenges'),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildFilterChip(String label, String description) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Battle Pass Features',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            _buildFeatureItem(
-              'Free Track',
-              'Earn rewards with free battle pass',
-            ),
-            _buildFeatureItem(
-              'Premium Track',
-              'Unlock exclusive rewards with premium',
-            ),
-            _buildFeatureItem(
-              'Weekly Rewards',
-              'Claim milestone rewards at each level',
-            ),
-            _buildFeatureItem(
-              'Progression',
-              'Earn XP from matches and challenges',
-            ),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(description, style: const TextStyle(fontSize: 12)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildFeatureItem(String title, String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(description, style: const TextStyle(fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChallengesTab(BuildContext context, Season season) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          ChallengeTrackerCard(
-            playerId: widget.playerId,
-            seasonId: season.seasonId,
-          ),
-          const SizedBox(height: 16),
-          _buildChallengeFilters(context, season),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChallengeFilters(BuildContext context, Season season) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Challenge Types',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            _buildFilterChip('Daily', 'Complete daily challenges'),
-            _buildFilterChip('Weekly', 'Complete weekly challenges'),
-            _buildFilterChip('Seasonal', 'Complete seasonal challenges'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(description, style: const TextStyle(fontSize: 12)),
-        ],
-      ),
-    );
-  }
+      );
 
   Widget _buildEventsTab(BuildContext context, Season season) {
     final activeEventsAsync = ref.watch(activeEventsProvider(season.seasonId));

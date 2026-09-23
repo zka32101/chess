@@ -5,6 +5,24 @@ import '../utils/query_cache.dart';
 import '../utils/pagination_helper.dart';
 
 class TournamentServiceOptimized {
+  factory TournamentServiceOptimized() => _instance;
+  TournamentServiceOptimized._internal() {
+    _tournamentCache = SmartCache(
+      fetcher: _getTournamentFromDb,
+      cacheTtl: const Duration(minutes: 15),
+    );
+    _standingsCache = SmartCache(
+      fetcher: _getStandingsFromDb,
+      cacheTtl: const Duration(minutes: 5),
+    );
+    _matchCache = SmartCache(
+      fetcher: _getMatchesFromDb,
+      cacheTtl: const Duration(minutes: 2),
+    );
+    _participantCountCache = MonitoredCache(
+      cacheTtl: const Duration(minutes: 5),
+    );
+  }
   static final TournamentServiceOptimized _instance =
       TournamentServiceOptimized._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,31 +32,11 @@ class TournamentServiceOptimized {
   late final SmartCache<String, List<TournamentMatch>> _matchCache;
   late final MonitoredCache<String, int> _participantCountCache;
 
-  factory TournamentServiceOptimized() => _instance;
-  TournamentServiceOptimized._internal() {
-    _tournamentCache = SmartCache(
-      fetcher: (id) => _getTournamentFromDb(id),
-      cacheTtl: const Duration(minutes: 15),
-    );
-    _standingsCache = SmartCache(
-      fetcher: (id) => _getStandingsFromDb(id),
-      cacheTtl: const Duration(minutes: 5),
-    );
-    _matchCache = SmartCache(
-      fetcher: (id) => _getMatchesFromDb(id),
-      cacheTtl: const Duration(minutes: 2),
-    );
-    _participantCountCache = MonitoredCache(
-      cacheTtl: const Duration(minutes: 5),
-    );
-  }
-
   static TournamentServiceOptimized get instance => _instance;
 
   /// Get tournament with smart caching
-  Future<Tournament> getTournamentOptimized(String tournamentId) async {
-    return _tournamentCache.get(tournamentId);
-  }
+  Future<Tournament> getTournamentOptimized(String tournamentId) async =>
+      _tournamentCache.get(tournamentId);
 
   /// Get active tournaments with pagination
   Future<PaginatedResult<Tournament>> getActiveTournamentsPaginated({
@@ -55,14 +53,14 @@ class TournamentServiceOptimized {
           whereIn: ['registration', 'in-progress']).orderBy('startDate');
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => Tournament.fromJson(data),
+        Tournament.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching active tournaments: $e');
@@ -73,9 +71,8 @@ class TournamentServiceOptimized {
   /// Get tournament standings with pagination
   Future<TournamentStandings> getTournamentStandingsOptimized(
     String tournamentId,
-  ) async {
-    return _standingsCache.get(tournamentId);
-  }
+  ) async =>
+      _standingsCache.get(tournamentId);
 
   /// Get tournament matches with round filtering and pagination
   Future<PaginatedResult<TournamentMatch>> getTournamentMatchesPaginated(
@@ -102,14 +99,14 @@ class TournamentServiceOptimized {
       }
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => TournamentMatch.fromJson(data),
+        TournamentMatch.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching tournament matches: $e');
@@ -189,14 +186,14 @@ class TournamentServiceOptimized {
           .orderBy('scheduledAt');
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => TournamentMatch.fromJson(data),
+        TournamentMatch.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching user upcoming matches: $e');
@@ -241,7 +238,7 @@ class TournamentServiceOptimized {
           wins: doc['wins'] ?? 0,
           losses: doc['losses'] ?? 0,
           draws: doc['draws'] ?? 0,
-          buchholz: 0.0,
+          buchholz: 0,
           performance: 0,
         );
       }).toList();

@@ -11,9 +11,8 @@ class ResponsiveBreakpoints {
   static const double desktop = 1200;
 
   /// Check if screen size is mobile
-  static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < tablet;
-  }
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < tablet;
 
   /// Check if screen size is tablet
   static bool isTablet(BuildContext context) {
@@ -22,9 +21,8 @@ class ResponsiveBreakpoints {
   }
 
   /// Check if screen size is desktop
-  static bool isDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= desktop;
-  }
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= desktop;
 
   /// Get current screen size category
   static ScreenSize getScreenSize(BuildContext context) {
@@ -92,16 +90,15 @@ enum ScreenSize {
 
 /// Responsive layout widget that switches layouts based on screen size
 class ResponsiveLayout extends StatelessWidget {
-  final Widget mobileLayout;
-  final Widget? tabletLayout;
-  final Widget? desktopLayout;
-
   const ResponsiveLayout({
     required this.mobileLayout,
     this.tabletLayout,
     this.desktopLayout,
     Key? key,
   }) : super(key: key);
+  final Widget mobileLayout;
+  final Widget? tabletLayout;
+  final Widget? desktopLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -117,13 +114,6 @@ class ResponsiveLayout extends StatelessWidget {
 
 /// Responsive grid widget that adjusts column count based on screen size
 class ResponsiveGridView extends StatelessWidget {
-  final List<Widget> children;
-  final int mobileColumns;
-  final int? tabletColumns;
-  final int? desktopColumns;
-  final double spacing;
-  final double runSpacing;
-
   const ResponsiveGridView({
     required this.children,
     this.mobileColumns = 2,
@@ -133,6 +123,12 @@ class ResponsiveGridView extends StatelessWidget {
     this.runSpacing = 8.0,
     Key? key,
   }) : super(key: key);
+  final List<Widget> children;
+  final int mobileColumns;
+  final int? tabletColumns;
+  final int? desktopColumns;
+  final double spacing;
+  final double runSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -157,12 +153,6 @@ class ResponsiveGridView extends StatelessWidget {
 
 /// Responsive container that adapts width and padding
 class ResponsiveContainer extends StatelessWidget {
-  final Widget child;
-  final double? maxWidth;
-  final EdgeInsets? padding;
-  final Color? color;
-  final BorderRadius? borderRadius;
-
   const ResponsiveContainer({
     required this.child,
     this.maxWidth,
@@ -171,6 +161,11 @@ class ResponsiveContainer extends StatelessWidget {
     this.borderRadius,
     Key? key,
   }) : super(key: key);
+  final Widget child;
+  final double? maxWidth;
+  final EdgeInsets? padding;
+  final Color? color;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -202,15 +197,6 @@ class ResponsiveContainer extends StatelessWidget {
 
 /// Responsive text widget with size scaling
 class ResponsiveText extends StatelessWidget {
-  final String text;
-  final TextStyle? style;
-  final double? mobileSize;
-  final double? tabletSize;
-  final double? desktopSize;
-  final TextAlign? textAlign;
-  final int? maxLines;
-  final TextOverflow? overflow;
-
   const ResponsiveText(
     this.text, {
     this.style,
@@ -222,6 +208,14 @@ class ResponsiveText extends StatelessWidget {
     this.overflow,
     Key? key,
   }) : super(key: key);
+  final String text;
+  final TextStyle? style;
+  final double? mobileSize;
+  final double? tabletSize;
+  final double? desktopSize;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
 
   @override
   Widget build(BuildContext context) {
@@ -249,11 +243,6 @@ class ResponsiveText extends StatelessWidget {
 
 /// Responsive column with adaptive spacing
 class ResponsiveColumn extends StatelessWidget {
-  final List<Widget> children;
-  final MainAxisAlignment mainAxisAlignment;
-  final CrossAxisAlignment crossAxisAlignment;
-  final MainAxisSize mainAxisSize;
-
   const ResponsiveColumn({
     required this.children,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -261,6 +250,10 @@ class ResponsiveColumn extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     Key? key,
   }) : super(key: key);
+  final List<Widget> children;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
+  final MainAxisSize mainAxisSize;
 
   @override
   Widget build(BuildContext context) {
@@ -290,11 +283,6 @@ class ResponsiveColumn extends StatelessWidget {
 
 /// Responsive row with adaptive spacing
 class ResponsiveRow extends StatelessWidget {
-  final List<Widget> children;
-  final MainAxisAlignment mainAxisAlignment;
-  final CrossAxisAlignment crossAxisAlignment;
-  final MainAxisSize mainAxisSize;
-
   const ResponsiveRow({
     required this.children,
     this.mainAxisAlignment = MainAxisAlignment.start,
@@ -302,6 +290,10 @@ class ResponsiveRow extends StatelessWidget {
     this.mainAxisSize = MainAxisSize.max,
     Key? key,
   }) : super(key: key);
+  final List<Widget> children;
+  final MainAxisAlignment mainAxisAlignment;
+  final CrossAxisAlignment crossAxisAlignment;
+  final MainAxisSize mainAxisSize;
 
   @override
   Widget build(BuildContext context) {

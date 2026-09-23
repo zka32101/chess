@@ -1,26 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/services/matchmaking_service.dart';
-import 'package:chess_tactics_master/src/services/online_game_service.dart';
-import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
-import 'package:chess_tactics_master/src/providers/auth_provider.dart';
+import '../models/online_game.dart';
+import '../services/matchmaking_service.dart';
+import '../services/online_game_service.dart';
+import '../services/chess_engine_service.dart';
+import 'auth_provider.dart';
 
 /// Provider for Firebase Auth state
-final firebaseAuthProvider = StreamProvider<User?>((ref) {
-  return FirebaseAuth.instance.authStateChanges();
-});
+final firebaseAuthProvider =
+    StreamProvider<User?>((ref) => FirebaseAuth.instance.authStateChanges());
 
 /// Provider for matchmaking service
-final matchmakingServiceProvider = Provider<MatchmakingService>((ref) {
-  return MatchmakingService();
-});
+final matchmakingServiceProvider =
+    Provider<MatchmakingService>((ref) => MatchmakingService());
 
 /// Provider for online game service
-final onlineGameServiceProvider = Provider<OnlineGameService>((ref) {
-  return OnlineGameService();
-});
+final onlineGameServiceProvider =
+    Provider<OnlineGameService>((ref) => OnlineGameService());
 
 /// Provider for current queue status
 final queueStatusProvider = FutureProvider.family<Map<String, dynamic>, String>(
@@ -79,15 +76,13 @@ final gameStreamProvider =
 
 /// Stream provider for real-time game updates that emits null when the
 /// game document doesn't (or no longer) exists, instead of throwing.
-final onlineGameStreamProvider =
-    StreamProvider.family<OnlineGame?, String>((ref, gameId) {
-  return FirebaseFirestore.instance
-      .collection('games')
-      .doc(gameId)
-      .snapshots()
-      .map((snapshot) =>
-          snapshot.exists ? OnlineGame.fromJson(snapshot.data()!) : null);
-});
+final onlineGameStreamProvider = StreamProvider.family<OnlineGame?, String>(
+    (ref, gameId) => FirebaseFirestore.instance
+        .collection('games')
+        .doc(gameId)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.exists ? OnlineGame.fromJson(snapshot.data()!) : null));
 
 /// Whether the opponent currently has an outstanding draw offer pending
 /// for the local player to respond to.
@@ -109,11 +104,10 @@ final gameMoveProvider =
 
 /// Notifier for online game operations
 class OnlineGameNotifier extends StateNotifier<AsyncValue<void>> {
-  final OnlineGameService _service;
-  final String? _userId;
-
   OnlineGameNotifier(this._service, this._userId)
       : super(const AsyncValue.data(null));
+  final OnlineGameService _service;
+  final String? _userId;
 
   /// Create a new online game
   Future<OnlineGame> createGame({
@@ -164,10 +158,10 @@ class OnlineGameNotifier extends StateNotifier<AsyncValue<void>> {
     required int moveNumber,
     required String from,
     required String to,
-    String? promotion,
     required String playerId,
     required String updatedFen,
     required String updatedPgn,
+    String? promotion,
   }) async {
     try {
       await _service.recordMove(
@@ -255,9 +249,8 @@ final onlineGameNotifierProvider =
 
 /// Notifier for matchmaking operations
 class MatchmakingNotifier extends StateNotifier<AsyncValue<void>> {
-  final MatchmakingService _service;
-
   MatchmakingNotifier(this._service) : super(const AsyncValue.data(null));
+  final MatchmakingService _service;
 
   /// Join matchmaking queue
   Future<MatchmakingQueueEntry> joinQueue({
@@ -300,38 +293,30 @@ class MatchmakingNotifier extends StateNotifier<AsyncValue<void>> {
 /// Local play state for an online game screen: the chess engine kept in
 /// sync with the server's current FEN, plus in-flight move/error status.
 class OnlineGameState {
-  final ChessEngineService engine;
-  final bool isSyncingMove;
-  final String? lastError;
-
   OnlineGameState({
     required this.engine,
     this.isSyncingMove = false,
     this.lastError,
   });
+  final ChessEngineService engine;
+  final bool isSyncingMove;
+  final String? lastError;
 
   OnlineGameState copyWith({
     bool? isSyncingMove,
     String? lastError,
-  }) {
-    return OnlineGameState(
-      engine: engine,
-      isSyncingMove: isSyncingMove ?? this.isSyncingMove,
-      lastError: lastError,
-    );
-  }
+  }) =>
+      OnlineGameState(
+        engine: engine,
+        isSyncingMove: isSyncingMove ?? this.isSyncingMove,
+        lastError: lastError,
+      );
 }
 
 /// Drives a single online game's board: keeps [OnlineGameState.engine] in
 /// sync with the authoritative server state, and submits the local
 /// player's moves/draw offers/resignation back to Firestore.
 class OnlineGameStateNotifier extends StateNotifier<OnlineGameState> {
-  final Ref _ref;
-  final String _gameId;
-
-  OnlineGame? _latestGame;
-  String? _lastSyncedFen;
-
   OnlineGameStateNotifier(this._ref, this._gameId)
       : super(OnlineGameState(engine: ChessEngineService()..initGame())) {
     _ref.listen<AsyncValue<OnlineGame?>>(
@@ -340,6 +325,11 @@ class OnlineGameStateNotifier extends StateNotifier<OnlineGameState> {
       fireImmediately: true,
     );
   }
+  final Ref _ref;
+  final String _gameId;
+
+  OnlineGame? _latestGame;
+  String? _lastSyncedFen;
 
   void _onGameUpdate(OnlineGame? game) {
     _latestGame = game;
@@ -418,7 +408,7 @@ class OnlineGameStateNotifier extends StateNotifier<OnlineGameState> {
 /// Per-game online play state, keyed by gameId.
 final onlineGameStateProvider = StateNotifierProvider.family<
     OnlineGameStateNotifier, OnlineGameState, String>(
-  (ref, gameId) => OnlineGameStateNotifier(ref, gameId),
+  OnlineGameStateNotifier.new,
 );
 
 /// State notifier provider for matchmaking operations

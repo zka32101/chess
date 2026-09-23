@@ -1,23 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaginationParams {
-  final int pageSize;
-  final DocumentSnapshot? startAfter;
-  final bool descending;
-
   PaginationParams({
     this.pageSize = 20,
     this.startAfter,
     this.descending = true,
-  }) : assert(pageSize > 0 && pageSize <= 100, 'Page size must be between 1 and 100');
+  }) : assert(pageSize > 0 && pageSize <= 100,
+            'Page size must be between 1 and 100');
+  final int pageSize;
+  final DocumentSnapshot? startAfter;
+  final bool descending;
 }
 
 class PaginatedResult<T> {
-  final List<T> items;
-  final DocumentSnapshot? nextPageToken;
-  final bool hasMore;
-  final int totalRetrieved;
-
   PaginatedResult({
     required this.items,
     required this.nextPageToken,
@@ -25,46 +20,44 @@ class PaginatedResult<T> {
     required this.totalRetrieved,
   });
 
-  factory PaginatedResult.empty() {
-    return PaginatedResult(
-      items: [],
-      nextPageToken: null,
-      hasMore: false,
-      totalRetrieved: 0,
-    );
-  }
+  factory PaginatedResult.empty() => PaginatedResult(
+        items: [],
+        nextPageToken: null,
+        hasMore: false,
+        totalRetrieved: 0,
+      );
+  final List<T> items;
+  final DocumentSnapshot? nextPageToken;
+  final bool hasMore;
+  final int totalRetrieved;
 }
 
 class CursorPaginationParams {
+  CursorPaginationParams({
+    required this.cursorField,
+    this.cursor,
+    this.pageSize = 20,
+  }) : assert(pageSize > 0 && pageSize <= 100);
   final String? cursor;
   final int pageSize;
   final String cursorField;
-
-  CursorPaginationParams({
-    this.cursor,
-    this.pageSize = 20,
-    required this.cursorField,
-  }) : assert(pageSize > 0 && pageSize <= 100);
 }
 
 class CursorPaginatedResult<T> {
-  final List<T> items;
-  final String? nextCursor;
-  final bool hasMore;
-
   CursorPaginatedResult({
     required this.items,
     required this.nextCursor,
     required this.hasMore,
   });
 
-  factory CursorPaginatedResult.empty() {
-    return CursorPaginatedResult(
-      items: [],
-      nextCursor: null,
-      hasMore: false,
-    );
-  }
+  factory CursorPaginatedResult.empty() => CursorPaginatedResult(
+        items: [],
+        nextCursor: null,
+        hasMore: false,
+      );
+  final List<T> items;
+  final String? nextCursor;
+  final bool hasMore;
 }
 
 class QueryOptimizer {

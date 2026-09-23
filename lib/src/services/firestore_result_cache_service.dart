@@ -1,17 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'cache_manager_service.dart';
 
 /// Caches Firestore query results with smart invalidation.
 /// Reduces redundant database reads for identical queries.
 class FirestoreResultCacheService {
+  factory FirestoreResultCacheService() => _instance;
+
+  FirestoreResultCacheService._internal();
   static final FirestoreResultCacheService _instance =
       FirestoreResultCacheService._internal();
   final CacheManagerService _cacheManager = CacheManagerService();
   final Map<String, Set<String>> _queryDependencies = {};
-
-  factory FirestoreResultCacheService() => _instance;
-
-  FirestoreResultCacheService._internal();
 
   /// Generate cache key from query parameters.
   String _generateKey(String collection, Map<String, dynamic>? filters) {

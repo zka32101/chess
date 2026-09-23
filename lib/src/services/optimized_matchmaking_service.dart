@@ -4,6 +4,10 @@ import 'dart:async';
 
 /// Optimized matchmaking with rating and time control matching
 class OptimizedMatchmakingService {
+  // Maximum rating range
+
+  OptimizedMatchmakingService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -11,11 +15,9 @@ class OptimizedMatchmakingService {
   static const String _playersCollection = 'users';
   static const int _matchmakingTimeoutMs = 30000; // 30 seconds
   static const int _ratingToleranceInitial = 100; // Initial rating range
-  static const int _ratingToleranceIncrement = 50; // Increase tolerance every 5s
-  static const int _maxRatingTolerance = 400; // Maximum rating range
-
-  OptimizedMatchmakingService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  static const int _ratingToleranceIncrement =
+      50; // Increase tolerance every 5s
+  static const int _maxRatingTolerance = 400;
 
   /// Enqueue a player for matchmaking
   Future<MatchmakingQueue> enqueuePlayer({
@@ -77,8 +79,7 @@ class OptimizedMatchmakingService {
           DateTime.now().difference(playerQueue.enqueuedAt).inMilliseconds;
 
       // Determine current rating tolerance
-      final currentTolerance =
-          _calculateRatingTolerance(waitTimeMs);
+      final currentTolerance = _calculateRatingTolerance(waitTimeMs);
 
       // Find potential opponents
       final potentialMatches = await _findPotentialMatches(
@@ -129,8 +130,7 @@ class OptimizedMatchmakingService {
       // Mark queue entries as matched
       final queueDocs = await _firestore
           .collection(_queuesCollection)
-          .where('playerId', whereIn: [player1Id, player2Id])
-          .get();
+          .where('playerId', whereIn: [player1Id, player2Id]).get();
 
       for (final doc in queueDocs.docs) {
         batch.update(doc.reference, {
@@ -154,10 +154,7 @@ class OptimizedMatchmakingService {
     required String queueId,
   }) async {
     try {
-      await _firestore
-          .collection(_queuesCollection)
-          .doc(queueId)
-          .update({
+      await _firestore.collection(_queuesCollection).doc(queueId).update({
         'status': 'waiting',
         'lastDeclineAt': FieldValue.serverTimestamp(),
       });
@@ -189,7 +186,7 @@ class OptimizedMatchmakingService {
           .where('status', isEqualTo: 'waiting')
           .get();
 
-      int totalWaiting = activeQueues.size;
+      final int totalWaiting = activeQueues.size;
       double averageWaitTimeMs = 0;
 
       if (totalWaiting > 0) {
@@ -219,12 +216,22 @@ class OptimizedMatchmakingService {
         final queue = MatchmakingQueue.fromJson(doc.data());
         final rating = queue.rating;
 
-        if (rating < 1000) ratingDistribution['600-999'] = ratingDistribution['600-999']! + 1;
-        else if (rating < 1300) ratingDistribution['1000-1299'] = ratingDistribution['1000-1299']! + 1;
-        else if (rating < 1600) ratingDistribution['1300-1599'] = ratingDistribution['1300-1599']! + 1;
-        else if (rating < 1900) ratingDistribution['1600-1899'] = ratingDistribution['1600-1899']! + 1;
-        else if (rating < 2200) ratingDistribution['1900-2199'] = ratingDistribution['1900-2199']! + 1;
-        else ratingDistribution['2200+'] = ratingDistribution['2200+']! + 1;
+        if (rating < 1000) {
+          ratingDistribution['600-999'] = ratingDistribution['600-999']! + 1;
+        } else if (rating < 1300)
+          ratingDistribution['1000-1299'] =
+              ratingDistribution['1000-1299']! + 1;
+        else if (rating < 1600)
+          ratingDistribution['1300-1599'] =
+              ratingDistribution['1300-1599']! + 1;
+        else if (rating < 1900)
+          ratingDistribution['1600-1899'] =
+              ratingDistribution['1600-1899']! + 1;
+        else if (rating < 2200)
+          ratingDistribution['1900-2199'] =
+              ratingDistribution['1900-2199']! + 1;
+        else
+          ratingDistribution['2200+'] = ratingDistribution['2200+']! + 1;
       }
 
       return MatchmakingStats(
@@ -242,9 +249,9 @@ class OptimizedMatchmakingService {
   /// Private helper methods
 
   int _calculateRatingTolerance(int waitTimeMs) {
-    final toleranceIncreases = (waitTimeMs ~/ 5000); // Increase every 5 seconds
-    final calculatedTolerance =
-        _ratingToleranceInitial + (toleranceIncreases * _ratingToleranceIncrement);
+    final toleranceIncreases = waitTimeMs ~/ 5000; // Increase every 5 seconds
+    final calculatedTolerance = _ratingToleranceInitial +
+        (toleranceIncreases * _ratingToleranceIncrement);
     return calculatedTolerance.clamp(0, _maxRatingTolerance);
   }
 
@@ -270,8 +277,7 @@ class OptimizedMatchmakingService {
       final matches = snapshot.docs
           .map((doc) => MatchmakingQueue.fromJson(doc.data()))
           .where((queue) =>
-              queue.playerId != playerId &&
-              queue.status == 'waiting')
+              queue.playerId != playerId && queue.status == 'waiting')
           .toList();
 
       return matches;
@@ -300,16 +306,6 @@ class OptimizedMatchmakingService {
 
 /// Matchmaking queue entry
 class MatchmakingQueue {
-  final String queueId;
-  final String playerId;
-  final String playerName;
-  final int rating;
-  final String timeControl;
-  final bool isProvisional;
-  final DateTime enqueuedAt;
-  final String status; // waiting, matched, declined
-  final String? gameId;
-
   MatchmakingQueue({
     required this.queueId,
     required this.playerId,
@@ -322,47 +318,43 @@ class MatchmakingQueue {
     this.gameId,
   });
 
-  factory MatchmakingQueue.fromJson(Map<String, dynamic> json) {
-    return MatchmakingQueue(
-      queueId: json['queueId'] as String,
-      playerId: json['playerId'] as String,
-      playerName: json['playerName'] as String,
-      rating: json['rating'] as int,
-      timeControl: json['timeControl'] as String,
-      isProvisional: json['isProvisional'] as bool? ?? false,
-      enqueuedAt: (json['enqueuedAt'] as Timestamp).toDate(),
-      status: json['status'] as String,
-      gameId: json['gameId'] as String?,
-    );
-  }
+  factory MatchmakingQueue.fromJson(Map<String, dynamic> json) =>
+      MatchmakingQueue(
+        queueId: json['queueId'] as String,
+        playerId: json['playerId'] as String,
+        playerName: json['playerName'] as String,
+        rating: json['rating'] as int,
+        timeControl: json['timeControl'] as String,
+        isProvisional: json['isProvisional'] as bool? ?? false,
+        enqueuedAt: (json['enqueuedAt'] as Timestamp).toDate(),
+        status: json['status'] as String,
+        gameId: json['gameId'] as String?,
+      );
+  final String queueId;
+  final String playerId;
+  final String playerName;
+  final int rating;
+  final String timeControl;
+  final bool isProvisional;
+  final DateTime enqueuedAt;
+  final String status; // waiting, matched, declined
+  final String? gameId;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'queueId': queueId,
-      'playerId': playerId,
-      'playerName': playerName,
-      'rating': rating,
-      'timeControl': timeControl,
-      'isProvisional': isProvisional,
-      'enqueuedAt': Timestamp.fromDate(enqueuedAt),
-      'status': status,
-      'gameId': gameId,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'queueId': queueId,
+        'playerId': playerId,
+        'playerName': playerName,
+        'rating': rating,
+        'timeControl': timeControl,
+        'isProvisional': isProvisional,
+        'enqueuedAt': Timestamp.fromDate(enqueuedAt),
+        'status': status,
+        'gameId': gameId,
+      };
 }
 
 /// Match result
 class MatchResult {
-  final String player1Id;
-  final String player1Name;
-  final int player1Rating;
-  final String player2Id;
-  final String player2Name;
-  final int player2Rating;
-  final String timeControl;
-  final int ratingDifference;
-  final DateTime matchedAt;
-
   MatchResult({
     required this.player1Id,
     required this.player1Name,
@@ -374,19 +366,27 @@ class MatchResult {
     required this.ratingDifference,
     required this.matchedAt,
   });
+  final String player1Id;
+  final String player1Name;
+  final int player1Rating;
+  final String player2Id;
+  final String player2Name;
+  final int player2Rating;
+  final String timeControl;
+  final int ratingDifference;
+  final DateTime matchedAt;
 }
 
 /// Matchmaking statistics
 class MatchmakingStats {
-  final String timeControl;
-  final int playersWaiting;
-  final int averageWaitTimeMs;
-  final Map<String, int> ratingDistribution;
-
   MatchmakingStats({
     required this.timeControl,
     required this.playersWaiting,
     required this.averageWaitTimeMs,
     required this.ratingDistribution,
   });
+  final String timeControl;
+  final int playersWaiting;
+  final int averageWaitTimeMs;
+  final Map<String, int> ratingDistribution;
 }

@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Batches multiple Firestore queries to reduce request count.
 /// Combines multiple queries into single batch operations where possible.
 class FirestoreBatchQueryService {
+  factory FirestoreBatchQueryService() => _instance;
+
+  FirestoreBatchQueryService._internal();
   static final FirestoreBatchQueryService _instance =
       FirestoreBatchQueryService._internal();
 
@@ -14,10 +17,6 @@ class FirestoreBatchQueryService {
   static const batchDelayMs = 10;
   static const maxBatchSize = 100;
 
-  factory FirestoreBatchQueryService() => _instance;
-
-  FirestoreBatchQueryService._internal();
-
   /// Batch fetch multiple documents by ID.
   /// Returns results in the same order as requested IDs.
   Future<List<DocumentSnapshot>> batchGetDocuments(
@@ -26,7 +25,8 @@ class FirestoreBatchQueryService {
   ) async {
     if (docIds.isEmpty) return [];
     if (docIds.length == 1) {
-      final doc = await _firestore.collection(collection).doc(docIds.first).get();
+      final doc =
+          await _firestore.collection(collection).doc(docIds.first).get();
       return [doc];
     }
 
@@ -35,7 +35,8 @@ class FirestoreBatchQueryService {
     final chunks = <List<String>>[];
     for (var i = 0; i < docIds.length; i += chunkSize) {
       chunks.add(
-        docIds.sublist(i, i + chunkSize > docIds.length ? docIds.length : i + chunkSize),
+        docIds.sublist(
+            i, i + chunkSize > docIds.length ? docIds.length : i + chunkSize),
       );
     }
 
@@ -49,8 +50,11 @@ class FirestoreBatchQueryService {
     }
 
     // Re-order results to match original order
-    final docMap = {for (var doc in results) doc.id: doc};
-    return docIds.map((id) => docMap[id]).whereType<DocumentSnapshot>().toList();
+    final docMap = {for (final doc in results) doc.id: doc};
+    return docIds
+        .map((id) => docMap[id])
+        .whereType<DocumentSnapshot>()
+        .toList();
   }
 
   /// Queue a batched query operation.

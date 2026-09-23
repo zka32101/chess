@@ -1,16 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/analytics_models.dart';
+import '../models/analytics_models.dart';
 import 'dart:developer' show log;
 
 class TrendAggregationService {
-  static final TrendAggregationService _instance =
-      TrendAggregationService._internal();
-
-  factory TrendAggregationService() {
-    return _instance;
-  }
+  factory TrendAggregationService() => _instance;
 
   TrendAggregationService._internal();
+  static final TrendAggregationService _instance =
+      TrendAggregationService._internal();
 
   static TrendAggregationService get instance => _instance;
 
@@ -130,15 +127,12 @@ class TrendAggregationService {
         return {'error': 'No data available'};
       }
 
-      final avgP50 =
-          trends.map((t) => t.p50Latency).reduce((a, b) => a + b) ~/
-              trends.length;
-      final avgP95 =
-          trends.map((t) => t.p95Latency).reduce((a, b) => a + b) ~/
-              trends.length;
-      final avgP99 =
-          trends.map((t) => t.p99Latency).reduce((a, b) => a + b) ~/
-              trends.length;
+      final avgP50 = trends.map((t) => t.p50Latency).reduce((a, b) => a + b) ~/
+          trends.length;
+      final avgP95 = trends.map((t) => t.p95Latency).reduce((a, b) => a + b) ~/
+          trends.length;
+      final avgP99 = trends.map((t) => t.p99Latency).reduce((a, b) => a + b) ~/
+          trends.length;
 
       return {
         'queryType': queryType,

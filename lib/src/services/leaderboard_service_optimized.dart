@@ -5,15 +5,6 @@ import '../utils/query_cache.dart';
 import '../utils/pagination_helper.dart';
 
 class LeaderboardServiceOptimized {
-  static final LeaderboardServiceOptimized _instance =
-      LeaderboardServiceOptimized._internal();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  late final SmartCache<String, List<LeaderboardEntry>> _leaderboardCache;
-  late final SmartCache<String, RankingStats> _rankingStatsCache;
-  late final MonitoredCache<String, Map<String, int>> _h2hCache;
-  late final CacheStats _cacheStats;
-
   factory LeaderboardServiceOptimized() => _instance;
   LeaderboardServiceOptimized._internal() {
     _leaderboardCache = SmartCache(
@@ -38,6 +29,14 @@ class LeaderboardServiceOptimized {
     _h2hCache = MonitoredCache(cacheTtl: const Duration(hours: 1));
     _cacheStats = CacheStats();
   }
+  static final LeaderboardServiceOptimized _instance =
+      LeaderboardServiceOptimized._internal();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  late final SmartCache<String, List<LeaderboardEntry>> _leaderboardCache;
+  late final SmartCache<String, RankingStats> _rankingStatsCache;
+  late final MonitoredCache<String, Map<String, int>> _h2hCache;
+  late final CacheStats _cacheStats;
 
   static LeaderboardServiceOptimized get instance => _instance;
 
@@ -60,14 +59,14 @@ class LeaderboardServiceOptimized {
           .orderBy('wins', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => LeaderboardEntry.fromJson(data),
+        LeaderboardEntry.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching paginated global leaderboard: $e');
@@ -94,14 +93,14 @@ class LeaderboardServiceOptimized {
           .orderBy('rating', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => LeaderboardEntry.fromJson(data),
+        LeaderboardEntry.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching paginated regional leaderboard: $e');
@@ -110,9 +109,8 @@ class LeaderboardServiceOptimized {
   }
 
   /// Get ranking statistics with smart caching
-  Future<RankingStats> getRankingStatsOptimized(String userId) async {
-    return _rankingStatsCache.get(userId);
-  }
+  Future<RankingStats> getRankingStatsOptimized(String userId) async =>
+      _rankingStatsCache.get(userId);
 
   /// Get head-to-head stats with monitored caching
   Future<Map<String, int>> getHeadToHeadStatsOptimized(

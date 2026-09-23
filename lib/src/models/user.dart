@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:chess_tactics_master/src/services/shogi_rank_service.dart';
+import '../services/shogi_rank_service.dart';
 
 part 'user.freezed.dart';
 part 'user.g.dart';
@@ -37,13 +37,11 @@ class _ShogiRankConverter
   @override
   ShogiRank? fromJson(Map<String, dynamic>? json) {
     if (json == null) {
-      return ShogiRank.dan(1); // デフォルト値
+      return const ShogiRank.dan(1); // デフォルト値
     }
     return ShogiRank.fromJson(json);
   }
 
   @override
-  Map<String, dynamic>? toJson(ShogiRank? value) {
-    return value?.toJson();
-  }
+  Map<String, dynamic>? toJson(ShogiRank? value) => value?.toJson();
 }

@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SocialNetworkService {
+  factory SocialNetworkService() => _instance;
+
+  SocialNetworkService._internal();
   static final SocialNetworkService _instance =
       SocialNetworkService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  factory SocialNetworkService() {
-    return _instance;
-  }
-
-  SocialNetworkService._internal();
 
   Future<void> addFriend(String userId, String friendId) async {
     try {
@@ -103,9 +100,7 @@ class SocialNetworkService {
           .limit(limit)
           .get();
 
-      return snapshot.docs
-          .map((doc) => FeedItem.fromJson(doc.data()))
-          .toList();
+      return snapshot.docs.map((doc) => FeedItem.fromJson(doc.data())).toList();
     } catch (e) {
       print('Error fetching social feed: $e');
       return [];
@@ -114,8 +109,7 @@ class SocialNetworkService {
 
   Future<UserProfile> getUserProfile(String userId) async {
     try {
-      final userDoc =
-          await _firestore.collection('users').doc(userId).get();
+      final userDoc = await _firestore.collection('users').doc(userId).get();
       final achievementsSnapshot = await _firestore
           .collection('achievements')
           .doc('user_achievements')
@@ -149,11 +143,7 @@ class SocialNetworkService {
   Future<void> addFeedItem(
       String userId, String actionType, String actionData) async {
     try {
-      await _firestore
-          .collection('social')
-          .doc('feed')
-          .collection(userId)
-          .add({
+      await _firestore.collection('social').doc('feed').collection(userId).add({
         'userId': userId,
         'actionType': actionType,
         'actionData': actionData,
@@ -166,13 +156,6 @@ class SocialNetworkService {
 }
 
 class Friend {
-  final String userId;
-  final String username;
-  final String photoUrl;
-  final int rating;
-  final bool isOnline;
-  final DateTime lastSeen;
-
   Friend({
     required this.userId,
     required this.username,
@@ -181,15 +164,15 @@ class Friend {
     required this.isOnline,
     required this.lastSeen,
   });
+  final String userId;
+  final String username;
+  final String photoUrl;
+  final int rating;
+  final bool isOnline;
+  final DateTime lastSeen;
 }
 
 class FeedItem {
-  final String feedId;
-  final String userId;
-  final String actionType;
-  final String actionData;
-  final DateTime createdAt;
-
   FeedItem({
     required this.feedId,
     required this.userId,
@@ -198,50 +181,40 @@ class FeedItem {
     required this.createdAt,
   });
 
-  factory FeedItem.fromJson(Map<String, dynamic> json) {
-    return FeedItem(
-      feedId: json.toString(),
-      userId: json['userId'] ?? '',
-      actionType: json['actionType'] ?? '',
-      actionData: json['actionData'] ?? '',
-      createdAt: json['createdAt'] != null
-          ? (json['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
-  }
+  factory FeedItem.fromJson(Map<String, dynamic> json) => FeedItem(
+        feedId: json.toString(),
+        userId: json['userId'] ?? '',
+        actionType: json['actionType'] ?? '',
+        actionData: json['actionData'] ?? '',
+        createdAt: json['createdAt'] != null
+            ? (json['createdAt'] as Timestamp).toDate()
+            : DateTime.now(),
+      );
+  final String feedId;
+  final String userId;
+  final String actionType;
+  final String actionData;
+  final DateTime createdAt;
 }
 
 class UserAchievementMinimal {
-  final String achievementId;
-  final DateTime unlockedAt;
-
   UserAchievementMinimal({
     required this.achievementId,
     required this.unlockedAt,
   });
 
-  factory UserAchievementMinimal.fromJson(Map<String, dynamic> json) {
-    return UserAchievementMinimal(
-      achievementId: json['achievementId'] ?? '',
-      unlockedAt: json['unlockedAt'] != null
-          ? (json['unlockedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
-  }
+  factory UserAchievementMinimal.fromJson(Map<String, dynamic> json) =>
+      UserAchievementMinimal(
+        achievementId: json['achievementId'] ?? '',
+        unlockedAt: json['unlockedAt'] != null
+            ? (json['unlockedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+      );
+  final String achievementId;
+  final DateTime unlockedAt;
 }
 
 class UserProfile {
-  final String userId;
-  final String username;
-  final String bio;
-  final String photoUrl;
-  final int totalGames;
-  final int wins;
-  final double winRate;
-  final int rating;
-  final List<UserAchievementMinimal> achievements;
-  final DateTime joinedAt;
-
   UserProfile({
     required this.userId,
     required this.username,
@@ -254,4 +227,14 @@ class UserProfile {
     required this.achievements,
     required this.joinedAt,
   });
+  final String userId;
+  final String username;
+  final String bio;
+  final String photoUrl;
+  final int totalGames;
+  final int wins;
+  final double winRate;
+  final int rating;
+  final List<UserAchievementMinimal> achievements;
+  final DateTime joinedAt;
 }

@@ -1,18 +1,15 @@
-import 'package:flutter/foundation.dart';
-
 /// Unified cache management service for Chess Tactics Master.
 /// Implements LRU eviction policy and TTL-based expiration.
 class CacheEntry<T> {
-  final T value;
-  final DateTime createdAt;
-  final Duration? ttl;
-  DateTime lastAccessedAt;
-
   CacheEntry({
     required this.value,
     this.ttl,
   })  : createdAt = DateTime.now(),
         lastAccessedAt = DateTime.now();
+  final T value;
+  final DateTime createdAt;
+  final Duration? ttl;
+  DateTime lastAccessedAt;
 
   bool get isExpired {
     if (ttl == null) return false;
@@ -28,6 +25,12 @@ class CacheEntry<T> {
 
 /// Central cache manager using LRU eviction and TTL expiration.
 class CacheManagerService {
+  factory CacheManagerService({int maxSize = defaultMaxSize, Duration? ttl}) =>
+      _instance;
+
+  CacheManagerService._internal()
+      : _maxSize = defaultMaxSize,
+        _defaultTtl = defaultTtl;
   static final CacheManagerService _instance = CacheManagerService._internal();
   static const int defaultMaxSize = 500;
   static const Duration defaultTtl = Duration(hours: 1);
@@ -35,14 +38,6 @@ class CacheManagerService {
   final Map<String, CacheEntry> _cache = {};
   final int _maxSize;
   final Duration _defaultTtl;
-
-  factory CacheManagerService({int maxSize = defaultMaxSize, Duration? ttl}) {
-    return _instance;
-  }
-
-  CacheManagerService._internal()
-      : _maxSize = defaultMaxSize,
-        _defaultTtl = defaultTtl;
 
   /// Store a value in cache with optional TTL.
   void set<T>(String key, T value, {Duration? ttl}) {
@@ -105,7 +100,8 @@ class CacheManagerService {
     if (_cache.length <= _maxSize) return;
 
     final sortedEntries = _cache.entries.toList()
-      ..sort((a, b) => a.value.lastAccessedAt.compareTo(b.value.lastAccessedAt));
+      ..sort(
+          (a, b) => a.value.lastAccessedAt.compareTo(b.value.lastAccessedAt));
 
     final toRemove = sortedEntries.first.key;
     _cache.remove(toRemove);
@@ -114,15 +110,14 @@ class CacheManagerService {
 
 /// Cache statistics for monitoring.
 class CacheStats {
-  final int totalEntries;
-  final int maxSize;
-  final String utilizationPercent;
-
   CacheStats({
     required this.totalEntries,
     required this.maxSize,
     required this.utilizationPercent,
   });
+  final int totalEntries;
+  final int maxSize;
+  final String utilizationPercent;
 
   @override
   String toString() =>

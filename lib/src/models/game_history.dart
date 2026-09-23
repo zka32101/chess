@@ -1,8 +1,36 @@
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
-import 'package:chess_tactics_master/src/widgets/performance_graphs.dart';
+import '../services/ai_opponent_engine_enhanced.dart';
+import '../widgets/performance_graphs.dart';
 
 /// Represents a complete game with all analysis data
 class GameRecord {
+  GameRecord({
+    required this.gameId,
+    required this.playedAt,
+    required this.difficulty,
+    required this.result,
+    required this.totalMoves,
+    required this.totalTimeMs,
+    required this.moveMetrics,
+    required this.statistics,
+    this.notes,
+  });
+
+  /// Create from JSON
+  factory GameRecord.fromJson(Map<String, dynamic> json) => GameRecord(
+        gameId: json['gameId'] as String,
+        playedAt: DateTime.parse(json['playedAt'] as String),
+        difficulty: _parseDifficulty(json['difficulty'] as String),
+        result: GameResult.values.byName(json['result'] as String),
+        totalMoves: json['totalMoves'] as int,
+        totalTimeMs: json['totalTimeMs'] as int,
+        moveMetrics: (json['moveMetrics'] as List?)
+                ?.map((m) => _moveMetricsFromJson(m as Map<String, dynamic>))
+                .toList() ??
+            [],
+        statistics:
+            GameStatistics.fromJson(json['statistics'] as Map<String, dynamic>),
+        notes: json['notes'] as String?,
+      );
   final String gameId;
   final DateTime playedAt;
   final AIDifficulty difficulty;
@@ -19,51 +47,18 @@ class GameRecord {
   /// Player notes
   final String? notes;
 
-  GameRecord({
-    required this.gameId,
-    required this.playedAt,
-    required this.difficulty,
-    required this.result,
-    required this.totalMoves,
-    required this.totalTimeMs,
-    required this.moveMetrics,
-    required this.statistics,
-    this.notes,
-  });
-
   /// Convert to JSON for storage
-  Map<String, dynamic> toJson() {
-    return {
-      'gameId': gameId,
-      'playedAt': playedAt.toIso8601String(),
-      'difficulty': difficulty.displayName,
-      'result': result.name,
-      'totalMoves': totalMoves,
-      'totalTimeMs': totalTimeMs,
-      'moveMetrics': moveMetrics.map((m) => _moveMetricsToJson(m)).toList(),
-      'statistics': statistics.toJson(),
-      'notes': notes,
-    };
-  }
-
-  /// Create from JSON
-  factory GameRecord.fromJson(Map<String, dynamic> json) {
-    return GameRecord(
-      gameId: json['gameId'] as String,
-      playedAt: DateTime.parse(json['playedAt'] as String),
-      difficulty: _parseDifficulty(json['difficulty'] as String),
-      result: GameResult.values.byName(json['result'] as String),
-      totalMoves: json['totalMoves'] as int,
-      totalTimeMs: json['totalTimeMs'] as int,
-      moveMetrics: (json['moveMetrics'] as List?)
-              ?.map((m) => _moveMetricsFromJson(m as Map<String, dynamic>))
-              .toList() ??
-          [],
-      statistics:
-          GameStatistics.fromJson(json['statistics'] as Map<String, dynamic>),
-      notes: json['notes'] as String?,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'gameId': gameId,
+        'playedAt': playedAt.toIso8601String(),
+        'difficulty': difficulty.displayName,
+        'result': result.name,
+        'totalMoves': totalMoves,
+        'totalTimeMs': totalTimeMs,
+        'moveMetrics': moveMetrics.map(_moveMetricsToJson).toList(),
+        'statistics': statistics.toJson(),
+        'notes': notes,
+      };
 
   static AIDifficulty _parseDifficulty(String name) {
     switch (name.toLowerCase()) {
@@ -78,42 +73,39 @@ class GameRecord {
     }
   }
 
-  static Map<String, dynamic> _moveMetricsToJson(MoveMetrics m) {
-    return {
-      'moveNumber': m.moveNumber,
-      'nodesEvaluated': m.nodesEvaluated,
-      'timeMs': m.timeMs,
-      'depth': m.depth,
-      'cacheHitRate': m.cacheHitRate,
-      'zobristHits': m.zobristHits,
-      'zobristMisses': m.zobristMisses,
-      'killerCutoffs': m.killerCutoffs,
-      'countermoveCutoffs': m.countermoveCutoffs,
-      'gamePhase': m.gamePhase,
-    };
-  }
+  static Map<String, dynamic> _moveMetricsToJson(MoveMetrics m) => {
+        'moveNumber': m.moveNumber,
+        'nodesEvaluated': m.nodesEvaluated,
+        'timeMs': m.timeMs,
+        'depth': m.depth,
+        'cacheHitRate': m.cacheHitRate,
+        'zobristHits': m.zobristHits,
+        'zobristMisses': m.zobristMisses,
+        'killerCutoffs': m.killerCutoffs,
+        'countermoveCutoffs': m.countermoveCutoffs,
+        'gamePhase': m.gamePhase,
+      };
 
-  static MoveMetrics _moveMetricsFromJson(Map<String, dynamic> json) {
-    return MoveMetrics(
-      moveNumber: json['moveNumber'] as int,
-      nodesEvaluated: json['nodesEvaluated'] as int,
-      timeMs: json['timeMs'] as int,
-      depth: json['depth'] as int,
-      cacheHitRate: json['cacheHitRate'] as double,
-      zobristHits: json['zobristHits'] as int,
-      zobristMisses: json['zobristMisses'] as int,
-      killerCutoffs: json['killerCutoffs'] as int,
-      countermoveCutoffs: json['countermoveCutoffs'] as int,
-      gamePhase: json['gamePhase'] as String,
-    );
-  }
+  static MoveMetrics _moveMetricsFromJson(Map<String, dynamic> json) =>
+      MoveMetrics(
+        moveNumber: json['moveNumber'] as int,
+        nodesEvaluated: json['nodesEvaluated'] as int,
+        timeMs: json['timeMs'] as int,
+        depth: json['depth'] as int,
+        cacheHitRate: json['cacheHitRate'] as double,
+        zobristHits: json['zobristHits'] as int,
+        zobristMisses: json['zobristMisses'] as int,
+        killerCutoffs: json['killerCutoffs'] as int,
+        countermoveCutoffs: json['countermoveCutoffs'] as int,
+        gamePhase: json['gamePhase'] as String,
+      );
 }
 
 /// Game result enumeration
 enum GameResult {
-  win('Win', 1.0),
+  win('Win', 1),
   draw('Draw', 0.5),
-  loss('Loss', 0.0);
+  loss('Loss', 0);
 
   final String displayName;
   final double scoreValue;
@@ -123,18 +115,6 @@ enum GameResult {
 
 /// Aggregated statistics for a single game
 class GameStatistics {
-  final double avgNodesPerSec;
-  final double avgCacheHitRate;
-  final double avgSearchDepth;
-  final double avgTimePerMove;
-  final int totalKillerCutoffs;
-  final int totalCountermoveCutoffs;
-
-  /// Performance by game phase
-  final PhaseStatistics openingStats;
-  final PhaseStatistics midgameStats;
-  final PhaseStatistics endgameStats;
-
   GameStatistics({
     required this.avgNodesPerSec,
     required this.avgCacheHitRate,
@@ -171,9 +151,9 @@ class GameStatistics {
     int totalKillers = 0;
     int totalCountermoves = 0;
 
-    List<MoveMetrics> openingMetrics = [];
-    List<MoveMetrics> midgameMetrics = [];
-    List<MoveMetrics> endgameMetrics = [];
+    final List<MoveMetrics> openingMetrics = [];
+    final List<MoveMetrics> midgameMetrics = [];
+    final List<MoveMetrics> endgameMetrics = [];
 
     for (final m in metrics) {
       totalNodesPerSec += m.nodesEvaluated / (m.timeMs / 1000);
@@ -211,48 +191,49 @@ class GameStatistics {
     );
   }
 
-  /// Convert to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'avgNodesPerSec': avgNodesPerSec,
-      'avgCacheHitRate': avgCacheHitRate,
-      'avgSearchDepth': avgSearchDepth,
-      'avgTimePerMove': avgTimePerMove,
-      'totalKillerCutoffs': totalKillerCutoffs,
-      'totalCountermoveCutoffs': totalCountermoveCutoffs,
-      'openingStats': openingStats.toJson(),
-      'midgameStats': midgameStats.toJson(),
-      'endgameStats': endgameStats.toJson(),
-    };
-  }
-
   /// Create from JSON
-  factory GameStatistics.fromJson(Map<String, dynamic> json) {
-    return GameStatistics(
-      avgNodesPerSec: json['avgNodesPerSec'] as double? ?? 0,
-      avgCacheHitRate: json['avgCacheHitRate'] as double? ?? 0,
-      avgSearchDepth: json['avgSearchDepth'] as double? ?? 0,
-      avgTimePerMove: json['avgTimePerMove'] as double? ?? 0,
-      totalKillerCutoffs: json['totalKillerCutoffs'] as int? ?? 0,
-      totalCountermoveCutoffs: json['totalCountermoveCutoffs'] as int? ?? 0,
-      openingStats: PhaseStatistics.fromJson(
-          json['openingStats'] as Map<String, dynamic>? ?? {}),
-      midgameStats: PhaseStatistics.fromJson(
-          json['midgameStats'] as Map<String, dynamic>? ?? {}),
-      endgameStats: PhaseStatistics.fromJson(
-          json['endgameStats'] as Map<String, dynamic>? ?? {}),
-    );
-  }
+  factory GameStatistics.fromJson(Map<String, dynamic> json) => GameStatistics(
+        avgNodesPerSec: json['avgNodesPerSec'] as double? ?? 0,
+        avgCacheHitRate: json['avgCacheHitRate'] as double? ?? 0,
+        avgSearchDepth: json['avgSearchDepth'] as double? ?? 0,
+        avgTimePerMove: json['avgTimePerMove'] as double? ?? 0,
+        totalKillerCutoffs: json['totalKillerCutoffs'] as int? ?? 0,
+        totalCountermoveCutoffs: json['totalCountermoveCutoffs'] as int? ?? 0,
+        openingStats: PhaseStatistics.fromJson(
+            json['openingStats'] as Map<String, dynamic>? ?? {}),
+        midgameStats: PhaseStatistics.fromJson(
+            json['midgameStats'] as Map<String, dynamic>? ?? {}),
+        endgameStats: PhaseStatistics.fromJson(
+            json['endgameStats'] as Map<String, dynamic>? ?? {}),
+      );
+  final double avgNodesPerSec;
+  final double avgCacheHitRate;
+  final double avgSearchDepth;
+  final double avgTimePerMove;
+  final int totalKillerCutoffs;
+  final int totalCountermoveCutoffs;
+
+  /// Performance by game phase
+  final PhaseStatistics openingStats;
+  final PhaseStatistics midgameStats;
+  final PhaseStatistics endgameStats;
+
+  /// Convert to JSON
+  Map<String, dynamic> toJson() => {
+        'avgNodesPerSec': avgNodesPerSec,
+        'avgCacheHitRate': avgCacheHitRate,
+        'avgSearchDepth': avgSearchDepth,
+        'avgTimePerMove': avgTimePerMove,
+        'totalKillerCutoffs': totalKillerCutoffs,
+        'totalCountermoveCutoffs': totalCountermoveCutoffs,
+        'openingStats': openingStats.toJson(),
+        'midgameStats': midgameStats.toJson(),
+        'endgameStats': endgameStats.toJson(),
+      };
 }
 
 /// Statistics for a specific game phase
 class PhaseStatistics {
-  final int moveCount;
-  final double avgNodesPerSec;
-  final double avgCacheHitRate;
-  final double avgSearchDepth;
-  final int totalCutoffs;
-
   PhaseStatistics({
     required this.moveCount,
     required this.avgNodesPerSec,
@@ -262,15 +243,13 @@ class PhaseStatistics {
   });
 
   /// Empty statistics
-  factory PhaseStatistics.empty() {
-    return PhaseStatistics(
-      moveCount: 0,
-      avgNodesPerSec: 0,
-      avgCacheHitRate: 0,
-      avgSearchDepth: 0,
-      totalCutoffs: 0,
-    );
-  }
+  factory PhaseStatistics.empty() => PhaseStatistics(
+        moveCount: 0,
+        avgNodesPerSec: 0,
+        avgCacheHitRate: 0,
+        avgSearchDepth: 0,
+        totalCutoffs: 0,
+      );
 
   /// Calculate from metrics
   factory PhaseStatistics.fromMetrics(List<MoveMetrics> metrics) {
@@ -298,42 +277,43 @@ class PhaseStatistics {
     );
   }
 
-  /// Convert to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'moveCount': moveCount,
-      'avgNodesPerSec': avgNodesPerSec,
-      'avgCacheHitRate': avgCacheHitRate,
-      'avgSearchDepth': avgSearchDepth,
-      'totalCutoffs': totalCutoffs,
-    };
-  }
-
   /// Create from JSON
-  factory PhaseStatistics.fromJson(Map<String, dynamic> json) {
-    return PhaseStatistics(
-      moveCount: json['moveCount'] as int? ?? 0,
-      avgNodesPerSec: json['avgNodesPerSec'] as double? ?? 0,
-      avgCacheHitRate: json['avgCacheHitRate'] as double? ?? 0,
-      avgSearchDepth: json['avgSearchDepth'] as double? ?? 0,
-      totalCutoffs: json['totalCutoffs'] as int? ?? 0,
-    );
-  }
+  factory PhaseStatistics.fromJson(Map<String, dynamic> json) =>
+      PhaseStatistics(
+        moveCount: json['moveCount'] as int? ?? 0,
+        avgNodesPerSec: json['avgNodesPerSec'] as double? ?? 0,
+        avgCacheHitRate: json['avgCacheHitRate'] as double? ?? 0,
+        avgSearchDepth: json['avgSearchDepth'] as double? ?? 0,
+        totalCutoffs: json['totalCutoffs'] as int? ?? 0,
+      );
+  final int moveCount;
+  final double avgNodesPerSec;
+  final double avgCacheHitRate;
+  final double avgSearchDepth;
+  final int totalCutoffs;
+
+  /// Convert to JSON
+  Map<String, dynamic> toJson() => {
+        'moveCount': moveCount,
+        'avgNodesPerSec': avgNodesPerSec,
+        'avgCacheHitRate': avgCacheHitRate,
+        'avgSearchDepth': avgSearchDepth,
+        'totalCutoffs': totalCutoffs,
+      };
 }
 
 /// Player statistics aggregated across games
 class PlayerStatistics {
-  final String playerId;
-  final List<GameRecord> games;
-  final DateTime firstGame;
-  final DateTime lastGame;
-
   PlayerStatistics({
     required this.playerId,
     required this.games,
     required this.firstGame,
     required this.lastGame,
   });
+  final String playerId;
+  final List<GameRecord> games;
+  final DateTime firstGame;
+  final DateTime lastGame;
 
   /// Total games played
   int get totalGames => games.length;
@@ -350,9 +330,8 @@ class PlayerStatistics {
   }
 
   /// Games by difficulty
-  List<GameRecord> gamesByDifficulty(AIDifficulty difficulty) {
-    return games.where((g) => g.difficulty == difficulty).toList();
-  }
+  List<GameRecord> gamesByDifficulty(AIDifficulty difficulty) =>
+      games.where((g) => g.difficulty == difficulty).toList();
 
   /// Average stats by difficulty
   Map<String, dynamic> getStatsByDifficulty(AIDifficulty difficulty) {
@@ -446,9 +425,9 @@ class PlayerStatistics {
     secondHalfCache /= secondHalf.length;
 
     final nodeImprovement =
-        ((secondHalfNodes - firstHalfNodes) / firstHalfNodes * 100);
+        (secondHalfNodes - firstHalfNodes) / firstHalfNodes * 100;
     final cacheImprovement =
-        ((secondHalfCache - firstHalfCache) / firstHalfCache * 100);
+        (secondHalfCache - firstHalfCache) / firstHalfCache * 100;
 
     return {
       'firstHalfAvgNodesPerSec': firstHalfNodes.toStringAsFixed(0),

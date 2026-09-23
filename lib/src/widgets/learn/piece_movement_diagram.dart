@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../services/chess_engine_service.dart';
+
 /// A small, non-interactive 8x8 board diagram used to illustrate how a
 /// piece moves: shows the piece on [pieceSquare] and highlights every
 /// square in [highlightSquares] as a reachable destination.
@@ -7,18 +9,17 @@ import 'package:flutter/material.dart';
 /// This is intentionally decoupled from [ChessEngineService]/[ChessBoard]:
 /// it only ever renders a fixed illustration, never live game state.
 class PieceMovementDiagram extends StatelessWidget {
+  const PieceMovementDiagram({
+    required this.symbol,
+    required this.pieceSquare,
+    required this.highlightSquares,
+    Key? key,
+    this.size = 280,
+  }) : super(key: key);
   final String symbol;
   final String pieceSquare;
   final List<String> highlightSquares;
   final double size;
-
-  const PieceMovementDiagram({
-    Key? key,
-    required this.symbol,
-    required this.pieceSquare,
-    required this.highlightSquares,
-    this.size = 280,
-  }) : super(key: key);
 
   static const List<String> _files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 

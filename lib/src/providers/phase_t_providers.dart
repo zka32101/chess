@@ -10,18 +10,14 @@ import '../models/phase_k_models.dart' hide FriendRequest;
 
 // Service Providers
 
-final playerConnectionServiceProvider =
-    Provider<PlayerConnectionService>((ref) {
-  return PlayerConnectionService(firestore: FirebaseFirestore.instance);
-});
+final playerConnectionServiceProvider = Provider<PlayerConnectionService>(
+    (ref) => PlayerConnectionService(firestore: FirebaseFirestore.instance));
 
-final leaderboardServiceProvider = Provider<LeaderboardService>((ref) {
-  return LeaderboardService();
-});
+final leaderboardServiceProvider =
+    Provider<LeaderboardService>((ref) => LeaderboardService());
 
-final achievementServiceProvider = Provider<AchievementService>((ref) {
-  return AchievementService();
-});
+final achievementServiceProvider =
+    Provider<AchievementService>((ref) => AchievementService());
 
 // Connection Providers
 
@@ -162,9 +158,8 @@ final achievementUnlockNotifierProvider =
 // Notifier Implementations
 
 class FriendRequestNotifier extends StateNotifier<FriendRequestState> {
-  final PlayerConnectionService _service;
-
   FriendRequestNotifier(this._service) : super(const FriendRequestState());
+  final PlayerConnectionService _service;
 
   Future<void> sendFriendRequest({
     required String fromPlayerId,
@@ -268,10 +263,9 @@ class FriendRequestNotifier extends StateNotifier<FriendRequestState> {
 }
 
 class AchievementUnlockNotifier extends StateNotifier<AchievementUnlockState> {
-  final AchievementService _service;
-
   AchievementUnlockNotifier(this._service)
       : super(const AchievementUnlockState());
+  final AchievementService _service;
 
   Future<void> unlockAchievement({
     required String playerId,
@@ -302,49 +296,45 @@ class AchievementUnlockNotifier extends StateNotifier<AchievementUnlockState> {
 // State Classes
 
 class FriendRequestState {
-  final bool isLoading;
-  final String? lastAction;
-  final String? error;
-
   const FriendRequestState({
     this.isLoading = false,
     this.lastAction,
     this.error,
   });
+  final bool isLoading;
+  final String? lastAction;
+  final String? error;
 
   FriendRequestState copyWith({
     bool? isLoading,
     String? lastAction,
     String? error,
-  }) {
-    return FriendRequestState(
-      isLoading: isLoading ?? this.isLoading,
-      lastAction: lastAction ?? this.lastAction,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      FriendRequestState(
+        isLoading: isLoading ?? this.isLoading,
+        lastAction: lastAction ?? this.lastAction,
+        error: error ?? this.error,
+      );
 }
 
 class AchievementUnlockState {
-  final bool isLoading;
-  final String? lastUnlockedId;
-  final String? error;
-
   const AchievementUnlockState({
     this.isLoading = false,
     this.lastUnlockedId,
     this.error,
   });
+  final bool isLoading;
+  final String? lastUnlockedId;
+  final String? error;
 
   AchievementUnlockState copyWith({
     bool? isLoading,
     String? lastUnlockedId,
     String? error,
-  }) {
-    return AchievementUnlockState(
-      isLoading: isLoading ?? this.isLoading,
-      lastUnlockedId: lastUnlockedId ?? this.lastUnlockedId,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      AchievementUnlockState(
+        isLoading: isLoading ?? this.isLoading,
+        lastUnlockedId: lastUnlockedId ?? this.lastUnlockedId,
+        error: error ?? this.error,
+      );
 }

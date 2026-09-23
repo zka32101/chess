@@ -5,24 +5,16 @@ import '../utils/launch_checklist.dart';
 import '../utils/cicd_pipeline.dart';
 
 /// Deployment manager provider
-final deploymentManagerProvider = Provider((ref) {
-  return DeploymentManager();
-});
+final deploymentManagerProvider = Provider((ref) => DeploymentManager());
 
 /// Beta testing manager provider
-final betaTestingManagerProvider = Provider((ref) {
-  return BetaTestingManager();
-});
+final betaTestingManagerProvider = Provider((ref) => BetaTestingManager());
 
 /// Launch checklist provider
-final launchChecklistProvider = Provider((ref) {
-  return LaunchChecklist();
-});
+final launchChecklistProvider = Provider((ref) => LaunchChecklist());
 
 /// CI/CD pipeline provider
-final cicdPipelineProvider = Provider((ref) {
-  return CICDPipeline();
-});
+final cicdPipelineProvider = Provider((ref) => CICDPipeline());
 
 /// Current deployment config provider
 final currentDeploymentConfigProvider = Provider((ref) {
@@ -110,9 +102,8 @@ final pipelinePassedRunsProvider = Provider((ref) {
 
 /// Deployment execution notifier
 class DeploymentNotifier extends StateNotifier<bool> {
-  final _manager = DeploymentManager();
-
   DeploymentNotifier() : super(false);
+  final _manager = DeploymentManager();
 
   Future<void> deploy({
     required DeploymentEnvironment environment,
@@ -136,15 +127,13 @@ class DeploymentNotifier extends StateNotifier<bool> {
 
 /// Deployment execution provider
 final deploymentExecutionProvider =
-    StateNotifierProvider<DeploymentNotifier, bool>((ref) {
-  return DeploymentNotifier();
-});
+    StateNotifierProvider<DeploymentNotifier, bool>(
+        (ref) => DeploymentNotifier());
 
 /// Beta session notifier
 class BetaSessionNotifier extends StateNotifier<int> {
-  final _manager = BetaTestingManager();
-
   BetaSessionNotifier() : super(0);
+  final _manager = BetaTestingManager();
 
   void startSession(String version) {
     _manager.startBetaSession(version);
@@ -158,15 +147,13 @@ class BetaSessionNotifier extends StateNotifier<int> {
 
 /// Beta session provider
 final betaSessionNotifierProvider =
-    StateNotifierProvider<BetaSessionNotifier, int>((ref) {
-  return BetaSessionNotifier();
-});
+    StateNotifierProvider<BetaSessionNotifier, int>(
+        (ref) => BetaSessionNotifier());
 
 /// Launch phase advancement notifier
 class LaunchPhaseNotifier extends StateNotifier<LaunchPhase> {
-  final _checklist = LaunchChecklist();
-
   LaunchPhaseNotifier() : super(LaunchPhase.preAlpha);
+  final _checklist = LaunchChecklist();
 
   bool advancePhase() {
     if (_checklist.advanceToNextPhase()) {
@@ -184,15 +171,13 @@ class LaunchPhaseNotifier extends StateNotifier<LaunchPhase> {
 
 /// Launch phase provider
 final launchPhaseNotifierProvider =
-    StateNotifierProvider<LaunchPhaseNotifier, LaunchPhase>((ref) {
-  return LaunchPhaseNotifier();
-});
+    StateNotifierProvider<LaunchPhaseNotifier, LaunchPhase>(
+        (ref) => LaunchPhaseNotifier());
 
 /// Pipeline execution notifier
 class PipelineNotifier extends StateNotifier<bool> {
-  final _pipeline = CICDPipeline();
-
   PipelineNotifier() : super(false);
+  final _pipeline = CICDPipeline();
 
   Future<void> executePipeline(String commitHash, String branch) async {
     state = true;
@@ -207,6 +192,4 @@ class PipelineNotifier extends StateNotifier<bool> {
 
 /// Pipeline execution provider
 final pipelineExecutionProvider =
-    StateNotifierProvider<PipelineNotifier, bool>((ref) {
-  return PipelineNotifier();
-});
+    StateNotifierProvider<PipelineNotifier, bool>((ref) => PipelineNotifier());

@@ -7,24 +7,18 @@ import '../services/analytics_dashboard_service.dart';
 // ========== Service Providers ==========
 
 /// Access to MonitoringService singleton
-final monitoringServiceProvider = Provider((ref) {
-  return MonitoringService.instance;
-});
+final monitoringServiceProvider = Provider((ref) => MonitoringService.instance);
 
 /// Access to ABTestingService singleton
-final abTestingServiceProvider = Provider((ref) {
-  return ABTestingService.instance;
-});
+final abTestingServiceProvider = Provider((ref) => ABTestingService.instance);
 
 /// Access to FeedbackAnalysisService singleton
-final feedbackAnalysisServiceProvider = Provider((ref) {
-  return FeedbackAnalysisService.instance;
-});
+final feedbackAnalysisServiceProvider =
+    Provider((ref) => FeedbackAnalysisService.instance);
 
 /// Access to AnalyticsDashboardService singleton
-final analyticsDashboardServiceProvider = Provider((ref) {
-  return AnalyticsDashboardService.instance;
-});
+final analyticsDashboardServiceProvider =
+    Provider((ref) => AnalyticsDashboardService.instance);
 
 // ========== Monitoring Providers ==========
 
@@ -167,24 +161,16 @@ final kpiTrendProvider =
 // ========== State Management Providers ==========
 
 /// Track recent actions for monitoring
-final recentActionsProvider = StateProvider<List<String>>((ref) {
-  return [];
-});
+final recentActionsProvider = StateProvider<List<String>>((ref) => []);
 
 /// Manage active experiments
-final activeExperimentsProvider = StateProvider<List<String>>((ref) {
-  return [];
-});
+final activeExperimentsProvider = StateProvider<List<String>>((ref) => []);
 
 /// Store latest dashboard summary
-final latestDashboardProvider = StateProvider<DashboardSummary?>((ref) {
-  return null;
-});
+final latestDashboardProvider = StateProvider<DashboardSummary?>((ref) => null);
 
 /// Track alert state
-final alertsProvider = StateProvider<List<String>>((ref) {
-  return [];
-});
+final alertsProvider = StateProvider<List<String>>((ref) => []);
 
 // ========== Notifiers for State Management ==========
 

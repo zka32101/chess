@@ -36,19 +36,19 @@ extension AIDifficultyStockfishExt on AIDifficulty {
 /// Runs entirely off the Flutter UI isolate/thread, so `getBestMove()` never
 /// blocks the app the way the hand-rolled minimax engine does.
 class StockfishEngineService {
+  StockfishEngineService._internal();
   static StockfishEngineService? _instance;
   Stockfish? _stockfish;
   StreamSubscription<String>? _stdoutSub;
   bool _uciReady = false;
-
-  StockfishEngineService._internal();
 
   static StockfishEngineService get instance {
     _instance ??= StockfishEngineService._internal();
     return _instance!;
   }
 
-  StockfishState get state => _stockfish?.state.value ?? StockfishState.disposed;
+  StockfishState get state =>
+      _stockfish?.state.value ?? StockfishState.disposed;
 
   /// Boots the engine process and waits for `uciok`. Safe to call multiple
   /// times; subsequent calls are no-ops while already ready.
@@ -70,7 +70,8 @@ class StockfishEngineService {
     _stockfish!.stdin = 'uci';
     await uciOkCompleter.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () => throw TimeoutException('Stockfish did not respond to uci'),
+      onTimeout: () =>
+          throw TimeoutException('Stockfish did not respond to uci'),
     );
 
     _uciReady = true;
@@ -101,7 +102,8 @@ class StockfishEngineService {
     _send('setoption name UCI_LimitStrength value true');
     _send('setoption name UCI_Elo value ${difficulty.stockfishElo}');
     // Use all available cores for faster search at higher difficulties.
-    _send('setoption name Threads value ${difficulty == AIDifficulty.hard ? 4 : 2}');
+    _send(
+        'setoption name Threads value ${difficulty == AIDifficulty.hard ? 4 : 2}');
     _send('setoption name Hash value 64');
   }
 
@@ -138,7 +140,8 @@ class StockfishEngineService {
 
     try {
       return await completer.future.timeout(
-        Duration(milliseconds: (moveTimeMs ?? (depth != null ? 5000 : 800)) + 5000),
+        Duration(
+            milliseconds: (moveTimeMs ?? (depth != null ? 5000 : 800)) + 5000),
         onTimeout: () {
           sub?.cancel();
           _send('stop');

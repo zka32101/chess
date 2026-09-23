@@ -3,19 +3,18 @@ import 'package:logger/logger.dart';
 
 /// Manages seasonal challenges and event-based objectives
 class SeasonChallengeService {
+  SeasonChallengeService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _challengesCollection = 'season_challenges';
   static const String _playerChallengeCollection = 'player_challenge_progress';
 
-  SeasonChallengeService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
   /// Get all active challenges for a season
   Future<List<Challenge>> getChallenges({
     required String seasonId,
-    String? type,  // daily, weekly, seasonal, event
+    String? type, // daily, weekly, seasonal, event
   }) async {
     try {
       Query query = _firestore
@@ -29,7 +28,7 @@ class SeasonChallengeService {
       final snapshot = await query.get();
 
       return snapshot.docs
-          .map((doc) => Challenge.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => Challenge.fromJson(doc.data()! as Map<String, dynamic>))
           .toList();
     } catch (e, st) {
       _logger.e('Failed to get challenges', error: e, stackTrace: st);
@@ -40,7 +39,7 @@ class SeasonChallengeService {
   /// Get challenges by difficulty tier
   Future<List<Challenge>> getChallengeTiers(
     String seasonId, {
-    required String difficulty,  // easy, medium, hard
+    required String difficulty, // easy, medium, hard
   }) async {
     try {
       final snapshot = await _firestore
@@ -50,7 +49,7 @@ class SeasonChallengeService {
           .get();
 
       return snapshot.docs
-          .map((doc) => Challenge.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => Challenge.fromJson(doc.data()))
           .toList();
     } catch (e, st) {
       _logger.e('Failed to get challenge tiers', error: e, stackTrace: st);
@@ -77,7 +76,8 @@ class SeasonChallengeService {
 
       return PlayerChallengeProgress.fromJson(doc.data()!);
     } catch (e, st) {
-      _logger.e('Failed to get player challenge progress', error: e, stackTrace: st);
+      _logger.e('Failed to get player challenge progress',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -174,7 +174,8 @@ class SeasonChallengeService {
 
       _logger.i('Updated challenge progress: $challengeId for $playerId');
     } catch (e, st) {
-      _logger.e('Failed to update challenge progress', error: e, stackTrace: st);
+      _logger.e('Failed to update challenge progress',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -210,7 +211,7 @@ class SeasonChallengeService {
           .get();
 
       return snapshot.docs
-          .map((doc) => Challenge.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => Challenge.fromJson(doc.data()))
           .toList();
     } catch (e, st) {
       _logger.e('Failed to get event challenges', error: e, stackTrace: st);
@@ -239,7 +240,8 @@ class SeasonChallengeService {
 
       return progress;
     } catch (e, st) {
-      _logger.e('Failed to get player season challenges', error: e, stackTrace: st);
+      _logger.e('Failed to get player season challenges',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -266,19 +268,6 @@ class SeasonChallengeService {
 
 /// Challenge definition
 class Challenge {
-  final String challengeId;
-  final String seasonId;
-  final String name;
-  final String description;
-  final String type;        // daily, weekly, seasonal, event
-  final String? eventId;    // if type == event
-  final String objective;   // e.g., "Win 5 games"
-  final int target;
-  final String difficulty;  // easy, medium, hard
-  final List<ChallengeReward> rewards;
-  final DateTime startDate;
-  final DateTime endDate;
-
   Challenge({
     required this.challengeId,
     required this.seasonId,
@@ -294,50 +283,55 @@ class Challenge {
     this.eventId,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'challengeId': challengeId,
-      'seasonId': seasonId,
-      'name': name,
-      'description': description,
-      'type': type,
-      'eventId': eventId,
-      'objective': objective,
-      'target': target,
-      'difficulty': difficulty,
-      'rewards': rewards.map((r) => r.toJson()).toList(),
-      'startDate': Timestamp.fromDate(startDate),
-      'endDate': Timestamp.fromDate(endDate),
-    };
-  }
+  factory Challenge.fromJson(Map<String, dynamic> json) => Challenge(
+        challengeId: json['challengeId'] as String,
+        seasonId: json['seasonId'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        type: json['type'] as String,
+        eventId: json['eventId'] as String?,
+        objective: json['objective'] as String,
+        target: json['target'] as int,
+        difficulty: json['difficulty'] as String,
+        rewards: (json['rewards'] as List<dynamic>?)
+                ?.map(
+                    (r) => ChallengeReward.fromJson(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        startDate: (json['startDate'] as Timestamp).toDate(),
+        endDate: (json['endDate'] as Timestamp).toDate(),
+      );
+  final String challengeId;
+  final String seasonId;
+  final String name;
+  final String description;
+  final String type; // daily, weekly, seasonal, event
+  final String? eventId; // if type == event
+  final String objective; // e.g., "Win 5 games"
+  final int target;
+  final String difficulty; // easy, medium, hard
+  final List<ChallengeReward> rewards;
+  final DateTime startDate;
+  final DateTime endDate;
 
-  factory Challenge.fromJson(Map<String, dynamic> json) {
-    return Challenge(
-      challengeId: json['challengeId'] as String,
-      seasonId: json['seasonId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      type: json['type'] as String,
-      eventId: json['eventId'] as String?,
-      objective: json['objective'] as String,
-      target: json['target'] as int,
-      difficulty: json['difficulty'] as String,
-      rewards: (json['rewards'] as List<dynamic>?)
-          ?.map((r) => ChallengeReward.fromJson(r as Map<String, dynamic>))
-          .toList() ?? [],
-      startDate: (json['startDate'] as Timestamp).toDate(),
-      endDate: (json['endDate'] as Timestamp).toDate(),
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'challengeId': challengeId,
+        'seasonId': seasonId,
+        'name': name,
+        'description': description,
+        'type': type,
+        'eventId': eventId,
+        'objective': objective,
+        'target': target,
+        'difficulty': difficulty,
+        'rewards': rewards.map((r) => r.toJson()).toList(),
+        'startDate': Timestamp.fromDate(startDate),
+        'endDate': Timestamp.fromDate(endDate),
+      };
 }
 
 /// Challenge reward
 class ChallengeReward {
-  final String type;        // currency, experience, item
-  final String name;
-  final int amount;
-  final String? icon;
-
   ChallengeReward({
     required this.type,
     required this.name,
@@ -345,36 +339,28 @@ class ChallengeReward {
     this.icon,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'name': name,
-      'amount': amount,
-      'icon': icon,
-    };
-  }
+  factory ChallengeReward.fromJson(Map<String, dynamic> json) =>
+      ChallengeReward(
+        type: json['type'] as String,
+        name: json['name'] as String,
+        amount: json['amount'] as int,
+        icon: json['icon'] as String?,
+      );
+  final String type; // currency, experience, item
+  final String name;
+  final int amount;
+  final String? icon;
 
-  factory ChallengeReward.fromJson(Map<String, dynamic> json) {
-    return ChallengeReward(
-      type: json['type'] as String,
-      name: json['name'] as String,
-      amount: json['amount'] as int,
-      icon: json['icon'] as String?,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'name': name,
+        'amount': amount,
+        'icon': icon,
+      };
 }
 
 /// Player's progress on a challenge
 class PlayerChallengeProgress {
-  final String playerId;
-  final String challengeId;
-  final int currentProgress;
-  final int targetProgress;
-  final bool isCompleted;
-  final DateTime startedAt;
-  final DateTime? completedAt;
-  final DateTime updatedAt;
-
   PlayerChallengeProgress({
     required this.playerId,
     required this.challengeId,
@@ -386,22 +372,29 @@ class PlayerChallengeProgress {
     this.completedAt,
   });
 
-  factory PlayerChallengeProgress.fromJson(Map<String, dynamic> json) {
-    return PlayerChallengeProgress(
-      playerId: json['playerId'] as String,
-      challengeId: json['challengeId'] as String,
-      currentProgress: json['currentProgress'] as int? ?? 0,
-      targetProgress: json['targetProgress'] as int? ?? 0,
-      isCompleted: json['isCompleted'] as bool? ?? false,
-      startedAt: json['startedAt'] != null
-          ? (json['startedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      completedAt: json['completedAt'] != null
-          ? (json['completedAt'] as Timestamp).toDate()
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? (json['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
-  }
+  factory PlayerChallengeProgress.fromJson(Map<String, dynamic> json) =>
+      PlayerChallengeProgress(
+        playerId: json['playerId'] as String,
+        challengeId: json['challengeId'] as String,
+        currentProgress: json['currentProgress'] as int? ?? 0,
+        targetProgress: json['targetProgress'] as int? ?? 0,
+        isCompleted: json['isCompleted'] as bool? ?? false,
+        startedAt: json['startedAt'] != null
+            ? (json['startedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+        completedAt: json['completedAt'] != null
+            ? (json['completedAt'] as Timestamp).toDate()
+            : null,
+        updatedAt: json['updatedAt'] != null
+            ? (json['updatedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+      );
+  final String playerId;
+  final String challengeId;
+  final int currentProgress;
+  final int targetProgress;
+  final bool isCompleted;
+  final DateTime startedAt;
+  final DateTime? completedAt;
+  final DateTime updatedAt;
 }

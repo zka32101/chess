@@ -9,10 +9,6 @@ import 'analytics_services_provider.dart';
 ///
 /// Coordinates tracking across multiple analytics services for complex workflows
 class AnalyticsCoordinator {
-  final AnalyticsRevenueService _revenueService;
-  final AnalyticsEngagementService _engagementService;
-  final AnalyticsFunnelService _funnelService;
-
   AnalyticsCoordinator({
     required AnalyticsRevenueService revenueService,
     required AnalyticsEngagementService engagementService,
@@ -20,6 +16,9 @@ class AnalyticsCoordinator {
   })  : _revenueService = revenueService,
         _engagementService = engagementService,
         _funnelService = funnelService;
+  final AnalyticsRevenueService _revenueService;
+  final AnalyticsEngagementService _engagementService;
+  final AnalyticsFunnelService _funnelService;
 
   /// Track complete purchase flow end-to-end
   ///
@@ -69,7 +68,7 @@ class AnalyticsCoordinator {
       await _funnelService.trackPurchaseCompleted(
         packageId: packageId,
         transactionId: transactionId,
-        processingTimeSeconds: 2.0,
+        processingTimeSeconds: 2,
       );
 
       // Track user subscription property

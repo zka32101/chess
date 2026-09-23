@@ -3,11 +3,6 @@ import '../models/roadmap.dart';
 
 /// Feature Roadmap Service
 class FeatureRoadmapService {
-  static final FeatureRoadmapService _instance =
-      FeatureRoadmapService._internal();
-
-  FirebaseFirestore _firestore;
-
   factory FeatureRoadmapService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
       _instance._firestore = firestore;
@@ -16,6 +11,10 @@ class FeatureRoadmapService {
   }
 
   FeatureRoadmapService._internal() : _firestore = FirebaseFirestore.instance;
+  static final FeatureRoadmapService _instance =
+      FeatureRoadmapService._internal();
+
+  FirebaseFirestore _firestore;
 
   /// Create roadmap item
   Future<void> createRoadmapItem({
@@ -76,8 +75,7 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map(
-              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => RoadmapItem.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching roadmap items: $e');
@@ -94,8 +92,7 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map(
-              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => RoadmapItem.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching roadmap by priority: $e');
@@ -112,8 +109,7 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map(
-              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => RoadmapItem.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching roadmap by timeline: $e');
@@ -130,8 +126,7 @@ class FeatureRoadmapService {
           .get();
 
       return querySnapshot.docs
-          .map(
-              (doc) => RoadmapItem.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => RoadmapItem.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching roadmap by status: $e');

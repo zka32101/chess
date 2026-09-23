@@ -11,19 +11,20 @@ class GameModel with _$GameModel {
     required String status, // 'matchmaking', 'active', 'completed', 'abandoned'
     required String whitePlayerId,
     required String blackPlayerId,
-    String? whitePlayerName,
-    String? blackPlayerName,
     required int whiteRating,
     required int blackRating,
+    required List<Map<String, dynamic>> moves,
+    String? whitePlayerName,
+    String? blackPlayerName,
     String? pgn,
     String? currentFen,
-    required List<Map<String, dynamic>> moves,
     String? timeControl, // '10min', '5min', '3min'
     int? timeControlMs,
     int? whiteTimeRemainingMs,
     int? blackTimeRemainingMs,
     String? result, // 'white_win', 'black_win', 'draw', null
-    String? resultReason, // 'checkmate', 'resignation', 'timeout', 'draw_agreement', 'abandonment'
+    String?
+        resultReason, // 'checkmate', 'resignation', 'timeout', 'draw_agreement', 'abandonment'
     String? abandonedBy,
     int? whiteRatingDelta,
     int? blackRatingDelta,

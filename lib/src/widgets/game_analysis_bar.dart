@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
 
 /// Game Analysis Bar Widget
 ///
@@ -10,6 +9,13 @@ import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.da
 /// - Nodes evaluated
 /// - Search depth achieved
 class GameAnalysisBar extends StatelessWidget {
+  const GameAnalysisBar({
+    required this.stats,
+    Key? key,
+    this.detailed = false,
+    this.onTapDetails,
+  }) : super(key: key);
+
   /// Engine statistics from AIOpponentEngineEnhanced.getSearchStats()
   final Map<String, dynamic> stats;
 
@@ -18,13 +24,6 @@ class GameAnalysisBar extends StatelessWidget {
 
   /// Callback when user taps for more details
   final VoidCallback? onTapDetails;
-
-  const GameAnalysisBar({
-    Key? key,
-    required this.stats,
-    this.detailed = false,
-    this.onTapDetails,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -170,33 +169,31 @@ class GameAnalysisBar extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricTile(String label, String value, Color color) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: color,
+  Widget _buildMetricTile(String label, String value, Color color) => Expanded(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 11),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11),
+            ),
+          ],
+        ),
+      );
 
   Widget _buildCacheBar(int hits, int misses) {
     final total = hits + misses;
@@ -240,7 +237,7 @@ class GameAnalysisBar extends StatelessWidget {
     try {
       return double.parse(value);
     } catch (e) {
-      return 0.0;
+      return 0;
     }
   }
 
@@ -273,6 +270,13 @@ class GameAnalysisBar extends StatelessWidget {
 /// Shows position evaluation as a visual bar.
 /// Negative values = black advantage, Positive = white advantage
 class EvaluationBar extends StatelessWidget {
+  const EvaluationBar({
+    required this.evaluation,
+    Key? key,
+    this.maxEvaluation = 500,
+    this.showValue = true,
+  }) : super(key: key);
+
   /// Evaluation score from position evaluator
   /// Typical range: -500 to +500 (centipawns)
   final int evaluation;
@@ -283,19 +287,12 @@ class EvaluationBar extends StatelessWidget {
   /// Whether to show numeric value
   final bool showValue;
 
-  const EvaluationBar({
-    Key? key,
-    required this.evaluation,
-    this.maxEvaluation = 500,
-    this.showValue = true,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     // Normalize evaluation to 0-1 range where 0.5 = equal position
     final normalized =
-        (evaluation.clamp(-maxEvaluation, maxEvaluation) / (maxEvaluation * 2) +
-            0.5);
+        evaluation.clamp(-maxEvaluation, maxEvaluation) / (maxEvaluation * 2) +
+            0.5;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -344,17 +341,17 @@ class EvaluationBar extends StatelessWidget {
 ///
 /// Comprehensive display of engine statistics for game analysis
 class StatisticsDashboard extends StatelessWidget {
+  const StatisticsDashboard({
+    required this.stats,
+    required this.tableStats,
+    Key? key,
+  }) : super(key: key);
+
   /// Engine statistics from AIOpponentEngineEnhanced.getSearchStats()
   final Map<String, dynamic> stats;
 
   /// Transposition table statistics from AIOpponentEngineEnhanced.getTableStats()
   final Map<String, dynamic> tableStats;
-
-  const StatisticsDashboard({
-    Key? key,
-    required this.stats,
-    required this.tableStats,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -364,8 +361,8 @@ class StatisticsDashboard extends StatelessWidget {
       length: 3,
       child: Column(
         children: [
-          TabBar(
-            tabs: const [
+          const TabBar(
+            tabs: [
               Tab(text: 'Performance'),
               Tab(text: 'Cache'),
               Tab(text: 'Heuristics'),
@@ -474,23 +471,22 @@ class StatisticsDashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildStatItem(BuildContext context, String label, String value) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+      );
 
   String _formatNumber(int number) {
     if (number >= 1000000) {

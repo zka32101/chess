@@ -96,8 +96,11 @@ extension SoundEffectExt on SoundEffect {
 /// Uses audio player pooling per sound effect for efficient resource management.
 /// Supports volume control, sound sequences, and full playback state management.
 class SoundService {
+  factory SoundService() => _instance;
+
+  SoundService._internal();
   bool _soundEnabled = true;
-  double _volume = 1.0;
+  double _volume = 1;
   bool _initialized = false;
 
   // Map of sound effects to audio players
@@ -109,10 +112,6 @@ class SoundService {
   };
 
   static final SoundService _instance = SoundService._internal();
-
-  SoundService._internal();
-
-  factory SoundService() => _instance;
 
   /// Initialize the sound service by preloading all sound files
   /// Should be called once during app startup

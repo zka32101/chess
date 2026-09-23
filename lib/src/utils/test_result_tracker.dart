@@ -11,15 +11,6 @@ enum TestStatus {
 
 /// Test result model
 class TestResult {
-  final String name;
-  final String category;
-  final TestStatus status;
-  final Duration? duration;
-  final String? errorMessage;
-  final String? stackTrace;
-  final Map<String, dynamic>? metadata;
-  final DateTime timestamp;
-
   TestResult({
     required this.name,
     required this.category,
@@ -30,6 +21,14 @@ class TestResult {
     this.metadata,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
+  final String name;
+  final String category;
+  final TestStatus status;
+  final Duration? duration;
+  final String? errorMessage;
+  final String? stackTrace;
+  final Map<String, dynamic>? metadata;
+  final DateTime timestamp;
 
   bool get passed => status == TestStatus.passed;
   bool get failed => status == TestStatus.failed;
@@ -53,6 +52,12 @@ class TestResult {
 
 /// Test session tracking
 class TestSession {
+  TestSession({
+    required this.sessionId,
+    required this.deviceName,
+    required this.appVersion,
+    DateTime? startTime,
+  }) : startTime = startTime ?? DateTime.now();
   final String sessionId;
   final String deviceName;
   final String appVersion;
@@ -60,23 +65,18 @@ class TestSession {
   late DateTime endTime;
   final List<TestResult> results = [];
 
-  TestSession({
-    required this.sessionId,
-    required this.deviceName,
-    required this.appVersion,
-    DateTime? startTime,
-  }) : startTime = startTime ?? DateTime.now();
+  bool get isCompleted => endTime.isAfter(startTime);
 
-  bool get isCompleted => endTime != null && endTime.isAfter(startTime);
-
-  Duration get duration => isCompleted ? endTime.difference(startTime) : Duration.zero;
+  Duration get duration =>
+      isCompleted ? endTime.difference(startTime) : Duration.zero;
 
   int get totalTests => results.length;
   int get passedCount => results.where((r) => r.passed).length;
   int get failedCount => results.where((r) => r.failed).length;
   int get skippedCount => results.where((r) => r.skipped).length;
 
-  double get passRate => totalTests > 0 ? (passedCount / totalTests) * 100 : 0.0;
+  double get passRate =>
+      totalTests > 0 ? (passedCount / totalTests) * 100 : 0.0;
 
   void completeSession() {
     endTime = DateTime.now();
@@ -100,21 +100,19 @@ class TestSession {
       };
 
   @override
-  String toString() => 'TestSession($sessionId: $passedCount/$totalTests passed)';
+  String toString() =>
+      'TestSession($sessionId: $passedCount/$totalTests passed)';
 }
 
 /// Test result tracker
 class TestResultTracker {
+  factory TestResultTracker() => _instance;
+
+  TestResultTracker._internal();
   static final TestResultTracker _instance = TestResultTracker._internal();
 
   final _sessions = <TestSession>[];
   TestSession? _currentSession;
-
-  factory TestResultTracker() {
-    return _instance;
-  }
-
-  TestResultTracker._internal();
 
   /// Start a new test session
   TestSession startSession({
@@ -143,7 +141,8 @@ class TestResultTracker {
     Map<String, dynamic>? metadata,
   }) {
     if (_currentSession == null) {
-      debugPrint('[TestResultTracker] No active session. Starting default session.');
+      debugPrint(
+          '[TestResultTracker] No active session. Starting default session.');
       _currentSession = TestSession(
         sessionId: 'session_${DateTime.now().millisecondsSinceEpoch}',
         deviceName: 'unknown',
@@ -165,7 +164,8 @@ class TestResultTracker {
     _currentSession!.results.add(result);
 
     final statusStr = status.toString().split('.').last.toUpperCase();
-    final durationStr = duration != null ? ' (${duration.inMilliseconds}ms)' : '';
+    final durationStr =
+        duration != null ? ' (${duration.inMilliseconds}ms)' : '';
     debugPrint('[TestResultTracker] $testName: $statusStr$durationStr');
   }
 
@@ -173,7 +173,8 @@ class TestResultTracker {
   void completeSession() {
     if (_currentSession != null) {
       _currentSession!.completeSession();
-      debugPrint('[TestResultTracker] Session completed: ${_currentSession!.sessionId}');
+      debugPrint(
+          '[TestResultTracker] Session completed: ${_currentSession!.sessionId}');
       _currentSession = null;
     }
   }
@@ -186,7 +187,8 @@ class TestResultTracker {
 
   /// Get session by ID
   TestSession? getSessionById(String sessionId) =>
-      _sessions.firstWhere((s) => s.sessionId == sessionId, orElse: () => null as dynamic);
+      _sessions.firstWhere((s) => s.sessionId == sessionId,
+          orElse: () => null as dynamic);
 
   /// Get results by category
   List<TestResult> getResultsByCategory(String category) {
@@ -253,14 +255,17 @@ class TestResultTracker {
       }
 
       for (final category in categories) {
-        final categoryResults = session.results.where((r) => r.category == category).toList();
-        buffer.writeln('║ $category'.padRight(62) + '║');
+        final categoryResults =
+            session.results.where((r) => r.category == category).toList();
+        buffer.writeln('${'║ $category'.padRight(62)}║');
 
         for (final result in categoryResults) {
           final statusIcon = result.passed ? '✓' : (result.failed ? '✗' : '○');
-          final duration = result.duration != null ? ' (${result.duration!.inMilliseconds}ms)' : '';
+          final duration = result.duration != null
+              ? ' (${result.duration!.inMilliseconds}ms)'
+              : '';
           final line = '  $statusIcon ${result.name}$duration';
-          buffer.writeln('║' + line.padRight(62) + '║');
+          buffer.writeln('║${line.padRight(62)}║');
 
           if (result.failed && result.errorMessage != null) {
             buffer.writeln('║    Error: ${result.errorMessage!.padRight(52)}║');
@@ -268,7 +273,8 @@ class TestResultTracker {
         }
       }
 
-      buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+      buffer.writeln(
+          '╚══════════════════════════════════════════════════════════════════╝');
       buffer.writeln('');
     }
 

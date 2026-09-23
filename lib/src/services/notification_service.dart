@@ -39,13 +39,6 @@ extension NotificationSeverityExt on NotificationSeverity {
 
 /// Notification model
 class AppNotification {
-  final String message;
-  final NotificationSeverity severity;
-  final Duration duration;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-  final bool dismissible;
-
   AppNotification({
     required this.message,
     this.severity = NotificationSeverity.info,
@@ -54,6 +47,12 @@ class AppNotification {
     this.onAction,
     this.dismissible = true,
   });
+  final String message;
+  final NotificationSeverity severity;
+  final Duration duration;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final bool dismissible;
 }
 
 /// Service for managing notifications
@@ -145,13 +144,12 @@ final notificationServiceProvider = Provider((ref) => NotificationService());
 
 /// Notification state notifier
 class NotificationNotifier extends StateNotifier<List<AppNotification>> {
-  final NotificationService _service;
-
   NotificationNotifier(this._service) : super([]) {
     _service.addListener((notification) {
       state = [..._service.getNotifications()];
     });
   }
+  final NotificationService _service;
 
   void show(AppNotification notification) => _service.show(notification);
   void showInfo(String message) => _service.showInfo(message);

@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/providers/match_history_provider.dart';
-import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
+import '../../providers/match_history_provider.dart';
+import '../../widgets/animations/chart_entrance_animation.dart';
 
 /// Screen for displaying match history with filtering and pagination
 class MatchHistoryScreen extends ConsumerWidget {
-  final String playerId;
-  final String playerName;
-
   const MatchHistoryScreen({
-    Key? key,
     required this.playerId,
     required this.playerName,
+    Key? key,
   }) : super(key: key);
+  final String playerId;
+  final String playerName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,92 +54,89 @@ class MatchHistoryScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     dynamic state,
-  ) {
-    return Column(
-      children: [
-        // Filter controls
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: _buildFilterControls(context, ref),
-        ),
-
-        // Match list
-        Expanded(
-          child: state.matches.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.sports_outlined,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '対戦履歴がありません',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: state.matches.length + (state.hasMore ? 1 : 0),
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    if (index == state.matches.length) {
-                      // Load more button
-                      return Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ref
-                                .read(matchHistoryProvider.notifier)
-                                .loadMore(playerId);
-                          },
-                          child: const Text('さらに読み込む'),
-                        ),
-                      );
-                    }
-
-                    final match = state.matches[index];
-                    return ChartEntranceAnimation(
-                      duration: Duration(
-                        milliseconds: 300 + (index * 50).clamp(0, 500),
-                      ),
-                      child: _buildMatchCard(context, match),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterControls(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: () {
-              // Show filter dialog
-              _showFilterDialog(context, ref);
-            },
-            icon: const Icon(Icons.filter_list),
-            label: const Text('フィルター'),
+  ) =>
+      Column(
+        children: [
+          // Filter controls
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: _buildFilterControls(context, ref),
           ),
-        ),
-        const SizedBox(width: 8),
-        OutlinedButton.icon(
-          onPressed: () {
-            ref.read(matchHistoryProvider.notifier).resetFilters(playerId);
-          },
-          icon: const Icon(Icons.refresh),
-          label: const Text('リセット'),
-        ),
-      ],
-    );
-  }
+
+          // Match list
+          Expanded(
+            child: state.matches.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.sports_outlined,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          '対戦履歴がありません',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: state.matches.length + (state.hasMore ? 1 : 0),
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      if (index == state.matches.length) {
+                        // Load more button
+                        return Center(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              ref
+                                  .read(matchHistoryProvider.notifier)
+                                  .loadMore(playerId);
+                            },
+                            child: const Text('さらに読み込む'),
+                          ),
+                        );
+                      }
+
+                      final match = state.matches[index];
+                      return ChartEntranceAnimation(
+                        duration: Duration(
+                          milliseconds: 300 + (index * 50).clamp(0, 500),
+                        ),
+                        child: _buildMatchCard(context, match),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      );
+
+  Widget _buildFilterControls(BuildContext context, WidgetRef ref) => Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                // Show filter dialog
+                _showFilterDialog(context, ref);
+              },
+              icon: const Icon(Icons.filter_list),
+              label: const Text('フィルター'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              ref.read(matchHistoryProvider.notifier).resetFilters(playerId);
+            },
+            icon: const Icon(Icons.refresh),
+            label: const Text('リセット'),
+          ),
+        ],
+      );
 
   Widget _buildMatchCard(BuildContext context, dynamic match) {
     final ratingChange = match.playerRatingAfter - match.playerRatingBefore;
@@ -265,11 +261,11 @@ class MatchHistoryScreen extends ConsumerWidget {
                 DropdownButton<String?>(
                   value: selectedResult,
                   isExpanded: true,
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('すべて')),
-                    const DropdownMenuItem(value: 'win', child: Text('勝利')),
-                    const DropdownMenuItem(value: 'loss', child: Text('敗北')),
-                    const DropdownMenuItem(value: 'draw', child: Text('引き分け')),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('すべて')),
+                    DropdownMenuItem(value: 'win', child: Text('勝利')),
+                    DropdownMenuItem(value: 'loss', child: Text('敗北')),
+                    DropdownMenuItem(value: 'draw', child: Text('引き分け')),
                   ],
                   onChanged: (value) => setState(() => selectedResult = value),
                 ),
@@ -282,12 +278,11 @@ class MatchHistoryScreen extends ConsumerWidget {
                 DropdownButton<String?>(
                   value: selectedTimeControl,
                   isExpanded: true,
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('すべて')),
-                    const DropdownMenuItem(
-                        value: 'bullet', child: Text('バレット')),
-                    const DropdownMenuItem(value: 'blitz', child: Text('ブリッツ')),
-                    const DropdownMenuItem(value: 'rapid', child: Text('ラピッド')),
+                  items: const [
+                    DropdownMenuItem(value: null, child: Text('すべて')),
+                    DropdownMenuItem(value: 'bullet', child: Text('バレット')),
+                    DropdownMenuItem(value: 'blitz', child: Text('ブリッツ')),
+                    DropdownMenuItem(value: 'rapid', child: Text('ラピッド')),
                   ],
                   onChanged: (value) =>
                       setState(() => selectedTimeControl = value),

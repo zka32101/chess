@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:chess/chess.dart' as chess_lib;
 
 /// Principal Variation (PV) Display Widget
 ///
 /// Shows the best line of play found during engine search.
 /// Updates in real-time as the search progresses.
 class PrincipalVariationDisplay extends StatelessWidget {
+  const PrincipalVariationDisplay({
+    required this.principalVariation,
+    required this.evaluation,
+    required this.depth,
+    Key? key,
+    this.isBestLine = true,
+    this.confidence = 0.8,
+  }) : super(key: key);
+
   /// List of moves in the principal variation
   /// Example: ['e2e4', 'c7c5', 'd2d4', 'c5d4']
   final List<String> principalVariation;
@@ -22,15 +30,6 @@ class PrincipalVariationDisplay extends StatelessWidget {
   /// Confidence score (0.0-1.0)
   /// Higher = more confident in this line
   final double confidence;
-
-  const PrincipalVariationDisplay({
-    Key? key,
-    required this.principalVariation,
-    required this.evaluation,
-    required this.depth,
-    this.isBestLine = true,
-    this.confidence = 0.8,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -206,6 +205,13 @@ class PrincipalVariationDisplay extends StatelessWidget {
 ///
 /// Shows top variations found during search with comparison
 class PrincipalVariationsPanel extends StatefulWidget {
+  const PrincipalVariationsPanel({
+    required this.variations,
+    Key? key,
+    this.showBestOnly = false,
+    this.maxVariations = 5,
+  }) : super(key: key);
+
   /// List of principal variations
   final List<PVLine> variations;
 
@@ -214,13 +220,6 @@ class PrincipalVariationsPanel extends StatefulWidget {
 
   /// Maximum variations to display
   final int maxVariations;
-
-  const PrincipalVariationsPanel({
-    Key? key,
-    required this.variations,
-    this.showBestOnly = false,
-    this.maxVariations = 5,
-  }) : super(key: key);
 
   @override
   State<PrincipalVariationsPanel> createState() =>
@@ -341,15 +340,15 @@ class _PrincipalVariationsPanelState extends State<PrincipalVariationsPanel> {
                               runSpacing: 6,
                               children: [
                                 ...variation.moves.map((move) => Chip(
-                                  label: Text(
-                                    move,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontFamily: 'monospace',
-                                    ),
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                )),
+                                      label: Text(
+                                        move,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                      visualDensity: VisualDensity.compact,
+                                    )),
                               ],
                             ),
 
@@ -388,13 +387,6 @@ class _PrincipalVariationsPanelState extends State<PrincipalVariationsPanel> {
 
 /// Principal Variation Line data structure
 class PVLine {
-  final List<String> moves;
-  final int evaluation;
-  final int depth;
-  final double confidence;
-  final int nodesSearched;
-  final int timeMs;
-
   PVLine({
     required this.moves,
     required this.evaluation,
@@ -403,6 +395,12 @@ class PVLine {
     this.nodesSearched = 0,
     this.timeMs = 0,
   });
+  final List<String> moves;
+  final int evaluation;
+  final int depth;
+  final double confidence;
+  final int nodesSearched;
+  final int timeMs;
 
   /// Create copy with modified fields
   PVLine copyWith({
@@ -412,14 +410,13 @@ class PVLine {
     double? confidence,
     int? nodesSearched,
     int? timeMs,
-  }) {
-    return PVLine(
-      moves: moves ?? this.moves,
-      evaluation: evaluation ?? this.evaluation,
-      depth: depth ?? this.depth,
-      confidence: confidence ?? this.confidence,
-      nodesSearched: nodesSearched ?? this.nodesSearched,
-      timeMs: timeMs ?? this.timeMs,
-    );
-  }
+  }) =>
+      PVLine(
+        moves: moves ?? this.moves,
+        evaluation: evaluation ?? this.evaluation,
+        depth: depth ?? this.depth,
+        confidence: confidence ?? this.confidence,
+        nodesSearched: nodesSearched ?? this.nodesSearched,
+        timeMs: timeMs ?? this.timeMs,
+      );
 }

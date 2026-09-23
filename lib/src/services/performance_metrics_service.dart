@@ -2,14 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Application size metrics
 class AppSizeMetrics {
-  final String buildType; // 'release', 'debug', 'profile'
-  final int sizeInBytes;
-  final int apkSizeInBytes;
-  final int appBundleSizeInBytes;
-  final DateTime measuredAt;
-  final String dartVersion;
-  final String flutterVersion;
-  final Map<String, int> componentSizes; // Component breakdown
+  // Component breakdown
 
   AppSizeMetrics({
     required this.buildType,
@@ -22,6 +15,27 @@ class AppSizeMetrics {
     this.componentSizes = const {},
   });
 
+  factory AppSizeMetrics.fromJson(Map<String, dynamic> json) => AppSizeMetrics(
+        buildType: json['buildType'] as String,
+        sizeInBytes: json['sizeInBytes'] as int,
+        apkSizeInBytes: json['apkSizeInBytes'] as int,
+        appBundleSizeInBytes: json['appBundleSizeInBytes'] as int,
+        measuredAt: DateTime.parse(json['measuredAt'] as String),
+        dartVersion: json['dartVersion'] as String,
+        flutterVersion: json['flutterVersion'] as String,
+        componentSizes: Map<String, int>.from(
+          json['componentSizes'] as Map<String, dynamic>? ?? {},
+        ),
+      );
+  final String buildType; // 'release', 'debug', 'profile'
+  final int sizeInBytes;
+  final int apkSizeInBytes;
+  final int appBundleSizeInBytes;
+  final DateTime measuredAt;
+  final String dartVersion;
+  final String flutterVersion;
+  final Map<String, int> componentSizes;
+
   int get sizeInMB => sizeInBytes ~/ (1024 * 1024);
   int get apkSizeInMB => apkSizeInBytes ~/ (1024 * 1024);
   int get appBundleSizeInMB => appBundleSizeInBytes ~/ (1024 * 1024);
@@ -30,9 +44,7 @@ class AppSizeMetrics {
 
   double getGrowthPercentage(AppSizeMetrics previous) {
     if (previous.sizeInBytes == 0) return 0;
-    return ((sizeInBytes - previous.sizeInBytes) /
-            previous.sizeInBytes *
-            100)
+    return ((sizeInBytes - previous.sizeInBytes) / previous.sizeInBytes * 100)
         .toDouble();
   }
 
@@ -49,33 +61,10 @@ class AppSizeMetrics {
         'flutterVersion': flutterVersion,
         'componentSizes': componentSizes,
       };
-
-  factory AppSizeMetrics.fromJson(Map<String, dynamic> json) {
-    return AppSizeMetrics(
-      buildType: json['buildType'] as String,
-      sizeInBytes: json['sizeInBytes'] as int,
-      apkSizeInBytes: json['apkSizeInBytes'] as int,
-      appBundleSizeInBytes: json['appBundleSizeInBytes'] as int,
-      measuredAt: DateTime.parse(json['measuredAt'] as String),
-      dartVersion: json['dartVersion'] as String,
-      flutterVersion: json['flutterVersion'] as String,
-      componentSizes: Map<String, int>.from(
-        json['componentSizes'] as Map<String, dynamic>? ?? {},
-      ),
-    );
-  }
 }
 
 /// Build time metrics
 class BuildTimeMetrics {
-  final Duration totalBuildTime;
-  final Duration analyzeTime;
-  final Duration compileTime;
-  final Duration linkTime;
-  final DateTime builtAt;
-  final String buildType; // 'debug', 'profile', 'release'
-  final Map<String, Duration> phaseTimes;
-
   BuildTimeMetrics({
     required this.totalBuildTime,
     required this.analyzeTime,
@@ -86,9 +75,29 @@ class BuildTimeMetrics {
     this.phaseTimes = const {},
   });
 
-  bool exceedsLimit(Duration limitDuration) {
-    return totalBuildTime > limitDuration;
-  }
+  factory BuildTimeMetrics.fromJson(Map<String, dynamic> json) =>
+      BuildTimeMetrics(
+        totalBuildTime: Duration(milliseconds: json['totalBuildTime'] as int),
+        analyzeTime: Duration(milliseconds: json['analyzeTime'] as int),
+        compileTime: Duration(milliseconds: json['compileTime'] as int),
+        linkTime: Duration(milliseconds: json['linkTime'] as int),
+        builtAt: DateTime.parse(json['builtAt'] as String),
+        buildType: json['buildType'] as String,
+        phaseTimes: Map<String, Duration>.from(
+          (json['phaseTimes'] as Map<String, dynamic>? ?? {}).map(
+            (key, value) => MapEntry(key, Duration(milliseconds: value as int)),
+          ),
+        ),
+      );
+  final Duration totalBuildTime;
+  final Duration analyzeTime;
+  final Duration compileTime;
+  final Duration linkTime;
+  final DateTime builtAt;
+  final String buildType; // 'debug', 'profile', 'release'
+  final Map<String, Duration> phaseTimes;
+
+  bool exceedsLimit(Duration limitDuration) => totalBuildTime > limitDuration;
 
   double getSpeedupPercentage(BuildTimeMetrics previous) {
     if (previous.totalBuildTime.inMilliseconds == 0) return 0;
@@ -110,33 +119,10 @@ class BuildTimeMetrics {
           (key, value) => MapEntry(key, value.inMilliseconds),
         ),
       };
-
-  factory BuildTimeMetrics.fromJson(Map<String, dynamic> json) {
-    return BuildTimeMetrics(
-      totalBuildTime: Duration(
-          milliseconds: json['totalBuildTime'] as int),
-      analyzeTime: Duration(milliseconds: json['analyzeTime'] as int),
-      compileTime: Duration(milliseconds: json['compileTime'] as int),
-      linkTime: Duration(milliseconds: json['linkTime'] as int),
-      builtAt: DateTime.parse(json['builtAt'] as String),
-      buildType: json['buildType'] as String,
-      phaseTimes: Map<String, Duration>.from(
-        (json['phaseTimes'] as Map<String, dynamic>? ?? {}).map(
-          (key, value) => MapEntry(key, Duration(milliseconds: value as int)),
-        ),
-      ),
-    );
-  }
 }
 
 /// Performance regression detection result
 class RegressionResult {
-  final bool hasRegression;
-  final double regressionPercentage;
-  final String regressionType; // 'size', 'buildTime', 'memory'
-  final String? recommendation;
-  final DateTime detectedAt;
-
   RegressionResult({
     required this.hasRegression,
     required this.regressionPercentage,
@@ -144,6 +130,11 @@ class RegressionResult {
     this.recommendation,
     DateTime? detectedAt,
   }) : detectedAt = detectedAt ?? DateTime.now();
+  final bool hasRegression;
+  final double regressionPercentage;
+  final String regressionType; // 'size', 'buildTime', 'memory'
+  final String? recommendation;
+  final DateTime detectedAt;
 
   @override
   String toString() =>
@@ -152,12 +143,13 @@ class RegressionResult {
 
 /// Performance metrics service for tracking app performance
 class PerformanceMetricsService {
-  final FirebaseFirestore _firestore;
-  static const String _collection = 'performance_metrics';
-  static const double _regressionThreshold = 10.0; // 10% threshold
+  // 10% threshold
 
   PerformanceMetricsService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+  static const String _collection = 'performance_metrics';
+  static const double _regressionThreshold = 10;
 
   /// Record app size metrics
   Future<void> recordAppSizeMetrics(AppSizeMetrics metrics) async {
@@ -349,34 +341,30 @@ class PerformanceMetricsService {
   }
 
   /// Stream app size metrics history
-  Stream<List<AppSizeMetrics>> watchAppSizeMetrics() {
-    return _firestore
-        .collection(_collection)
-        .doc('app_size')
-        .collection('history')
-        .orderBy('measuredAt', descending: true)
-        .limit(30)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
+  Stream<List<AppSizeMetrics>> watchAppSizeMetrics() => _firestore
+      .collection(_collection)
+      .doc('app_size')
+      .collection('history')
+      .orderBy('measuredAt', descending: true)
+      .limit(30)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
           .map((doc) => AppSizeMetrics.fromJson(doc.data()))
-          .toList();
-    }).handleError((e) => throw Exception('Failed to watch app size metrics: $e'));
-  }
+          .toList())
+      .handleError(
+          (e) => throw Exception('Failed to watch app size metrics: $e'));
 
   /// Stream build time metrics history
-  Stream<List<BuildTimeMetrics>> watchBuildTimeMetrics() {
-    return _firestore
-        .collection(_collection)
-        .doc('build_time')
-        .collection('history')
-        .orderBy('builtAt', descending: true)
-        .limit(30)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
+  Stream<List<BuildTimeMetrics>> watchBuildTimeMetrics() => _firestore
+      .collection(_collection)
+      .doc('build_time')
+      .collection('history')
+      .orderBy('builtAt', descending: true)
+      .limit(30)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
           .map((doc) => BuildTimeMetrics.fromJson(doc.data()))
-          .toList();
-    }).handleError((e) => throw Exception('Failed to watch build time metrics: $e'));
-  }
+          .toList())
+      .handleError(
+          (e) => throw Exception('Failed to watch build time metrics: $e'));
 }

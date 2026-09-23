@@ -238,13 +238,11 @@ Send feedback: support@chessmaster.app
   }
 
   /// Parse semantic version for comparison
-  static List<int> _parseVersion(String version) {
-    return version
-        .split('+')[0] // Remove build number
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
-  }
+  static List<int> _parseVersion(String version) => version
+      .split('+')[0] // Remove build number
+      .split('.')
+      .map((e) => int.tryParse(e) ?? 0)
+      .toList();
 
   /// Get next planned release
   static Map<String, dynamic>? getNextRelease() {

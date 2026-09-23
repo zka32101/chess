@@ -4,6 +4,8 @@ import 'dart:async';
 
 /// Manages real-time game synchronization with conflict detection
 class RealtimeSyncService {
+  RealtimeSyncService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -12,9 +14,6 @@ class RealtimeSyncService {
   static const int _syncTimeoutMs = 5000;
   static const int _maxRetries = 3;
 
-  RealtimeSyncService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
   /// Record a tentative move locally with sync metadata
   Future<MoveSync> recordTentativeMove({
     required String gameId,
@@ -22,8 +21,8 @@ class RealtimeSyncService {
     required int moveNumber,
     required String from,
     required String to,
-    String? promotion,
     required String updatedFen,
+    String? promotion,
   }) async {
     try {
       final clientTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -42,8 +41,8 @@ class RealtimeSyncService {
         createdAt: DateTime.now(),
       );
 
-      _logger.d(
-          'Recorded tentative move: ${moveSync.moveId} from $from to $to');
+      _logger
+          .d('Recorded tentative move: ${moveSync.moveId} from $from to $to');
 
       return moveSync;
     } catch (e, st) {
@@ -73,7 +72,7 @@ class RealtimeSyncService {
       // Detect move order conflict
       if (moveSync.moveNumber != currentMoveCount) {
         _logger.w(
-            'Move conflict detected: expected move #${currentMoveCount}, got #${moveSync.moveNumber}');
+            'Move conflict detected: expected move #$currentMoveCount, got #${moveSync.moveNumber}');
         return false;
       }
 
@@ -115,9 +114,7 @@ class RealtimeSyncService {
           .where('syncStatus', isEqualTo: 'pending')
           .get();
 
-      return snapshot.docs
-          .map((doc) => MoveSync.fromJson(doc.data()))
-          .toList();
+      return snapshot.docs.map((doc) => MoveSync.fromJson(doc.data())).toList();
     } catch (e, st) {
       _logger.e('Failed to get pending moves', error: e, stackTrace: st);
       rethrow;
@@ -125,45 +122,41 @@ class RealtimeSyncService {
   }
 
   /// Stream sync state for real-time updates
-  Stream<GameSyncState> watchSyncState(String gameId) {
-    return _firestore
-        .collection(_gamesCollection)
-        .doc(gameId)
-        .collection(_syncStateSubcollection)
-        .snapshots()
-        .map((snapshot) {
-          final moves = snapshot.docs
-              .map((doc) => MoveSync.fromJson(doc.data()))
-              .toList();
+  Stream<GameSyncState> watchSyncState(String gameId) => _firestore
+          .collection(_gamesCollection)
+          .doc(gameId)
+          .collection(_syncStateSubcollection)
+          .snapshots()
+          .map((snapshot) {
+        final moves =
+            snapshot.docs.map((doc) => MoveSync.fromJson(doc.data())).toList();
 
-          final pendingCount = moves.where((m) => m.syncStatus == 'pending').length;
-          final confirmedCount =
-              moves.where((m) => m.syncStatus == 'confirmed').length;
+        final pendingCount =
+            moves.where((m) => m.syncStatus == 'pending').length;
+        final confirmedCount =
+            moves.where((m) => m.syncStatus == 'confirmed').length;
 
-          return GameSyncState(
-            gameId: gameId,
-            totalMoves: moves.length,
-            pendingMoves: pendingCount,
-            confirmedMoves: confirmedCount,
-            lastSyncTimestamp: DateTime.now(),
-            movesList: moves,
-          );
-        });
-  }
+        return GameSyncState(
+          gameId: gameId,
+          totalMoves: moves.length,
+          pendingMoves: pendingCount,
+          confirmedMoves: confirmedCount,
+          lastSyncTimestamp: DateTime.now(),
+          movesList: moves,
+        );
+      });
 
   /// Cleanup old sync records
   Future<void> cleanupOldSyncRecords(String gameId,
       {int retentionDays = 7}) async {
     try {
-      final cutoffDate =
-          DateTime.now().subtract(Duration(days: retentionDays));
+      final cutoffDate = DateTime.now().subtract(Duration(days: retentionDays));
 
       await _firestore
           .collection(_gamesCollection)
           .doc(gameId)
           .collection(_syncStateSubcollection)
-          .where('createdAt',
-              isLessThan: cutoffDate.toIso8601String())
+          .where('createdAt', isLessThan: cutoffDate.toIso8601String())
           .get()
           .then((snapshot) async {
         for (final doc in snapshot.docs) {
@@ -177,13 +170,41 @@ class RealtimeSyncService {
     }
   }
 
-  String _generateMoveId() {
-    return '${DateTime.now().millisecondsSinceEpoch}_${(DateTime.now().microsecond % 1000).toString().padLeft(3, '0')}';
-  }
+  String _generateMoveId() =>
+      '${DateTime.now().millisecondsSinceEpoch}_${(DateTime.now().microsecond % 1000).toString().padLeft(3, '0')}';
 }
 
 /// Data class for move synchronization state
 class MoveSync {
+  MoveSync({
+    required this.moveId,
+    required this.gameId,
+    required this.playerId,
+    required this.moveNumber,
+    required this.from,
+    required this.to,
+    required this.fen,
+    required this.clientTimestamp,
+    required this.syncStatus,
+    required this.retryCount,
+    required this.createdAt,
+    this.promotion,
+  });
+
+  factory MoveSync.fromJson(Map<String, dynamic> json) => MoveSync(
+        moveId: json['moveId'] as String,
+        gameId: json['gameId'] as String,
+        playerId: json['playerId'] as String,
+        moveNumber: json['moveNumber'] as int,
+        from: json['from'] as String,
+        to: json['to'] as String,
+        promotion: json['promotion'] as String?,
+        fen: json['fen'] as String,
+        clientTimestamp: json['clientTimestamp'] as int,
+        syncStatus: json['syncStatus'] as String,
+        retryCount: json['retryCount'] as int? ?? 0,
+        createdAt: DateTime.parse(json['createdAt'] as String),
+      );
   final String moveId;
   final String gameId;
   final String playerId;
@@ -197,65 +218,24 @@ class MoveSync {
   final int retryCount;
   final DateTime createdAt;
 
-  MoveSync({
-    required this.moveId,
-    required this.gameId,
-    required this.playerId,
-    required this.moveNumber,
-    required this.from,
-    required this.to,
-    this.promotion,
-    required this.fen,
-    required this.clientTimestamp,
-    required this.syncStatus,
-    required this.retryCount,
-    required this.createdAt,
-  });
-
-  factory MoveSync.fromJson(Map<String, dynamic> json) {
-    return MoveSync(
-      moveId: json['moveId'] as String,
-      gameId: json['gameId'] as String,
-      playerId: json['playerId'] as String,
-      moveNumber: json['moveNumber'] as int,
-      from: json['from'] as String,
-      to: json['to'] as String,
-      promotion: json['promotion'] as String?,
-      fen: json['fen'] as String,
-      clientTimestamp: json['clientTimestamp'] as int,
-      syncStatus: json['syncStatus'] as String,
-      retryCount: json['retryCount'] as int? ?? 0,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'moveId': moveId,
-      'gameId': gameId,
-      'playerId': playerId,
-      'moveNumber': moveNumber,
-      'from': from,
-      'to': to,
-      'promotion': promotion,
-      'fen': fen,
-      'clientTimestamp': clientTimestamp,
-      'syncStatus': syncStatus,
-      'retryCount': retryCount,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'moveId': moveId,
+        'gameId': gameId,
+        'playerId': playerId,
+        'moveNumber': moveNumber,
+        'from': from,
+        'to': to,
+        'promotion': promotion,
+        'fen': fen,
+        'clientTimestamp': clientTimestamp,
+        'syncStatus': syncStatus,
+        'retryCount': retryCount,
+        'createdAt': createdAt.toIso8601String(),
+      };
 }
 
 /// Data class for game synchronization state
 class GameSyncState {
-  final String gameId;
-  final int totalMoves;
-  final int pendingMoves;
-  final int confirmedMoves;
-  final DateTime lastSyncTimestamp;
-  final List<MoveSync> movesList;
-
   GameSyncState({
     required this.gameId,
     required this.totalMoves,
@@ -264,6 +244,12 @@ class GameSyncState {
     required this.lastSyncTimestamp,
     required this.movesList,
   });
+  final String gameId;
+  final int totalMoves;
+  final int pendingMoves;
+  final int confirmedMoves;
+  final DateTime lastSyncTimestamp;
+  final List<MoveSync> movesList;
 
   bool get isSynced => pendingMoves == 0;
   double get syncProgress => confirmedMoves / (totalMoves + 1);

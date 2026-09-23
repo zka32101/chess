@@ -49,9 +49,8 @@ class StrategyScreen extends StatelessWidget {
 }
 
 class StrategyDetailScreen extends StatelessWidget {
+  const StrategyDetailScreen({required this.guide, Key? key}) : super(key: key);
   final StrategyGuide guide;
-
-  const StrategyDetailScreen({Key? key, required this.guide}) : super(key: key);
 
   Widget _section(
     BuildContext context, {
@@ -100,54 +99,52 @@ class StrategyDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(guide.title)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    guide.description,
-                    style: Theme.of(context).textTheme.bodyLarge,
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(guide.title)),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      guide.description,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                DifficultyBadge(difficulty: guide.difficulty),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _section(
-              context,
-              title: '重要な考え方',
-              icon: Icons.lightbulb_outline,
-              items: guide.keyConceptsExplained,
-            ),
-            _section(
-              context,
-              title: '局面の評価ポイント',
-              icon: Icons.fact_check_outlined,
-              items: guide.positionEvaluationCriteria,
-            ),
-            _section(
-              context,
-              title: '指し手の方針',
-              icon: Icons.route_outlined,
-              items: guide.planFormationGuidelines,
-            ),
-            _section(
-              context,
-              title: '終盤への移行のコツ',
-              icon: Icons.flag_outlined,
-              items: guide.endgameTransitionTips,
-            ),
-          ],
+                  const SizedBox(width: 12),
+                  DifficultyBadge(difficulty: guide.difficulty),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _section(
+                context,
+                title: '重要な考え方',
+                icon: Icons.lightbulb_outline,
+                items: guide.keyConceptsExplained,
+              ),
+              _section(
+                context,
+                title: '局面の評価ポイント',
+                icon: Icons.fact_check_outlined,
+                items: guide.positionEvaluationCriteria,
+              ),
+              _section(
+                context,
+                title: '指し手の方針',
+                icon: Icons.route_outlined,
+                items: guide.planFormationGuidelines,
+              ),
+              _section(
+                context,
+                title: '終盤への移行のコツ',
+                icon: Icons.flag_outlined,
+                items: guide.endgameTransitionTips,
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

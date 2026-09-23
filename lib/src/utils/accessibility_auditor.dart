@@ -1,18 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 /// Accessibility audit result
 class AccessibilityIssue {
-  final String id;
-  final String title;
-  final String description;
-  final AccessibilitySeverity severity;
-  final String? wcagCriteria;
-  final String? suggestion;
-  final DateTime foundAt;
-
   AccessibilityIssue({
     required this.title,
     required this.description,
@@ -22,6 +13,13 @@ class AccessibilityIssue {
     DateTime? foundAt,
   })  : id = 'A11Y_${DateTime.now().millisecondsSinceEpoch}',
         foundAt = foundAt ?? DateTime.now();
+  final String id;
+  final String title;
+  final String description;
+  final AccessibilitySeverity severity;
+  final String? wcagCriteria;
+  final String? suggestion;
+  final DateTime foundAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -47,16 +45,13 @@ enum AccessibilitySeverity {
 
 /// Comprehensive accessibility auditor
 class AccessibilityAuditor {
+  factory AccessibilityAuditor() => _instance;
+
+  AccessibilityAuditor._internal();
   static final AccessibilityAuditor _instance =
       AccessibilityAuditor._internal();
 
   final _issues = <AccessibilityIssue>[];
-
-  factory AccessibilityAuditor() {
-    return _instance;
-  }
-
-  AccessibilityAuditor._internal();
 
   /// Run full accessibility audit
   Future<List<AccessibilityIssue>> runFullAudit() async {
@@ -84,8 +79,8 @@ class AccessibilityAuditor {
       final colors = [
         (Colors.black, Colors.white, 'Black on White'),
         (Colors.black, Colors.grey[100]!, 'Black on Light Grey'),
-        (Color(0xFF2E7D32), Colors.white, 'Primary on White'),
-        (Colors.white, Color(0xFF2E7D32), 'White on Primary'),
+        (const Color(0xFF2E7D32), Colors.white, 'Primary on White'),
+        (Colors.white, const Color(0xFF2E7D32), 'White on Primary'),
       ];
 
       for (final (foreground, background, description) in colors) {

@@ -5,15 +5,6 @@ import '../utils/query_cache.dart';
 import '../utils/pagination_helper.dart';
 
 class FriendChallengeServiceOptimized {
-  static final FriendChallengeServiceOptimized _instance =
-      FriendChallengeServiceOptimized._internal();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  late final SmartCache<String, List<Challenge>> _challengesCache;
-  late final SmartCache<String, ChallengeStreak> _streakCache;
-  late final MonitoredCache<String, Map<String, int>> _h2hChallengeCache;
-  late final SmartCache<String, List<ChallengeStreak>> _topStreaksCache;
-
   factory FriendChallengeServiceOptimized() => _instance;
   FriendChallengeServiceOptimized._internal() {
     _challengesCache = SmartCache(
@@ -21,7 +12,7 @@ class FriendChallengeServiceOptimized {
       cacheTtl: const Duration(minutes: 2),
     );
     _streakCache = SmartCache(
-      fetcher: (userId) => _getUserStreakFromDb(userId),
+      fetcher: _getUserStreakFromDb,
       cacheTtl: const Duration(minutes: 10),
     );
     _h2hChallengeCache = MonitoredCache(
@@ -32,6 +23,14 @@ class FriendChallengeServiceOptimized {
       cacheTtl: const Duration(minutes: 15),
     );
   }
+  static final FriendChallengeServiceOptimized _instance =
+      FriendChallengeServiceOptimized._internal();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  late final SmartCache<String, List<Challenge>> _challengesCache;
+  late final SmartCache<String, ChallengeStreak> _streakCache;
+  late final MonitoredCache<String, Map<String, int>> _h2hChallengeCache;
+  late final SmartCache<String, List<ChallengeStreak>> _topStreaksCache;
 
   static FriendChallengeServiceOptimized get instance => _instance;
 
@@ -56,14 +55,14 @@ class FriendChallengeServiceOptimized {
           .orderBy('createdAt', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => Challenge.fromJson(data),
+        Challenge.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching pending challenges: $e');
@@ -91,19 +90,20 @@ class FriendChallengeServiceOptimized {
           .orderBy('createdAt', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       final paginated = await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => Challenge.fromJson(data),
+        Challenge.fromJson,
       );
 
       // Filter by user (either challenger or challengee)
       final userChallenges = paginated.items
-          .where((c) => c.challengerUserId == userId || c.challengeeUserId == userId)
+          .where((c) =>
+              c.challengerUserId == userId || c.challengeeUserId == userId)
           .toList();
 
       return PaginatedResult(
@@ -138,19 +138,20 @@ class FriendChallengeServiceOptimized {
           .orderBy('completedAt', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       final paginated = await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => Challenge.fromJson(data),
+        Challenge.fromJson,
       );
 
       // Filter by user
       final userChallenges = paginated.items
-          .where((c) => c.challengerUserId == userId || c.challengeeUserId == userId)
+          .where((c) =>
+              c.challengerUserId == userId || c.challengeeUserId == userId)
           .toList();
 
       return PaginatedResult(
@@ -166,9 +167,8 @@ class FriendChallengeServiceOptimized {
   }
 
   /// Get user streak with caching
-  Future<ChallengeStreak> getUserStreakOptimized(String userId) async {
-    return _streakCache.get(userId);
-  }
+  Future<ChallengeStreak> getUserStreakOptimized(String userId) async =>
+      _streakCache.get(userId);
 
   /// Get top streaks with caching
   Future<List<ChallengeStreak>> getTopStreaksOptimized({int limit = 50}) async {
@@ -251,8 +251,7 @@ class FriendChallengeServiceOptimized {
       final active = activeSnapshot.docs
           .map((doc) => Challenge.fromJson(doc.data()))
           .where(
-            (c) =>
-                c.challengerUserId == userId || c.challengeeUserId == userId,
+            (c) => c.challengerUserId == userId || c.challengeeUserId == userId,
           )
           .toList();
 
@@ -306,7 +305,7 @@ class FriendChallengeServiceOptimized {
         userId: userId,
         totalWins: 0,
         totalLosses: 0,
-        winRate: 0.0,
+        winRate: 0,
         currentStreak: 0,
         bestStreak: 0,
       );
@@ -317,10 +316,8 @@ class FriendChallengeServiceOptimized {
 
   Future<ChallengeStreak> _getUserStreakFromDb(String userId) async {
     try {
-      final doc = await _firestore
-          .collection('challenge_streaks')
-          .doc(userId)
-          .get();
+      final doc =
+          await _firestore.collection('challenge_streaks').doc(userId).get();
 
       if (!doc.exists) {
         return ChallengeStreak(
@@ -330,7 +327,7 @@ class FriendChallengeServiceOptimized {
           streakStartDate: DateTime.now(),
           totalChallengesWon: 0,
           totalChallengesLost: 0,
-          winRate: 0.0,
+          winRate: 0,
         );
       }
 
@@ -382,13 +379,6 @@ class FriendChallengeServiceOptimized {
 }
 
 class ChallengeStats {
-  final String userId;
-  final int totalWins;
-  final int totalLosses;
-  final double winRate;
-  final int currentStreak;
-  final int bestStreak;
-
   ChallengeStats({
     required this.userId,
     required this.totalWins,
@@ -397,4 +387,10 @@ class ChallengeStats {
     required this.currentStreak,
     required this.bestStreak,
   });
+  final String userId;
+  final int totalWins;
+  final int totalLosses;
+  final double winRate;
+  final int currentStreak;
+  final int bestStreak;
 }

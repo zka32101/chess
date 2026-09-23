@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RankingService {
+  factory RankingService() => _instance;
+
+  RankingService._internal();
   static final RankingService _instance = RankingService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, List<PlayerRanking>> _rankingCache = {};
-
-  factory RankingService() {
-    return _instance;
-  }
-
-  RankingService._internal();
 
   Future<List<PlayerRanking>> getGlobalRankings(int limit) async {
     if (_rankingCache.containsKey('global')) {
@@ -32,7 +29,7 @@ class RankingService {
           .toList();
 
       _rankingCache['global'] = rankings;
-      Future.delayed(Duration(minutes: 5)).then((_) {
+      Future.delayed(const Duration(minutes: 5)).then((_) {
         _rankingCache.remove('global');
       });
 
@@ -66,7 +63,7 @@ class RankingService {
           .toList();
 
       _rankingCache[cacheKey] = rankings;
-      Future.delayed(Duration(minutes: 5)).then((_) {
+      Future.delayed(const Duration(minutes: 5)).then((_) {
         _rankingCache.remove(cacheKey);
       });
 
@@ -176,9 +173,14 @@ class RankingService {
           .limit(limit + offset)
           .get();
 
-      return snapshot.docs.skip(offset).toList().asMap().entries.map((e) {
-        return RankingEntry.fromJson(e.value.data(), rank: offset + e.key + 1);
-      }).toList();
+      return snapshot.docs
+          .skip(offset)
+          .toList()
+          .asMap()
+          .entries
+          .map((e) =>
+              RankingEntry.fromJson(e.value.data(), rank: offset + e.key + 1))
+          .toList();
     } catch (e) {
       print('Error fetching global ranking: $e');
       return [];
@@ -200,9 +202,11 @@ class RankingService {
           .limit(limit)
           .get();
 
-      return snapshot.docs.asMap().entries.map((e) {
-        return RankingEntry.fromJson(e.value.data(), rank: e.key + 1);
-      }).toList();
+      return snapshot.docs
+          .asMap()
+          .entries
+          .map((e) => RankingEntry.fromJson(e.value.data(), rank: e.key + 1))
+          .toList();
     } catch (e) {
       print('Error fetching shogi-rank ranking: $e');
       return [];
@@ -223,9 +227,11 @@ class RankingService {
           .limit(limit)
           .get();
 
-      return snapshot.docs.asMap().entries.map((e) {
-        return RankingEntry.fromJson(e.value.data(), rank: e.key + 1);
-      }).toList();
+      return snapshot.docs
+          .asMap()
+          .entries
+          .map((e) => RankingEntry.fromJson(e.value.data(), rank: e.key + 1))
+          .toList();
     } catch (e) {
       print('Error fetching monthly ranking: $e');
       return [];
@@ -277,9 +283,13 @@ class RankingService {
       final start = (index - proximityCount).clamp(0, docs.length);
       final end = (index + proximityCount + 1).clamp(0, docs.length);
 
-      return docs.sublist(start, end).asMap().entries.map((e) {
-        return RankingEntry.fromJson(e.value.data(), rank: start + e.key + 1);
-      }).toList();
+      return docs
+          .sublist(start, end)
+          .asMap()
+          .entries
+          .map((e) =>
+              RankingEntry.fromJson(e.value.data(), rank: start + e.key + 1))
+          .toList();
     } catch (e) {
       print('Error fetching nearby rankings: $e');
       return [];
@@ -287,29 +297,29 @@ class RankingService {
   }
 
   /// Real-time stream of the global ranking's top [limit] entries.
-  Stream<List<RankingEntry>> watchGlobalRanking({required int limit}) {
-    return _firestore
-        .collection('rankings')
-        .doc('global')
-        .collection('players')
-        .orderBy('rating', descending: true)
-        .limit(limit)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.asMap().entries.map((e) {
-              return RankingEntry.fromJson(e.value.data(), rank: e.key + 1);
-            }).toList());
-  }
+  Stream<List<RankingEntry>> watchGlobalRanking({required int limit}) =>
+      _firestore
+          .collection('rankings')
+          .doc('global')
+          .collection('players')
+          .orderBy('rating', descending: true)
+          .limit(limit)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .asMap()
+              .entries
+              .map(
+                  (e) => RankingEntry.fromJson(e.value.data(), rank: e.key + 1))
+              .toList());
 
   /// Real-time stream of a single user's own ranking entry.
-  Stream<RankingEntry?> watchUserRanking(String uid) {
-    return _firestore
-        .collection('rankings')
-        .doc('global')
-        .collection('players')
-        .doc(uid)
-        .snapshots()
-        .map((doc) => doc.exists ? RankingEntry.fromJson(doc.data()!) : null);
-  }
+  Stream<RankingEntry?> watchUserRanking(String uid) => _firestore
+      .collection('rankings')
+      .doc('global')
+      .collection('players')
+      .doc(uid)
+      .snapshots()
+      .map((doc) => doc.exists ? RankingEntry.fromJson(doc.data()!) : null);
 
   /// Aggregate stats over the whole global ranking (used by the leaderboard
   /// screen's summary header). Distinct from [getRankingStatistics], which
@@ -377,16 +387,6 @@ class RankingService {
 }
 
 class PlayerRanking {
-  final String userId;
-  final String username;
-  final int rating;
-  final int rank;
-  final int wins;
-  final int losses;
-  final double winRate;
-  final String region;
-  final DateTime updatedAt;
-
   PlayerRanking({
     required this.userId,
     required this.username,
@@ -399,80 +399,74 @@ class PlayerRanking {
     required this.updatedAt,
   });
 
-  factory PlayerRanking.fromJson(Map<String, dynamic> json, {int rank = 0}) {
-    return PlayerRanking(
-      userId: json['userId'] ?? '',
-      username: json['username'] ?? '',
-      rating: json['rating'] ?? 1000,
-      rank: rank,
-      wins: json['wins'] ?? 0,
-      losses: json['losses'] ?? 0,
-      winRate: (json['winRate'] ?? 0.0).toDouble(),
-      region: json['region'] ?? 'Global',
-      updatedAt: json['updatedAt'] != null
-          ? (json['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
-  }
+  factory PlayerRanking.fromJson(Map<String, dynamic> json, {int rank = 0}) =>
+      PlayerRanking(
+        userId: json['userId'] ?? '',
+        username: json['username'] ?? '',
+        rating: json['rating'] ?? 1000,
+        rank: rank,
+        wins: json['wins'] ?? 0,
+        losses: json['losses'] ?? 0,
+        winRate: (json['winRate'] ?? 0.0).toDouble(),
+        region: json['region'] ?? 'Global',
+        updatedAt: json['updatedAt'] != null
+            ? (json['updatedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+      );
+  final String userId;
+  final String username;
+  final int rating;
+  final int rank;
+  final int wins;
+  final int losses;
+  final double winRate;
+  final String region;
+  final DateTime updatedAt;
 
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'username': username,
-      'rating': rating,
-      'wins': wins,
-      'losses': losses,
-      'winRate': winRate,
-      'region': region,
-      'updatedAt': updatedAt,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'userId': userId,
+        'username': username,
+        'rating': rating,
+        'wins': wins,
+        'losses': losses,
+        'winRate': winRate,
+        'region': region,
+        'updatedAt': updatedAt,
+      };
 }
 
 class RankingStatistics {
-  final int totalPlayers;
-  final double averageRating;
-  final int topPlayerRating;
-  final List<RatingDistribution> distribution;
-
   RankingStatistics({
     required this.totalPlayers,
     required this.averageRating,
     required this.topPlayerRating,
     required this.distribution,
   });
+  final int totalPlayers;
+  final double averageRating;
+  final int topPlayerRating;
+  final List<RatingDistribution> distribution;
 }
 
 class RatingDistribution {
-  final String tier;
-  final int playerCount;
-  final double percentage;
-
   RatingDistribution({
     required this.tier,
     required this.playerCount,
     required this.percentage,
   });
+  final String tier;
+  final int playerCount;
+  final double percentage;
 }
 
 class GameResult {
+  GameResult({required this.isWin, required this.isDraw});
   final bool isWin;
   final bool isDraw;
-
-  GameResult({required this.isWin, required this.isDraw});
 }
 
 /// A single leaderboard row, as shown on the leaderboard/ranking screens.
 class RankingEntry {
-  final String uid;
-  final String displayName;
-  final String shogiRankString;
-  final int rating;
-  final int rank;
-  final int gamesPlayed;
-  final double winRate;
-  final DateTime? lastGameAt;
-
   RankingEntry({
     required this.uid,
     required this.displayName,
@@ -500,18 +494,25 @@ class RankingEntry {
           : null,
     );
   }
+  final String uid;
+  final String displayName;
+  final String shogiRankString;
+  final int rating;
+  final int rank;
+  final int gamesPlayed;
+  final double winRate;
+  final DateTime? lastGameAt;
 }
 
 /// Aggregate statistics over the whole ranking, shown in the leaderboard
 /// screen's summary header.
 class RankingStats {
-  final int totalPlayers;
-  final double averageRating;
-  final int topRating;
-
   RankingStats({
     required this.totalPlayers,
     required this.averageRating,
     required this.topRating,
   });
+  final int totalPlayers;
+  final double averageRating;
+  final int topRating;
 }

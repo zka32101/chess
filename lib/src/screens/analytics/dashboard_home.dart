@@ -22,92 +22,92 @@ class DashboardHome extends ConsumerWidget {
         error: (err, stack) => Center(
           child: Text('Error: $err'),
         ),
-        data: (kpis) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Key Performance Indicators',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 1.2,
-                    ),
-                    itemCount: kpis.length,
-                    itemBuilder: (context, index) {
-                      final kpi = kpis[index];
-                      return KPICard(
-                        label: kpi.label,
-                        value: kpi.value,
-                        unit: kpi.unit,
-                        trend: kpi.trend,
-                        trendColor: _getTrendColor(kpi.trend),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Dashboard Sections',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+        data: (kpis) => SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Key Performance Indicators',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 12,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 1.5,
-                    children: [
-                      _DashboardTile(
-                        title: 'Performance',
-                        icon: Icons.speed,
-                        onTap: () {
-                          Navigator.of(context).pushNamed('/analytics/performance');
-                        },
-                      ),
-                      _DashboardTile(
-                        title: 'Engagement',
-                        icon: Icons.people,
-                        onTap: () {
-                          Navigator.of(context).pushNamed('/analytics/engagement');
-                        },
-                      ),
-                      _DashboardTile(
-                        title: 'Cache',
-                        icon: Icons.storage,
-                        onTap: () {
-                          Navigator.of(context).pushNamed('/analytics/cache');
-                        },
-                      ),
-                      _DashboardTile(
-                        title: 'Features',
-                        icon: Icons.star,
-                        onTap: () {
-                          Navigator.of(context).pushNamed('/analytics/features');
-                        },
-                      ),
-                    ],
+                    childAspectRatio: 1.2,
                   ),
-                ],
-              ),
+                  itemCount: kpis.length,
+                  itemBuilder: (context, index) {
+                    final kpi = kpis[index];
+                    return KPICard(
+                      label: kpi.label,
+                      value: kpi.value,
+                      unit: kpi.unit,
+                      trend: kpi.trend,
+                      trendColor: _getTrendColor(kpi.trend),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Dashboard Sections',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.5,
+                  children: [
+                    _DashboardTile(
+                      title: 'Performance',
+                      icon: Icons.speed,
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/analytics/performance');
+                      },
+                    ),
+                    _DashboardTile(
+                      title: 'Engagement',
+                      icon: Icons.people,
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed('/analytics/engagement');
+                      },
+                    ),
+                    _DashboardTile(
+                      title: 'Cache',
+                      icon: Icons.storage,
+                      onTap: () {
+                        Navigator.of(context).pushNamed('/analytics/cache');
+                      },
+                    ),
+                    _DashboardTile(
+                      title: 'Features',
+                      icon: Icons.star,
+                      onTap: () {
+                        Navigator.of(context).pushNamed('/analytics/features');
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -121,39 +121,36 @@ class DashboardHome extends ConsumerWidget {
 }
 
 class _DashboardTile extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
   const _DashboardTile({
     required this.title,
     required this.icon,
     required this.onTap,
   });
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
+  Widget build(BuildContext context) => Card(
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: Theme.of(context).primaryColor,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

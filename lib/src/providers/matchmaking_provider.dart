@@ -14,25 +14,23 @@ enum MatchmakingStatus {
 
 // Matchmaking notification model
 class MatchmakingNotification {
-  final String opponentId;
-  final String opponentName;
-  final int opponentRating;
-  final String? opponentPhotoUrl;
-
   MatchmakingNotification({
     required this.opponentId,
     required this.opponentName,
     required this.opponentRating,
     this.opponentPhotoUrl,
   });
+  final String opponentId;
+  final String opponentName;
+  final int opponentRating;
+  final String? opponentPhotoUrl;
 }
 
 // Matchmaking queue service
 class MatchmakingService {
+  MatchmakingService(this._firestore, this._auth);
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  MatchmakingService(this._firestore, this._auth);
 
   // Join matchmaking queue
   Future<String> joinQueue({
@@ -59,7 +57,8 @@ class MatchmakingService {
       };
 
       // Add to matchmaking queue
-      final docRef = await _firestore.collection('matchmaking_queue').add(queueEntry);
+      final docRef =
+          await _firestore.collection('matchmaking_queue').add(queueEntry);
       return docRef.id;
     } catch (e) {
       print('Error joining matchmaking queue: $e');
@@ -70,7 +69,10 @@ class MatchmakingService {
   // Leave matchmaking queue
   Future<void> leaveQueue(String queueEntryId) async {
     try {
-      await _firestore.collection('matchmaking_queue').doc(queueEntryId).delete();
+      await _firestore
+          .collection('matchmaking_queue')
+          .doc(queueEntryId)
+          .delete();
     } catch (e) {
       print('Error leaving matchmaking queue: $e');
       rethrow;
@@ -84,7 +86,8 @@ class MatchmakingService {
 
     try {
       // Update match status to accepted
-      final matchDoc = await _firestore.collection('matches').doc(matchId).get();
+      final matchDoc =
+          await _firestore.collection('matches').doc(matchId).get();
 
       if (matchDoc.exists) {
         final matchData = matchDoc.data()!;
@@ -102,7 +105,8 @@ class MatchmakingService {
         }
 
         // If both players accepted, create a game
-        if (updatedData['whiteAccepted'] == true && updatedData['blackAccepted'] == true) {
+        if (updatedData['whiteAccepted'] == true &&
+            updatedData['blackAccepted'] == true) {
           updatedData['status'] = 'matched';
           updatedData['matchedAt'] = FieldValue.serverTimestamp();
         }
@@ -163,7 +167,8 @@ class MatchmakingService {
   // Get matchmaking stats
   Future<Map<String, dynamic>> getMatchmakingStats() async {
     try {
-      final queueSnapshot = await _firestore.collection('matchmaking_queue').get();
+      final queueSnapshot =
+          await _firestore.collection('matchmaking_queue').get();
       final activeMatches = await _firestore
           .collection('matches')
           .where('status', isEqualTo: 'pending')
@@ -210,7 +215,8 @@ final matchmakingStatusProvider =
 final currentQueueEntryProvider = StateProvider<String?>((ref) => null);
 
 // Matchmaking stats provider
-final matchmakingStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final matchmakingStatsProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
   final matchmakingService = ref.watch(matchmakingServiceProvider);
   return matchmakingService.getMatchmakingStats();
 });

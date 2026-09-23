@@ -7,12 +7,11 @@ import 'package:intl/intl.dart';
 
 /// Leaderboard screen displaying player rankings
 class LeaderboardScreen extends ConsumerStatefulWidget {
-  final String? initialShogiRank;
-
   const LeaderboardScreen({
     Key? key,
     this.initialShogiRank,
   }) : super(key: key);
+  final String? initialShogiRank;
 
   @override
   ConsumerState<LeaderboardScreen> createState() => _LeaderboardScreenState();
@@ -92,50 +91,49 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   /// Filter tabs for changing ranking view
-  Widget _buildFilterTabs(BuildContext context, LeaderboardState state) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-        child: Wrap(
-          spacing: 8.0,
-          children: [
-            // Global tab
-            FilterChip(
-              label: const Text('グローバル'),
-              selected: state.filter == LeaderboardFilter.global,
-              onSelected: (selected) {
-                if (selected) {
-                  ref.read(leaderboardProvider.notifier).loadGlobalRanking();
-                }
-              },
-            ),
-
-            // Monthly tab
-            FilterChip(
-              label: const Text('月間'),
-              selected: state.filter == LeaderboardFilter.monthly,
-              onSelected: (selected) {
-                if (selected) {
-                  ref.read(leaderboardProvider.notifier).loadMonthlyRanking();
-                }
-              },
-            ),
-
-            // Shogi rank filter button
-            Tooltip(
-              message: '段級別ランキング',
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.filter_list),
-                label: const Text('段級別'),
-                onPressed: () => _showShogiRankFilter(context),
+  Widget _buildFilterTabs(BuildContext context, LeaderboardState state) =>
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Wrap(
+            spacing: 8,
+            children: [
+              // Global tab
+              FilterChip(
+                label: const Text('グローバル'),
+                selected: state.filter == LeaderboardFilter.global,
+                onSelected: (selected) {
+                  if (selected) {
+                    ref.read(leaderboardProvider.notifier).loadGlobalRanking();
+                  }
+                },
               ),
-            ),
-          ],
+
+              // Monthly tab
+              FilterChip(
+                label: const Text('月間'),
+                selected: state.filter == LeaderboardFilter.monthly,
+                onSelected: (selected) {
+                  if (selected) {
+                    ref.read(leaderboardProvider.notifier).loadMonthlyRanking();
+                  }
+                },
+              ),
+
+              // Shogi rank filter button
+              Tooltip(
+                message: '段級別ランキング',
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.filter_list),
+                  label: const Text('段級別'),
+                  onPressed: () => _showShogiRankFilter(context),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Show shogi rank filter dialog
   void _showShogiRankFilter(BuildContext context) {
@@ -203,13 +201,13 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.all(12.0),
-      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDarkMode
-            ? theme.colorScheme.surfaceVariant
-            : theme.colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(12.0),
+            ? theme.colorScheme.surfaceContainerHighest
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -243,119 +241,114 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     String label,
     String value,
     IconData icon,
-  ) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: 24,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        const SizedBox(height: 8.0),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 4.0),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall,
-        ),
-      ],
-    );
-  }
+  ) =>
+      Column(
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
+        ],
+      );
 
   /// Build rankings list
-  Widget _buildRankingsList(BuildContext context, LeaderboardState state) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(8.0),
-      itemCount: state.entries.length,
-      itemBuilder: (context, index) => RankCard(
-        entry: state.entries[index],
-        index: index,
-      ),
-    );
-  }
+  Widget _buildRankingsList(BuildContext context, LeaderboardState state) =>
+      ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: state.entries.length,
+        itemBuilder: (context, index) => RankCard(
+          entry: state.entries[index],
+          index: index,
+        ),
+      );
 
   /// Build pagination controls
   Widget _buildPaginationControls(
-      BuildContext context, LeaderboardState state) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ElevatedButton.icon(
-            icon: const Icon(Icons.chevron_left),
-            label: const Text('前へ'),
-            onPressed: state.currentPage > 0
-                ? () => ref.read(leaderboardProvider.notifier).previousPage()
-                : null,
-          ),
-          Text(
-            'ページ ${state.currentPage + 1}',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.chevron_right),
-            label: const Text('次へ'),
-            onPressed: () => ref.read(leaderboardProvider.notifier).nextPage(),
-          ),
-        ],
-      ),
-    );
-  }
+          BuildContext context, LeaderboardState state) =>
+      Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.chevron_left),
+              label: const Text('前へ'),
+              onPressed: state.currentPage > 0
+                  ? () => ref.read(leaderboardProvider.notifier).previousPage()
+                  : null,
+            ),
+            Text(
+              'ページ ${state.currentPage + 1}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.chevron_right),
+              label: const Text('次へ'),
+              onPressed: () =>
+                  ref.read(leaderboardProvider.notifier).nextPage(),
+            ),
+          ],
+        ),
+      );
 
   /// Build error widget
-  Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Colors.red,
-          ),
-          const SizedBox(height: 16.0),
-          Text(
-            'エラーが発生しました',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Text(
-              error,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.red,
-                  ),
+  Widget _buildErrorWidget(BuildContext context, String error) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red,
             ),
-          ),
-          const SizedBox(height: 24.0),
-          ElevatedButton(
-            onPressed: () => ref.read(leaderboardProvider.notifier).refresh(),
-            child: const Text('再試行'),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 16),
+            Text(
+              'エラーが発生しました',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                error,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.red,
+                    ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => ref.read(leaderboardProvider.notifier).refresh(),
+              child: const Text('再試行'),
+            ),
+          ],
+        ),
+      );
 }
 
 /// Rank card widget for displaying individual ranking entry
 class RankCard extends ConsumerWidget {
-  final RankingEntry entry;
-  final int index;
-
   const RankCard({
-    Key? key,
     required this.entry,
     required this.index,
+    Key? key,
   }) : super(key: key);
+  final RankingEntry entry;
+  final int index;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -372,15 +365,15 @@ class RankCard extends ConsumerWidget {
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             // Rank badge
             Container(
-              width: 56.0,
-              height: 56.0,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: getRankColor(),
                 shape: BoxShape.circle,
@@ -400,7 +393,7 @@ class RankCard extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 16.0),
+            const SizedBox(width: 16),
 
             // Player info
             Expanded(
@@ -416,7 +409,7 @@ class RankCard extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4.0),
+                  const SizedBox(height: 4),
 
                   // Shogi rank and stats
                   Row(
@@ -427,7 +420,7 @@ class RankCard extends ConsumerWidget {
                         eloRating: entry.rating,
                         compact: true,
                       ),
-                      const SizedBox(width: 8.0),
+                      const SizedBox(width: 8),
 
                       // Stats
                       Expanded(
@@ -443,7 +436,7 @@ class RankCard extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12.0),
+            const SizedBox(width: 12),
 
             // Rating
             Column(
@@ -456,7 +449,7 @@ class RankCard extends ConsumerWidget {
                     color: theme.colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 4.0),
+                const SizedBox(height: 4),
                 Text(
                   'レート',
                   style: theme.textTheme.labelSmall,

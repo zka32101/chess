@@ -1,22 +1,14 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:logger/logger.dart';
-import 'package:chess_tactics_master/src/models/game_history.dart';
-import 'package:chess_tactics_master/src/services/game_history_service.dart';
-import 'package:chess_tactics_master/src/services/firebase_game_history_service.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
+import '../models/game_history.dart';
+import 'game_history_service.dart';
+import 'firebase_game_history_service.dart';
+import 'ai_opponent_engine_enhanced.dart';
 
 /// Hybrid service combining local and cloud storage with automatic sync
 ///
 /// Provides offline-first experience with background cloud synchronization
 class HybridGameHistoryService implements GameHistoryService {
-  final LocalGameHistoryService _local;
-  final FirebaseGameHistoryService _firebase;
-  final Connectivity _connectivity = Connectivity();
-  final Logger _logger = Logger();
-
-  bool _isOnline = false;
-  late Stream<ConnectivityResult> _connectivityStream;
-
   HybridGameHistoryService({
     required LocalGameHistoryService local,
     required FirebaseGameHistoryService firebase,
@@ -24,6 +16,13 @@ class HybridGameHistoryService implements GameHistoryService {
         _firebase = firebase {
     _initializeConnectivity();
   }
+  final LocalGameHistoryService _local;
+  final FirebaseGameHistoryService _firebase;
+  final Connectivity _connectivity = Connectivity();
+  final Logger _logger = Logger();
+
+  bool _isOnline = false;
+  late Stream<ConnectivityResult> _connectivityStream;
 
   /// Initialize connectivity monitoring
   void _initializeConnectivity() {
@@ -206,14 +205,11 @@ class HybridGameHistoryService implements GameHistoryService {
   }
 
   /// Watch player statistics with real-time cloud updates
-  Stream<PlayerStatistics> watchPlayerStatisticsLive() {
-    return _firebase.watchPlayerStatistics();
-  }
+  Stream<PlayerStatistics> watchPlayerStatisticsLive() =>
+      _firebase.watchPlayerStatistics();
 
   /// Watch all games for real-time updates
-  Stream<List<GameRecord>> watchAllGamesLive() {
-    return _firebase.watchAllGames();
-  }
+  Stream<List<GameRecord>> watchAllGamesLive() => _firebase.watchAllGames();
 
   /// Sync all pending local games to cloud
   Future<int> _syncPendingGames() async {
@@ -334,9 +330,8 @@ class HybridGameHistoryService implements GameHistoryService {
     _syncStatus[gameId] = -1; // -1 = deleted
   }
 
-  bool _shouldSyncGame(String gameId) {
-    return _syncStatus[gameId] == null || _syncStatus[gameId] == 0;
-  }
+  bool _shouldSyncGame(String gameId) =>
+      _syncStatus[gameId] == null || _syncStatus[gameId] == 0;
 
   int _estimateSize(List<GameRecord> games) {
     // Rough estimate: ~2KB per game

@@ -58,7 +58,7 @@ class MyRankingScreen extends ConsumerWidget {
               children: [
                 // User rank position card
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16),
                   child: userRankAsync.when(
                     data: (rank) => _buildMyRankCard(
                       context,
@@ -74,7 +74,7 @@ class MyRankingScreen extends ConsumerWidget {
                     ),
                     error: (err, st) => Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16),
                         child: Text('エラー: $err'),
                       ),
                     ),
@@ -83,7 +83,7 @@ class MyRankingScreen extends ConsumerWidget {
 
                 // Nearby players section
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -94,7 +94,7 @@ class MyRankingScreen extends ConsumerWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                       ),
-                      const SizedBox(height: 12.0),
+                      const SizedBox(height: 12),
                       nearbyRankingsAsync.when(
                         data: (rankings) => _buildNearbyPlayersList(
                             context, rankings, currentUser.uid),
@@ -129,17 +129,17 @@ class MyRankingScreen extends ConsumerWidget {
     if (rank == null) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Center(
             child: Column(
               children: [
                 const Icon(Icons.info_outline, size: 48),
-                const SizedBox(height: 12.0),
+                const SizedBox(height: 12),
                 Text(
                   'ランク情報を取得できません',
                   style: theme.textTheme.bodyLarge,
                 ),
-                const SizedBox(height: 8.0),
+                const SizedBox(height: 8),
                 Text(
                   'ゲームをプレイしてランキングに参加してください',
                   style: theme.textTheme.labelSmall,
@@ -153,9 +153,9 @@ class MyRankingScreen extends ConsumerWidget {
     }
 
     return Card(
-      elevation: 4.0,
+      elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             // My rank position
@@ -175,7 +175,7 @@ class MyRankingScreen extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8.0),
+                      const SizedBox(height: 8),
                       if (user.shogiRank != null)
                         ShogiRankDisplay(
                           rank: user.shogiRank!,
@@ -186,8 +186,8 @@ class MyRankingScreen extends ConsumerWidget {
                   ),
                 ),
                 Container(
-                  width: 100.0,
-                  height: 100.0,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     shape: BoxShape.circle,
@@ -215,7 +215,7 @@ class MyRankingScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20.0),
+            const SizedBox(height: 20),
 
             // Stats row
             Row(
@@ -247,11 +247,11 @@ class MyRankingScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20.0),
+            const SizedBox(height: 20),
 
             // Win rate bar
             _buildWinRateBar(context, user),
-            const SizedBox(height: 16.0),
+            const SizedBox(height: 16),
 
             // Detail button
             SizedBox(
@@ -295,14 +295,14 @@ class MyRankingScreen extends ConsumerWidget {
     return Column(
       children: [
         Icon(icon, size: 20, color: theme.colorScheme.primary),
-        const SizedBox(height: 8.0),
+        const SizedBox(height: 8),
         Text(
           value,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 4.0),
+        const SizedBox(height: 4),
         Text(
           label,
           style: theme.textTheme.labelSmall,
@@ -334,13 +334,13 @@ class MyRankingScreen extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8.0),
+        const SizedBox(height: 8),
         ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(8),
           child: LinearProgressIndicator(
             value: winRate,
-            minHeight: 8.0,
-            backgroundColor: theme.colorScheme.surfaceVariant,
+            minHeight: 8,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
             valueColor: AlwaysStoppedAnimation<Color>(
               theme.colorScheme.primary,
             ),
@@ -361,7 +361,7 @@ class MyRankingScreen extends ConsumerWidget {
     if (rankings.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Text(
             'ランキングにまだプレイヤーがいません',
             style: theme.textTheme.bodyMedium,
@@ -383,19 +383,19 @@ class MyRankingScreen extends ConsumerWidget {
             : '0.0';
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 8.0),
+          margin: const EdgeInsets.only(bottom: 8),
           elevation: isCurrentUser ? 4.0 : 0.0,
           child: Container(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isCurrentUser
                   ? theme.colorScheme.primary.withOpacity(0.1)
                   : null,
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8),
               border: isCurrentUser
                   ? Border.all(
                       color: theme.colorScheme.primary,
-                      width: 2.0,
+                      width: 2,
                     )
                   : null,
             ),
@@ -403,8 +403,8 @@ class MyRankingScreen extends ConsumerWidget {
               children: [
                 // Rank badge
                 Container(
-                  width: 44.0,
-                  height: 44.0,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
                     shape: BoxShape.circle,
@@ -419,7 +419,7 @@ class MyRankingScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12.0),
+                const SizedBox(width: 12),
 
                 // Player info
                 Expanded(
@@ -446,7 +446,7 @@ class MyRankingScreen extends ConsumerWidget {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 4.0),
+                      const SizedBox(height: 4),
                       Text(
                         '${entry.shogiRankString} • 勝率 $winRate% • ${entry.rating}',
                         style: theme.textTheme.labelSmall,

@@ -1,19 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GameSharingService {
-  static final GameSharingService _instance = GameSharingService._internal();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  factory GameSharingService() {
-    return _instance;
-  }
+  factory GameSharingService() => _instance;
 
   GameSharingService._internal();
+  static final GameSharingService _instance = GameSharingService._internal();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<SharedGameLink> createShareableLink(String gameId) async {
     try {
       final shortCode = _generateShortCode();
-      final expiresAt = DateTime.now().add(Duration(days: 30));
+      final expiresAt = DateTime.now().add(const Duration(days: 30));
 
       await _firestore
           .collection('shared_games')
@@ -36,7 +33,7 @@ class GameSharingService {
       );
     } catch (e) {
       print('Error creating shareable link: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -92,8 +89,12 @@ class GameSharingService {
 
   Future<GameViewerData> getGameViewerData(String gameId) async {
     try {
-      final gameDoc =
-          await _firestore.collection('shared_games').doc('games').collection('all').doc(gameId).get();
+      final gameDoc = await _firestore
+          .collection('shared_games')
+          .doc('games')
+          .collection('all')
+          .doc(gameId)
+          .get();
 
       final commentsSnapshot = await _firestore
           .collection('shared_games')
@@ -121,16 +122,41 @@ class GameSharingService {
   }
 
   String _generateShortCode() {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     String result = '';
     for (int i = 0; i < 8; i++) {
-      result += chars[(DateTime.now().millisecondsSinceEpoch + i) % chars.length];
+      result +=
+          chars[(DateTime.now().millisecondsSinceEpoch + i) % chars.length];
     }
     return result;
   }
 }
 
 class SharedGame {
+  SharedGame({
+    required this.gameId,
+    required this.sharedBy,
+    required this.title,
+    required this.pgn,
+    required this.tags,
+    required this.viewCount,
+    required this.sharedAt,
+    this.analysis,
+  });
+
+  factory SharedGame.fromJson(Map<String, dynamic> json) => SharedGame(
+        gameId: json['gameId'] ?? '',
+        sharedBy: json['sharedBy'] ?? '',
+        title: json['title'] ?? '',
+        pgn: json['pgn'] ?? '',
+        analysis: json['analysis'],
+        tags: List<String>.from(json['tags'] ?? []),
+        viewCount: json['viewCount'] ?? 0,
+        sharedAt: json['sharedAt'] != null
+            ? (json['sharedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+      );
   final String gameId;
   final String sharedBy;
   final String title;
@@ -139,41 +165,9 @@ class SharedGame {
   final List<String> tags;
   final int viewCount;
   final DateTime sharedAt;
-
-  SharedGame({
-    required this.gameId,
-    required this.sharedBy,
-    required this.title,
-    required this.pgn,
-    this.analysis,
-    required this.tags,
-    required this.viewCount,
-    required this.sharedAt,
-  });
-
-  factory SharedGame.fromJson(Map<String, dynamic> json) {
-    return SharedGame(
-      gameId: json['gameId'] ?? '',
-      sharedBy: json['sharedBy'] ?? '',
-      title: json['title'] ?? '',
-      pgn: json['pgn'] ?? '',
-      analysis: json['analysis'],
-      tags: List<String>.from(json['tags'] ?? []),
-      viewCount: json['viewCount'] ?? 0,
-      sharedAt: json['sharedAt'] != null
-          ? (json['sharedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
-  }
 }
 
 class SharedGameLink {
-  final String gameId;
-  final String shortCode;
-  final String fullUrl;
-  final DateTime expiresAt;
-  final bool isPublic;
-
   SharedGameLink({
     required this.gameId,
     required this.shortCode,
@@ -181,17 +175,14 @@ class SharedGameLink {
     required this.expiresAt,
     required this.isPublic,
   });
+  final String gameId;
+  final String shortCode;
+  final String fullUrl;
+  final DateTime expiresAt;
+  final bool isPublic;
 }
 
 class GameComment {
-  final String commentId;
-  final String userId;
-  final String username;
-  final String content;
-  final int moveNumber;
-  final DateTime createdAt;
-  final List<String> likes;
-
   GameComment({
     required this.commentId,
     required this.userId,
@@ -202,35 +193,39 @@ class GameComment {
     required this.likes,
   });
 
-  factory GameComment.fromJson(Map<String, dynamic> json) {
-    return GameComment(
-      commentId: json['commentId'] ?? '',
-      userId: json['userId'] ?? '',
-      username: json['username'] ?? '',
-      content: json['content'] ?? '',
-      moveNumber: json['moveNumber'] ?? 0,
-      createdAt: json['createdAt'] != null
-          ? (json['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      likes: List<String>.from(json['likes'] ?? []),
-    );
-  }
+  factory GameComment.fromJson(Map<String, dynamic> json) => GameComment(
+        commentId: json['commentId'] ?? '',
+        userId: json['userId'] ?? '',
+        username: json['username'] ?? '',
+        content: json['content'] ?? '',
+        moveNumber: json['moveNumber'] ?? 0,
+        createdAt: json['createdAt'] != null
+            ? (json['createdAt'] as Timestamp).toDate()
+            : DateTime.now(),
+        likes: List<String>.from(json['likes'] ?? []),
+      );
+  final String commentId;
+  final String userId;
+  final String username;
+  final String content;
+  final int moveNumber;
+  final DateTime createdAt;
+  final List<String> likes;
 }
 
 class GameViewerData {
+  GameViewerData({
+    required this.gameId,
+    required this.pgn,
+    required this.comments,
+    required this.viewCount,
+    required this.sharedAt,
+    this.analysis,
+  });
   final String gameId;
   final String pgn;
   final dynamic analysis;
   final List<GameComment> comments;
   final int viewCount;
   final DateTime sharedAt;
-
-  GameViewerData({
-    required this.gameId,
-    required this.pgn,
-    this.analysis,
-    required this.comments,
-    required this.viewCount,
-    required this.sharedAt,
-  });
 }

@@ -2,11 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Phase R: セキュリティ & コンプライアンス
 class SecurityService {
-  static final SecurityService _instance = SecurityService._internal();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   factory SecurityService() => _instance;
   SecurityService._internal();
+  static final SecurityService _instance = SecurityService._internal();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// ✅ 2要素認証の有効化 (認証確認付き)
   Future<void> enableTwoFactorAuth(
@@ -15,7 +14,8 @@ class SecurityService {
   ) async {
     // 認証確認: 現在のユーザーが本人またはadminか
     if (currentUserId != targetUserId) {
-      final currentUser = await _firestore.collection('users').doc(currentUserId).get();
+      final currentUser =
+          await _firestore.collection('users').doc(currentUserId).get();
       final isAdmin = currentUser['role'] == 'admin';
 
       if (!isAdmin) {
@@ -45,11 +45,13 @@ class SecurityService {
   ) async {
     // 権限確認: 本人またはadminのみ
     if (requestingUserId != targetUserId) {
-      final requester = await _firestore.collection('users').doc(requestingUserId).get();
+      final requester =
+          await _firestore.collection('users').doc(requestingUserId).get();
       final isAdmin = requester['role'] == 'admin';
 
       if (!isAdmin) {
-        throw UnauthorizedException('Only account owner or admin can request data operations');
+        throw UnauthorizedException(
+            'Only account owner or admin can request data operations');
       }
     }
 
@@ -96,11 +98,13 @@ class SecurityService {
   ) async {
     // 権限確認: 本人またはadminのみ
     if (requestingUserId != targetUserId) {
-      final requester = await _firestore.collection('users').doc(requestingUserId).get();
+      final requester =
+          await _firestore.collection('users').doc(requestingUserId).get();
       final isAdmin = requester['role'] == 'admin';
 
       if (!isAdmin) {
-        throw UnauthorizedException('Insufficient permissions for data deletion');
+        throw UnauthorizedException(
+            'Insufficient permissions for data deletion');
       }
     }
 
@@ -129,7 +133,8 @@ class SecurityService {
             .doc(targetUserId));
 
         // プロフィール削除
-        transaction.delete(_firestore.collection('user_profiles').doc(targetUserId));
+        transaction
+            .delete(_firestore.collection('user_profiles').doc(targetUserId));
 
         // アチーブメント削除
         transaction.delete(_firestore
@@ -157,28 +162,27 @@ class SecurityService {
   }
 
   /// ✅ 機密情報マスキング (public for testing)
-  Map<String, dynamic> sanitizeDetails(Map<String, dynamic> details) {
-    return details.map((key, value) {
-      final lowerKey = key.toLowerCase();
+  Map<String, dynamic> sanitizeDetails(Map<String, dynamic> details) =>
+      details.map((key, value) {
+        final lowerKey = key.toLowerCase();
 
-      // 機密キーワードのマスキング
-      if (lowerKey.contains('password') ||
-          lowerKey.contains('token') ||
-          lowerKey.contains('secret') ||
-          lowerKey.contains('apikey') ||
-          lowerKey.contains('credential')) {
-        return MapEntry(key, '[REDACTED]');
-      }
+        // 機密キーワードのマスキング
+        if (lowerKey.contains('password') ||
+            lowerKey.contains('token') ||
+            lowerKey.contains('secret') ||
+            lowerKey.contains('apikey') ||
+            lowerKey.contains('credential')) {
+          return MapEntry(key, '[REDACTED]');
+        }
 
-      return MapEntry(key, value);
-    });
-  }
+        return MapEntry(key, value);
+      });
 }
 
 /// ✅ 認可エラー例外
 class UnauthorizedException implements Exception {
-  final String message;
   UnauthorizedException(this.message);
+  final String message;
 
   @override
   String toString() => 'UnauthorizedException: $message';

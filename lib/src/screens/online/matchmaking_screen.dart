@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/providers/online_game_provider.dart';
+import '../../providers/online_game_provider.dart';
 
 /// Screen for matchmaking queue management
 class MatchmakingScreen extends ConsumerStatefulWidget {
@@ -36,43 +35,42 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
   Widget _buildInitialState(
     BuildContext context,
     AsyncValue<Map<String, dynamic>> queueStats,
-  ) {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        // Time Control Selection
-        _buildSectionTitle('Time Control'),
-        _buildTimeControlSelector(),
-        const SizedBox(height: 24),
+  ) =>
+      ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Time Control Selection
+          _buildSectionTitle('Time Control'),
+          _buildTimeControlSelector(),
+          const SizedBox(height: 24),
 
-        // Color Selection
-        _buildSectionTitle('Preferred Color'),
-        _buildColorSelector(),
-        const SizedBox(height: 24),
+          // Color Selection
+          _buildSectionTitle('Preferred Color'),
+          _buildColorSelector(),
+          const SizedBox(height: 24),
 
-        // Queue Statistics
-        _buildSectionTitle('Queue Status'),
-        queueStats.when(
-          data: (stats) => _buildQueueStats(stats),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, st) => Text('Error: $err'),
-        ),
-        const SizedBox(height: 32),
-
-        // Start Search Button
-        ElevatedButton.icon(
-          onPressed: _startSearch,
-          icon: const Icon(Icons.search),
-          label: const Text('Find Opponent'),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
+          // Queue Statistics
+          _buildSectionTitle('Queue Status'),
+          queueStats.when(
+            data: _buildQueueStats,
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, st) => Text('Error: $err'),
           ),
-        ),
-      ],
-    );
-  }
+          const SizedBox(height: 32),
+
+          // Start Search Button
+          ElevatedButton.icon(
+            onPressed: _startSearch,
+            icon: const Icon(Icons.search),
+            label: const Text('Find Opponent'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      );
 
   /// Searching state: Show spinner and match notification
   Widget _buildSearchingState(BuildContext context) {
@@ -129,7 +127,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
 
         return Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -245,84 +243,76 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
   }
 
   /// Build queue statistics widget
-  Widget _buildQueueStats(Map<String, dynamic> stats) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+  Widget _buildQueueStats(Map<String, dynamic> stats) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildStatRow(
+                'Total Waiting',
+                (stats['totalWaiting'] as int? ?? 0).toString(),
+              ),
+              const Divider(),
+              const SizedBox(height: 8),
+              const Text('By Time Control:',
+                  style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(height: 8),
+              ...((stats['byTimeControl'] as Map<String, dynamic>?) ?? {})
+                  .entries
+                  .map((e) => _buildStatRow(e.key, e.value.toString())),
+              const Divider(),
+              const SizedBox(height: 8),
+              _buildStatRow(
+                'Avg Wait Time',
+                '${(stats['avgWaitTimeSeconds'] as double? ?? 0).toStringAsFixed(0)}s',
+              ),
+            ],
+          ),
+        ),
+      );
+
+  /// Build individual stat row
+  Widget _buildStatRow(String label, String value) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value, style: TextStyle(color: Colors.grey[600])),
+        ],
+      );
+
+  /// Build error state widget
+  Widget _buildErrorState(Object error) => Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildStatRow(
-              'Total Waiting',
-              (stats['totalWaiting'] as int? ?? 0).toString(),
-            ),
-            const Divider(),
-            const SizedBox(height: 8),
-            const Text('By Time Control:',
-                style: TextStyle(fontWeight: FontWeight.w500)),
-            const SizedBox(height: 8),
-            ...((stats['byTimeControl'] as Map<String, dynamic>?) ?? {})
-                .entries
-                .map((e) => _buildStatRow(e.key, e.value.toString())),
-            const Divider(),
-            const SizedBox(height: 8),
-            _buildStatRow(
-              'Avg Wait Time',
-              '${(stats['avgWaitTimeSeconds'] as double? ?? 0).toStringAsFixed(0)}s',
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text('Error: $error'),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _cancelSearch,
+              child: const Text('Go Back'),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  /// Build individual stat row
-  Widget _buildStatRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        Text(value, style: TextStyle(color: Colors.grey[600])),
-      ],
-    );
-  }
-
-  /// Build error state widget
-  Widget _buildErrorState(Object error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-          const SizedBox(height: 16),
-          Text('Error: $error'),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _cancelSearch,
-            child: const Text('Go Back'),
-          ),
-        ],
-      ),
-    );
-  }
+      );
 
   /// Build section title widget
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
+  Widget _buildSectionTitle(String title) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      );
 
   /// Start matchmaking search
   Future<void> _startSearch() async {
     final notifier = ref.read(matchmakingNotifierProvider.notifier);
     final auth = ref.read(firebaseAuthProvider);
 
-    await auth.whenData((user) async {
+    auth.whenData((user) async {
       if (user != null) {
         try {
           setState(() => _isSearching = true);

@@ -30,11 +30,10 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
 
 // Authentication state notifier
 class AuthStateNotifier extends StateNotifier<AsyncValue<UserModel?>> {
-  final FirebaseAuthService _authService;
-
   AuthStateNotifier(this._authService) : super(const AsyncValue.loading()) {
     _init();
   }
+  final FirebaseAuthService _authService;
 
   Future<void> _init() async {
     try {
@@ -152,15 +151,14 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<UserModel?>> {
 }
 
 // Auth state notifier provider
-final authStateNotifierProvider = StateNotifierProvider<AuthStateNotifier, AsyncValue<UserModel?>>((ref) {
+final authStateNotifierProvider =
+    StateNotifierProvider<AuthStateNotifier, AsyncValue<UserModel?>>((ref) {
   final authService = ref.watch(firebaseAuthServiceProvider);
   return AuthStateNotifier(authService);
 });
 
 // Auth methods convenience provider
-final authProvider = Provider((ref) {
-  return ref.watch(firebaseAuthServiceProvider);
-});
+final authProvider = Provider((ref) => ref.watch(firebaseAuthServiceProvider));
 
 // User is authenticated check
 final isAuthenticatedProvider = Provider<bool>((ref) {

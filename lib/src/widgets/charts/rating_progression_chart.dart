@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:chess_tactics_master/src/providers/performance_analytics_provider.dart';
-import 'package:chess_tactics_master/src/models/rating_progression.dart';
+import '../../providers/performance_analytics_provider.dart';
+import '../../models/rating_progression.dart';
 import 'chart_utils.dart';
 
 /// Chart displaying rating progression over time
 class RatingProgressionChart extends ConsumerWidget {
-  final String playerId;
-  final int days;
-
   const RatingProgressionChart({
-    Key? key,
     required this.playerId,
     required this.days,
+    Key? key,
   }) : super(key: key);
+  final String playerId;
+  final int days;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -113,15 +112,11 @@ class RatingProgressionChart extends ConsumerWidget {
                   horizontalInterval:
                       ChartConfig.getGridInterval(minRating, maxRating)
                           .toDouble(),
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withOpacity(0.3),
-                      strokeWidth: 1,
-                    );
-                  },
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                    strokeWidth: 1,
+                  ),
                 ),
                 titlesData: FlTitlesData(
                   show: true,
@@ -146,12 +141,10 @@ class RatingProgressionChart extends ConsumerWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 40,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toInt().toString(),
-                          style: Theme.of(context).textTheme.labelSmall,
-                        );
-                      },
+                      getTitlesWidget: (value, meta) => Text(
+                        value.toInt().toString(),
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ),
                   ),
                   topTitles: const AxisTitles(
@@ -187,21 +180,20 @@ class RatingProgressionChart extends ConsumerWidget {
                     isStrokeCapRound: true,
                     dotData: FlDotData(
                       show: true,
-                      getDotPainter: (spot, percent, barData, index) {
-                        return FlDotCirclePainter(
-                          radius: ChartConfig.dotRadius,
-                          color: context.getPrimaryChartColor(),
-                          strokeWidth: 2,
-                          strokeColor: Theme.of(context).colorScheme.surface,
-                        );
-                      },
+                      getDotPainter: (spot, percent, barData, index) =>
+                          FlDotCirclePainter(
+                        radius: ChartConfig.dotRadius,
+                        color: context.getPrimaryChartColor(),
+                        strokeWidth: 2,
+                        strokeColor: Theme.of(context).colorScheme.surface,
+                      ),
                     ),
                     belowBarData: BarAreaData(
                       show: true,
                       gradient: LinearGradient(
                         colors: [
                           context.getPrimaryChartColor().withOpacity(0.3),
-                          context.getPrimaryChartColor().withOpacity(0.0),
+                          context.getPrimaryChartColor().withOpacity(0),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -217,16 +209,14 @@ class RatingProgressionChart extends ConsumerWidget {
                     tooltipBorder: BorderSide(
                       color: Theme.of(context).colorScheme.outline,
                     ),
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((LineBarSpot touchedBarSpot) {
-                        final textColor =
-                            Theme.of(context).colorScheme.onSurface;
-                        return LineTooltipItem(
-                          'レーティング: ${touchedBarSpot.y.toInt()}',
-                          TextStyle(color: textColor),
-                        );
-                      }).toList();
-                    },
+                    getTooltipItems: (touchedSpots) =>
+                        touchedSpots.map((touchedBarSpot) {
+                      final textColor = Theme.of(context).colorScheme.onSurface;
+                      return LineTooltipItem(
+                        'レーティング: ${touchedBarSpot.y.toInt()}',
+                        TextStyle(color: textColor),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
@@ -237,39 +227,35 @@ class RatingProgressionChart extends ConsumerWidget {
     );
   }
 
-  Widget _buildLoadingState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: 16),
-          Text(
-            'データを読み込み中...',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildLoadingState(BuildContext context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              'データを読み込み中...',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      );
 
-  Widget _buildErrorState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'データの取得に失敗しました',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildErrorState(BuildContext context) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'データの取得に失敗しました',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      );
 }

@@ -1,15 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/analytics_models.dart';
+import '../models/analytics_models.dart';
 import 'dart:developer' show log;
 
 class AnalyticsService {
-  static final AnalyticsService _instance = AnalyticsService._internal();
-
-  factory AnalyticsService() {
-    return _instance;
-  }
+  factory AnalyticsService() => _instance;
 
   AnalyticsService._internal();
+  static final AnalyticsService _instance = AnalyticsService._internal();
 
   static AnalyticsService get instance => _instance;
 
@@ -169,8 +166,8 @@ class AnalyticsService {
           .get();
 
       return snapshot.docs
-          .expand((doc) => (doc.data().values.cast<Map<String, dynamic>>()))
-          .map((data) => CacheAnalytics.fromJson(data))
+          .expand((doc) => doc.data().values.cast<Map<String, dynamic>>())
+          .map(CacheAnalytics.fromJson)
           .toList();
     } catch (e) {
       log('Failed to get cache analytics: $e');
@@ -233,7 +230,6 @@ class AnalyticsService {
   }
 
   /// Get cached metrics for operation
-  PerformanceMetrics? getCachedMetric(String operationName) {
-    return _metricsCache[operationName];
-  }
+  PerformanceMetrics? getCachedMetric(String operationName) =>
+      _metricsCache[operationName];
 }

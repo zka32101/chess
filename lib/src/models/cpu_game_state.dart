@@ -1,8 +1,20 @@
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
+import '../services/ai_opponent_engine.dart';
 
 /// State of a CPU game
 class CpuGameState {
+  CpuGameState({
+    required this.gameState,
+    required this.difficulty,
+    required this.startTime,
+    this.moves = const [],
+    this.isGameOver = false,
+    this.result,
+    this.endReason,
+    this.endTime,
+    this.isAIThinking = false,
+    this.playerIsWhite = true,
+  });
   final chess_lib.Chess gameState;
   final AIDifficulty difficulty;
   final List<chess_lib.Move> moves;
@@ -13,19 +25,6 @@ class CpuGameState {
   final DateTime? endTime;
   final bool isAIThinking;
   final bool playerIsWhite;
-
-  CpuGameState({
-    required this.gameState,
-    required this.difficulty,
-    this.moves = const [],
-    this.isGameOver = false,
-    this.result,
-    this.endReason,
-    required this.startTime,
-    this.endTime,
-    this.isAIThinking = false,
-    this.playerIsWhite = true,
-  });
 
   /// Get the current turn (true = white, false = black)
   bool get isWhiteTurn => gameState.turn == chess_lib.Color.WHITE;
@@ -57,18 +56,17 @@ class CpuGameState {
     DateTime? endTime,
     bool? isAIThinking,
     bool? playerIsWhite,
-  }) {
-    return CpuGameState(
-      gameState: gameState ?? this.gameState,
-      difficulty: difficulty ?? this.difficulty,
-      moves: moves ?? this.moves,
-      isGameOver: isGameOver ?? this.isGameOver,
-      result: result ?? this.result,
-      endReason: endReason ?? this.endReason,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      isAIThinking: isAIThinking ?? this.isAIThinking,
-      playerIsWhite: playerIsWhite ?? this.playerIsWhite,
-    );
-  }
+  }) =>
+      CpuGameState(
+        gameState: gameState ?? this.gameState,
+        difficulty: difficulty ?? this.difficulty,
+        moves: moves ?? this.moves,
+        isGameOver: isGameOver ?? this.isGameOver,
+        result: result ?? this.result,
+        endReason: endReason ?? this.endReason,
+        startTime: startTime ?? this.startTime,
+        endTime: endTime ?? this.endTime,
+        isAIThinking: isAIThinking ?? this.isAIThinking,
+        playerIsWhite: playerIsWhite ?? this.playerIsWhite,
+      );
 }

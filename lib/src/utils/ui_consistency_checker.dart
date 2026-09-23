@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 /// UI consistency issue
 class ConsistencyIssue {
-  final String id;
-  final String component;
-  final String issue;
-  final String? expectedBehavior;
-  final String? actualBehavior;
-  final String? suggestion;
-  final DateTime foundAt;
-
   ConsistencyIssue({
     required this.component,
     required this.issue,
@@ -20,6 +11,13 @@ class ConsistencyIssue {
     DateTime? foundAt,
   })  : id = 'UI_${DateTime.now().millisecondsSinceEpoch}',
         foundAt = foundAt ?? DateTime.now();
+  final String id;
+  final String component;
+  final String issue;
+  final String? expectedBehavior;
+  final String? actualBehavior;
+  final String? suggestion;
+  final DateTime foundAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -37,15 +35,13 @@ class ConsistencyIssue {
 
 /// UI consistency checker
 class UIConsistencyChecker {
-  static final UIConsistencyChecker _instance = UIConsistencyChecker._internal();
-
-  final _issues = <ConsistencyIssue>[];
-
-  factory UIConsistencyChecker() {
-    return _instance;
-  }
+  factory UIConsistencyChecker() => _instance;
 
   UIConsistencyChecker._internal();
+  static final UIConsistencyChecker _instance =
+      UIConsistencyChecker._internal();
+
+  final _issues = <ConsistencyIssue>[];
 
   /// Run comprehensive UI consistency check
   Future<void> runConsistencyCheck() async {
@@ -62,7 +58,8 @@ class UIConsistencyChecker {
     await _checkErrorMessageConsistency();
     await _checkNavigationConsistency();
 
-    debugPrint('[UIConsistencyChecker] Consistency check complete. Issues: ${_issues.length}');
+    debugPrint(
+        '[UIConsistencyChecker] Consistency check complete. Issues: ${_issues.length}');
   }
 
   /// Check button consistency
@@ -73,7 +70,8 @@ class UIConsistencyChecker {
         ConsistencyIssue(
           component: 'Buttons',
           issue: 'Button styles should follow Material 3 elevation rules',
-          expectedBehavior: 'ElevatedButton: 1dp, OutlinedButton: 0dp, TextButton: 0dp',
+          expectedBehavior:
+              'ElevatedButton: 1dp, OutlinedButton: 0dp, TextButton: 0dp',
           actualBehavior: 'Verify all buttons use correct Material 3 styles',
           suggestion: 'Use theme-defined button styles consistently',
         ),
@@ -81,7 +79,8 @@ class UIConsistencyChecker {
 
       debugPrint('[UIConsistencyChecker] Button consistency checked');
     } catch (e) {
-      debugPrint('[UIConsistencyChecker] Error checking button consistency: $e');
+      debugPrint(
+          '[UIConsistencyChecker] Error checking button consistency: $e');
     }
   }
 
@@ -97,7 +96,8 @@ class UIConsistencyChecker {
           issue: 'Primary color should be consistent across all uses',
           expectedBehavior: 'Primary color: #2E7D32 (light), #81C784 (dark)',
           actualBehavior: 'Verify all primary color uses match theme',
-          suggestion: 'Use Theme.of(context).primaryColor instead of hardcoded colors',
+          suggestion:
+              'Use Theme.of(context).primaryColor instead of hardcoded colors',
         ),
       );
 
@@ -114,15 +114,18 @@ class UIConsistencyChecker {
         ConsistencyIssue(
           component: 'Typography',
           issue: 'Font sizes should follow Material 3 scale',
-          expectedBehavior: 'Display, Headline, Title, Body, Label styles from Material 3',
+          expectedBehavior:
+              'Display, Headline, Title, Body, Label styles from Material 3',
           actualBehavior: 'Verify all text uses theme text styles',
-          suggestion: 'Use Theme.of(context).textTheme instead of hardcoded sizes',
+          suggestion:
+              'Use Theme.of(context).textTheme instead of hardcoded sizes',
         ),
       );
 
       debugPrint('[UIConsistencyChecker] Typography consistency checked');
     } catch (e) {
-      debugPrint('[UIConsistencyChecker] Error checking typography consistency: $e');
+      debugPrint(
+          '[UIConsistencyChecker] Error checking typography consistency: $e');
     }
   }
 
@@ -142,7 +145,8 @@ class UIConsistencyChecker {
 
       debugPrint('[UIConsistencyChecker] Spacing consistency checked');
     } catch (e) {
-      debugPrint('[UIConsistencyChecker] Error checking spacing consistency: $e');
+      debugPrint(
+          '[UIConsistencyChecker] Error checking spacing consistency: $e');
     }
   }
 
@@ -172,7 +176,8 @@ class UIConsistencyChecker {
         ConsistencyIssue(
           component: 'Animations',
           issue: 'Animation durations should be consistent',
-          expectedBehavior: 'Short: 100-200ms, Medium: 200-300ms, Long: 300-500ms',
+          expectedBehavior:
+              'Short: 100-200ms, Medium: 200-300ms, Long: 300-500ms',
           actualBehavior: 'Verify all animations use consistent durations',
           suggestion: 'Define animation duration constants in theme',
         ),
@@ -180,7 +185,8 @@ class UIConsistencyChecker {
 
       debugPrint('[UIConsistencyChecker] Animation consistency checked');
     } catch (e) {
-      debugPrint('[UIConsistencyChecker] Error checking animation consistency: $e');
+      debugPrint(
+          '[UIConsistencyChecker] Error checking animation consistency: $e');
     }
   }
 
@@ -199,7 +205,8 @@ class UIConsistencyChecker {
 
       debugPrint('[UIConsistencyChecker] Error message consistency checked');
     } catch (e) {
-      debugPrint('[UIConsistencyChecker] Error checking error message consistency: $e');
+      debugPrint(
+          '[UIConsistencyChecker] Error checking error message consistency: $e');
     }
   }
 
@@ -210,7 +217,8 @@ class UIConsistencyChecker {
         ConsistencyIssue(
           component: 'Navigation',
           issue: 'Navigation patterns should be consistent',
-          expectedBehavior: 'BottomNavBar for main navigation, push transitions',
+          expectedBehavior:
+              'BottomNavBar for main navigation, push transitions',
           actualBehavior: 'Verify navigation follows established patterns',
           suggestion: 'Use consistent navigation architecture',
         ),
@@ -218,7 +226,8 @@ class UIConsistencyChecker {
 
       debugPrint('[UIConsistencyChecker] Navigation consistency checked');
     } catch (e) {
-      debugPrint('[UIConsistencyChecker] Error checking navigation consistency: $e');
+      debugPrint(
+          '[UIConsistencyChecker] Error checking navigation consistency: $e');
     }
   }
 

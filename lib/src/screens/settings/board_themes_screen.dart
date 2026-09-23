@@ -83,136 +83,132 @@ class BoardThemesScreen extends ConsumerWidget {
 }
 
 class _ThemeCard extends StatelessWidget {
-  final BoardTheme theme;
-  final bool isSelected;
-  final bool isLocked;
-  final VoidCallback onTap;
-
   const _ThemeCard({
     required this.theme,
     required this.isSelected,
     required this.isLocked,
     required this.onTap,
   });
+  final BoardTheme theme;
+  final bool isSelected;
+  final bool isLocked;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.grey.shade300,
-            width: isSelected ? 2.5 : 1,
+  Widget build(BuildContext context) => InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey.shade300,
+              width: isSelected ? 2.5 : 1,
+            ),
           ),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Expanded(
-              child: Stack(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Opacity(
+                          opacity: isLocked ? 0.45 : 1,
+                          child: _MiniBoardPreview(theme: theme),
+                        ),
+                      ),
+                    ),
+                    if (isLocked)
+                      const Positioned(
+                        top: 6,
+                        right: 6,
+                        child:
+                            Icon(Icons.lock, color: Colors.black54, size: 20),
+                      ),
+                    if (isSelected)
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Opacity(
-                        opacity: isLocked ? 0.45 : 1,
-                        child: _MiniBoardPreview(theme: theme),
-                      ),
-                    ),
+                  Text(
+                    theme.displayName,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  if (isLocked)
-                    const Positioned(
-                      top: 6,
-                      right: 6,
-                      child: Icon(Icons.lock, color: Colors.black54, size: 20),
+                  if (theme.isPremium) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.workspace_premium,
+                      size: 14,
+                      color: Colors.amber.shade700,
                     ),
-                  if (isSelected)
-                    Positioned(
-                      top: 6,
-                      right: 6,
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+                  ],
                 ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  theme.displayName,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                if (theme.isPremium) ...[
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.workspace_premium,
-                    size: 14,
-                    color: Colors.amber.shade700,
-                  ),
-                ],
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 /// A tiny static 4x4 checkerboard swatch previewing a [BoardTheme], with a
 /// king glyph on each color to preview the piece colors too.
 class _MiniBoardPreview extends StatelessWidget {
+  const _MiniBoardPreview({required this.theme});
   final BoardTheme theme;
 
-  const _MiniBoardPreview({required this.theme});
-
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final squareSize = constraints.maxWidth / 4;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: List.generate(4, (row) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(4, (col) {
-                final isLight = (row + col).isEven;
-                final showWhiteKing = row == 2 && col == 1;
-                final showBlackKing = row == 1 && col == 2;
-                return Container(
-                  width: squareSize,
-                  height: squareSize,
-                  color:
-                      isLight ? theme.lightSquareColor : theme.darkSquareColor,
-                  child: showWhiteKing || showBlackKing
-                      ? Center(
-                          child: Text(
-                            '♚',
-                            style: TextStyle(
-                              fontSize: squareSize * 0.75,
-                              color: showWhiteKing
-                                  ? theme.whitePieceColor
-                                  : theme.blackPieceColor,
-                            ),
-                          ),
-                        )
-                      : null,
-                );
-              }),
-            );
-          }),
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final squareSize = constraints.maxWidth / 4;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(
+                4,
+                (row) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(4, (col) {
+                        final isLight = (row + col).isEven;
+                        final showWhiteKing = row == 2 && col == 1;
+                        final showBlackKing = row == 1 && col == 2;
+                        return Container(
+                          width: squareSize,
+                          height: squareSize,
+                          color: isLight
+                              ? theme.lightSquareColor
+                              : theme.darkSquareColor,
+                          child: showWhiteKing || showBlackKing
+                              ? Center(
+                                  child: Text(
+                                    '♚',
+                                    style: TextStyle(
+                                      fontSize: squareSize * 0.75,
+                                      color: showWhiteKing
+                                          ? theme.whitePieceColor
+                                          : theme.blackPieceColor,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        );
+                      }),
+                    )),
+          );
+        },
+      );
 }

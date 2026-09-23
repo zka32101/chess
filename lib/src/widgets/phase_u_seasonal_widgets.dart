@@ -8,14 +8,13 @@ import '../services/seasonal_event_service.dart';
 
 /// Season Progress Display Widget
 class SeasonProgressCard extends ConsumerWidget {
-  final String playerId;
-  final String seasonId;
-
   const SeasonProgressCard({
-    Key? key,
     required this.playerId,
     required this.seasonId,
+    Key? key,
   }) : super(key: key);
+  final String playerId;
+  final String seasonId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -127,14 +126,13 @@ class SeasonProgressCard extends ConsumerWidget {
 
 /// Battle Pass Progression Widget
 class BattlePassProgressCard extends ConsumerWidget {
-  final String playerId;
-  final String seasonId;
-
   const BattlePassProgressCard({
-    Key? key,
     required this.playerId,
     required this.seasonId,
+    Key? key,
   }) : super(key: key);
+  final String playerId;
+  final String seasonId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -300,16 +298,17 @@ class BattlePassProgressCard extends ConsumerWidget {
 
 /// Challenge Tracker Widget
 class ChallengeTrackerCard extends ConsumerWidget {
-  final String playerId;
-  final String seasonId;
-  final String? challengeType; // daily, weekly, seasonal, event
+  // daily, weekly, seasonal, event
 
   const ChallengeTrackerCard({
-    Key? key,
     required this.playerId,
     required this.seasonId,
+    Key? key,
     this.challengeType,
   }) : super(key: key);
+  final String playerId;
+  final String seasonId;
+  final String? challengeType;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -485,14 +484,13 @@ class ChallengeTrackerCard extends ConsumerWidget {
 
 /// Event Leaderboard Widget
 class EventLeaderboardCard extends ConsumerWidget {
-  final String eventId;
-  final int limit;
-
   const EventLeaderboardCard({
-    Key? key,
     required this.eventId,
+    Key? key,
     this.limit = 10,
   }) : super(key: key);
+  final String eventId;
+  final int limit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -587,14 +585,13 @@ class EventLeaderboardCard extends ConsumerWidget {
 
 /// Season Statistics Widget
 class SeasonStatisticsCard extends ConsumerWidget {
-  final String playerId;
-  final String seasonId;
-
   const SeasonStatisticsCard({
-    Key? key,
     required this.playerId,
     required this.seasonId,
+    Key? key,
   }) : super(key: key);
+  final String playerId;
+  final String seasonId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -682,27 +679,26 @@ class SeasonStatisticsCard extends ConsumerWidget {
     String label,
     String value,
     IconData icon,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 24, color: Colors.blue),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          ),
-          Text(
-            value,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
+  ) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Icon(icon, size: 24, color: Colors.blue),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+            ),
+            Text(
+              value,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
 }
 
 /// Loading and Error Widgets
@@ -711,167 +707,142 @@ class SeasonLoadingWidget extends StatelessWidget {
   const SeasonLoadingWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          height: 100,
-          child: Center(
-            child: CircularProgressIndicator(),
+  Widget build(BuildContext context) => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: SizedBox(
+            height: 100,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class SeasonErrorWidget extends StatelessWidget {
+  const SeasonErrorWidget({required this.error, Key? key}) : super(key: key);
   final String error;
 
-  const SeasonErrorWidget({Key? key, required this.error}) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text('Error: $error'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Error: $error'),
+        ),
+      );
 }
 
 class BattlePassLoadingWidget extends StatelessWidget {
   const BattlePassLoadingWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          height: 120,
-          child: Center(child: CircularProgressIndicator()),
+  Widget build(BuildContext context) => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: SizedBox(
+            height: 120,
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class BattlePassErrorWidget extends StatelessWidget {
+  const BattlePassErrorWidget({required this.error, Key? key})
+      : super(key: key);
   final String error;
 
-  const BattlePassErrorWidget({Key? key, required this.error})
-      : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text('Error: $error'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Error: $error'),
+        ),
+      );
 }
 
 class ChallengeLoadingWidget extends StatelessWidget {
   const ChallengeLoadingWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          height: 80,
-          child: Center(child: CircularProgressIndicator()),
+  Widget build(BuildContext context) => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: SizedBox(
+            height: 80,
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class ChallengeErrorWidget extends StatelessWidget {
+  const ChallengeErrorWidget({required this.error, Key? key}) : super(key: key);
   final String error;
 
-  const ChallengeErrorWidget({Key? key, required this.error}) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text('Error: $error'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Error: $error'),
+        ),
+      );
 }
 
 class EventLoadingWidget extends StatelessWidget {
   const EventLoadingWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          height: 100,
-          child: Center(child: CircularProgressIndicator()),
+  Widget build(BuildContext context) => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: SizedBox(
+            height: 100,
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class EventErrorWidget extends StatelessWidget {
+  const EventErrorWidget({required this.error, Key? key}) : super(key: key);
   final String error;
 
-  const EventErrorWidget({Key? key, required this.error}) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text('Error: $error'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Error: $error'),
+        ),
+      );
 }
 
 class StatisticsLoadingWidget extends StatelessWidget {
   const StatisticsLoadingWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SizedBox(
-          height: 80,
-          child: Center(child: CircularProgressIndicator()),
+  Widget build(BuildContext context) => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: SizedBox(
+            height: 80,
+            child: Center(child: CircularProgressIndicator()),
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class StatisticsErrorWidget extends StatelessWidget {
+  const StatisticsErrorWidget({required this.error, Key? key})
+      : super(key: key);
   final String error;
 
-  const StatisticsErrorWidget({Key? key, required this.error})
-      : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text('Error: $error'),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text('Error: $error'),
+        ),
+      );
 }

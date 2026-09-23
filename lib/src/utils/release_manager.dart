@@ -2,14 +2,6 @@ import 'package:flutter/foundation.dart';
 
 /// Release version model
 class ReleaseVersion {
-  final String versionString; // semantic versioning: major.minor.patch
-  final int buildNumber;
-  final String releaseDate;
-  final String? releaseNotes;
-  final List<String> features;
-  final List<String> bugFixes;
-  final bool isProduction;
-
   ReleaseVersion({
     required this.versionString,
     required this.buildNumber,
@@ -19,6 +11,13 @@ class ReleaseVersion {
     this.bugFixes = const [],
     this.isProduction = false,
   });
+  final String versionString; // semantic versioning: major.minor.patch
+  final int buildNumber;
+  final String releaseDate;
+  final String? releaseNotes;
+  final List<String> features;
+  final List<String> bugFixes;
+  final bool isProduction;
 
   Map<String, dynamic> toJson() => {
         'versionString': versionString,
@@ -36,18 +35,17 @@ class ReleaseVersion {
 
 /// Release checklist item
 class ReleaseChecklistItem {
-  final String id;
-  final String title;
-  final String description;
-  bool isCompleted;
-  String? notes;
-
   ReleaseChecklistItem({
     required this.title,
     required this.description,
     this.isCompleted = false,
     this.notes,
   }) : id = 'RC_${DateTime.now().millisecondsSinceEpoch}';
+  final String id;
+  final String title;
+  final String description;
+  bool isCompleted;
+  String? notes;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -63,25 +61,23 @@ class ReleaseChecklistItem {
 
 /// Release manager
 class ReleaseManager {
-  static final ReleaseManager _instance = ReleaseManager._internal();
-
-  final _releases = <ReleaseVersion>[];
-  final _checklistItems = <ReleaseChecklistItem>[];
-
-  factory ReleaseManager() {
-    return _instance;
-  }
+  factory ReleaseManager() => _instance;
 
   ReleaseManager._internal() {
     _initializeChecklist();
   }
+  static final ReleaseManager _instance = ReleaseManager._internal();
+
+  final _releases = <ReleaseVersion>[];
+  final _checklistItems = <ReleaseChecklistItem>[];
 
   /// Initialize release checklist
   void _initializeChecklist() {
     _checklistItems.addAll([
       ReleaseChecklistItem(
         title: 'All Tests Passing',
-        description: 'Unit, widget, integration, and performance tests all passing',
+        description:
+            'Unit, widget, integration, and performance tests all passing',
       ),
       ReleaseChecklistItem(
         title: 'Security Audit Passed',
@@ -89,7 +85,8 @@ class ReleaseManager {
       ),
       ReleaseChecklistItem(
         title: 'Performance Benchmarks',
-        description: 'App meets performance targets (startup time, memory, FPS)',
+        description:
+            'App meets performance targets (startup time, memory, FPS)',
       ),
       ReleaseChecklistItem(
         title: 'UI/UX Review',
@@ -141,7 +138,8 @@ class ReleaseManager {
       ),
     ]);
 
-    debugPrint('[ReleaseManager] Initialized with ${_checklistItems.length} checklist items');
+    debugPrint(
+        '[ReleaseManager] Initialized with ${_checklistItems.length} checklist items');
   }
 
   /// Create new release
@@ -173,7 +171,8 @@ class ReleaseManager {
   List<ReleaseVersion> getAllReleases() => List.unmodifiable(_releases);
 
   /// Get latest release
-  ReleaseVersion? getLatestRelease() => _releases.isNotEmpty ? _releases.last : null;
+  ReleaseVersion? getLatestRelease() =>
+      _releases.isNotEmpty ? _releases.last : null;
 
   /// Get checklist items
   List<ReleaseChecklistItem> getChecklistItems() =>
@@ -185,15 +184,13 @@ class ReleaseManager {
       (i) => i.id == id,
       orElse: () => null as dynamic,
     );
-    if (item != null) {
-      item.isCompleted = true;
-      item.notes = notes;
-    }
+    item.isCompleted = true;
+    item.notes = notes;
   }
 
   /// Get checklist completion percentage
   double getChecklistCompletion() {
-    if (_checklistItems.isEmpty) return 0.0;
+    if (_checklistItems.isEmpty) return 0;
     final completed = _checklistItems.where((i) => i.isCompleted).length;
     return (completed / _checklistItems.length) * 100;
   }

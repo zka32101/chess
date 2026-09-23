@@ -76,7 +76,6 @@ class BugReport with _$BugReport {
     required String userId,
     required String title,
     required String description,
-    String? stackTrace,
     required BugSeverity severity,
     required String deviceInfo,
     required String appVersion,
@@ -84,6 +83,7 @@ class BugReport with _$BugReport {
     required List<String> steps,
     required BugStatus status,
     required DateTime timestamp,
+    String? stackTrace,
   }) = _BugReport;
 
   factory BugReport.fromJson(Map<String, dynamic> json) =>

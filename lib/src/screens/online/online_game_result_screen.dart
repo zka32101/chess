@@ -1,43 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/models/online_game.dart';
-import 'package:chess_tactics_master/src/providers/auth_provider.dart';
+import '../../models/online_game.dart';
+import '../../providers/auth_provider.dart';
 
 /// Displays the result of a completed online game
 class OnlineGameResultScreen extends ConsumerWidget {
+  const OnlineGameResultScreen({
+    required this.gameId,
+    required this.game,
+    Key? key,
+  }) : super(key: key);
   final String gameId;
   final OnlineGame game;
 
-  const OnlineGameResultScreen({
-    Key? key,
-    required this.gameId,
-    required this.game,
-  }) : super(key: key);
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Game Result'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildResultHeader(context, ref),
-            const SizedBox(height: 24),
-            _buildRatingChanges(context),
-            const SizedBox(height: 24),
-            _buildGameStatistics(context),
-            const SizedBox(height: 32),
-            _buildActionButtons(context, ref),
-          ],
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Game Result'),
+          centerTitle: true,
         ),
-      ),
-    );
-  }
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildResultHeader(context, ref),
+              const SizedBox(height: 24),
+              _buildRatingChanges(context),
+              const SizedBox(height: 24),
+              _buildGameStatistics(context),
+              const SizedBox(height: 32),
+              _buildActionButtons(context, ref),
+            ],
+          ),
+        ),
+      );
 
   /// Display the game result (win/loss/draw)
   Widget _buildResultHeader(BuildContext context, WidgetRef ref) {
@@ -96,43 +93,41 @@ class OnlineGameResultScreen extends ConsumerWidget {
   }
 
   /// Display rating changes for both players
-  Widget _buildRatingChanges(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Rating Changes',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 16),
-          _buildRatingChangeRow(
-            context: context,
-            playerName: game.whitePlayerName,
-            oldRating: game.whiteRating,
-            ratingDelta: game.whiteRatingDelta ?? 0,
-            newRating: game.whiteNewRating ?? game.whiteRating,
-          ),
-          const SizedBox(height: 12),
-          _buildRatingChangeRow(
-            context: context,
-            playerName: game.blackPlayerName,
-            oldRating: game.blackRating,
-            ratingDelta: game.blackRatingDelta ?? 0,
-            newRating: game.blackNewRating ?? game.blackRating,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildRatingChanges(BuildContext context) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Rating Changes',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            _buildRatingChangeRow(
+              context: context,
+              playerName: game.whitePlayerName,
+              oldRating: game.whiteRating,
+              ratingDelta: game.whiteRatingDelta ?? 0,
+              newRating: game.whiteNewRating ?? game.whiteRating,
+            ),
+            const SizedBox(height: 12),
+            _buildRatingChangeRow(
+              context: context,
+              playerName: game.blackPlayerName,
+              oldRating: game.blackRating,
+              ratingDelta: game.blackRatingDelta ?? 0,
+              newRating: game.blackNewRating ?? game.blackRating,
+            ),
+          ],
+        ),
+      );
 
   /// Build individual rating change row
   Widget _buildRatingChangeRow({
@@ -210,7 +205,7 @@ class OnlineGameResultScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _buildStatRow(context, 'Game Type', game.type),
-          _buildStatRow(context, 'Time Control', '${game.timeControl}'),
+          _buildStatRow(context, 'Time Control', game.timeControl),
           _buildStatRow(context, 'Total Moves', '${game.moves.length}'),
           _buildStatRow(context, 'Duration', durationText),
           _buildStatRow(
@@ -224,61 +219,58 @@ class OnlineGameResultScreen extends ConsumerWidget {
   }
 
   /// Build individual stat row
-  Widget _buildStatRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildStatRow(BuildContext context, String label, String value) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+            ),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
+      );
 
   /// Action buttons for next steps
-  Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Colors.blue,
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref) => Column(
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pushNamedAndRemoveUntil('/', (_) => false);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              backgroundColor: Colors.blue,
+            ),
+            child: const Text(
+              'Back to Home',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
-          child: const Text(
-            'Back to Home',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () {
+              // Navigate to matchmaking for a new game
+              Navigator.of(context).pushNamed('/online/matchmaking');
+            },
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text(
+              'Play Again',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () {
-            // Navigate to matchmaking for a new game
-            Navigator.of(context).pushNamed('/online/matchmaking');
-          },
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-          child: const Text(
-            'Play Again',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 }

@@ -4,14 +4,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 /// Device information and testing utilities
 class DeviceTestingHelper {
-  static final DeviceTestingHelper _instance = DeviceTestingHelper._internal();
-  static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
-
-  factory DeviceTestingHelper() {
-    return _instance;
-  }
+  factory DeviceTestingHelper() => _instance;
 
   DeviceTestingHelper._internal();
+  static final DeviceTestingHelper _instance = DeviceTestingHelper._internal();
+  static final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
 
   /// Get device information for testing
   static Future<DeviceInfo> getDeviceInfo() async {
@@ -122,6 +119,16 @@ ${deviceInfo.manufacturer != null ? '║ Manufacturer:      ${deviceInfo.manufac
 
 /// Device information model
 class DeviceInfo {
+  DeviceInfo({
+    required this.platform,
+    required this.osVersion,
+    required this.deviceModel,
+    required this.appVersion,
+    required this.buildNumber,
+    this.deviceName,
+    this.isPhysicalDevice = true,
+    this.manufacturer,
+  });
   final String platform;
   final String osVersion;
   final String deviceModel;
@@ -130,17 +137,6 @@ class DeviceInfo {
   final String buildNumber;
   final bool isPhysicalDevice;
   final String? manufacturer;
-
-  DeviceInfo({
-    required this.platform,
-    required this.osVersion,
-    required this.deviceModel,
-    this.deviceName,
-    required this.appVersion,
-    required this.buildNumber,
-    this.isPhysicalDevice = true,
-    this.manufacturer,
-  });
 
   /// Convert to JSON for logging
   Map<String, dynamic> toJson() => {
@@ -165,15 +161,12 @@ class DeviceInfo {
 
 /// Performance metrics helper
 class PerformanceMetrics {
+  factory PerformanceMetrics() => _instance;
+
+  PerformanceMetrics._internal();
   static final PerformanceMetrics _instance = PerformanceMetrics._internal();
 
   final _metrics = <String, List<double>>{};
-
-  factory PerformanceMetrics() {
-    return _instance;
-  }
-
-  PerformanceMetrics._internal();
 
   /// Record a performance metric
   void recordMetric(String name, double value) {
@@ -235,22 +228,16 @@ class PerformanceMetrics {
       final count = _metrics[name]!.length;
 
       debugPrint(
-        '║ $name'.padRight(30) +
-            '║ Avg: ${avg?.toStringAsFixed(2) ?? 'N/A'}'.padRight(20) +
-            '║',
+        '${'║ $name'.padRight(30)}${'║ Avg: ${avg?.toStringAsFixed(2) ?? 'N/A'}'.padRight(20)}║',
       );
       debugPrint(
-        '║ '.padRight(30) +
-            '║ Max: ${max?.toStringAsFixed(2) ?? 'N/A'}'.padRight(20) +
-            '║',
+        '${'║ '.padRight(30)}${'║ Max: ${max?.toStringAsFixed(2) ?? 'N/A'}'.padRight(20)}║',
       );
       debugPrint(
-        '║ '.padRight(30) +
-            '║ Min: ${min?.toStringAsFixed(2) ?? 'N/A'}'.padRight(20) +
-            '║',
+        '${'║ '.padRight(30)}${'║ Min: ${min?.toStringAsFixed(2) ?? 'N/A'}'.padRight(20)}║',
       );
       debugPrint(
-        '║ '.padRight(30) + '║ Count: $count'.padRight(20) + '║',
+        '${'║ '.padRight(30)}${'║ Count: $count'.padRight(20)}║',
       );
       debugPrint(
           '╠═══════════════════════════════════════════════════════════════╣');

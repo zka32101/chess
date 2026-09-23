@@ -54,12 +54,6 @@ extension SoundCategoryExt on SoundCategory {
 
 /// Sound preferences model
 class SoundPreferences {
-  final String userId;
-  final bool soundMasterEnabled;
-  final Map<SoundCategory, bool> categoryEnabled;
-  final double volume; // 0.0 - 1.0
-  final DateTime? lastUpdated;
-
   SoundPreferences({
     required this.userId,
     this.soundMasterEnabled = true,
@@ -67,40 +61,6 @@ class SoundPreferences {
     this.volume = 1.0,
     this.lastUpdated,
   }) : categoryEnabled = categoryEnabled ?? _defaultCategories();
-
-  static Map<SoundCategory, bool> _defaultCategories() {
-    return {
-      SoundCategory.gamePlay: true,
-      SoundCategory.gameEnd: true,
-      SoundCategory.ui: true,
-      SoundCategory.notifications: true,
-    };
-  }
-
-  /// Check if a category is enabled (respects master toggle)
-  bool isCategoryEnabled(SoundCategory category) {
-    return soundMasterEnabled && (categoryEnabled[category] ?? true);
-  }
-
-  /// Check if any sound is enabled
-  bool hasAnySoundEnabled() {
-    if (!soundMasterEnabled) return false;
-    return categoryEnabled.values.any((enabled) => enabled);
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'soundMasterEnabled': soundMasterEnabled,
-      'categoryEnabled': {
-        for (final category in SoundCategory.values)
-          category.toString().split('.').last:
-              categoryEnabled[category] ?? true,
-      },
-      'volume': volume,
-      'lastUpdated': FieldValue.serverTimestamp(),
-    };
-  }
 
   factory SoundPreferences.fromMap(Map<String, dynamic> map) {
     final categoryMap = map['categoryEnabled'] as Map<String, dynamic>? ?? {};
@@ -121,6 +81,40 @@ class SoundPreferences {
           : null,
     );
   }
+  final String userId;
+  final bool soundMasterEnabled;
+  final Map<SoundCategory, bool> categoryEnabled;
+  final double volume; // 0.0 - 1.0
+  final DateTime? lastUpdated;
+
+  static Map<SoundCategory, bool> _defaultCategories() => {
+        SoundCategory.gamePlay: true,
+        SoundCategory.gameEnd: true,
+        SoundCategory.ui: true,
+        SoundCategory.notifications: true,
+      };
+
+  /// Check if a category is enabled (respects master toggle)
+  bool isCategoryEnabled(SoundCategory category) =>
+      soundMasterEnabled && (categoryEnabled[category] ?? true);
+
+  /// Check if any sound is enabled
+  bool hasAnySoundEnabled() {
+    if (!soundMasterEnabled) return false;
+    return categoryEnabled.values.any((enabled) => enabled);
+  }
+
+  Map<String, dynamic> toMap() => {
+        'userId': userId,
+        'soundMasterEnabled': soundMasterEnabled,
+        'categoryEnabled': {
+          for (final category in SoundCategory.values)
+            category.toString().split('.').last:
+                categoryEnabled[category] ?? true,
+        },
+        'volume': volume,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      };
 
   SoundPreferences copyWith({
     String? userId,
@@ -128,23 +122,21 @@ class SoundPreferences {
     Map<SoundCategory, bool>? categoryEnabled,
     double? volume,
     DateTime? lastUpdated,
-  }) {
-    return SoundPreferences(
-      userId: userId ?? this.userId,
-      soundMasterEnabled: soundMasterEnabled ?? this.soundMasterEnabled,
-      categoryEnabled: categoryEnabled ?? this.categoryEnabled,
-      volume: volume ?? this.volume,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-    );
-  }
+  }) =>
+      SoundPreferences(
+        userId: userId ?? this.userId,
+        soundMasterEnabled: soundMasterEnabled ?? this.soundMasterEnabled,
+        categoryEnabled: categoryEnabled ?? this.categoryEnabled,
+        volume: volume ?? this.volume,
+        lastUpdated: lastUpdated ?? this.lastUpdated,
+      );
 }
 
 /// Sound preferences service
 class SoundPreferencesService {
+  SoundPreferencesService(this._firestore, this._auth);
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  SoundPreferencesService(this._firestore, this._auth);
 
   /// Get sound preferences
   Future<SoundPreferences> getPreferences() async {

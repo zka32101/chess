@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 
 /// Game result display with statistics
 class GameResult extends StatelessWidget {
+  const GameResult({
+    required this.result,
+    required this.method,
+    required this.moves,
+    required this.duration,
+    Key? key,
+    this.onAnalyze,
+    this.onNewGame,
+    this.onHome,
+  }) : super(key: key);
   final String result; // 'white_win', 'black_win', or 'draw'
   final String method; // 'checkmate', 'resignation', 'stalemate', 'timeout'
   final int moves;
@@ -9,17 +19,6 @@ class GameResult extends StatelessWidget {
   final Function()? onAnalyze;
   final Function()? onNewGame;
   final Function()? onHome;
-
-  const GameResult({
-    Key? key,
-    required this.result,
-    required this.method,
-    required this.moves,
-    required this.duration,
-    this.onAnalyze,
-    this.onNewGame,
-    this.onHome,
-  }) : super(key: key);
 
   String _getResultTitle() {
     switch (result) {
@@ -80,7 +79,7 @@ class GameResult extends StatelessWidget {
       ),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -96,8 +95,8 @@ class GameResult extends StatelessWidget {
               Text(
                 _getResultTitle(),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
 
               const SizedBox(height: 8),
@@ -106,8 +105,8 @@ class GameResult extends StatelessWidget {
               Text(
                 _getMethodDescription(),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
-                ),
+                      color: Colors.grey,
+                    ),
               ),
 
               const SizedBox(height: 32),
@@ -130,9 +129,10 @@ class GameResult extends StatelessWidget {
                         ),
                         Text(
                           '$moves',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -146,9 +146,10 @@ class GameResult extends StatelessWidget {
                         ),
                         Text(
                           _formatDuration(duration),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),

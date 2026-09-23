@@ -3,9 +3,7 @@ import 'package:chess/chess.dart' as chess_lib;
 /// Service for detecting various draw conditions in chess
 class DrawDetectionService {
   /// Check if position is in stalemate
-  static bool isStalemate(chess_lib.Chess chess) {
-    return chess.in_stalemate;
-  }
+  static bool isStalemate(chess_lib.Chess chess) => chess.in_stalemate;
 
   static const _files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -78,7 +76,7 @@ class DrawDetectionService {
 
       // Count FEN occurrences by replaying game
       final fenHistory = <String>[];
-      var chess = chess_lib.Chess();
+      final chess = chess_lib.Chess();
       fenHistory.add(chess.fen);
 
       for (final moveData in moves) {

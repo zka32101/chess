@@ -32,7 +32,7 @@ class NotificationsScreen extends ConsumerWidget {
                     _showDeleteAllDialog(context, ref, user.uid);
                   }
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                itemBuilder: (context) => <PopupMenuEntry<String>>[
                   const PopupMenuItem<String>(
                     value: 'mark_all_read',
                     child: Text('Mark all as read'),

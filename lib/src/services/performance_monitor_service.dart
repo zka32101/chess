@@ -3,11 +3,6 @@ import '../models/performance.dart';
 
 /// Performance Monitoring Service
 class PerformanceMonitorService {
-  static final PerformanceMonitorService _instance =
-      PerformanceMonitorService._internal();
-
-  FirebaseFirestore _firestore;
-
   factory PerformanceMonitorService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
       _instance._firestore = firestore;
@@ -17,6 +12,10 @@ class PerformanceMonitorService {
 
   PerformanceMonitorService._internal()
       : _firestore = FirebaseFirestore.instance;
+  static final PerformanceMonitorService _instance =
+      PerformanceMonitorService._internal();
+
+  FirebaseFirestore _firestore;
 
   /// Track screen load time
   Future<void> trackScreenLoadTime(
@@ -157,8 +156,7 @@ class PerformanceMonitorService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              PerformanceMetric.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => PerformanceMetric.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching performance metrics: $e');
@@ -176,8 +174,7 @@ class PerformanceMonitorService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              PerformanceMetric.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => PerformanceMetric.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching metrics by type: $e');
@@ -195,8 +192,7 @@ class PerformanceMonitorService {
           .get();
 
       return querySnapshot.docs
-          .map(
-              (doc) => CrashReport.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => CrashReport.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching crash reports: $e');
@@ -234,7 +230,7 @@ class PerformanceMonitorService {
             issue: 'Performance varies significantly',
             currentBaseline: average,
             suggestedImprovement: average * 0.8,
-            estimatedImpact: 20.0,
+            estimatedImpact: 20,
             effort: 3,
             priority: 3,
             category: 'performance',

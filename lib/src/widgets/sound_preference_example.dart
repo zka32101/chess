@@ -48,41 +48,39 @@ class SoundPreferenceExample extends ConsumerWidget {
     );
   }
 
-  Widget _buildPreferencesDisplay(SoundPreferences prefs) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Current Preferences',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildPreferenceRow('Master Sound', prefs.soundMasterEnabled),
-            _buildPreferenceRow(
-                'Volume', '${(prefs.volume * 100).toStringAsFixed(0)}%'),
-            const Divider(),
-            const SizedBox(height: 8),
-            const Text(
-              'Category Status:',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
-            ),
-            const SizedBox(height: 8),
-            for (final category in SoundCategory.values)
-              _buildPreferenceRow(
-                category.displayName,
-                prefs.isCategoryEnabled(category) ? 'Enabled' : 'Disabled',
+  Widget _buildPreferencesDisplay(SoundPreferences prefs) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Current Preferences',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-          ],
+              const SizedBox(height: 12),
+              _buildPreferenceRow('Master Sound', prefs.soundMasterEnabled),
+              _buildPreferenceRow(
+                  'Volume', '${(prefs.volume * 100).toStringAsFixed(0)}%'),
+              const Divider(),
+              const SizedBox(height: 8),
+              const Text(
+                'Category Status:',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey),
+              ),
+              const SizedBox(height: 8),
+              for (final category in SoundCategory.values)
+                _buildPreferenceRow(
+                  category.displayName,
+                  prefs.isCategoryEnabled(category) ? 'Enabled' : 'Disabled',
+                ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _buildPreferenceRow(String label, dynamic value) {
     final valueText =
@@ -113,84 +111,85 @@ class SoundPreferenceExample extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     SoundManager soundManager,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Test Sounds',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            ElevatedButton.icon(
-              onPressed: () => soundManager.play(SoundEffect.movePiece),
-              icon: const Icon(Icons.videogame_asset),
-              label: const Text('Move'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => soundManager.play(SoundEffect.capture),
-              icon: const Icon(Icons.close),
-              label: const Text('Capture'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => soundManager.play(SoundEffect.check),
-              icon: const Icon(Icons.warning),
-              label: const Text('Check'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => soundManager.play(SoundEffect.checkmate),
-              icon: const Icon(Icons.flag),
-              label: const Text('Checkmate'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => soundManager.play(SoundEffect.buttonTap),
-              icon: const Icon(Icons.touch_app),
-              label: const Text('UI Tap'),
-            ),
-            ElevatedButton.icon(
-              onPressed: () => soundManager.play(SoundEffect.notification),
-              icon: const Icon(Icons.notifications),
-              label: const Text('Alert'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  ) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Test Sounds',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () => soundManager.play(SoundEffect.movePiece),
+                icon: const Icon(Icons.videogame_asset),
+                label: const Text('Move'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => soundManager.play(SoundEffect.capture),
+                icon: const Icon(Icons.close),
+                label: const Text('Capture'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => soundManager.play(SoundEffect.check),
+                icon: const Icon(Icons.warning),
+                label: const Text('Check'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => soundManager.play(SoundEffect.checkmate),
+                icon: const Icon(Icons.flag),
+                label: const Text('Checkmate'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => soundManager.play(SoundEffect.buttonTap),
+                icon: const Icon(Icons.touch_app),
+                label: const Text('UI Tap'),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => soundManager.play(SoundEffect.notification),
+                icon: const Icon(Icons.notifications),
+                label: const Text('Alert'),
+              ),
+            ],
+          ),
+        ],
+      );
 
-  Widget _buildUsageExamples() {
-    return Card(
-      color: Colors.grey.shade50,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'How to Use in Your Code',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildCodeExample(
-              'Play Sound (Async)',
-              '''final soundManager = await ref.read(soundManagerProvider.future);
+  Widget _buildUsageExamples() => Card(
+        color: Colors.grey.shade50,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'How to Use in Your Code',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              _buildCodeExample(
+                'Play Sound (Async)',
+                '''
+final soundManager = await ref.read(soundManagerProvider.future);
 await soundManager.play(SoundEffect.movePiece);''',
-            ),
-            const SizedBox(height: 12),
-            _buildCodeExample(
-              'Check if Category Enabled',
-              '''final soundManager = await ref.read(soundManagerProvider.future);
+              ),
+              const SizedBox(height: 12),
+              _buildCodeExample(
+                'Check if Category Enabled',
+                '''
+final soundManager = await ref.read(soundManagerProvider.future);
 bool isGamePlaySoundEnabled =
     soundManager.isCategoryEnabled(SoundCategory.gamePlay);''',
-            ),
-            const SizedBox(height: 12),
-            _buildCodeExample(
-              'In ConsumerWidget',
-              '''class MyWidget extends ConsumerWidget {
+              ),
+              const SizedBox(height: 12),
+              _buildCodeExample(
+                'In ConsumerWidget',
+                '''
+class MyWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final soundManager = ref.watch(soundManagerProvider);
@@ -204,41 +203,38 @@ bool isGamePlaySoundEnabled =
     );
   }
 }''',
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _buildCodeExample(String title, String code) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-              fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey.shade300),
-          ),
-          child: Text(
-            code,
+  Widget _buildCodeExample(String title, String code) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
             style: const TextStyle(
-              fontSize: 11,
-              fontFamily: 'monospace',
-              color: Colors.black87,
-              height: 1.4,
+                fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Text(
+              code,
+              style: const TextStyle(
+                fontSize: 11,
+                fontFamily: 'monospace',
+                color: Colors.black87,
+                height: 1.4,
+              ),
             ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 }

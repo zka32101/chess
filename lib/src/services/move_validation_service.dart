@@ -245,47 +245,34 @@ class MoveValidationService {
 
 /// Result of move validation
 class MoveValidationResult {
-  final bool isValid;
-  final String? error;
-
   MoveValidationResult({
     required this.isValid,
     this.error,
   });
+  final bool isValid;
+  final String? error;
 }
 
 /// Information about a legal move
 class LegalMove {
+  LegalMove({
+    required this.from,
+    required this.to,
+    required this.isCheck,
+    required this.isCheckmate,
+    required this.isCapture,
+    this.promotion,
+  });
   final String from;
   final String to;
   final String? promotion;
   final bool isCheck;
   final bool isCheckmate;
   final bool isCapture;
-
-  LegalMove({
-    required this.from,
-    required this.to,
-    this.promotion,
-    required this.isCheck,
-    required this.isCheckmate,
-    required this.isCapture,
-  });
 }
 
 /// Analysis of current position
 class PositionAnalysis {
-  final int legalMovesCount;
-  final bool checkMovesAvailable;
-  final bool captureMovesAvailable;
-  final bool checkMateMovesAvailable;
-  final bool isCheck;
-  final bool isStalemate;
-  final bool isCheckmate;
-  final bool isEndgame;
-  final int whiteMaterial;
-  final int blackMaterial;
-
   PositionAnalysis({
     required this.legalMovesCount,
     required this.checkMovesAvailable,
@@ -298,6 +285,16 @@ class PositionAnalysis {
     required this.whiteMaterial,
     required this.blackMaterial,
   });
+  final int legalMovesCount;
+  final bool checkMovesAvailable;
+  final bool captureMovesAvailable;
+  final bool checkMateMovesAvailable;
+  final bool isCheck;
+  final bool isStalemate;
+  final bool isCheckmate;
+  final bool isEndgame;
+  final int whiteMaterial;
+  final int blackMaterial;
 
   int get materialAdvantage => whiteMaterial - blackMaterial;
 

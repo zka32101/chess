@@ -1,21 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/services/match_history_service.dart';
-import 'package:chess_tactics_master/src/models/match_record.dart';
+import '../services/match_history_service.dart';
+import '../models/match_record.dart';
 
 /// Provider for match history service
-final matchHistoryServiceProvider = Provider((ref) {
-  return MatchHistoryService();
-});
+final matchHistoryServiceProvider = Provider((ref) => MatchHistoryService());
 
 /// State class for match history with pagination
 class MatchHistoryState {
-  final List<MatchRecord> matches;
-  final bool isLoading;
-  final String? error;
-  final DocumentSnapshot? lastDocument; // For pagination
-  final bool hasMore;
-
   MatchHistoryState({
     required this.matches,
     this.isLoading = false,
@@ -23,6 +15,11 @@ class MatchHistoryState {
     this.lastDocument,
     this.hasMore = true,
   });
+  final List<MatchRecord> matches;
+  final bool isLoading;
+  final String? error;
+  final DocumentSnapshot? lastDocument; // For pagination
+  final bool hasMore;
 
   MatchHistoryState copyWith({
     List<MatchRecord>? matches,
@@ -30,23 +27,21 @@ class MatchHistoryState {
     String? error,
     DocumentSnapshot? lastDocument,
     bool? hasMore,
-  }) {
-    return MatchHistoryState(
-      matches: matches ?? this.matches,
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
-      lastDocument: lastDocument ?? this.lastDocument,
-      hasMore: hasMore ?? this.hasMore,
-    );
-  }
+  }) =>
+      MatchHistoryState(
+        matches: matches ?? this.matches,
+        isLoading: isLoading ?? this.isLoading,
+        error: error,
+        lastDocument: lastDocument ?? this.lastDocument,
+        hasMore: hasMore ?? this.hasMore,
+      );
 }
 
 /// State notifier for match history with pagination
 class MatchHistoryNotifier
     extends StateNotifier<AsyncValue<MatchHistoryState>> {
-  final MatchHistoryService _service;
-
   MatchHistoryNotifier(this._service) : super(const AsyncValue.loading());
+  final MatchHistoryService _service;
 
   /// Load initial match history
   Future<void> loadHistory(String playerId) async {

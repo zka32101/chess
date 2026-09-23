@@ -5,6 +5,9 @@ import 'package:logger/logger.dart';
 ///
 /// Provides debugging and testing utilities for analytics tracking
 class AnalyticsDebugService {
+  factory AnalyticsDebugService() => _instance;
+
+  AnalyticsDebugService._internal();
   static final AnalyticsDebugService _instance =
       AnalyticsDebugService._internal();
 
@@ -16,12 +19,6 @@ class AnalyticsDebugService {
   // Event tracking for debugging
   final List<Map<String, dynamic>> _eventLog = [];
   final int _maxEventLogSize = 500;
-
-  AnalyticsDebugService._internal();
-
-  factory AnalyticsDebugService() {
-    return _instance;
-  }
 
   /// Enable/disable debug mode
   void setDebugMode(bool enabled) {
@@ -67,9 +64,7 @@ class AnalyticsDebugService {
   }
 
   /// Get event log
-  List<Map<String, dynamic>> getEventLog() {
-    return List.from(_eventLog);
-  }
+  List<Map<String, dynamic>> getEventLog() => List.from(_eventLog);
 
   /// Clear event log
   void clearEventLog() {
@@ -78,29 +73,25 @@ class AnalyticsDebugService {
   }
 
   /// Get event count
-  int getEventCount() {
-    return _eventLog.length;
-  }
+  int getEventCount() => _eventLog.length;
 
   /// Get events by name
-  List<Map<String, dynamic>> getEventsByName(String eventName) {
-    return _eventLog.where((event) => event['eventName'] == eventName).toList();
-  }
+  List<Map<String, dynamic>> getEventsByName(String eventName) =>
+      _eventLog.where((event) => event['eventName'] == eventName).toList();
 
   /// Get events by time range
   List<Map<String, dynamic>> getEventsByTimeRange(
     DateTime start,
     DateTime end,
-  ) {
-    return _eventLog.where((event) {
-      try {
-        final timestamp = DateTime.parse(event['timestamp'] as String);
-        return timestamp.isAfter(start) && timestamp.isBefore(end);
-      } catch (e) {
-        return false;
-      }
-    }).toList();
-  }
+  ) =>
+      _eventLog.where((event) {
+        try {
+          final timestamp = DateTime.parse(event['timestamp'] as String);
+          return timestamp.isAfter(start) && timestamp.isBefore(end);
+        } catch (e) {
+          return false;
+        }
+      }).toList();
 
   /// Print event log
   void printEventLog() {
@@ -145,20 +136,18 @@ class AnalyticsDebugService {
   }
 
   /// Get analytics status
-  Map<String, dynamic> getAnalyticsStatus() {
-    return {
-      'debug_mode': _debugMode,
-      'log_all_events': _logAllEvents,
-      'mock_analytics': _mockAnalyticsEnabled,
-      'event_log_size': _eventLog.length,
-      'max_log_size': _maxEventLogSize,
-      'recent_events': _eventLog.isNotEmpty
-          ? _eventLog.sublist(
-              (_eventLog.length - 5).clamp(0, _eventLog.length),
-            )
-          : [],
-    };
-  }
+  Map<String, dynamic> getAnalyticsStatus() => {
+        'debug_mode': _debugMode,
+        'log_all_events': _logAllEvents,
+        'mock_analytics': _mockAnalyticsEnabled,
+        'event_log_size': _eventLog.length,
+        'max_log_size': _maxEventLogSize,
+        'recent_events': _eventLog.isNotEmpty
+            ? _eventLog.sublist(
+                (_eventLog.length - 5).clamp(0, _eventLog.length),
+              )
+            : [],
+      };
 
   /// Simulate purchase event
   void simulatePurchaseEvent({

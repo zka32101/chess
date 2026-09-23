@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 
 /// Visual representation of win percentage with animated progress bar
 class WinRateProgressBar extends StatefulWidget {
+  const WinRateProgressBar({
+    required this.label,
+    required this.percentage,
+    Key? key,
+    this.animated = true,
+    this.customColor,
+  }) : super(key: key);
   final String label;
   final int percentage;
   final bool animated;
   final Color? customColor;
-
-  const WinRateProgressBar({
-    Key? key,
-    required this.label,
-    required this.percentage,
-    this.animated = true,
-    this.customColor,
-  }) : super(key: key);
 
   @override
   State<WinRateProgressBar> createState() => _WinRateProgressBarState();
@@ -38,7 +37,8 @@ class _WinRateProgressBarState extends State<WinRateProgressBar>
     _progressAnimation = Tween<double>(
       begin: _previousPercentage / 100,
       end: widget.percentage / 100,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOutQuad));
+    ).animate(CurvedAnimation(
+        parent: _animationController, curve: Curves.easeInOutQuad));
 
     if (widget.animated) {
       _animationController.forward();
@@ -53,7 +53,8 @@ class _WinRateProgressBarState extends State<WinRateProgressBar>
       _progressAnimation = Tween<double>(
         begin: _progressAnimation.value,
         end: widget.percentage / 100,
-      ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOutQuad));
+      ).animate(CurvedAnimation(
+          parent: _animationController, curve: Curves.easeInOutQuad));
 
       _animationController.reset();
       if (widget.animated) {
@@ -96,18 +97,16 @@ class _WinRateProgressBarState extends State<WinRateProgressBar>
         const SizedBox(height: 8),
         AnimatedBuilder(
           animation: _progressAnimation,
-          builder: (context, child) {
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: _progressAnimation.value,
-                minHeight: 12,
-                backgroundColor:
-                    Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-              ),
-            );
-          },
+          builder: (context, child) => ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: _progressAnimation.value,
+              minHeight: 12,
+              backgroundColor:
+                  Theme.of(context).colorScheme.outline.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
         ),
       ],
     );

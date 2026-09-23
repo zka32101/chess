@@ -53,7 +53,7 @@ final currentUserNotificationsProvider =
       return ref.watch(firebaseNotificationsProvider(user.uid)).when(
             loading: () => Stream.value(null),
             error: (err, stack) => Stream.value(null),
-            data: (batch) => Stream.value(batch),
+            data: Stream.value,
           );
     },
   );
@@ -81,9 +81,8 @@ final unreadNotificationsCountProvider = Provider<int>((ref) {
 
 /// Notification service for marking as read and deleting
 class NotificationServiceProvider {
-  final FirebaseFirestore _firestore;
-
   NotificationServiceProvider(this._firestore);
+  final FirebaseFirestore _firestore;
 
   /// Mark a notification as read
   Future<void> markAsRead(String userId, String notificationId) async {
@@ -163,14 +162,12 @@ final notificationServiceProvider = Provider((ref) {
 
 /// Notification action handler
 final notificationActionProvider =
-    StateNotifierProvider<NotificationActionNotifier, AsyncValue<void>>((ref) {
-  return NotificationActionNotifier(ref);
-});
+    StateNotifierProvider<NotificationActionNotifier, AsyncValue<void>>(
+        NotificationActionNotifier.new);
 
 class NotificationActionNotifier extends StateNotifier<AsyncValue<void>> {
-  final StateNotifierProviderRef ref;
-
   NotificationActionNotifier(this.ref) : super(const AsyncValue.data(null));
+  final StateNotifierProviderRef ref;
 
   /// Mark notification as read
   Future<void> markAsRead(String userId, String notificationId) async {

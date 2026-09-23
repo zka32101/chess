@@ -68,62 +68,61 @@ class SoundPreferencesScreen extends ConsumerWidget {
     WidgetRef ref,
     SoundPreferences preferences,
     SoundPreferencesService service,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Master Volume',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+  ) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Master Volume',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Turn all sounds on or off',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
+                const SizedBox(height: 4),
+                Text(
+                  'Turn all sounds on or off',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            leading: Icon(
-              preferences.soundMasterEnabled
-                  ? Icons.volume_up
-                  : Icons.volume_off,
-              size: 28,
-            ),
-            title: const Text('All Sound Effects'),
-            subtitle: preferences.soundMasterEnabled
-                ? const Text('Sounds are enabled')
-                : const Text('All sounds are muted'),
-            trailing: Switch(
-              value: preferences.soundMasterEnabled,
-              onChanged: (value) {
-                service.setSoundMasterEnabled(value);
-              },
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading: Icon(
+                preferences.soundMasterEnabled
+                    ? Icons.volume_up
+                    : Icons.volume_off,
+                size: 28,
+              ),
+              title: const Text('All Sound Effects'),
+              subtitle: preferences.soundMasterEnabled
+                  ? const Text('Sounds are enabled')
+                  : const Text('All sounds are muted'),
+              trailing: Switch(
+                value: preferences.soundMasterEnabled,
+                onChanged: (value) {
+                  service.setSoundMasterEnabled(value);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      );
 
   Widget _buildVolumeControlSection(
     BuildContext context,
@@ -216,59 +215,58 @@ class SoundPreferencesScreen extends ConsumerWidget {
     WidgetRef ref,
     SoundPreferences preferences,
     SoundPreferencesService service,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Sound Categories',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+  ) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Sound Categories',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Enable or disable specific sound types',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
+                const SizedBox(height: 4),
+                Text(
+                  'Enable or disable specific sound types',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              for (int i = 0; i < SoundCategory.values.length; i++) ...[
-                _buildCategoryTile(
-                  context,
-                  ref,
-                  SoundCategory.values[i],
-                  preferences,
-                  service,
-                ),
-                if (i < SoundCategory.values.length - 1)
-                  const Divider(height: 1),
               ],
-            ],
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < SoundCategory.values.length; i++) ...[
+                  _buildCategoryTile(
+                    context,
+                    ref,
+                    SoundCategory.values[i],
+                    preferences,
+                    service,
+                  ),
+                  if (i < SoundCategory.values.length - 1)
+                    const Divider(height: 1),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      );
 
   Widget _buildCategoryTile(
     BuildContext context,
@@ -297,38 +295,36 @@ class SoundPreferencesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHelpSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.blue.shade200),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.info_outline,
-              color: Colors.blue.shade700,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Disable "All Sound Effects" to mute everything. Individual categories can only be toggled when the master control is on.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.blue.shade700,
-                  height: 1.4,
+  Widget _buildHelpSection() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.blue.shade200),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Colors.blue.shade700,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Disable "All Sound Effects" to mute everything. Individual categories can only be toggled when the master control is on.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue.shade700,
+                    height: 1.4,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

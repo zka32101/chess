@@ -7,39 +7,32 @@ import '../services/firestore_batch_query_service.dart';
 // Streaming providers (existing)
 final streamingServiceProvider = Provider((ref) => StreamingService());
 
-final liveStreamsProvider = FutureProvider((ref) {
-  return ref.watch(streamingServiceProvider).getLiveStreams();
-});
+final liveStreamsProvider = FutureProvider(
+    (ref) => ref.watch(streamingServiceProvider).getLiveStreams());
 
-final videoTutorialsProvider =
-    FutureProvider.family<List<VideoContent>, int>((ref, limit) {
-  return ref.watch(streamingServiceProvider).getVideoTutorials(limit);
-});
+final videoTutorialsProvider = FutureProvider.family<List<VideoContent>, int>(
+    (ref, limit) =>
+        ref.watch(streamingServiceProvider).getVideoTutorials(limit));
 
 final streamAnalyticsProvider =
-    FutureProvider.family<Map<String, dynamic>, String>((ref, streamId) {
-  return ref.watch(streamingServiceProvider).getStreamAnalytics(streamId);
-});
+    FutureProvider.family<Map<String, dynamic>, String>((ref, streamId) =>
+        ref.watch(streamingServiceProvider).getStreamAnalytics(streamId));
 
 // Phase L: Performance Optimization Providers
 
 /// Singleton providers for Phase L performance optimization services.
 
 /// Global cache manager instance
-final cacheManagerProvider = Provider<CacheManagerService>((ref) {
-  return CacheManagerService();
-});
+final cacheManagerProvider =
+    Provider<CacheManagerService>((ref) => CacheManagerService());
 
 /// Firestore result cache service
-final firestoreResultCacheProvider =
-    Provider<FirestoreResultCacheService>((ref) {
-  return FirestoreResultCacheService();
-});
+final firestoreResultCacheProvider = Provider<FirestoreResultCacheService>(
+    (ref) => FirestoreResultCacheService());
 
 /// Firestore batch query service
-final firestoreBatchQueryProvider = Provider<FirestoreBatchQueryService>((ref) {
-  return FirestoreBatchQueryService();
-});
+final firestoreBatchQueryProvider =
+    Provider<FirestoreBatchQueryService>((ref) => FirestoreBatchQueryService());
 
 /// Cache statistics provider - monitors cache health
 final cacheStatsProvider = StateProvider<CacheStats?>((ref) {
@@ -67,9 +60,8 @@ final cacheInvalidationProvider =
 
 /// Notifier for manual cache invalidation
 class CacheInvalidationNotifier extends StateNotifier<List<String>> {
-  final FirestoreResultCacheService _cache;
-
   CacheInvalidationNotifier(this._cache) : super([]);
+  final FirestoreResultCacheService _cache;
 
   /// Invalidate specific collection
   void invalidateCollection(String collection) {
@@ -107,15 +99,14 @@ final performanceMetricsProvider = StateProvider<PerformanceMetrics>((ref) {
 
 /// Data class for performance metrics
 class PerformanceMetrics {
-  final double cacheUtilization;
-  final int totalCacheEntries;
-  final int maxCacheSize;
-
   PerformanceMetrics({
     required this.cacheUtilization,
     required this.totalCacheEntries,
     required this.maxCacheSize,
   });
+  final double cacheUtilization;
+  final int totalCacheEntries;
+  final int maxCacheSize;
 
   double get cacheHitRatePotential => (totalCacheEntries / maxCacheSize) * 100;
   bool get cacheNearCapacity => cacheUtilization > 80;

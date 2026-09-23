@@ -4,19 +4,18 @@ import 'match_prediction_service.dart';
 
 /// Adaptive matchmaking using predictions and analytics
 class AdaptiveMatchmakingService {
-  final FirebaseFirestore _firestore;
-  final MatchPredictionService _predictionService;
-  final Logger _logger = Logger();
-
-  static const String _queuesCollection = 'matchmakingQueues';
-  static const String _usersCollection = 'users';
-
   AdaptiveMatchmakingService({
     FirebaseFirestore? firestore,
     MatchPredictionService? predictionService,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _predictionService =
             predictionService ?? MatchPredictionService(firestore: firestore);
+  final FirebaseFirestore _firestore;
+  final MatchPredictionService _predictionService;
+  final Logger _logger = Logger();
+
+  static const String _queuesCollection = 'matchmakingQueues';
+  static const String _usersCollection = 'users';
 
   /// Find optimal match using predictions
   Future<AdaptiveMatchResult?> findOptimalMatch(String queueId) async {
@@ -210,7 +209,9 @@ class AdaptiveMatchmakingService {
 
         if (opponentId == playerId) continue;
 
-        final waitTimeMs = now.difference((data['enqueuedAt'] as Timestamp).toDate()).inMilliseconds;
+        final waitTimeMs = now
+            .difference((data['enqueuedAt'] as Timestamp).toDate())
+            .inMilliseconds;
 
         candidates.add({
           'playerId': opponentId,
@@ -243,7 +244,7 @@ class AdaptiveMatchmakingService {
     score += (prediction.confidence * 100 * 0.3).toInt();
 
     // Fairness (win probability gap) weight (20%)
-    final fairness = (1.0 - prediction.whiteWinProbability.abs());
+    final fairness = 1.0 - prediction.whiteWinProbability.abs();
     score += (fairness * 100 * 0.2).toInt();
 
     // Wait time bonus (10%) - prefer shorter waits
@@ -268,25 +269,13 @@ class AdaptiveMatchmakingService {
   int _calculateFairnessScore(MatchOutcomePrediction prediction) {
     // Fairness is highest when win probabilities are close
     // 100 = perfectly fair (50-50), 0 = completely one-sided
-    final gapFromFair =
-        (prediction.whiteWinProbability - 0.5).abs() * 2;
+    final gapFromFair = (prediction.whiteWinProbability - 0.5).abs() * 2;
     return ((1.0 - gapFromFair) * 100).toInt();
   }
 }
 
 /// Result of adaptive matching
 class AdaptiveMatchResult {
-  final String player1Id;
-  final String player1Name;
-  final int player1Rating;
-  final String player2Id;
-  final String player2Name;
-  final int player2Rating;
-  final int matchQuality;
-  final int competitivenessScore;
-  final int predictedDifficulty;
-  final String timeControl;
-
   AdaptiveMatchResult({
     required this.player1Id,
     required this.player1Name,
@@ -299,16 +288,20 @@ class AdaptiveMatchResult {
     required this.predictedDifficulty,
     required this.timeControl,
   });
+  final String player1Id;
+  final String player1Name;
+  final int player1Rating;
+  final String player2Id;
+  final String player2Name;
+  final int player2Rating;
+  final int matchQuality;
+  final int competitivenessScore;
+  final int predictedDifficulty;
+  final String timeControl;
 }
 
 /// Match suggestion for player development
 class MatchSuggestion {
-  final String type;
-  final String description;
-  final (int, int) recommendedRatingRange;
-  final int priority;
-  final String reasoning;
-
   MatchSuggestion({
     required this.type,
     required this.description,
@@ -316,17 +309,15 @@ class MatchSuggestion {
     required this.priority,
     required this.reasoning,
   });
+  final String type;
+  final String description;
+  final (int, int) recommendedRatingRange;
+  final int priority;
+  final String reasoning;
 }
 
 /// Match quality metrics
 class MatchQualityMetrics {
-  final String playerId;
-  final String opponentId;
-  final int qualityScore;
-  final int competitivenessScore;
-  final int fairnessScore;
-  final bool recommendedMatch;
-
   MatchQualityMetrics({
     required this.playerId,
     required this.opponentId,
@@ -335,19 +326,24 @@ class MatchQualityMetrics {
     required this.fairnessScore,
     required this.recommendedMatch,
   });
+  final String playerId;
+  final String opponentId;
+  final int qualityScore;
+  final int competitivenessScore;
+  final int fairnessScore;
+  final bool recommendedMatch;
 }
 
 /// Scored candidate for internal use
 class ScoredCandidate {
-  final Map<String, dynamic> candidate;
-  final MatchCompetitiveness competitiveness;
-  final MatchOutcomePrediction prediction;
-  final int score;
-
   ScoredCandidate({
     required this.candidate,
     required this.competitiveness,
     required this.prediction,
     required this.score,
   });
+  final Map<String, dynamic> candidate;
+  final MatchCompetitiveness competitiveness;
+  final MatchOutcomePrediction prediction;
+  final int score;
 }

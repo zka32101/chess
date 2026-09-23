@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 /// Service for analyzing user feedback and sentiment
 class FeedbackAnalysisService {
+  FeedbackAnalysisService._();
   static final FeedbackAnalysisService _instance = FeedbackAnalysisService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -12,8 +13,6 @@ class FeedbackAnalysisService {
   static const double POSITIVE_THRESHOLD = 0.6;
   static const double NEGATIVE_THRESHOLD = 0.4;
 
-  FeedbackAnalysisService._();
-
   static FeedbackAnalysisService get instance => _instance;
 
   /// Analyze sentiment of feedback text
@@ -21,7 +20,7 @@ class FeedbackAnalysisService {
     try {
       final score = _calculateSentimentScore(text);
       final category = _categorizeText(text);
-      
+
       return SentimentAnalysis(
         text: text,
         score: score,
@@ -164,16 +163,45 @@ class FeedbackAnalysisService {
 
     // Positive indicators
     final positiveWords = [
-      'great', 'excellent', 'amazing', 'fantastic', 'love', 'best',
-      'awesome', 'perfect', 'wonderful', 'brilliant', 'good', 'nice',
-      'excellent', 'super', 'fun', 'enjoyed', 'impressed'
+      'great',
+      'excellent',
+      'amazing',
+      'fantastic',
+      'love',
+      'best',
+      'awesome',
+      'perfect',
+      'wonderful',
+      'brilliant',
+      'good',
+      'nice',
+      'excellent',
+      'super',
+      'fun',
+      'enjoyed',
+      'impressed'
     ];
 
     // Negative indicators
     final negativeWords = [
-      'bad', 'terrible', 'horrible', 'awful', 'hate', 'crash', 'bug',
-      'slow', 'broken', 'useless', 'poor', 'disappointing', 'angry',
-      'frustrated', 'annoyed', 'error', 'problem', 'issue'
+      'bad',
+      'terrible',
+      'horrible',
+      'awful',
+      'hate',
+      'crash',
+      'bug',
+      'slow',
+      'broken',
+      'useless',
+      'poor',
+      'disappointing',
+      'angry',
+      'frustrated',
+      'annoyed',
+      'error',
+      'problem',
+      'issue'
     ];
 
     var score = 0.5;
@@ -254,7 +282,8 @@ class FeedbackAnalysisService {
   String _estimateSeverity(String text) {
     final lowerText = text.toLowerCase();
 
-    if (lowerText.contains('crash') || lowerText.contains('completely broken')) {
+    if (lowerText.contains('crash') ||
+        lowerText.contains('completely broken')) {
       return 'critical';
     }
 
@@ -278,9 +307,9 @@ class FeedbackAnalysisService {
       'low': 10,
     };
 
-    for (var issue in issues) {
-      issue.priority = (severityScores[issue.severity] ?? 0) + 
-                       (issue.affectedUsers * 5);
+    for (final issue in issues) {
+      issue.priority =
+          (severityScores[issue.severity] ?? 0) + (issue.affectedUsers * 5);
     }
 
     issues.sort((a, b) => b.priority.compareTo(a.priority));
@@ -308,12 +337,6 @@ class FeedbackAnalysisService {
 
 /// Sentiment analysis result
 class SentimentAnalysis {
-  final String text;
-  final double score;
-  final String sentiment;
-  final String category;
-  final DateTime timestamp;
-
   SentimentAnalysis({
     required this.text,
     required this.score,
@@ -321,17 +344,15 @@ class SentimentAnalysis {
     required this.category,
     required this.timestamp,
   });
+  final String text;
+  final double score;
+  final String sentiment;
+  final String category;
+  final DateTime timestamp;
 }
 
 /// Feedback report
 class FeedbackReport {
-  final Duration period;
-  final int totalFeedback;
-  final Map<String, int> sentimentDistribution;
-  final Map<String, int> categoryDistribution;
-  final List<FeedbackIssue> topIssues;
-  final double sentimentTrend;
-
   FeedbackReport({
     required this.period,
     required this.totalFeedback,
@@ -340,22 +361,24 @@ class FeedbackReport {
     required this.topIssues,
     required this.sentimentTrend,
   });
+  final Duration period;
+  final int totalFeedback;
+  final Map<String, int> sentimentDistribution;
+  final Map<String, int> categoryDistribution;
+  final List<FeedbackIssue> topIssues;
+  final double sentimentTrend;
 
-  double get positiveRatio =>
-      totalFeedback > 0 ? (sentimentDistribution['positive'] ?? 0) / totalFeedback : 0.0;
-  
-  double get negativeRatio =>
-      totalFeedback > 0 ? (sentimentDistribution['negative'] ?? 0) / totalFeedback : 0.0;
+  double get positiveRatio => totalFeedback > 0
+      ? (sentimentDistribution['positive'] ?? 0) / totalFeedback
+      : 0.0;
+
+  double get negativeRatio => totalFeedback > 0
+      ? (sentimentDistribution['negative'] ?? 0) / totalFeedback
+      : 0.0;
 }
 
 /// Feedback issue
 class FeedbackIssue {
-  final String text;
-  final String category;
-  final String severity;
-  int affectedUsers;
-  int priority;
-
   FeedbackIssue({
     required this.text,
     required this.category,
@@ -363,4 +386,9 @@ class FeedbackIssue {
     required this.affectedUsers,
     required this.priority,
   });
+  final String text;
+  final String category;
+  final String severity;
+  int affectedUsers;
+  int priority;
 }

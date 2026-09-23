@@ -4,14 +4,13 @@ import '../models/phase_k_models.dart';
 
 /// Friend-to-friend challenge service for head-to-head competitive matches
 class FriendChallengeService {
+  factory FriendChallengeService() => _instance;
+  FriendChallengeService._internal();
   static final FriendChallengeService _instance =
       FriendChallengeService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, List<Challenge>> _challengesCache = {};
   final Map<String, ChallengeStreak> _streakCache = {};
-
-  factory FriendChallengeService() => _instance;
-  FriendChallengeService._internal();
 
   static FriendChallengeService get instance => _instance;
 
@@ -33,20 +32,20 @@ class FriendChallengeService {
           .collection('list')
           .doc(challengeId)
           .set({
-            'challengeId': challengeId,
-            'challengerUserId': challengerUserId,
-            'challengerUsername': challengerUsername,
-            'challengeeUserId': challengeeUserId,
-            'challengeeUsername': challengeeUsername,
-            'createdAt': FieldValue.serverTimestamp(),
-            'status': 'pending',
-            'timeControl': timeControl,
-            'wagerPoints': wagerPoints,
-            'respondedAt': null,
-            'winnerId': null,
-            'gameId': null,
-            'completedAt': null,
-          });
+        'challengeId': challengeId,
+        'challengerUserId': challengerUserId,
+        'challengerUsername': challengerUsername,
+        'challengeeUserId': challengeeUserId,
+        'challengeeUsername': challengeeUsername,
+        'createdAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'timeControl': timeControl,
+        'wagerPoints': wagerPoints,
+        'respondedAt': null,
+        'winnerId': null,
+        'gameId': null,
+        'completedAt': null,
+      });
 
       _challengesCache.remove(challengeeUserId);
 
@@ -83,10 +82,10 @@ class FriendChallengeService {
           .collection('list')
           .doc(challengeId)
           .update({
-            'status': 'accepted',
-            'respondedAt': FieldValue.serverTimestamp(),
-            'gameId': gameId,
-          });
+        'status': 'accepted',
+        'respondedAt': FieldValue.serverTimestamp(),
+        'gameId': gameId,
+      });
 
       _challengesCache.clear();
     } catch (e) {
@@ -104,9 +103,9 @@ class FriendChallengeService {
           .collection('list')
           .doc(challengeId)
           .update({
-            'status': 'rejected',
-            'respondedAt': FieldValue.serverTimestamp(),
-          });
+        'status': 'rejected',
+        'respondedAt': FieldValue.serverTimestamp(),
+      });
 
       _challengesCache.clear();
     } catch (e) {
@@ -124,9 +123,9 @@ class FriendChallengeService {
           .collection('list')
           .doc(challengeId)
           .update({
-            'status': 'cancelled',
-            'completedAt': FieldValue.serverTimestamp(),
-          });
+        'status': 'cancelled',
+        'completedAt': FieldValue.serverTimestamp(),
+      });
 
       _challengesCache.clear();
     } catch (e) {
@@ -162,42 +161,33 @@ class FriendChallengeService {
             });
 
         // Record result
-        transaction.set(
-            _firestore
-                .collection('challenge_results')
-                .doc(resultId),
-            {
-              'resultId': resultId,
-              'challengeId': challengeId,
-              'winnerId': winnerId,
-              'loserId': loserId,
-              'winnerRatingGain': winnerRatingGain,
-              'loserRatingLoss': loserRatingLoss,
-              'completedAt': FieldValue.serverTimestamp(),
-              'gameMode': 'challenge',
-              'moveCount': moveCount,
-            });
+        transaction
+            .set(_firestore.collection('challenge_results').doc(resultId), {
+          'resultId': resultId,
+          'challengeId': challengeId,
+          'winnerId': winnerId,
+          'loserId': loserId,
+          'winnerRatingGain': winnerRatingGain,
+          'loserRatingLoss': loserRatingLoss,
+          'completedAt': FieldValue.serverTimestamp(),
+          'gameMode': 'challenge',
+          'moveCount': moveCount,
+        });
 
         // Update winner's streak
-        transaction.update(
-            _firestore
-                .collection('challenge_streaks')
-                .doc(winnerId),
-            {
-              'currentStreak': FieldValue.increment(1),
-              'totalChallengesWon': FieldValue.increment(1),
-              'streakStartDate': FieldValue.serverTimestamp(),
-            });
+        transaction
+            .update(_firestore.collection('challenge_streaks').doc(winnerId), {
+          'currentStreak': FieldValue.increment(1),
+          'totalChallengesWon': FieldValue.increment(1),
+          'streakStartDate': FieldValue.serverTimestamp(),
+        });
 
         // Reset loser's streak
-        transaction.update(
-            _firestore
-                .collection('challenge_streaks')
-                .doc(loserId),
-            {
-              'currentStreak': 0,
-              'totalChallengesLost': FieldValue.increment(1),
-            });
+        transaction
+            .update(_firestore.collection('challenge_streaks').doc(loserId), {
+          'currentStreak': 0,
+          'totalChallengesLost': FieldValue.increment(1),
+        });
       });
 
       _challengesCache.clear();
@@ -243,7 +233,8 @@ class FriendChallengeService {
 
       final userChallenges = snapshot.docs
           .map((doc) => Challenge.fromJson(doc.data()))
-          .where((c) => c.challengerUserId == userId || c.challengeeUserId == userId)
+          .where((c) =>
+              c.challengerUserId == userId || c.challengeeUserId == userId)
           .toList();
 
       return userChallenges;
@@ -270,7 +261,8 @@ class FriendChallengeService {
 
       final userChallenges = snapshot.docs
           .map((doc) => Challenge.fromJson(doc.data()))
-          .where((c) => c.challengerUserId == userId || c.challengeeUserId == userId)
+          .where((c) =>
+              c.challengerUserId == userId || c.challengeeUserId == userId)
           .toList();
 
       return userChallenges;
@@ -287,10 +279,8 @@ class FriendChallengeService {
     }
 
     try {
-      final doc = await _firestore
-          .collection('challenge_streaks')
-          .doc(userId)
-          .get();
+      final doc =
+          await _firestore.collection('challenge_streaks').doc(userId).get();
 
       if (!doc.exists) {
         return ChallengeStreak(
@@ -300,7 +290,7 @@ class FriendChallengeService {
           streakStartDate: DateTime.now(),
           totalChallengesWon: 0,
           totalChallengesLost: 0,
-          winRate: 0.0,
+          winRate: 0,
         );
       }
 

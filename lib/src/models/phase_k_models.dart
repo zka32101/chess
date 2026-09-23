@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'phase_k_models.freezed.dart';
@@ -72,8 +71,7 @@ class Friend with _$Friend {
     @Default(0) int mutualChallenges,
   }) = _Friend;
 
-  factory Friend.fromJson(Map<String, dynamic> json) =>
-      _$FriendFromJson(json);
+  factory Friend.fromJson(Map<String, dynamic> json) => _$FriendFromJson(json);
 }
 
 @freezed
@@ -110,7 +108,8 @@ class FriendActivity with _$FriendActivity {
   const factory FriendActivity({
     required String activityId,
     required String userId,
-    required String activityType, // 'win', 'loss', 'achievement', 'online', 'challenge'
+    required String
+        activityType, // 'win', 'loss', 'achievement', 'online', 'challenge'
     required String description,
     required DateTime timestamp,
     required Map<String, dynamic> metadata,
@@ -131,7 +130,8 @@ class Challenge with _$Challenge {
     required String challengeeUserId,
     required String challengeeUsername,
     required DateTime createdAt,
-    required String status, // 'pending', 'accepted', 'rejected', 'completed', 'cancelled'
+    required String
+        status, // 'pending', 'accepted', 'rejected', 'completed', 'cancelled'
     required String timeControl, // 'blitz', 'rapid', 'classical'
     required int wagerPoints,
     required DateTime? respondedAt,
@@ -186,10 +186,12 @@ class Tournament with _$Tournament {
     required String tournamentId,
     required String name,
     required String description,
-    required String status, // 'registration', 'in-progress', 'completed', 'cancelled'
+    required String
+        status, // 'registration', 'in-progress', 'completed', 'cancelled'
     required DateTime startDate,
     required DateTime endDate,
-    required String format, // 'single-elimination', 'double-elimination', 'round-robin', 'swiss'
+    required String
+        format, // 'single-elimination', 'double-elimination', 'round-robin', 'swiss'
     required int maxParticipants,
     required int currentParticipants,
     required String timeControl,
@@ -297,7 +299,8 @@ class SocialActivity with _$SocialActivity {
   const factory SocialActivity({
     required String activityId,
     required String userId,
-    required String activityType, // 'friend_joined', 'challenge_sent', 'tournament_joined', 'achievement_unlocked'
+    required String
+        activityType, // 'friend_joined', 'challenge_sent', 'tournament_joined', 'achievement_unlocked'
     required String title,
     required String description,
     required DateTime timestamp,

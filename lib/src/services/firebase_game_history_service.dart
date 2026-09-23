@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'package:chess_tactics_master/src/models/game_history.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
-import 'package:chess_tactics_master/src/services/game_history_service.dart';
+import '../models/game_history.dart';
+import 'ai_opponent_engine_enhanced.dart';
+import 'game_history_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Firebase implementation of game history service
@@ -14,11 +14,11 @@ class FirebaseGameHistoryService implements GameHistoryService {
   final Logger _logger = Logger();
 
   /// Collection path for game records
-  String get _gamesCollection => 'users/${_userId}/games';
+  String get _gamesCollection => 'users/$_userId/games';
   String get _userId => _auth.currentUser?.uid ?? 'anonymous';
 
   /// Collection path for aggregated statistics
-  String get _statsCollection => 'users/${_userId}/statistics';
+  String get _statsCollection => 'users/$_userId/statistics';
 
   @override
   Future<void> saveGame(GameRecord game) async {
@@ -138,7 +138,7 @@ class FirebaseGameHistoryService implements GameHistoryService {
       final batch = _firestore.batch();
       final snapshot = await _firestore.collection(_gamesCollection).get();
 
-      for (var doc in snapshot.docs) {
+      for (final doc in snapshot.docs) {
         batch.delete(doc.reference);
       }
 
@@ -249,43 +249,39 @@ class FirebaseGameHistoryService implements GameHistoryService {
   }
 
   /// Stream of player statistics for real-time updates
-  Stream<PlayerStatistics> watchPlayerStatistics() {
-    return _firestore
-        .collection(_gamesCollection)
-        .orderBy('playedAt', descending: true)
-        .snapshots()
-        .map((snapshot) {
-      final games =
-          snapshot.docs.map((doc) => GameRecord.fromJson(doc.data())).toList();
+  Stream<PlayerStatistics> watchPlayerStatistics() => _firestore
+          .collection(_gamesCollection)
+          .orderBy('playedAt', descending: true)
+          .snapshots()
+          .map((snapshot) {
+        final games = snapshot.docs
+            .map((doc) => GameRecord.fromJson(doc.data()))
+            .toList();
 
-      if (games.isEmpty) {
+        if (games.isEmpty) {
+          return PlayerStatistics(
+            playerId: _userId,
+            games: [],
+            firstGame: DateTime.now(),
+            lastGame: DateTime.now(),
+          );
+        }
+
         return PlayerStatistics(
           playerId: _userId,
-          games: [],
-          firstGame: DateTime.now(),
-          lastGame: DateTime.now(),
+          games: games,
+          firstGame: games.last.playedAt,
+          lastGame: games.first.playedAt,
         );
-      }
-
-      return PlayerStatistics(
-        playerId: _userId,
-        games: games,
-        firstGame: games.last.playedAt,
-        lastGame: games.first.playedAt,
-      );
-    });
-  }
+      });
 
   /// Stream of games for real-time sync
-  Stream<List<GameRecord>> watchAllGames() {
-    return _firestore
-        .collection(_gamesCollection)
-        .orderBy('playedAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => GameRecord.fromJson(doc.data()))
-            .toList());
-  }
+  Stream<List<GameRecord>> watchAllGames() => _firestore
+      .collection(_gamesCollection)
+      .orderBy('playedAt', descending: true)
+      .snapshots()
+      .map((snapshot) =>
+          snapshot.docs.map((doc) => GameRecord.fromJson(doc.data())).toList());
 
   /// Sync games from local storage to cloud
   Future<int> syncLocalGames(List<GameRecord> localGames) async {

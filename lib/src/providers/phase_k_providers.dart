@@ -8,24 +8,18 @@ import '../models/phase_k_models.dart';
 // ========== Service Providers ==========
 
 /// Access to LeaderboardService singleton
-final leaderboardServiceProvider = Provider((ref) {
-  return LeaderboardService.instance;
-});
+final leaderboardServiceProvider =
+    Provider((ref) => LeaderboardService.instance);
 
 /// Access to FriendService singleton
-final friendServiceProvider = Provider((ref) {
-  return FriendService.instance;
-});
+final friendServiceProvider = Provider((ref) => FriendService.instance);
 
 /// Access to FriendChallengeService singleton
-final friendChallengeServiceProvider = Provider((ref) {
-  return FriendChallengeService.instance;
-});
+final friendChallengeServiceProvider =
+    Provider((ref) => FriendChallengeService.instance);
 
 /// Access to TournamentService singleton
-final tournamentServiceProvider = Provider((ref) {
-  return TournamentService.instance;
-});
+final tournamentServiceProvider = Provider((ref) => TournamentService.instance);
 
 // ========== Leaderboard Providers ==========
 
@@ -37,8 +31,9 @@ final globalLeaderboardProvider =
 });
 
 /// Get regional leaderboard
-final regionalLeaderboardProvider = FutureProvider.family<List<LeaderboardEntry>,
-    (String, int)>((ref, params) async {
+final regionalLeaderboardProvider =
+    FutureProvider.family<List<LeaderboardEntry>, (String, int)>(
+        (ref, params) async {
   final (region, limit) = params;
   final service = ref.watch(leaderboardServiceProvider);
   return service.getRegionalLeaderboard(region, limit: limit);
@@ -75,8 +70,9 @@ final userRankingStatsProvider =
 });
 
 /// Get leaderboard history for user
-final leaderboardHistoryProvider = FutureProvider.family<
-    List<LeaderboardHistory>, (String, String, int)>((ref, params) async {
+final leaderboardHistoryProvider =
+    FutureProvider.family<List<LeaderboardHistory>, (String, String, int)>(
+        (ref, params) async {
   final (userId, period, limit) = params;
   final service = ref.watch(leaderboardServiceProvider);
   return service.getLeaderboardHistory(userId, period: period, limit: limit);
@@ -84,8 +80,7 @@ final leaderboardHistoryProvider = FutureProvider.family<
 
 /// Search leaderboard by username
 final leaderboardSearchProvider =
-    FutureProvider.family<List<LeaderboardEntry>, String>(
-        (ref, query) async {
+    FutureProvider.family<List<LeaderboardEntry>, String>((ref, query) async {
   final service = ref.watch(leaderboardServiceProvider);
   return service.searchByUsername(query);
 });
@@ -116,8 +111,9 @@ final pendingFriendRequestsProvider =
 });
 
 /// Get activity feed
-final activityFeedProvider = FutureProvider.family<List<FriendActivity>,
-    (String, int)>((ref, params) async {
+final activityFeedProvider =
+    FutureProvider.family<List<FriendActivity>, (String, int)>(
+        (ref, params) async {
   final (userId, limit) = params;
   final service = ref.watch(friendServiceProvider);
   return service.getActivityFeed(userId, limit: limit);
@@ -173,8 +169,7 @@ final headToHeadChallengeStatsProvider =
 // ========== Tournament Providers ==========
 
 /// Get active tournaments
-final activeTournamentsProvider =
-    FutureProvider<List<Tournament>>((ref) async {
+final activeTournamentsProvider = FutureProvider<List<Tournament>>((ref) async {
   final service = ref.watch(tournamentServiceProvider);
   return service.getActiveTournaments();
 });
@@ -229,8 +224,7 @@ final selectedLeaderboardFilterProvider =
 final selectedRegionProvider = StateProvider<String>((ref) => 'global');
 
 /// Selected leaderboard time period
-final selectedTimePeriodProvider =
-    StateProvider<String>((ref) => 'all-time');
+final selectedTimePeriodProvider = StateProvider<String>((ref) => 'all-time');
 
 /// Friend search query
 final friendSearchQueryProvider = StateProvider<String>((ref) => '');
@@ -253,7 +247,8 @@ final totalFriendsCountProvider =
 /// Pending friend requests count
 final pendingRequestsCountProvider =
     FutureProvider.family<int, String>((ref, userId) async {
-  final requests = await ref.watch(pendingFriendRequestsProvider(userId).future);
+  final requests =
+      await ref.watch(pendingFriendRequestsProvider(userId).future);
   return requests.length;
 });
 
@@ -275,7 +270,8 @@ final userWinRateProvider =
 final userSocialStatsProvider =
     FutureProvider.family<SocialStats, String>((ref, userId) async {
   final friends = await ref.watch(userFriendsProvider(userId).future);
-  final requests = await ref.watch(pendingFriendRequestsProvider(userId).future);
+  final requests =
+      await ref.watch(pendingFriendRequestsProvider(userId).future);
   final challenges = await ref.watch(activeChallengesProvider(userId).future);
   final rank = await ref.watch(userGlobalRankProvider(userId).future);
   final stats = await ref.watch(userRankingStatsProvider(userId).future);
@@ -286,7 +282,8 @@ final userSocialStatsProvider =
     activeChallengesCount: challenges.length,
     globalRank: rank,
     currentRating: stats.currentRating,
-    winRate: stats.currentRating > 0 ? (stats.totalGamesPlayed > 0 ? 0.5 : 0) : 0,
+    winRate:
+        stats.currentRating > 0 ? (stats.totalGamesPlayed > 0 ? 0.5 : 0) : 0,
   );
 });
 
@@ -318,13 +315,6 @@ class SelectedTournamentNotifier extends StateNotifier<String?> {
 
 /// User's social statistics
 class SocialStats {
-  final int friendsCount;
-  final int pendingRequestsCount;
-  final int activeChallengesCount;
-  final int globalRank;
-  final int currentRating;
-  final double winRate;
-
   SocialStats({
     required this.friendsCount,
     required this.pendingRequestsCount,
@@ -333,4 +323,10 @@ class SocialStats {
     required this.currentRating,
     required this.winRate,
   });
+  final int friendsCount;
+  final int pendingRequestsCount;
+  final int activeChallengesCount;
+  final int globalRank;
+  final int currentRating;
+  final double winRate;
 }

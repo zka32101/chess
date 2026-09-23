@@ -4,14 +4,18 @@ import '../models/subscription.dart';
 
 /// Subscription Service for RevenueCat integration
 class SubscriptionService {
-  final FirebaseFirestore _firestore;
-
   SubscriptionService(this._firestore);
+  final FirebaseFirestore _firestore;
 
   /// Get user subscription
   Future<UserSubscription?> getUserSubscription(String userId) async {
     try {
-      final doc = await _firestore.collection('users').doc(userId).collection('subscription').doc('current').get();
+      final doc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('subscription')
+          .doc('current')
+          .get();
       if (!doc.exists) return null;
 
       return UserSubscription.fromJson(doc.data()!);
@@ -21,18 +25,16 @@ class SubscriptionService {
   }
 
   /// Watch user subscription
-  Stream<UserSubscription?> watchUserSubscription(String userId) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('subscription')
-        .doc('current')
-        .snapshots()
-        .map((doc) {
-          if (!doc.exists) return null;
-          return UserSubscription.fromJson(doc.data()!);
-        });
-  }
+  Stream<UserSubscription?> watchUserSubscription(String userId) => _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('subscription')
+          .doc('current')
+          .snapshots()
+          .map((doc) {
+        if (!doc.exists) return null;
+        return UserSubscription.fromJson(doc.data()!);
+      });
 
   /// Update subscription after purchase
   Future<void> updateSubscription({
@@ -68,11 +70,11 @@ class SubscriptionService {
           .collection('purchases')
           .doc(transactionId)
           .set({
-            'transaction_id': transactionId,
-            'tier': tier.identifier,
-            'purchased_at': DateTime.now(),
-            'expires_at': expiresAt,
-          });
+        'transaction_id': transactionId,
+        'tier': tier.identifier,
+        'purchased_at': DateTime.now(),
+        'expires_at': expiresAt,
+      });
     } catch (e) {
       rethrow;
     }
@@ -87,9 +89,9 @@ class SubscriptionService {
           .collection('subscription')
           .doc('current')
           .update({
-            'status': SubscriptionStatus.cancelled.name,
-            'updated_at': DateTime.now(),
-          });
+        'status': SubscriptionStatus.cancelled.name,
+        'updated_at': DateTime.now(),
+      });
     } catch (e) {
       rethrow;
     }
@@ -146,14 +148,14 @@ class SubscriptionService {
     try {
       // In a real app, this would come from RevenueCat
       return [
-        SubscriptionOffering(
+        const SubscriptionOffering(
           tier: SubscriptionTier.premium,
           packageId: 'premium_monthly',
           price: 4.99,
           currency: 'USD',
-          displayPrice: '\$4.99',
+          displayPrice: r'$4.99',
           period: '1mo',
-          features: const [
+          features: [
             PremiumFeature.unlimitedPuzzles,
             PremiumFeature.customBoard,
             PremiumFeature.noAds,
@@ -161,14 +163,14 @@ class SubscriptionService {
           ],
           isMostPopular: true,
         ),
-        SubscriptionOffering(
+        const SubscriptionOffering(
           tier: SubscriptionTier.premium,
           packageId: 'premium_annual',
           price: 39.99,
           currency: 'USD',
-          displayPrice: '\$39.99',
+          displayPrice: r'$39.99',
           period: '1y',
-          features: const [
+          features: [
             PremiumFeature.unlimitedPuzzles,
             PremiumFeature.customBoard,
             PremiumFeature.noAds,
@@ -176,14 +178,14 @@ class SubscriptionService {
           ],
           isMostPopular: false,
         ),
-        SubscriptionOffering(
+        const SubscriptionOffering(
           tier: SubscriptionTier.elite,
           packageId: 'elite_monthly',
           price: 9.99,
           currency: 'USD',
-          displayPrice: '\$9.99',
+          displayPrice: r'$9.99',
           period: '1mo',
-          features: const [
+          features: [
             PremiumFeature.unlimitedPuzzles,
             PremiumFeature.customBoard,
             PremiumFeature.gameAnalysis,
@@ -239,12 +241,12 @@ class SubscriptionService {
             .collection('subscription')
             .doc('current')
             .set({
-              'user_id': userId,
-              'current_tier': SubscriptionTier.free.identifier,
-              'status': SubscriptionStatus.active.name,
-              'created_at': DateTime.now(),
-              'updated_at': DateTime.now(),
-            });
+          'user_id': userId,
+          'current_tier': SubscriptionTier.free.identifier,
+          'status': SubscriptionStatus.active.name,
+          'created_at': DateTime.now(),
+          'updated_at': DateTime.now(),
+        });
       }
     } catch (e) {
       rethrow;

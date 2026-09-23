@@ -3,14 +3,13 @@ import 'package:logger/logger.dart';
 
 /// Performance trend analysis service
 class PerformanceTrendService {
+  PerformanceTrendService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _gamesCollection = 'games';
   static const String _usersCollection = 'users';
-
-  PerformanceTrendService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Analyze performance trends over different time periods
   Future<PerformanceTrends> analyzePerformanceTrends(String playerId) async {
@@ -25,15 +24,18 @@ class PerformanceTrendService {
 
       // Segment games by time period
       final sevenDayGames = allGames
-          .where((g) => DateTime.parse(g['createdAt'] as String).isAfter(sevenDaysAgo))
+          .where((g) =>
+              DateTime.parse(g['createdAt'] as String).isAfter(sevenDaysAgo))
           .toList();
 
       final thirtyDayGames = allGames
-          .where((g) => DateTime.parse(g['createdAt'] as String).isAfter(thirtyDaysAgo))
+          .where((g) =>
+              DateTime.parse(g['createdAt'] as String).isAfter(thirtyDaysAgo))
           .toList();
 
       final ninetyDayGames = allGames
-          .where((g) => DateTime.parse(g['createdAt'] as String).isAfter(ninetyDaysAgo))
+          .where((g) =>
+              DateTime.parse(g['createdAt'] as String).isAfter(ninetyDaysAgo))
           .toList();
 
       // Calculate statistics for each period
@@ -59,7 +61,8 @@ class PerformanceTrendService {
         worstPerformanceDay: _findWorstPerformanceDay(allGames, playerId),
       );
     } catch (e, st) {
-      _logger.e('Failed to analyze performance trends', error: e, stackTrace: st);
+      _logger.e('Failed to analyze performance trends',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -76,7 +79,8 @@ class PerformanceTrendService {
       final games = await _getPlayerGames(playerId, limit: 200);
 
       final relevantGames = games
-          .where((g) => DateTime.parse(g['createdAt'] as String).isAfter(cutoffDate))
+          .where((g) =>
+              DateTime.parse(g['createdAt'] as String).isAfter(cutoffDate))
           .toList();
 
       return _calculatePeriodStats(relevantGames, playerId);
@@ -105,8 +109,15 @@ class PerformanceTrendService {
 
       for (final game in games) {
         final date = DateTime.parse(game['createdAt'] as String);
-        final dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-            [date.weekday - 1];
+        final dayName = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday'
+        ][date.weekday - 1];
 
         dayStats[dayName]!.add(game);
       }
@@ -128,7 +139,8 @@ class PerformanceTrendService {
 
       return dayPerformance;
     } catch (e, st) {
-      _logger.e('Failed to analyze performance by day', error: e, stackTrace: st);
+      _logger.e('Failed to analyze performance by day',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -177,9 +189,9 @@ class PerformanceTrendService {
         wins: 0,
         losses: 0,
         draws: 0,
-        winRate: 0.0,
-        accuracy: 0.0,
-        averageRatingChange: 0.0,
+        winRate: 0,
+        accuracy: 0,
+        averageRatingChange: 0,
       );
     }
 
@@ -221,13 +233,14 @@ class PerformanceTrendService {
       wins: wins,
       losses: losses,
       draws: draws,
-      winRate: (wins / games.length * 100),
-      accuracy: (totalAccuracy / games.length),
-      averageRatingChange: (totalRatingChange / games.length),
+      winRate: wins / games.length * 100,
+      accuracy: totalAccuracy / games.length,
+      averageRatingChange: totalRatingChange / games.length,
     );
   }
 
-  String? _findBestPerformanceDay(List<Map<String, dynamic>> games, String playerId) {
+  String? _findBestPerformanceDay(
+      List<Map<String, dynamic>> games, String playerId) {
     if (games.isEmpty) return null;
 
     String? bestDay;
@@ -244,7 +257,8 @@ class PerformanceTrendService {
     return bestDay;
   }
 
-  String? _findWorstPerformanceDay(List<Map<String, dynamic>> games, String playerId) {
+  String? _findWorstPerformanceDay(
+      List<Map<String, dynamic>> games, String playerId) {
     if (games.isEmpty) return null;
 
     String? worstDay;
@@ -264,14 +278,6 @@ class PerformanceTrendService {
 
 /// Performance trends data
 class PerformanceTrends {
-  final String playerId;
-  final TimePeriodMetrics sevenDayStats;
-  final TimePeriodMetrics thirtyDayStats;
-  final TimePeriodMetrics ninetyDayStats;
-  final String overallTrend;
-  final String? bestPerformanceDay;
-  final String? worstPerformanceDay;
-
   PerformanceTrends({
     required this.playerId,
     required this.sevenDayStats,
@@ -281,18 +287,17 @@ class PerformanceTrends {
     this.bestPerformanceDay,
     this.worstPerformanceDay,
   });
+  final String playerId;
+  final TimePeriodMetrics sevenDayStats;
+  final TimePeriodMetrics thirtyDayStats;
+  final TimePeriodMetrics ninetyDayStats;
+  final String overallTrend;
+  final String? bestPerformanceDay;
+  final String? worstPerformanceDay;
 }
 
 /// Time period metrics
 class TimePeriodMetrics {
-  final int gamesPlayed;
-  final int wins;
-  final int losses;
-  final int draws;
-  final double winRate;
-  final double accuracy;
-  final double averageRatingChange;
-
   TimePeriodMetrics({
     required this.gamesPlayed,
     required this.wins,
@@ -302,16 +307,17 @@ class TimePeriodMetrics {
     required this.accuracy,
     required this.averageRatingChange,
   });
+  final int gamesPlayed;
+  final int wins;
+  final int losses;
+  final int draws;
+  final double winRate;
+  final double accuracy;
+  final double averageRatingChange;
 }
 
 /// Day of week performance
 class DayPerformance {
-  final String dayOfWeek;
-  final int gamesPlayed;
-  final double winRate;
-  final double accuracy;
-  final double averageRatingChange;
-
   DayPerformance({
     required this.dayOfWeek,
     required this.gamesPlayed,
@@ -319,4 +325,9 @@ class DayPerformance {
     required this.accuracy,
     required this.averageRatingChange,
   });
+  final String dayOfWeek;
+  final int gamesPlayed;
+  final double winRate;
+  final double accuracy;
+  final double averageRatingChange;
 }

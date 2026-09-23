@@ -2,9 +2,8 @@ import 'dart:math';
 
 /// Exception thrown when rating calculation fails.
 class RatingCalculationException implements Exception {
-  final String message;
-
   RatingCalculationException(this.message);
+  final String message;
 
   @override
   String toString() => message;
@@ -98,7 +97,7 @@ class RatingCalculationService {
   static double calculateExpectedScore(int playerRating, int opponentRating) {
     final ratingDifference = opponentRating - playerRating;
     final exponent = ratingDifference / 400.0;
-    return 1.0 / (1.0 + pow(10, exponent) as double);
+    return 1.0 / (1.0 + pow(10, exponent));
   }
 
   /// Gets the K-factor based on player's current rating.
@@ -147,9 +146,8 @@ class RatingCalculationService {
   }
 
   /// Checks if a rating is within valid range.
-  static bool isValidRating(int rating) {
-    return rating >= minRating && rating <= maxRating;
-  }
+  static bool isValidRating(int rating) =>
+      rating >= minRating && rating <= maxRating;
 
   /// Calculates rating change (delta) for a player.
   ///

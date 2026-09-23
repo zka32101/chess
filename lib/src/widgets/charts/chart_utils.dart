@@ -37,15 +37,15 @@ class ChartColors {
   /// Get gradient colors for chart fill
   static List<Color> getGradientColors(BuildContext context) {
     final primary = getPrimaryColor(context);
-    return [primary.withOpacity(0.4), primary.withOpacity(0.0)];
+    return [primary.withOpacity(0.4), primary.withOpacity(0)];
   }
 }
 
 /// Utility class for chart configurations
 class ChartConfig {
-  static const double gridInterval = 200.0;
-  static const double borderWidth = 2.0;
-  static const double dotRadius = 6.0;
+  static const double gridInterval = 200;
+  static const double borderWidth = 2;
+  static const double dotRadius = 6;
   static const Duration animationDuration = Duration(milliseconds: 300);
   static const Duration chartEntranceDuration = Duration(milliseconds: 500);
 
@@ -59,19 +59,13 @@ class ChartConfig {
   }
 
   /// Format rating for display
-  static String formatRating(int rating) {
-    return rating.toString();
-  }
+  static String formatRating(int rating) => rating.toString();
 
   /// Format date for display
-  static String formatDate(DateTime date) {
-    return '${date.month}/${date.day}';
-  }
+  static String formatDate(DateTime date) => '${date.month}/${date.day}';
 
   /// Format percentage for display
-  static String formatPercentage(int percentage) {
-    return '$percentage%';
-  }
+  static String formatPercentage(int percentage) => '$percentage%';
 }
 
 /// Extension for easy color application
@@ -79,8 +73,7 @@ extension ColorExtension on BuildContext {
   Color getPerformanceColor(int percentage) =>
       ChartColors.getPerformanceColor(percentage, this);
 
-  Color getStreakColor(bool isWin) =>
-      ChartColors.getStreakColor(isWin, this);
+  Color getStreakColor(bool isWin) => ChartColors.getStreakColor(isWin, this);
 
   Color getPrimaryChartColor() => ChartColors.getPrimaryColor(this);
 

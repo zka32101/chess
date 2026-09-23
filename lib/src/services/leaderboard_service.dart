@@ -3,13 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../models/phase_k_models.dart';
 
 class LeaderboardService {
+  factory LeaderboardService() => _instance;
+  LeaderboardService._internal();
   static final LeaderboardService _instance = LeaderboardService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, List<LeaderboardEntry>> _leaderboardCache = {};
   final Map<String, RankingStats> _rankingStatsCache = {};
-
-  factory LeaderboardService() => _instance;
-  LeaderboardService._internal();
 
   static LeaderboardService get instance => _instance;
 
@@ -308,7 +307,7 @@ class LeaderboardService {
           .doc('global')
           .collection('entries')
           .where('username', isGreaterThanOrEqualTo: query)
-          .where('username', isLessThan: query + '')
+          .where('username', isLessThan: '$query')
           .limit(20)
           .get();
 

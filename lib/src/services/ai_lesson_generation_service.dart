@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 /// Service for AI-powered game analysis and personalized lesson generation
 class AILessonGenerationService {
+  AILessonGenerationService._();
   static final AILessonGenerationService _instance =
       AILessonGenerationService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -12,8 +13,6 @@ class AILessonGenerationService {
   // Cache for analyses
   final Map<String, GameAnalysis> _gameAnalysisCache = {};
   final Map<String, PlayerProfile> _playerProfileCache = {};
-
-  AILessonGenerationService._();
 
   static AILessonGenerationService get instance => _instance;
 
@@ -28,7 +27,7 @@ class AILessonGenerationService {
 
       if (!doc.exists) throw Exception('Game not found');
 
-      final gameData = doc.data() as Map<String, dynamic>;
+      final gameData = doc.data()!;
 
       // Simulate engine analysis
       final moves = _analyzeMoves(gameData['moves'] as List? ?? []);
@@ -209,7 +208,7 @@ class AILessonGenerationService {
           userId: userId,
           totalGamesAnalyzed: 0,
           playStyle: 'Balanced',
-          averageAccuracy: 0.0,
+          averageAccuracy: 0,
           strengthAreas: {},
           weaknessAreas: {},
           preferredOpenings: [],
@@ -372,165 +371,119 @@ class AILessonGenerationService {
 
   // ========== Helper Methods ==========
 
-  List<MoveAnalysis> _analyzeMoves(List<dynamic> moves) {
-    return List.generate(
-      moves.length,
-      (index) => MoveAnalysis(
-        moveNumber: index + 1,
-        move: moves[index].toString(),
-        analyzeType: index % 20 == 0 ? 'blunder' : 'acceptable',
-        bestMove: moves[index].toString(),
-        evaluationDifference: 0.0,
-        tacticalPattern: '',
-        explanation: 'Move analysis',
-      ),
-    );
-  }
+  List<MoveAnalysis> _analyzeMoves(List<dynamic> moves) => List.generate(
+        moves.length,
+        (index) => MoveAnalysis(
+          moveNumber: index + 1,
+          move: moves[index].toString(),
+          analyzeType: index % 20 == 0 ? 'blunder' : 'acceptable',
+          bestMove: moves[index].toString(),
+          evaluationDifference: 0,
+          tacticalPattern: '',
+          explanation: 'Move analysis',
+        ),
+      );
 
   double _calculateAccuracy(List<MoveAnalysis> moves) {
-    if (moves.isEmpty) return 0.0;
+    if (moves.isEmpty) return 0;
     final acceptable = moves.where((m) => m.analyzeType == 'acceptable').length;
     return (acceptable / moves.length * 100).clamp(0.0, 100.0);
   }
 
-  List<String> _identifyMissedOpportunities(List<MoveAnalysis> moves) {
-    return moves
-        .where((m) => m.tacticalPattern.isNotEmpty)
-        .map((m) => m.tacticalPattern)
-        .toList();
-  }
+  List<String> _identifyMissedOpportunities(List<MoveAnalysis> moves) => moves
+      .where((m) => m.tacticalPattern.isNotEmpty)
+      .map((m) => m.tacticalPattern)
+      .toList();
 
-  String _assessOpeningPhase(List<MoveAnalysis> moves) {
-    return 'Solid opening play with good piece development';
-  }
+  String _assessOpeningPhase(List<MoveAnalysis> moves) =>
+      'Solid opening play with good piece development';
 
-  String _assessMiddlegame(List<MoveAnalysis> moves) {
-    return 'Room for improvement in tactical accuracy';
-  }
+  String _assessMiddlegame(List<MoveAnalysis> moves) =>
+      'Room for improvement in tactical accuracy';
 
-  String _assessEndgame(List<MoveAnalysis> moves) {
-    return 'Endgame technique needs development';
-  }
+  String _assessEndgame(List<MoveAnalysis> moves) =>
+      'Endgame technique needs development';
 
-  List<String> _generateLessonSuggestions(List<MoveAnalysis> moves) {
-    return ['Tactical Patterns', 'Endgame Fundamentals'];
-  }
+  List<String> _generateLessonSuggestions(List<MoveAnalysis> moves) =>
+      ['Tactical Patterns', 'Endgame Fundamentals'];
 
-  String _generateOverallAssessment(List<MoveAnalysis> moves, double accuracy) {
-    return 'Good game! Focus on endgame technique.';
-  }
+  String _generateOverallAssessment(
+          List<MoveAnalysis> moves, double accuracy) =>
+      'Good game! Focus on endgame technique.';
 
-  String _classifyPlayStyle(List<Map<String, dynamic>> games) {
-    return 'Balanced';
-  }
+  String _classifyPlayStyle(List<Map<String, dynamic>> games) => 'Balanced';
 
-  double _calculateAverageAccuracy(List<Map<String, dynamic>> games) {
-    return 0.75;
-  }
+  double _calculateAverageAccuracy(List<Map<String, dynamic>> games) => 0.75;
 
-  Map<String, double> _identifyStrengths(List<Map<String, dynamic>> games) {
-    return {'opening': 0.8, 'middlegame': 0.75};
-  }
+  Map<String, double> _identifyStrengths(List<Map<String, dynamic>> games) =>
+      {'opening': 0.8, 'middlegame': 0.75};
 
-  Map<String, double> _identifyWeaknesses(List<Map<String, dynamic>> games) {
-    return {'endgame': 0.6, 'tactics': 0.65};
-  }
+  Map<String, double> _identifyWeaknesses(List<Map<String, dynamic>> games) =>
+      {'endgame': 0.6, 'tactics': 0.65};
 
-  List<String> _extractPreferredOpenings(List<Map<String, dynamic>> games) {
-    return ['Sicilian Defense', 'French Defense'];
-  }
+  List<String> _extractPreferredOpenings(List<Map<String, dynamic>> games) =>
+      ['Sicilian Defense', 'French Defense'];
 
-  List<String> _extractPreferredDefenses(List<Map<String, dynamic>> games) {
-    return ['Sicilian Defense'];
-  }
+  List<String> _extractPreferredDefenses(List<Map<String, dynamic>> games) =>
+      ['Sicilian Defense'];
 
-  double _assessTacticalStrength(List<Map<String, dynamic>> games) {
-    return 0.7;
-  }
+  double _assessTacticalStrength(List<Map<String, dynamic>> games) => 0.7;
 
-  double _assessStrategicStrength(List<Map<String, dynamic>> games) {
-    return 0.75;
-  }
+  double _assessStrategicStrength(List<Map<String, dynamic>> games) => 0.75;
 
-  double _assessEndgameStrength(List<Map<String, dynamic>> games) {
-    return 0.6;
-  }
+  double _assessEndgameStrength(List<Map<String, dynamic>> games) => 0.6;
 
-  List<String> _getRecommendedFocus(List<Map<String, dynamic>> games) {
-    return ['Endgame Fundamentals', 'Tactical Recognition'];
-  }
+  List<String> _getRecommendedFocus(List<Map<String, dynamic>> games) =>
+      ['Endgame Fundamentals', 'Tactical Recognition'];
 
-  List<String> _rankPriorityAreas(PlayerProfile profile) {
-    return ['endgame', 'tactics', 'opening_preparation'];
-  }
+  List<String> _rankPriorityAreas(PlayerProfile profile) =>
+      ['endgame', 'tactics', 'opening_preparation'];
 
-  Map<String, Duration> _estimateCompletionTimes(List<String> areas) {
-    return {
-      'endgame': const Duration(days: 30),
-      'tactics': const Duration(days: 21),
-      'opening_preparation': const Duration(days: 14),
-    };
-  }
+  Map<String, Duration> _estimateCompletionTimes(List<String> areas) => {
+        'endgame': const Duration(days: 30),
+        'tactics': const Duration(days: 21),
+        'opening_preparation': const Duration(days: 14),
+      };
 
-  List<String> _getLessonRecommendations(List<String> areas) {
-    return ['King and Pawn Endgames', 'Tactical Patterns', 'Opening Theory'];
-  }
+  List<String> _getLessonRecommendations(List<String> areas) =>
+      ['King and Pawn Endgames', 'Tactical Patterns', 'Opening Theory'];
 
-  List<String> _getPracticeFocusAreas(List<String> areas) {
-    return ['Solve 50 tactical puzzles', 'Play 20 endgame positions'];
-  }
+  List<String> _getPracticeFocusAreas(List<String> areas) =>
+      ['Solve 50 tactical puzzles', 'Play 20 endgame positions'];
 
   double _estimateRatingGain(List<String> areas) {
-    return 150.0; // Estimated rating points
+    return 150; // Estimated rating points
   }
 
-  double _calculateAverageAccuracyFromMoveAnalysis(List<MoveAnalysis> moves) {
-    return 75.0;
-  }
+  double _calculateAverageAccuracyFromMoveAnalysis(List<MoveAnalysis> moves) =>
+      75;
 
   double _calculateAccuracyTrend(List<Map<String, dynamic>> games) {
     return 0.02; // 2% improvement trend
   }
 
   double _calculateRatingTrend(List<Map<String, dynamic>> games) {
-    return 5.0; // +5 rating points trend
+    return 5; // +5 rating points trend
   }
 
   double _estimateImprovement(List<Map<String, dynamic>> games) {
     return 0.15; // 15% improvement
   }
 
-  Map<String, dynamic> _analysisTojson(GameAnalysis analysis) {
-    return {
-      'gameId': analysis.gameId,
-      'result': analysis.result,
-      'accuracy': analysis.accuracy,
-      'blunders': analysis.blunders,
-      'mistakes': analysis.mistakes,
-      'inaccuracies': analysis.inaccuracies,
-      'analyzedAt': Timestamp.fromDate(analysis.analyzedAt),
-    };
-  }
+  Map<String, dynamic> _analysisTojson(GameAnalysis analysis) => {
+        'gameId': analysis.gameId,
+        'result': analysis.result,
+        'accuracy': analysis.accuracy,
+        'blunders': analysis.blunders,
+        'mistakes': analysis.mistakes,
+        'inaccuracies': analysis.inaccuracies,
+        'analyzedAt': Timestamp.fromDate(analysis.analyzedAt),
+      };
 }
 
 // ========== Data Classes ==========
 
 class GameAnalysis {
-  final String gameId;
-  final String result;
-  final List<MoveAnalysis> moves;
-  final double accuracy;
-  final int blunders;
-  final int mistakes;
-  final int inaccuracies;
-  final List<String> tacticalOpportunitiesMissed;
-  final String openingPhaseAssessment;
-  final String middlegameAssessment;
-  final String endgameAssessment;
-  final List<String> suggestedLessons;
-  final String overallAssessment;
-  final DateTime analyzedAt;
-
   GameAnalysis({
     required this.gameId,
     required this.result,
@@ -547,17 +500,23 @@ class GameAnalysis {
     required this.overallAssessment,
     required this.analyzedAt,
   });
+  final String gameId;
+  final String result;
+  final List<MoveAnalysis> moves;
+  final double accuracy;
+  final int blunders;
+  final int mistakes;
+  final int inaccuracies;
+  final List<String> tacticalOpportunitiesMissed;
+  final String openingPhaseAssessment;
+  final String middlegameAssessment;
+  final String endgameAssessment;
+  final List<String> suggestedLessons;
+  final String overallAssessment;
+  final DateTime analyzedAt;
 }
 
 class MoveAnalysis {
-  final int moveNumber;
-  final String move;
-  final String analyzeType;
-  final String bestMove;
-  final double evaluationDifference;
-  final String tacticalPattern;
-  final String explanation;
-
   MoveAnalysis({
     required this.moveNumber,
     required this.move,
@@ -567,23 +526,16 @@ class MoveAnalysis {
     required this.tacticalPattern,
     required this.explanation,
   });
+  final int moveNumber;
+  final String move;
+  final String analyzeType;
+  final String bestMove;
+  final double evaluationDifference;
+  final String tacticalPattern;
+  final String explanation;
 }
 
 class PlayerProfile {
-  final String userId;
-  final int totalGamesAnalyzed;
-  final String playStyle;
-  final double averageAccuracy;
-  final Map<String, double> strengthAreas;
-  final Map<String, double> weaknessAreas;
-  final List<String> preferredOpenings;
-  final List<String> preferredDefenses;
-  final double tacticalStrength;
-  final double strategicStrength;
-  final double endgameStrength;
-  final List<String> recommendedFocus;
-  final DateTime profileUpdatedAt;
-
   PlayerProfile({
     required this.userId,
     required this.totalGamesAnalyzed,
@@ -599,17 +551,22 @@ class PlayerProfile {
     required this.recommendedFocus,
     required this.profileUpdatedAt,
   });
+  final String userId;
+  final int totalGamesAnalyzed;
+  final String playStyle;
+  final double averageAccuracy;
+  final Map<String, double> strengthAreas;
+  final Map<String, double> weaknessAreas;
+  final List<String> preferredOpenings;
+  final List<String> preferredDefenses;
+  final double tacticalStrength;
+  final double strategicStrength;
+  final double endgameStrength;
+  final List<String> recommendedFocus;
+  final DateTime profileUpdatedAt;
 }
 
 class ImprovementPath {
-  final String userId;
-  final List<String> priorityAreas;
-  final Map<String, Duration> estimatedCompletionTime;
-  final List<String> recommendedLessons;
-  final List<String> practiceFocusAreas;
-  final double expectedRatingGain;
-  final DateTime createdAt;
-
   ImprovementPath({
     required this.userId,
     required this.priorityAreas,
@@ -619,20 +576,16 @@ class ImprovementPath {
     required this.expectedRatingGain,
     required this.createdAt,
   });
+  final String userId;
+  final List<String> priorityAreas;
+  final Map<String, Duration> estimatedCompletionTime;
+  final List<String> recommendedLessons;
+  final List<String> practiceFocusAreas;
+  final double expectedRatingGain;
+  final DateTime createdAt;
 }
 
 class AIGeneratedLesson {
-  final String id;
-  final String userId;
-  final String contentType;
-  final String title;
-  final String description;
-  final String relevanceReason;
-  final int recommendedDifficulty;
-  final double relevanceScore;
-  final int userFeedback;
-  final DateTime createdAt;
-
   AIGeneratedLesson({
     required this.id,
     required this.userId,
@@ -645,17 +598,19 @@ class AIGeneratedLesson {
     required this.userFeedback,
     required this.createdAt,
   });
+  final String id;
+  final String userId;
+  final String contentType;
+  final String title;
+  final String description;
+  final String relevanceReason;
+  final int recommendedDifficulty;
+  final double relevanceScore;
+  final int userFeedback;
+  final DateTime createdAt;
 }
 
 class AIOpeningRecommendation {
-  final String openingName;
-  final String ecoCode;
-  final String reasoning;
-  final double compatibilityScore;
-  final String mainLine;
-  final List<String> tactics;
-  final double winRate;
-
   AIOpeningRecommendation({
     required this.openingName,
     required this.ecoCode,
@@ -665,15 +620,16 @@ class AIOpeningRecommendation {
     required this.tactics,
     required this.winRate,
   });
+  final String openingName;
+  final String ecoCode;
+  final String reasoning;
+  final double compatibilityScore;
+  final String mainLine;
+  final List<String> tactics;
+  final double winRate;
 }
 
 class EndgameInsight {
-  final String technique;
-  final double proficiencyLevel;
-  final String keyPrinciples;
-  final List<String> practicePositions;
-  final String relevanceToBattleStyle;
-
   EndgameInsight({
     required this.technique,
     required this.proficiencyLevel,
@@ -681,18 +637,14 @@ class EndgameInsight {
     required this.practicePositions,
     required this.relevanceToBattleStyle,
   });
+  final String technique;
+  final double proficiencyLevel;
+  final String keyPrinciples;
+  final List<String> practicePositions;
+  final String relevanceToBattleStyle;
 }
 
 class AIInsight {
-  final String id;
-  final String userId;
-  final String title;
-  final String description;
-  final String contentType;
-  final int relevanceRank;
-  final bool isRead;
-  final DateTime createdAt;
-
   AIInsight({
     required this.id,
     required this.userId,
@@ -703,17 +655,17 @@ class AIInsight {
     required this.isRead,
     required this.createdAt,
   });
+  final String id;
+  final String userId;
+  final String title;
+  final String description;
+  final String contentType;
+  final int relevanceRank;
+  final bool isRead;
+  final DateTime createdAt;
 }
 
 class PerformanceProgressAnalytics {
-  final String userId;
-  final int gamesAnalyzed;
-  final double accuracyTrend;
-  final double ratingTrend;
-  final int lessonsCompleted;
-  final double improvementPercentage;
-  final Map<String, double> strengthTrend;
-
   PerformanceProgressAnalytics({
     required this.userId,
     required this.gamesAnalyzed,
@@ -723,4 +675,11 @@ class PerformanceProgressAnalytics {
     required this.improvementPercentage,
     required this.strengthTrend,
   });
+  final String userId;
+  final int gamesAnalyzed;
+  final double accuracyTrend;
+  final double ratingTrend;
+  final int lessonsCompleted;
+  final double improvementPercentage;
+  final Map<String, double> strengthTrend;
 }

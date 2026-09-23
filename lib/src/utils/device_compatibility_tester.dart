@@ -14,13 +14,6 @@ enum CompatibilityTestCategory {
 
 /// Individual compatibility test result
 class CompatibilityTestResult {
-  final String testName;
-  final CompatibilityTestCategory category;
-  final bool passed;
-  final String? failureReason;
-  final Map<String, dynamic>? details;
-  final DateTime testedAt;
-
   CompatibilityTestResult({
     required this.testName,
     required this.category,
@@ -29,6 +22,12 @@ class CompatibilityTestResult {
     this.details,
     DateTime? testedAt,
   }) : testedAt = testedAt ?? DateTime.now();
+  final String testName;
+  final CompatibilityTestCategory category;
+  final bool passed;
+  final String? failureReason;
+  final Map<String, dynamic>? details;
+  final DateTime testedAt;
 
   Map<String, dynamic> toJson() => {
         'testName': testName,
@@ -46,16 +45,13 @@ class CompatibilityTestResult {
 
 /// Device compatibility tester
 class DeviceCompatibilityTester {
+  factory DeviceCompatibilityTester() => _instance;
+
+  DeviceCompatibilityTester._internal();
   static final DeviceCompatibilityTester _instance =
       DeviceCompatibilityTester._internal();
 
   final _testResults = <CompatibilityTestResult>[];
-
-  factory DeviceCompatibilityTester() {
-    return _instance;
-  }
-
-  DeviceCompatibilityTester._internal();
 
   /// Run all compatibility tests
   Future<List<CompatibilityTestResult>> runAllTests() async {
@@ -275,9 +271,8 @@ class DeviceCompatibilityTester {
 
   /// Get test results by category
   List<CompatibilityTestResult> getResultsByCategory(
-      CompatibilityTestCategory category) {
-    return _testResults.where((r) => r.category == category).toList();
-  }
+          CompatibilityTestCategory category) =>
+      _testResults.where((r) => r.category == category).toList();
 
   /// Get passed test count
   int get passedCount => _testResults.where((r) => r.passed).length;
@@ -306,12 +301,12 @@ class DeviceCompatibilityTester {
 ║ Total Tests: ${_testResults.length.toString().padRight(50)}║
 ║ Passed: ${passedCount.toString().padRight(54)}║
 ║ Failed: ${failedCount.toString().padRight(54)}║
-║ Score: ${compatibilityScore}% ${(compatibilityScore >= 80 ? '✓' : '✗').padRight(49)}║
+║ Score: $compatibilityScore% ${(compatibilityScore >= 80 ? '✓' : '✗').padRight(49)}║
 ╠══════════════════════════════════════════════════════════════════╣
     ''');
 
     // Group by category
-    final categories = CompatibilityTestCategory.values;
+    const categories = CompatibilityTestCategory.values;
     for (final category in categories) {
       final categoryResults = getResultsByCategory(category);
       if (categoryResults.isNotEmpty) {

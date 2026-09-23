@@ -1,16 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/analytics_models.dart';
+import '../models/analytics_models.dart';
 import 'dart:developer' show log;
 
 class CohortAnalyticsService {
-  static final CohortAnalyticsService _instance =
-      CohortAnalyticsService._internal();
-
-  factory CohortAnalyticsService() {
-    return _instance;
-  }
+  factory CohortAnalyticsService() => _instance;
 
   CohortAnalyticsService._internal();
+  static final CohortAnalyticsService _instance =
+      CohortAnalyticsService._internal();
 
   static CohortAnalyticsService get instance => _instance;
 

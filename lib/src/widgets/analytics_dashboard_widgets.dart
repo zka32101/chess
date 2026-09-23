@@ -3,18 +3,19 @@ import '../models/analytics_models.dart';
 
 /// KPI card widget for dashboard
 class KPICard extends StatelessWidget {
-  final DashboardKPI kpi;
-  final Color? color;
-
   const KPICard({
     required this.kpi,
+    super.key,
     this.color,
   });
+  final DashboardKPI kpi;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final cardColor = color ?? Colors.blue;
-    final trendIcon = kpi.trend == 'up' ? Icons.trending_up : Icons.trending_down;
+    final trendIcon =
+        kpi.trend == 'up' ? Icons.trending_up : Icons.trending_down;
     final trendColor = kpi.trend == 'up' ? Colors.green : Colors.red;
 
     return Card(
@@ -77,9 +78,8 @@ class KPICard extends StatelessWidget {
 
 /// Performance chart displaying accuracy over time
 class PerformanceChart extends StatelessWidget {
+  const PerformanceChart({required this.trend, super.key});
   final PerformanceTrend trend;
-
-  const PerformanceChart({required this.trend});
 
   @override
   Widget build(BuildContext context) {
@@ -178,15 +178,14 @@ class PerformanceChart extends StatelessWidget {
 }
 
 class _BarColumn extends StatelessWidget {
-  final double value;
-  final double maxValue;
-  final DateTime date;
-
   const _BarColumn({
     required this.value,
     required this.maxValue,
     required this.date,
   });
+  final double value;
+  final double maxValue;
+  final DateTime date;
 
   @override
   Widget build(BuildContext context) {
@@ -223,39 +222,35 @@ class _BarColumn extends StatelessWidget {
 
 /// Difficulty breakdown widget
 class DifficultyBreakdownWidget extends StatelessWidget {
+  const DifficultyBreakdownWidget({required this.breakdowns, super.key});
   final List<DifficultyBreakdown> breakdowns;
 
-  const DifficultyBreakdownWidget({required this.breakdowns});
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Performance by Difficulty',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            ...breakdowns.map((breakdown) =>
-                _DifficultyRow(breakdown: breakdown)),
-          ],
+  Widget build(BuildContext context) => Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Performance by Difficulty',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              ...breakdowns
+                  .map((breakdown) => _DifficultyRow(breakdown: breakdown)),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _DifficultyRow extends StatelessWidget {
-  final DifficultyBreakdown breakdown;
-
   const _DifficultyRow({required this.breakdown});
+  final DifficultyBreakdown breakdown;
 
   Color _getDifficultyColor() {
     switch (breakdown.difficulty.toLowerCase()) {
@@ -328,85 +323,79 @@ class _DifficultyRow extends StatelessWidget {
 
 /// Streak information card
 class StreakCard extends StatelessWidget {
+  const StreakCard({required this.streakInfo, super.key});
   final StreakInfo streakInfo;
 
-  const StreakCard({required this.streakInfo});
-
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Streaks',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) => Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Streaks',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _StreakStat(
+                    label: 'Current Win Streak',
+                    value: streakInfo.currentWinStreak,
+                    color: Colors.green,
                   ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _StreakStat(
-                  label: 'Current Win Streak',
-                  value: streakInfo.currentWinStreak,
-                  color: Colors.green,
-                ),
-                _StreakStat(
-                  label: 'Longest Win Streak',
-                  value: streakInfo.longestWinStreak,
-                  color: Colors.lightGreen,
-                ),
-              ],
-            ),
-          ],
+                  _StreakStat(
+                    label: 'Longest Win Streak',
+                    value: streakInfo.longestWinStreak,
+                    color: Colors.lightGreen,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _StreakStat extends StatelessWidget {
-  final String label;
-  final int value;
-  final Color color;
-
   const _StreakStat({
     required this.label,
     required this.value,
     required this.color,
   });
+  final String label;
+  final int value;
+  final Color color;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            value.toString(),
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) => Column(
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
                 ),
           ),
-        ),
-      ],
-    );
-  }
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              value.toString(),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ),
+        ],
+      );
 }

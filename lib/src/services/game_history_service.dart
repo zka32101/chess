@@ -1,6 +1,6 @@
-import 'package:chess_tactics_master/src/models/game_history.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
-import 'package:chess_tactics_master/src/widgets/performance_graphs.dart';
+import '../models/game_history.dart';
+import 'ai_opponent_engine_enhanced.dart';
+import '../widgets/performance_graphs.dart';
 
 /// Service for managing game history and statistics
 ///
@@ -39,26 +39,22 @@ class LocalGameHistoryService implements GameHistoryService {
   }
 
   @override
-  Future<List<GameRecord>> loadAllGames() async {
-    return _games.values.toList()
-      ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
-  }
+  Future<List<GameRecord>> loadAllGames() async =>
+      _games.values.toList()..sort((a, b) => b.playedAt.compareTo(a.playedAt));
 
   @override
   Future<List<GameRecord>> loadGamesByDifficulty(
-      AIDifficulty difficulty) async {
-    return _games.values.where((g) => g.difficulty == difficulty).toList()
-      ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
-  }
+          AIDifficulty difficulty) async =>
+      _games.values.where((g) => g.difficulty == difficulty).toList()
+        ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
 
   @override
   Future<List<GameRecord>> loadGamesBetween(
-      DateTime start, DateTime end) async {
-    return _games.values
-        .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
-        .toList()
-      ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
-  }
+          DateTime start, DateTime end) async =>
+      _games.values
+          .where((g) => g.playedAt.isAfter(start) && g.playedAt.isBefore(end))
+          .toList()
+        ..sort((a, b) => b.playedAt.compareTo(a.playedAt));
 
   @override
   Future<void> deleteGame(String gameId) async {
@@ -93,6 +89,10 @@ class LocalGameHistoryService implements GameHistoryService {
 
 /// Builder for creating GameRecord from a completed game
 class GameRecordBuilder {
+  GameRecordBuilder({
+    this.gameId,
+    this.playedAt,
+  });
   String? gameId;
   DateTime? playedAt;
   AIDifficulty difficulty = AIDifficulty.medium;
@@ -101,11 +101,6 @@ class GameRecordBuilder {
   int totalTimeMs = 0;
   final List<MoveMetrics> moveMetrics = [];
   String? notes;
-
-  GameRecordBuilder({
-    this.gameId,
-    this.playedAt,
-  });
 
   /// Set game properties
   void setProperties({

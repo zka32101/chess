@@ -15,41 +15,41 @@ class ChessCurriculumData {
   // ---------------------------------------------------------------------
 
   static final List<PieceMovementStep> pieceMovementSteps = [
-    PieceMovementStep(
+    const PieceMovementStep(
       pieceName: 'ポーン (Pawn)',
       symbol: '♟',
       summary: '前にしか進めない、最も数が多い駒です。',
-      details: const [
+      details: [
         '通常は1マス前に進みます。',
         '最初の1手だけ、2マス前に進めます。',
         '相手の駒を取るときだけ、斜め前に1マス動けます。',
         '相手側の端まで到達すると、他の駒(通常はクイーン)に昇格できます。',
       ],
-      highlightSquares: const ['e3', 'e4'],
+      highlightSquares: ['e3', 'e4'],
       pieceSquare: 'e2',
     ),
-    PieceMovementStep(
+    const PieceMovementStep(
       pieceName: 'ナイト (Knight)',
       symbol: '♞',
       summary: 'アルファベットの「L字」に動く、唯一他の駒を飛び越えられる駒です。',
-      details: const [
+      details: [
         '縦に2マス+横に1マス、または横に2マス+縦に1マス動きます。',
         '他の駒の上を飛び越えて移動できます。',
         '盤の中央にいるほど、動ける範囲が広がります。',
       ],
-      highlightSquares: const ['e2', 'e6', 'c3', 'c5', 'f3', 'f5', 'g4', 'g6'],
+      highlightSquares: ['e2', 'e6', 'c3', 'c5', 'f3', 'f5', 'g4', 'g6'],
       pieceSquare: 'd4',
     ),
-    PieceMovementStep(
+    const PieceMovementStep(
       pieceName: 'ビショップ (Bishop)',
       symbol: '♝',
       summary: '斜め方向にどこまでも進める駒です。1つの色のマスしか使えません。',
-      details: const [
+      details: [
         '斜め方向であれば、何マスでも進めます。',
         '他の駒を飛び越えることはできません。',
         '各プレイヤーは白マス用・黒マス用の2体を持ちます。',
       ],
-      highlightSquares: const [
+      highlightSquares: [
         'a1',
         'b2',
         'c3',
@@ -66,16 +66,16 @@ class ChessCurriculumData {
       ],
       pieceSquare: 'd4',
     ),
-    PieceMovementStep(
+    const PieceMovementStep(
       pieceName: 'ルーク (Rook)',
       symbol: '♜',
       summary: '縦・横方向にどこまでも進める駒です。',
-      details: const [
+      details: [
         '縦方向・横方向であれば、何マスでも進めます。',
         '他の駒を飛び越えることはできません。',
         '特定の条件下で、キングと「キャスリング」という特殊な動きができます。',
       ],
-      highlightSquares: const [
+      highlightSquares: [
         'd1',
         'd2',
         'd3',
@@ -93,16 +93,16 @@ class ChessCurriculumData {
       ],
       pieceSquare: 'd4',
     ),
-    PieceMovementStep(
+    const PieceMovementStep(
       pieceName: 'クイーン (Queen)',
       symbol: '♛',
       summary: '最も強力な駒。縦・横・斜め、すべての方向にどこまでも進めます。',
-      details: const [
+      details: [
         'ルークとビショップの動きを組み合わせた最強の駒です。',
         '縦・横・斜め、どの方向にも何マスでも進めます。',
         '序盤で早く動かしすぎると、相手の駒に狙われやすいので注意しましょう。',
       ],
-      highlightSquares: const [
+      highlightSquares: [
         'd1',
         'd2',
         'd3',
@@ -133,16 +133,16 @@ class ChessCurriculumData {
       ],
       pieceSquare: 'd4',
     ),
-    PieceMovementStep(
+    const PieceMovementStep(
       pieceName: 'キング (King)',
       symbol: '♚',
       summary: 'このゲームの主役。周囲1マスだけ動けますが、取られたら負けです。',
-      details: const [
+      details: [
         '縦・横・斜め、どの方向にも1マスだけ動けます。',
         'キングが「チェック」(次に取られる状態)から逃げられなくなると「チェックメイト」で負けです。',
         '特定の条件下で、ルークと「キャスリング」という2マス移動ができます。',
       ],
-      highlightSquares: const [
+      highlightSquares: [
         'c3',
         'd3',
         'e3',
@@ -467,7 +467,7 @@ class ChessCurriculumData {
     ),
     OpeningExplanation(
       id: 'opening_queens_gambit',
-      name: "クイーンズ・ギャンビット",
+      name: 'クイーンズ・ギャンビット',
       ecoCode: 'D06',
       description: '1.d4 d5 2.c4 から始まる、白の代表的な1手目1.d4への継続手です。',
       difficulty: DifficultyLevel.intermediate,
@@ -521,6 +521,14 @@ class ChessCurriculumData {
 /// Deliberately not a freezed model: this is purely static, bundled
 /// tutorial content, not data that flows through Firestore or providers.
 class PieceMovementStep {
+  const PieceMovementStep({
+    required this.pieceName,
+    required this.symbol,
+    required this.summary,
+    required this.details,
+    required this.highlightSquares,
+    required this.pieceSquare,
+  });
   final String pieceName;
   final String symbol;
   final String summary;
@@ -531,13 +539,4 @@ class PieceMovementStep {
 
   /// The square the piece itself sits on for this illustration.
   final String pieceSquare;
-
-  const PieceMovementStep({
-    required this.pieceName,
-    required this.symbol,
-    required this.summary,
-    required this.details,
-    required this.highlightSquares,
-    required this.pieceSquare,
-  });
 }

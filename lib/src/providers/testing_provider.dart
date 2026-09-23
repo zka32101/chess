@@ -4,19 +4,14 @@ import '../utils/security_auditor.dart';
 import '../utils/app_store_submission_checklist.dart';
 
 /// Test runner provider
-final testRunnerProvider = Provider((ref) {
-  return TestRunner();
-});
+final testRunnerProvider = Provider((ref) => TestRunner());
 
 /// Security auditor provider
-final securityAuditorProvider = Provider((ref) {
-  return SecurityAuditor();
-});
+final securityAuditorProvider = Provider((ref) => SecurityAuditor());
 
 /// App store submission checklist provider
-final appStoreSubmissionProvider = Provider((ref) {
-  return AppStoreSubmissionChecklist();
-});
+final appStoreSubmissionProvider =
+    Provider((ref) => AppStoreSubmissionChecklist());
 
 /// Unit tests provider
 final unitTestsProvider = FutureProvider((ref) async {
@@ -106,9 +101,8 @@ final androidRequirementsProvider = Provider((ref) {
 
 /// Test execution notifier
 class TestExecutionNotifier extends StateNotifier<bool> {
-  final _runner = TestRunner();
-
   TestExecutionNotifier() : super(false);
+  final _runner = TestRunner();
 
   Future<void> runAllTests() async {
     state = true;
@@ -122,15 +116,13 @@ class TestExecutionNotifier extends StateNotifier<bool> {
 
 /// Test execution provider
 final testExecutionProvider =
-    StateNotifierProvider<TestExecutionNotifier, bool>((ref) {
-  return TestExecutionNotifier();
-});
+    StateNotifierProvider<TestExecutionNotifier, bool>(
+        (ref) => TestExecutionNotifier());
 
 /// Security audit execution notifier
 class SecurityAuditNotifier extends StateNotifier<bool> {
-  final _auditor = SecurityAuditor();
-
   SecurityAuditNotifier() : super(false);
+  final _auditor = SecurityAuditor();
 
   Future<void> runAudit() async {
     state = true;
@@ -144,6 +136,5 @@ class SecurityAuditNotifier extends StateNotifier<bool> {
 
 /// Security audit execution provider
 final securityAuditExecutionProvider =
-    StateNotifierProvider<SecurityAuditNotifier, bool>((ref) {
-  return SecurityAuditNotifier();
-});
+    StateNotifierProvider<SecurityAuditNotifier, bool>(
+        (ref) => SecurityAuditNotifier());

@@ -49,10 +49,9 @@ class TacticsScreen extends StatelessWidget {
 }
 
 class TacticsDetailScreen extends StatelessWidget {
-  final TacticsPattern pattern;
-
-  const TacticsDetailScreen({Key? key, required this.pattern})
+  const TacticsDetailScreen({required this.pattern, Key? key})
       : super(key: key);
+  final TacticsPattern pattern;
 
   Widget _numberedSection(
     BuildContext context, {
@@ -104,61 +103,59 @@ class TacticsDetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(pattern.name)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    pattern.description,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                DifficultyBadge(difficulty: pattern.difficulty),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _numberedSection(
-              context,
-              title: '見分け方',
-              icon: Icons.visibility_outlined,
-              items: pattern.recognitionFeatures,
-            ),
-            _numberedSection(
-              context,
-              title: '実戦での手順',
-              icon: Icons.format_list_numbered,
-              items: pattern.executionSteps,
-            ),
-            if (pattern.relatedTactics.isNotEmpty) ...[
-              Text(
-                '関連する戦術',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(pattern.name)),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  for (final relatedId in pattern.relatedTactics)
-                    _relatedChip(context, relatedId),
+                  Expanded(
+                    child: Text(
+                      pattern.description,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  DifficultyBadge(difficulty: pattern.difficulty),
                 ],
               ),
+              const SizedBox(height: 24),
+              _numberedSection(
+                context,
+                title: '見分け方',
+                icon: Icons.visibility_outlined,
+                items: pattern.recognitionFeatures,
+              ),
+              _numberedSection(
+                context,
+                title: '実戦での手順',
+                icon: Icons.format_list_numbered,
+                items: pattern.executionSteps,
+              ),
+              if (pattern.relatedTactics.isNotEmpty) ...[
+                Text(
+                  '関連する戦術',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final relatedId in pattern.relatedTactics)
+                      _relatedChip(context, relatedId),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   Widget _relatedChip(BuildContext context, String relatedId) {
     final related = ChessCurriculumData.tacticsPatterns

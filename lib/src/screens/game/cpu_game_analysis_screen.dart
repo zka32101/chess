@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/services/chess_engine_service.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
-import 'package:chess_tactics_master/src/widgets/game_analysis_bar.dart';
+import '../../services/chess_engine_service.dart';
+import '../../services/ai_opponent_engine_enhanced.dart';
+import '../../widgets/game_analysis_bar.dart';
 import 'package:chess/chess.dart' as chess_lib;
 
 /// CPU Game Screen with Integrated Analysis
@@ -10,12 +10,11 @@ import 'package:chess/chess.dart' as chess_lib;
 /// Displays chess game with real-time engine analysis, statistics,
 /// and performance metrics using AIOpponentEngineEnhanced.
 class CPUGameAnalysisScreen extends ConsumerStatefulWidget {
-  final AIDifficulty difficulty;
-
   const CPUGameAnalysisScreen({
     Key? key,
     this.difficulty = AIDifficulty.medium,
   }) : super(key: key);
+  final AIDifficulty difficulty;
 
   @override
   ConsumerState<CPUGameAnalysisScreen> createState() =>
@@ -157,7 +156,7 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
           // Evaluation bar
           if (lastEngineStats.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8),
               child: EvaluationBar(
                 evaluation: _estimateEvaluation(),
                 maxEvaluation: 500,
@@ -177,7 +176,7 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
           Expanded(
             child: Center(
               child: AspectRatio(
-                aspectRatio: 1.0,
+                aspectRatio: 1,
                 child: _buildChessBoard(),
               ),
             ),
@@ -447,34 +446,33 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
     );
   }
 
-  Widget _buildAnalysisSection(String title, List<(String, String)> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        ...items.map((item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(item.$1, style: Theme.of(context).textTheme.bodySmall),
-                  Text(
-                    item.$2,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
-            )),
-      ],
-    );
-  }
+  Widget _buildAnalysisSection(String title, List<(String, String)> items) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(item.$1, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      item.$2,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      );
 
   String _getPieceSymbol(chess_lib.Piece piece) {
     const symbols = {
@@ -505,9 +503,7 @@ class _CPUGameAnalysisScreenState extends ConsumerState<CPUGameAnalysisScreen> {
     return 0;
   }
 
-  String _getMoveCount() {
-    return ((recorder.moves.length + 1) ~/ 2).toString();
-  }
+  String _getMoveCount() => ((recorder.moves.length + 1) ~/ 2).toString();
 
   String _getGameStatus() {
     if (chess.isGameOver()) {
@@ -607,14 +603,6 @@ class GameAnalysisRecorder {
 
 /// Individual move record with analysis data
 class MoveRecord {
-  final String from;
-  final String to;
-  final String notation;
-  final bool isAI;
-  final int timeMs;
-  final Map<String, dynamic> stats;
-  final Map<String, dynamic>? tableStats;
-
   MoveRecord({
     required this.from,
     required this.to,
@@ -624,4 +612,11 @@ class MoveRecord {
     required this.stats,
     this.tableStats,
   });
+  final String from;
+  final String to;
+  final String notation;
+  final bool isAI;
+  final int timeMs;
+  final Map<String, dynamic> stats;
+  final Map<String, dynamic>? tableStats;
 }

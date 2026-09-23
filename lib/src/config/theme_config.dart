@@ -8,52 +8,48 @@ class ThemeConfig {
   ThemeConfig._();
 
   /// Light mode theme
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryLight,
-        brightness: Brightness.light,
-      ),
-      fontFamily: GoogleFonts.roboto().fontFamily,
-      textTheme: _buildLightTextTheme(),
-      appBarTheme: _buildLightAppBarTheme(),
-      cardTheme: _buildLightCardTheme(),
-      inputDecorationTheme: _buildLightInputTheme(),
-      elevatedButtonTheme: _buildElevatedButtonTheme(Brightness.light),
-      outlinedButtonTheme: _buildOutlinedButtonTheme(Brightness.light),
-      textButtonTheme: _buildTextButtonTheme(Brightness.light),
-      iconButtonTheme: _buildIconButtonTheme(Brightness.light),
-      floatingActionButtonTheme: _buildFabTheme(Brightness.light),
-      scaffoldBackgroundColor: _surfaceLightBg,
-      dialogTheme: _buildDialogTheme(Brightness.light),
-      bottomSheetTheme: _buildBottomSheetTheme(Brightness.light),
-    );
-  }
+  static ThemeData get lightTheme => ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _primaryLight,
+          brightness: Brightness.light,
+        ),
+        fontFamily: GoogleFonts.roboto().fontFamily,
+        textTheme: _buildLightTextTheme(),
+        appBarTheme: _buildLightAppBarTheme(),
+        cardTheme: _buildLightCardTheme(),
+        inputDecorationTheme: _buildLightInputTheme(),
+        elevatedButtonTheme: _buildElevatedButtonTheme(Brightness.light),
+        outlinedButtonTheme: _buildOutlinedButtonTheme(Brightness.light),
+        textButtonTheme: _buildTextButtonTheme(Brightness.light),
+        iconButtonTheme: _buildIconButtonTheme(Brightness.light),
+        floatingActionButtonTheme: _buildFabTheme(Brightness.light),
+        scaffoldBackgroundColor: _surfaceLightBg,
+        dialogTheme: _buildDialogTheme(Brightness.light),
+        bottomSheetTheme: _buildBottomSheetTheme(Brightness.light),
+      );
 
   /// Dark mode theme
-  static ThemeData get darkTheme {
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: _primaryDark,
-        brightness: Brightness.dark,
-      ),
-      fontFamily: GoogleFonts.roboto().fontFamily,
-      textTheme: _buildDarkTextTheme(),
-      appBarTheme: _buildDarkAppBarTheme(),
-      cardTheme: _buildDarkCardTheme(),
-      inputDecorationTheme: _buildDarkInputTheme(),
-      elevatedButtonTheme: _buildElevatedButtonTheme(Brightness.dark),
-      outlinedButtonTheme: _buildOutlinedButtonTheme(Brightness.dark),
-      textButtonTheme: _buildTextButtonTheme(Brightness.dark),
-      iconButtonTheme: _buildIconButtonTheme(Brightness.dark),
-      floatingActionButtonTheme: _buildFabTheme(Brightness.dark),
-      scaffoldBackgroundColor: _surfaceDarkBg,
-      dialogTheme: _buildDialogTheme(Brightness.dark),
-      bottomSheetTheme: _buildBottomSheetTheme(Brightness.dark),
-    );
-  }
+  static ThemeData get darkTheme => ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _primaryDark,
+          brightness: Brightness.dark,
+        ),
+        fontFamily: GoogleFonts.roboto().fontFamily,
+        textTheme: _buildDarkTextTheme(),
+        appBarTheme: _buildDarkAppBarTheme(),
+        cardTheme: _buildDarkCardTheme(),
+        inputDecorationTheme: _buildDarkInputTheme(),
+        elevatedButtonTheme: _buildElevatedButtonTheme(Brightness.dark),
+        outlinedButtonTheme: _buildOutlinedButtonTheme(Brightness.dark),
+        textButtonTheme: _buildTextButtonTheme(Brightness.dark),
+        iconButtonTheme: _buildIconButtonTheme(Brightness.dark),
+        floatingActionButtonTheme: _buildFabTheme(Brightness.dark),
+        scaffoldBackgroundColor: _surfaceDarkBg,
+        dialogTheme: _buildDialogTheme(Brightness.dark),
+        bottomSheetTheme: _buildBottomSheetTheme(Brightness.dark),
+      );
 
   // ============================================================
   // Colors
@@ -107,313 +103,299 @@ class ThemeConfig {
   // Text Themes
   // ============================================================
 
-  static TextTheme _buildLightTextTheme() {
-    return TextTheme(
-      displayLarge: GoogleFonts.raleway(
-        fontSize: 57,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: -0.25,
-      ),
-      displayMedium: GoogleFonts.raleway(
-        fontSize: 45,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: 0,
-      ),
-      displaySmall: GoogleFonts.raleway(
-        fontSize: 36,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: 0,
-      ),
-      headlineLarge: GoogleFonts.roboto(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: 0,
-      ),
-      headlineMedium: GoogleFonts.roboto(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: 0,
-      ),
-      headlineSmall: GoogleFonts.roboto(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: 0,
-      ),
-      titleLarge: GoogleFonts.roboto(
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-        letterSpacing: 0,
-      ),
-      titleMedium: GoogleFonts.roboto(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceLight,
-        letterSpacing: 0.15,
-      ),
-      titleSmall: GoogleFonts.roboto(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceLight,
-        letterSpacing: 0.1,
-      ),
-      bodyLarge: GoogleFonts.roboto(
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
-        color: _onSurfaceLight,
-        letterSpacing: 0.5,
-      ),
-      bodyMedium: GoogleFonts.roboto(
-        fontSize: 14,
-        fontWeight: FontWeight.normal,
-        color: _onSurfaceLight,
-        letterSpacing: 0.25,
-      ),
-      bodySmall: GoogleFonts.roboto(
-        fontSize: 12,
-        fontWeight: FontWeight.normal,
-        color: _onSurfaceVariantLight,
-        letterSpacing: 0.4,
-      ),
-      labelLarge: GoogleFonts.roboto(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceLight,
-        letterSpacing: 0.1,
-      ),
-      labelMedium: GoogleFonts.roboto(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceLight,
-        letterSpacing: 0.5,
-      ),
-      labelSmall: GoogleFonts.roboto(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceLight,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
+  static TextTheme _buildLightTextTheme() => TextTheme(
+        displayLarge: GoogleFonts.raleway(
+          fontSize: 57,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: -0.25,
+        ),
+        displayMedium: GoogleFonts.raleway(
+          fontSize: 45,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: 0,
+        ),
+        displaySmall: GoogleFonts.raleway(
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: 0,
+        ),
+        headlineLarge: GoogleFonts.roboto(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: 0,
+        ),
+        headlineMedium: GoogleFonts.roboto(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: 0,
+        ),
+        headlineSmall: GoogleFonts.roboto(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: 0,
+        ),
+        titleLarge: GoogleFonts.roboto(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+          letterSpacing: 0,
+        ),
+        titleMedium: GoogleFonts.roboto(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceLight,
+          letterSpacing: 0.15,
+        ),
+        titleSmall: GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceLight,
+          letterSpacing: 0.1,
+        ),
+        bodyLarge: GoogleFonts.roboto(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: _onSurfaceLight,
+          letterSpacing: 0.5,
+        ),
+        bodyMedium: GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+          color: _onSurfaceLight,
+          letterSpacing: 0.25,
+        ),
+        bodySmall: GoogleFonts.roboto(
+          fontSize: 12,
+          fontWeight: FontWeight.normal,
+          color: _onSurfaceVariantLight,
+          letterSpacing: 0.4,
+        ),
+        labelLarge: GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceLight,
+          letterSpacing: 0.1,
+        ),
+        labelMedium: GoogleFonts.roboto(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceLight,
+          letterSpacing: 0.5,
+        ),
+        labelSmall: GoogleFonts.roboto(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceLight,
+          letterSpacing: 0.5,
+        ),
+      );
 
-  static TextTheme _buildDarkTextTheme() {
-    return TextTheme(
-      displayLarge: GoogleFonts.raleway(
-        fontSize: 57,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: -0.25,
-      ),
-      displayMedium: GoogleFonts.raleway(
-        fontSize: 45,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: 0,
-      ),
-      displaySmall: GoogleFonts.raleway(
-        fontSize: 36,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: 0,
-      ),
-      headlineLarge: GoogleFonts.roboto(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: 0,
-      ),
-      headlineMedium: GoogleFonts.roboto(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: 0,
-      ),
-      headlineSmall: GoogleFonts.roboto(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: 0,
-      ),
-      titleLarge: GoogleFonts.roboto(
-        fontSize: 22,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-        letterSpacing: 0,
-      ),
-      titleMedium: GoogleFonts.roboto(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceDark,
-        letterSpacing: 0.15,
-      ),
-      titleSmall: GoogleFonts.roboto(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceDark,
-        letterSpacing: 0.1,
-      ),
-      bodyLarge: GoogleFonts.roboto(
-        fontSize: 16,
-        fontWeight: FontWeight.normal,
-        color: _onSurfaceDark,
-        letterSpacing: 0.5,
-      ),
-      bodyMedium: GoogleFonts.roboto(
-        fontSize: 14,
-        fontWeight: FontWeight.normal,
-        color: _onSurfaceDark,
-        letterSpacing: 0.25,
-      ),
-      bodySmall: GoogleFonts.roboto(
-        fontSize: 12,
-        fontWeight: FontWeight.normal,
-        color: _onSurfaceVariantDark,
-        letterSpacing: 0.4,
-      ),
-      labelLarge: GoogleFonts.roboto(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceDark,
-        letterSpacing: 0.1,
-      ),
-      labelMedium: GoogleFonts.roboto(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceDark,
-        letterSpacing: 0.5,
-      ),
-      labelSmall: GoogleFonts.roboto(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-        color: _onSurfaceDark,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
+  static TextTheme _buildDarkTextTheme() => TextTheme(
+        displayLarge: GoogleFonts.raleway(
+          fontSize: 57,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: -0.25,
+        ),
+        displayMedium: GoogleFonts.raleway(
+          fontSize: 45,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: 0,
+        ),
+        displaySmall: GoogleFonts.raleway(
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: 0,
+        ),
+        headlineLarge: GoogleFonts.roboto(
+          fontSize: 32,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: 0,
+        ),
+        headlineMedium: GoogleFonts.roboto(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: 0,
+        ),
+        headlineSmall: GoogleFonts.roboto(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: 0,
+        ),
+        titleLarge: GoogleFonts.roboto(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+          letterSpacing: 0,
+        ),
+        titleMedium: GoogleFonts.roboto(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceDark,
+          letterSpacing: 0.15,
+        ),
+        titleSmall: GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceDark,
+          letterSpacing: 0.1,
+        ),
+        bodyLarge: GoogleFonts.roboto(
+          fontSize: 16,
+          fontWeight: FontWeight.normal,
+          color: _onSurfaceDark,
+          letterSpacing: 0.5,
+        ),
+        bodyMedium: GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: FontWeight.normal,
+          color: _onSurfaceDark,
+          letterSpacing: 0.25,
+        ),
+        bodySmall: GoogleFonts.roboto(
+          fontSize: 12,
+          fontWeight: FontWeight.normal,
+          color: _onSurfaceVariantDark,
+          letterSpacing: 0.4,
+        ),
+        labelLarge: GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceDark,
+          letterSpacing: 0.1,
+        ),
+        labelMedium: GoogleFonts.roboto(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceDark,
+          letterSpacing: 0.5,
+        ),
+        labelSmall: GoogleFonts.roboto(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: _onSurfaceDark,
+          letterSpacing: 0.5,
+        ),
+      );
 
   // ============================================================
   // Component Themes
   // ============================================================
 
-  static AppBarTheme _buildLightAppBarTheme() {
-    return AppBarTheme(
-      backgroundColor: _surfaceLight,
-      foregroundColor: _onSurfaceLight,
-      elevation: 0,
-      centerTitle: false,
-      titleTextStyle: GoogleFonts.roboto(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceLight,
-      ),
-    );
-  }
+  static AppBarTheme _buildLightAppBarTheme() => AppBarTheme(
+        backgroundColor: _surfaceLight,
+        foregroundColor: _onSurfaceLight,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.roboto(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceLight,
+        ),
+      );
 
-  static AppBarTheme _buildDarkAppBarTheme() {
-    return AppBarTheme(
-      backgroundColor: _surfaceDark,
-      foregroundColor: _onSurfaceDark,
-      elevation: 0,
-      centerTitle: false,
-      titleTextStyle: GoogleFonts.roboto(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: _onSurfaceDark,
-      ),
-    );
-  }
+  static AppBarTheme _buildDarkAppBarTheme() => AppBarTheme(
+        backgroundColor: _surfaceDark,
+        foregroundColor: _onSurfaceDark,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: GoogleFonts.roboto(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: _onSurfaceDark,
+        ),
+      );
 
-  static CardTheme _buildLightCardTheme() {
-    return CardTheme(
-      color: _surfaceLight,
-      elevation: 2,
-      margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
-  }
+  static CardTheme _buildLightCardTheme() => CardTheme(
+        color: _surfaceLight,
+        elevation: 2,
+        margin: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      );
 
-  static CardTheme _buildDarkCardTheme() {
-    return CardTheme(
-      color: _surfaceDark,
-      elevation: 2,
-      margin: const EdgeInsets.all(8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    );
-  }
+  static CardTheme _buildDarkCardTheme() => CardTheme(
+        color: _surfaceDark,
+        elevation: 2,
+        margin: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      );
 
-  static InputDecorationTheme _buildLightInputTheme() {
-    return InputDecorationTheme(
-      filled: true,
-      fillColor: _surfaceVariantLight,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _surfaceVariantLight),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _surfaceVariantLight),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _primaryLight, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _errorLight),
-      ),
-      labelStyle: GoogleFonts.roboto(
-        fontSize: 14,
-        color: _onSurfaceVariantLight,
-      ),
-      hintStyle: GoogleFonts.roboto(
-        fontSize: 14,
-        color: _onSurfaceVariantLight,
-      ),
-    );
-  }
+  static InputDecorationTheme _buildLightInputTheme() => InputDecorationTheme(
+        filled: true,
+        fillColor: _surfaceVariantLight,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _surfaceVariantLight),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _surfaceVariantLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _primaryLight, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _errorLight),
+        ),
+        labelStyle: GoogleFonts.roboto(
+          fontSize: 14,
+          color: _onSurfaceVariantLight,
+        ),
+        hintStyle: GoogleFonts.roboto(
+          fontSize: 14,
+          color: _onSurfaceVariantLight,
+        ),
+      );
 
-  static InputDecorationTheme _buildDarkInputTheme() {
-    return InputDecorationTheme(
-      filled: true,
-      fillColor: _surfaceVariantDark,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _surfaceVariantDark),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _surfaceVariantDark),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _primaryDark, width: 2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _errorDark),
-      ),
-      labelStyle: GoogleFonts.roboto(
-        fontSize: 14,
-        color: _onSurfaceVariantDark,
-      ),
-      hintStyle: GoogleFonts.roboto(
-        fontSize: 14,
-        color: _onSurfaceVariantDark,
-      ),
-    );
-  }
+  static InputDecorationTheme _buildDarkInputTheme() => InputDecorationTheme(
+        filled: true,
+        fillColor: _surfaceVariantDark,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _surfaceVariantDark),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _surfaceVariantDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _primaryDark, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _errorDark),
+        ),
+        labelStyle: GoogleFonts.roboto(
+          fontSize: 14,
+          color: _onSurfaceVariantDark,
+        ),
+        hintStyle: GoogleFonts.roboto(
+          fontSize: 14,
+          color: _onSurfaceVariantDark,
+        ),
+      );
 
   static ElevatedButtonThemeData _buildElevatedButtonTheme(
     Brightness brightness,
@@ -459,13 +441,12 @@ class ThemeConfig {
     );
   }
 
-  static IconButtonThemeData _buildIconButtonTheme(Brightness brightness) {
-    return IconButtonThemeData(
-      style: IconButton.styleFrom(
-        iconSize: 24,
-      ),
-    );
-  }
+  static IconButtonThemeData _buildIconButtonTheme(Brightness brightness) =>
+      IconButtonThemeData(
+        style: IconButton.styleFrom(
+          iconSize: 24,
+        ),
+      );
 
   static FloatingActionButtonThemeData _buildFabTheme(Brightness brightness) {
     final isLight = brightness == Brightness.light;

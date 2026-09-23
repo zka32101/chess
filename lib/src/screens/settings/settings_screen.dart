@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/user_preferences_provider.dart';
-import '../../providers/auth_provider.dart';
 import 'sound_preferences_screen.dart';
 import 'legal_documents_screen.dart';
 import 'board_themes_screen.dart';
@@ -139,9 +138,9 @@ class SettingsScreen extends ConsumerWidget {
                 _buildSettingSection(
                   title: 'About',
                   children: [
-                    ListTile(
-                      title: const Text('Version'),
-                      subtitle: const Text('1.0.0'),
+                    const ListTile(
+                      title: Text('Version'),
+                      subtitle: Text('1.0.0'),
                     ),
                     const Divider(height: 1),
                     ListTile(
@@ -186,202 +185,198 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildSettingSection({
     required String title,
     required List<Widget> children,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-              letterSpacing: 0.5,
+  }) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(children: children),
           ),
-          child: Column(children: children),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
+          const SizedBox(height: 16),
+        ],
+      );
 
   Widget _buildThemeOption(
     BuildContext context,
     WidgetRef ref,
     ThemeMode currentMode,
     UserPreferencesService service,
-  ) {
-    return ListTile(
-      title: const Text('Theme'),
-      subtitle: Text(
-        currentMode == ThemeMode.light
-            ? 'Light'
-            : currentMode == ThemeMode.dark
-                ? 'Dark'
-                : 'System',
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text('Light'),
-                  trailing: currentMode == ThemeMode.light
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    service.setThemeMode(ThemeMode.light);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text('Dark'),
-                  trailing: currentMode == ThemeMode.dark
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    service.setThemeMode(ThemeMode.dark);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text('System'),
-                  trailing: currentMode == ThemeMode.system
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    service.setThemeMode(ThemeMode.system);
-                    Navigator.pop(context);
-                  },
-                ),
-                const SizedBox(height: 8),
-              ],
+  ) =>
+      ListTile(
+        title: const Text('Theme'),
+        subtitle: Text(
+          currentMode == ThemeMode.light
+              ? 'Light'
+              : currentMode == ThemeMode.dark
+                  ? 'Dark'
+                  : 'System',
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('Light'),
+                    trailing: currentMode == ThemeMode.light
+                        ? const Icon(Icons.check, color: Colors.blue)
+                        : null,
+                    onTap: () {
+                      service.setThemeMode(ThemeMode.light);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Dark'),
+                    trailing: currentMode == ThemeMode.dark
+                        ? const Icon(Icons.check, color: Colors.blue)
+                        : null,
+                    onTap: () {
+                      service.setThemeMode(ThemeMode.dark);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('System'),
+                    trailing: currentMode == ThemeMode.system
+                        ? const Icon(Icons.check, color: Colors.blue)
+                        : null,
+                    onTap: () {
+                      service.setThemeMode(ThemeMode.system);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
 
   Widget _buildLanguageOption(
     BuildContext context,
     WidgetRef ref,
     String currentLanguage,
     UserPreferencesService service,
-  ) {
-    return ListTile(
-      title: const Text('Language'),
-      subtitle: Text(
-        currentLanguage == 'en' ? 'English' : '日本語',
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  title: const Text('English'),
-                  trailing: currentLanguage == 'en'
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    service.setLanguage('en');
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: const Text('日本語'),
-                  trailing: currentLanguage == 'ja'
-                      ? const Icon(Icons.check, color: Colors.blue)
-                      : null,
-                  onTap: () {
-                    service.setLanguage('ja');
-                    Navigator.pop(context);
-                  },
-                ),
-                const SizedBox(height: 8),
-              ],
+  ) =>
+      ListTile(
+        title: const Text('Language'),
+        subtitle: Text(
+          currentLanguage == 'en' ? 'English' : '日本語',
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('English'),
+                    trailing: currentLanguage == 'en'
+                        ? const Icon(Icons.check, color: Colors.blue)
+                        : null,
+                    onTap: () {
+                      service.setLanguage('en');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('日本語'),
+                    trailing: currentLanguage == 'ja'
+                        ? const Icon(Icons.check, color: Colors.blue)
+                        : null,
+                    onTap: () {
+                      service.setLanguage('ja');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
 
   Widget _buildBoardSizeOption(
     BuildContext context,
     WidgetRef ref,
     int currentSize,
     UserPreferencesService service,
-  ) {
-    return ListTile(
-      title: const Text('Board Size'),
-      subtitle: Text('$currentSize × $currentSize pixels'),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Select Board Size',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+  ) =>
+      ListTile(
+        title: const Text('Board Size'),
+        subtitle: Text('$currentSize × $currentSize pixels'),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Select Board Size',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Slider(
-                        value: currentSize.toDouble(),
-                        min: 300,
-                        max: 600,
-                        divisions: 6,
-                        label: '${currentSize}px',
-                        onChanged: (value) {
-                          service.setBoardSize(value.toInt());
-                        },
-                      ),
-                      Text(
-                        'Current: $currentSize × $currentSize pixels',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
+                        const SizedBox(height: 16),
+                        Slider(
+                          value: currentSize.toDouble(),
+                          min: 300,
+                          max: 600,
+                          divisions: 6,
+                          label: '${currentSize}px',
+                          onChanged: (value) {
+                            service.setBoardSize(value.toInt());
+                          },
                         ),
-                      ),
-                    ],
+                        Text(
+                          'Current: $currentSize × $currentSize pixels',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-              ],
+                  const SizedBox(height: 8),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
 
   Widget _buildBoardThemeOption(BuildContext context, WidgetRef ref) {
     final selectedTheme = ref.watch(selectedBoardThemeProvider);
@@ -419,65 +414,63 @@ class SettingsScreen extends ConsumerWidget {
     required String currentValue,
     required List<String> options,
     required Function(String) onChanged,
-  }) {
-    return Builder(
-      builder: (context) => ListTile(
-        title: Text(title),
-        subtitle:
-            Text(currentValue[0].toUpperCase() + currentValue.substring(1)),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) => SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'Select $title',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+  }) =>
+      Builder(
+        builder: (context) => ListTile(
+          title: Text(title),
+          subtitle:
+              Text(currentValue[0].toUpperCase() + currentValue.substring(1)),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'Select $title',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  ...options.map((option) => ListTile(
-                        title: Text(option),
-                        trailing: option.toLowerCase() == currentValue
-                            ? const Icon(Icons.check, color: Colors.blue)
-                            : null,
-                        onTap: () {
-                          onChanged(option.toLowerCase());
-                          Navigator.pop(context);
-                        },
-                      )),
-                  const SizedBox(height: 8),
-                ],
+                    ...options.map((option) => ListTile(
+                          title: Text(option),
+                          trailing: option.toLowerCase() == currentValue
+                              ? const Icon(Icons.check, color: Colors.blue)
+                              : null,
+                          onTap: () {
+                            onChanged(option.toLowerCase());
+                            Navigator.pop(context);
+                          },
+                        )),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+            );
+          },
+        ),
+      );
 
   Widget _buildToggleOption({
     required String title,
     required String subtitle,
     required bool value,
     required Function(bool) onChanged,
-  }) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(subtitle),
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
-    );
-  }
+  }) =>
+      ListTile(
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+      );
 
   void _showResetDialog(
     BuildContext context,
