@@ -59,7 +59,7 @@ function detectGameConclusion(fen, moves) {
 /**
  * Handle draw agreement
  */
-async function processDraw Agreement(db, gameRef, game) {
+async function processDrawAgreement(db, gameRef, game) {
   // In production: track draw proposals and agreements
   // Only end game when both players agree
   
@@ -108,6 +108,6 @@ async function updateGameState(db, gameRef, game, moveData) {
 module.exports = {
   validateMove,
   detectGameConclusion,
-  processDraw Agreement,
+  processDrawAgreement,
   updateGameState,
 };
