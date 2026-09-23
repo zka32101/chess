@@ -82,16 +82,3 @@ flutter:
   assets:
     - .env
     - assets/images/
-    - assets/lottie/
-    - assets/data/puzzles.db
-    - assets/data/stockfish.wasm
-
-  # Fonts
-  fonts:
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Regular.ttf
-        - asset: assets/fonts/Roboto-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Roboto-Italic.ttf
-          style: italic
