@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/puzzle.dart';
 import '../../providers/puzzle_provider.dart';
+import '../../services/chess_engine_service.dart';
+import '../../widgets/game_board.dart';
 
 class PuzzleScreen extends ConsumerStatefulWidget {
   const PuzzleScreen({Key? key}) : super(key: key);
@@ -412,8 +415,14 @@ class _PuzzleScreenState extends ConsumerState<PuzzleScreen> {
       );
 }
 
-// Placeholder for puzzle solving screen
-class PuzzleSolvingScreen extends StatelessWidget {
+enum _PuzzleFeedback { none, correct, wrong, solved }
+
+/// Interactive puzzle solving screen: presents each puzzle's [PuzzleModel.fen]
+/// position and requires the solver to play [PuzzleModel.moves] in order.
+/// Moves alternate solver/opponent: after each correct solver move, the next
+/// move in the list (the opponent's reply) is auto-played, until the list is
+/// exhausted.
+class PuzzleSolvingScreen extends ConsumerStatefulWidget {
   const PuzzleSolvingScreen({
     required this.puzzleIds,
     Key? key,
@@ -421,31 +430,225 @@ class PuzzleSolvingScreen extends StatelessWidget {
   final List<String> puzzleIds;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: const Text('Solve Puzzles'),
-          centerTitle: true,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.construction, size: 48, color: Colors.grey),
-              const SizedBox(height: 16),
-              const Text('Puzzle solving coming soon!'),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Go Back'),
-              ),
-            ],
+  ConsumerState<PuzzleSolvingScreen> createState() =>
+      _PuzzleSolvingScreenState();
+}
+
+class _PuzzleSolvingScreenState extends ConsumerState<PuzzleSolvingScreen> {
+  final _chess = ChessEngineService();
+  int _puzzleIndex = 0;
+  int _moveIndex = 0;
+  String? _loadedPuzzleId;
+  bool _isPlayerTurn = true;
+  _PuzzleFeedback _feedback = _PuzzleFeedback.none;
+
+  String get _currentPuzzleId => widget.puzzleIds[_puzzleIndex];
+
+  void _loadPuzzle(PuzzleModel puzzle) {
+    _chess.initGame(fen: puzzle.fen);
+    _loadedPuzzleId = puzzle.id;
+    _moveIndex = 0;
+    _isPlayerTurn = true;
+    _feedback = _PuzzleFeedback.none;
+  }
+
+  Future<void> _handleMove(String from, String to, {String? promotion}) async {
+    final puzzle = await ref.read(puzzleByIdProvider(_currentPuzzleId).future);
+    if (puzzle == null || !_isPlayerTurn) return;
+
+    final attempted = '$from$to${promotion ?? ''}'.toLowerCase();
+    final expected = puzzle.moves[_moveIndex].toLowerCase();
+
+    if (attempted != expected) {
+      setState(() => _feedback = _PuzzleFeedback.wrong);
+      _recordAttempt(puzzle.id, solved: false, userMoves: [attempted]);
+      return;
+    }
+
+    setState(() {
+      _chess.makeMove(from, to, promotion: promotion);
+      _moveIndex++;
+      _feedback = _PuzzleFeedback.correct;
+    });
+
+    if (_moveIndex >= puzzle.moves.length) {
+      setState(() => _feedback = _PuzzleFeedback.solved);
+      _recordAttempt(puzzle.id, solved: true, userMoves: puzzle.moves);
+      return;
+    }
+
+    // Auto-play the opponent's reply.
+    setState(() => _isPlayerTurn = false);
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+
+    setState(() {
+      _chess.makeMoveUCI(puzzle.moves[_moveIndex]);
+      _moveIndex++;
+      _feedback = _PuzzleFeedback.none;
+      _isPlayerTurn = _moveIndex < puzzle.moves.length;
+    });
+
+    if (_moveIndex >= puzzle.moves.length) {
+      setState(() => _feedback = _PuzzleFeedback.solved);
+      _recordAttempt(puzzle.id, solved: true, userMoves: puzzle.moves);
+    }
+  }
+
+  void _recordAttempt(
+    String puzzleId, {
+    required bool solved,
+    required List<String> userMoves,
+  }) {
+    ref
+        .read(puzzleServiceProvider)
+        .recordPuzzleAttempt(
+          puzzleId: puzzleId,
+          solved: solved,
+          userMoves: userMoves,
+        )
+        .catchError((_) {});
+  }
+
+  void _nextPuzzle() {
+    if (_puzzleIndex + 1 >= widget.puzzleIds.length) {
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() {
+      _puzzleIndex++;
+      _loadedPuzzleId = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final puzzleAsync = ref.watch(puzzleByIdProvider(_currentPuzzleId));
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Puzzle ${_puzzleIndex + 1} of ${widget.puzzleIds.length}'),
+        centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: _nextPuzzle,
+            child: const Text('Skip', style: TextStyle(color: Colors.white)),
           ),
+        ],
+      ),
+      body: puzzleAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
+        data: (puzzle) {
+          if (puzzle == null) {
+            return const Center(child: Text('Puzzle not found'));
+          }
+          if (_loadedPuzzleId != puzzle.id) {
+            _loadPuzzle(puzzle);
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  children: [
+                    Chip(label: Text('Rating: ${puzzle.rating}')),
+                    for (final theme in puzzle.themes) Chip(label: Text(theme)),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _buildFeedbackBanner(),
+                const SizedBox(height: 12),
+                GameBoard(
+                  gameState: _chess.rawChess,
+                  onMove: _handleMove,
+                  isPlayerTurn: _isPlayerTurn,
+                  showMaterial: false,
+                ),
+                if (_feedback == _PuzzleFeedback.solved)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: FilledButton(
+                      onPressed: _nextPuzzle,
+                      child: Text(
+                        _puzzleIndex + 1 >= widget.puzzleIds.length
+                            ? 'Finish'
+                            : 'Next Puzzle',
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildFeedbackBanner() {
+    switch (_feedback) {
+      case _PuzzleFeedback.correct:
+        return const _FeedbackBanner(
+          text: 'Correct!',
+          color: Colors.green,
+          icon: Icons.check_circle,
+        );
+      case _PuzzleFeedback.wrong:
+        return const _FeedbackBanner(
+          text: 'Not quite — try again',
+          color: Colors.red,
+          icon: Icons.cancel,
+        );
+      case _PuzzleFeedback.solved:
+        return const _FeedbackBanner(
+          text: 'Puzzle solved!',
+          color: Colors.blue,
+          icon: Icons.emoji_events,
+        );
+      case _PuzzleFeedback.none:
+        return const Text(
+          'Find the best move for the side to play',
+          style: TextStyle(color: Colors.grey),
+        );
+    }
+  }
+}
+
+class _FeedbackBanner extends StatelessWidget {
+  const _FeedbackBanner({
+    required this.text,
+    required this.color,
+    required this.icon,
+  });
+  final String text;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(text,
+                style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+          ],
         ),
       );
 }
 
-// Placeholder for puzzle list screen
-class PuzzleListScreen extends StatelessWidget {
+/// Lists puzzles within a rating range; tapping one starts solving from that
+/// puzzle onward through the rest of the filtered list.
+class PuzzleListScreen extends ConsumerWidget {
   const PuzzleListScreen({
     required this.minRating,
     required this.maxRating,
@@ -457,27 +660,56 @@ class PuzzleListScreen extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-          centerTitle: true,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.construction, size: 48, color: Colors.grey),
-              const SizedBox(height: 16),
-              const Text('Puzzle list coming soon!'),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Go Back'),
-              ),
-            ],
-          ),
-        ),
-      );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final puzzlesAsync = ref.watch(
+      puzzlesByRatingProvider((minRating: minRating, maxRating: maxRating)),
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        centerTitle: true,
+      ),
+      body: puzzlesAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
+        data: (puzzles) {
+          if (puzzles.isEmpty) {
+            return const Center(child: Text('No puzzles found in this range'));
+          }
+
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: puzzles.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final puzzle = puzzles[index];
+              return Card(
+                child: ListTile(
+                  leading: CircleAvatar(child: Text('${puzzle.rating}')),
+                  title: Text(puzzle.themes.isNotEmpty
+                      ? puzzle.themes.join(', ')
+                      : 'Puzzle'),
+                  subtitle: Text('${puzzle.moves.length} moves to solve'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PuzzleSolvingScreen(
+                          puzzleIds:
+                              puzzles.skip(index).map((p) => p.id).toList(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
 // Skeleton loader placeholder
