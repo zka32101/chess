@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/online_game_provider.dart';
+import 'online_game_screen.dart';
 
 /// Screen for matchmaking queue management
 class MatchmakingScreen extends ConsumerStatefulWidget {
@@ -117,9 +118,12 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
         if (status['status'] == 'matched') {
           // Game created, navigate to game screen
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.of(context).pushReplacementNamed(
-              '/online-game',
-              arguments: status['matchedGameId'],
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => OnlineGameScreen(
+                  gameId: status['matchedGameId'] as String,
+                ),
+              ),
             );
           });
           return const SizedBox.shrink();

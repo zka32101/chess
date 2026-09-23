@@ -7,7 +7,7 @@ import '../../utils/animations.dart';
 import '../puzzle/puzzle_screen.dart';
 import '../settings/settings_screen.dart';
 import '../profile/profile_screen.dart';
-import '../game/matchmaking_screen.dart';
+import '../online/matchmaking_screen.dart';
 import '../game/cpu_game_selection_screen.dart';
 import '../premium/premium_screen.dart';
 import '../notifications_screen.dart';

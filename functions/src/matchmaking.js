@@ -102,7 +102,7 @@ function matchGroup(players, matched) {
     if (bestOpponent && bestScore > 0) {
       // Assign colors
       const player1Color = getPlayerColor(player1);
-      const player2Color = getPlayerColor(player2);
+      const player2Color = getPlayerColor(bestOpponent);
       
       matches.push({
         player1: { ...player1, color: player1Color },

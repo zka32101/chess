@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const { matchplayers } = require("./matchmaking");
+const { matchPlayers } = require("./matchmaking");
 const { validateMove, updateGameState } = require("./game-validation");
 const { handleGameTimeout, cleanupExpiredQueues } = require("./timeout-handler");
 const { calculateRatingChanges } = require("./rating-system");
@@ -40,7 +40,7 @@ exports.matchmakingWorker = functions
       }));
 
       // Attempt to match players
-      const matches = matchplayers(queueEntries);
+      const matches = matchPlayers(queueEntries);
       console.log(`Found ${matches.length} matches`);
 
       // Create games for each match
