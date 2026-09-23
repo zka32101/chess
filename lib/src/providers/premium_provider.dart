@@ -7,15 +7,14 @@ import '../services/feature_gating_service.dart';
 
 /// User subscription state
 class UserSubscription {
+  UserSubscription({
+    required this.tier,
+    required this.isActive,
+    this.expiryDate,
+  });
   final String tier; // 'free', 'pro', 'premium'
   final DateTime? expiryDate;
   final bool isActive;
-
-  UserSubscription({
-    required this.tier,
-    this.expiryDate,
-    required this.isActive,
-  });
 
   bool get isPro => tier == 'pro' && isActive;
   bool get isPremium => tier == 'premium' && isActive;
@@ -23,9 +22,7 @@ class UserSubscription {
 }
 
 // Get paywall service
-final paywallServiceProvider = Provider((ref) {
-  return PaywallService.instance;
-});
+final paywallServiceProvider = Provider((ref) => PaywallService.instance);
 
 // Get user's current subscription
 final userSubscriptionProvider = FutureProvider<UserSubscription>((ref) async {
@@ -44,7 +41,7 @@ final userSubscriptionProvider = FutureProvider<UserSubscription>((ref) async {
       return UserSubscription(tier: 'free', isActive: false);
     }
 
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data()!;
     final tier = data['subscriptionTier'] as String? ?? 'free';
     final expiryTimestamp = data['subscriptionExpiry'] as Timestamp?;
     final expiryDate = expiryTimestamp?.toDate();
@@ -111,9 +108,8 @@ final triggerPaywallProvider = StateProvider<String?>((ref) {
 });
 
 // Feature gating service provider
-final featureGatingServiceProvider = Provider((ref) {
-  return FeatureGatingService.instance;
-});
+final featureGatingServiceProvider =
+    Provider((ref) => FeatureGatingService.instance);
 
 // Check if user can perform action (with daily limits)
 final canPerformActionProvider =

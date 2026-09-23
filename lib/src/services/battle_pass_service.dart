@@ -3,14 +3,13 @@ import 'package:logger/logger.dart';
 
 /// Manages battle pass progression and rewards
 class BattlePassService {
+  BattlePassService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _battlePassCollection = 'battle_passes';
   static const String _playerBattlePassCollection = 'player_battle_passes';
-
-  BattlePassService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Create a new battle pass for a season
   Future<BattlePass> createBattlePass({
@@ -21,7 +20,8 @@ class BattlePassService {
     required int experiencePerLevel,
   }) async {
     try {
-      final battlePassId = _firestore.collection(_battlePassCollection).doc().id;
+      final battlePassId =
+          _firestore.collection(_battlePassCollection).doc().id;
       final now = DateTime.now();
 
       final battlePass = BattlePass(
@@ -82,7 +82,8 @@ class BattlePassService {
 
       return BattlePass.fromJson(snapshot.docs.first.data());
     } catch (e, st) {
-      _logger.e('Failed to get battle pass by season', error: e, stackTrace: st);
+      _logger.e('Failed to get battle pass by season',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -106,7 +107,8 @@ class BattlePassService {
 
       return PlayerBattlePassProgress.fromJson(doc.data()!);
     } catch (e, st) {
-      _logger.e('Failed to get player battle pass progress', error: e, stackTrace: st);
+      _logger.e('Failed to get player battle pass progress',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -156,7 +158,8 @@ class BattlePassService {
         }
       });
 
-      _logger.i('Reward claimed by $playerId for level $level (premium: $isPremium)');
+      _logger.i(
+          'Reward claimed by $playerId for level $level (premium: $isPremium)');
     } catch (e, st) {
       _logger.e('Failed to claim battle pass reward', error: e, stackTrace: st);
       rethrow;
@@ -262,7 +265,7 @@ class BattlePassService {
 
           // Level up if experience exceeds requirement
           while (newExp >= battlePass.experiencePerLevel &&
-                 newLevel < battlePass.maxLevel) {
+              newLevel < battlePass.maxLevel) {
             newExp -= battlePass.experiencePerLevel;
             newLevel++;
           }
@@ -277,7 +280,8 @@ class BattlePassService {
 
       _logger.i('Added $experienceAmount exp to battle pass for $playerId');
     } catch (e, st) {
-      _logger.e('Failed to add battle pass experience', error: e, stackTrace: st);
+      _logger.e('Failed to add battle pass experience',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -294,7 +298,9 @@ class BattlePassService {
         return [];
       }
 
-      return isPremium ? progress.claimedPremiumRewards : progress.claimedFreeRewards;
+      return isPremium
+          ? progress.claimedPremiumRewards
+          : progress.claimedFreeRewards;
     } catch (e, st) {
       _logger.e('Failed to get claimed rewards', error: e, stackTrace: st);
       rethrow;
@@ -304,15 +310,6 @@ class BattlePassService {
 
 /// Battle pass configuration
 class BattlePass {
-  final String battlePassId;
-  final String seasonId;
-  final String name;
-  final int maxLevel;
-  final List<BattlePassTier> tiers;
-  final int experiencePerLevel;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
   BattlePass({
     required this.battlePassId,
     required this.seasonId,
@@ -324,45 +321,42 @@ class BattlePass {
     required this.updatedAt,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'battlePassId': battlePassId,
-      'seasonId': seasonId,
-      'name': name,
-      'maxLevel': maxLevel,
-      'tiers': tiers.map((t) => t.toJson()).toList(),
-      'experiencePerLevel': experiencePerLevel,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-    };
-  }
+  factory BattlePass.fromJson(Map<String, dynamic> json) => BattlePass(
+        battlePassId: json['battlePassId'] as String,
+        seasonId: json['seasonId'] as String,
+        name: json['name'] as String,
+        maxLevel: json['maxLevel'] as int,
+        tiers: (json['tiers'] as List<dynamic>?)
+                ?.map((t) => BattlePassTier.fromJson(t as Map<String, dynamic>))
+                .toList() ??
+            [],
+        experiencePerLevel: json['experiencePerLevel'] as int,
+        createdAt: (json['createdAt'] as Timestamp).toDate(),
+        updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+      );
+  final String battlePassId;
+  final String seasonId;
+  final String name;
+  final int maxLevel;
+  final List<BattlePassTier> tiers;
+  final int experiencePerLevel;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  factory BattlePass.fromJson(Map<String, dynamic> json) {
-    return BattlePass(
-      battlePassId: json['battlePassId'] as String,
-      seasonId: json['seasonId'] as String,
-      name: json['name'] as String,
-      maxLevel: json['maxLevel'] as int,
-      tiers: (json['tiers'] as List<dynamic>?)
-          ?.map((t) => BattlePassTier.fromJson(t as Map<String, dynamic>))
-          .toList() ?? [],
-      experiencePerLevel: json['experiencePerLevel'] as int,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-      updatedAt: (json['updatedAt'] as Timestamp).toDate(),
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'battlePassId': battlePassId,
+        'seasonId': seasonId,
+        'name': name,
+        'maxLevel': maxLevel,
+        'tiers': tiers.map((t) => t.toJson()).toList(),
+        'experiencePerLevel': experiencePerLevel,
+        'createdAt': Timestamp.fromDate(createdAt),
+        'updatedAt': Timestamp.fromDate(updatedAt),
+      };
 }
 
 /// Individual battle pass tier
 class BattlePassTier {
-  final int level;
-  final String name;
-  final String icon;
-  final int experienceRequired;
-  final List<BattlePassReward> freeRewards;
-  final List<BattlePassReward> premiumRewards;
-  final bool isLocked;
-
   BattlePassTier({
     required this.level,
     required this.name,
@@ -373,43 +367,45 @@ class BattlePassTier {
     this.isLocked = false,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'level': level,
-      'name': name,
-      'icon': icon,
-      'experienceRequired': experienceRequired,
-      'freeRewards': freeRewards.map((r) => r.toJson()).toList(),
-      'premiumRewards': premiumRewards.map((r) => r.toJson()).toList(),
-      'isLocked': isLocked,
-    };
-  }
+  factory BattlePassTier.fromJson(Map<String, dynamic> json) => BattlePassTier(
+        level: json['level'] as int,
+        name: json['name'] as String,
+        icon: json['icon'] as String,
+        experienceRequired: json['experienceRequired'] as int,
+        freeRewards: (json['freeRewards'] as List<dynamic>?)
+                ?.map(
+                    (r) => BattlePassReward.fromJson(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        premiumRewards: (json['premiumRewards'] as List<dynamic>?)
+                ?.map(
+                    (r) => BattlePassReward.fromJson(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        isLocked: json['isLocked'] as bool? ?? false,
+      );
+  final int level;
+  final String name;
+  final String icon;
+  final int experienceRequired;
+  final List<BattlePassReward> freeRewards;
+  final List<BattlePassReward> premiumRewards;
+  final bool isLocked;
 
-  factory BattlePassTier.fromJson(Map<String, dynamic> json) {
-    return BattlePassTier(
-      level: json['level'] as int,
-      name: json['name'] as String,
-      icon: json['icon'] as String,
-      experienceRequired: json['experienceRequired'] as int,
-      freeRewards: (json['freeRewards'] as List<dynamic>?)
-          ?.map((r) => BattlePassReward.fromJson(r as Map<String, dynamic>))
-          .toList() ?? [],
-      premiumRewards: (json['premiumRewards'] as List<dynamic>?)
-          ?.map((r) => BattlePassReward.fromJson(r as Map<String, dynamic>))
-          .toList() ?? [],
-      isLocked: json['isLocked'] as bool? ?? false,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'level': level,
+        'name': name,
+        'icon': icon,
+        'experienceRequired': experienceRequired,
+        'freeRewards': freeRewards.map((r) => r.toJson()).toList(),
+        'premiumRewards': premiumRewards.map((r) => r.toJson()).toList(),
+        'isLocked': isLocked,
+      };
 }
 
 /// Battle pass reward item
 class BattlePassReward {
-  final String rewardId;
-  final String type;        // cosmetic, currency, item, battle_pass
-  final String name;
-  final String description;
-  final String icon;
-  final Map<String, dynamic> value;  // amount, rarity, etc.
+  // amount, rarity, etc.
 
   BattlePassReward({
     required this.rewardId,
@@ -420,41 +416,34 @@ class BattlePassReward {
     required this.value,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'rewardId': rewardId,
-      'type': type,
-      'name': name,
-      'description': description,
-      'icon': icon,
-      'value': value,
-    };
-  }
+  factory BattlePassReward.fromJson(Map<String, dynamic> json) =>
+      BattlePassReward(
+        rewardId: json['rewardId'] as String,
+        type: json['type'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        icon: json['icon'] as String,
+        value: json['value'] as Map<String, dynamic>? ?? {},
+      );
+  final String rewardId;
+  final String type; // cosmetic, currency, item, battle_pass
+  final String name;
+  final String description;
+  final String icon;
+  final Map<String, dynamic> value;
 
-  factory BattlePassReward.fromJson(Map<String, dynamic> json) {
-    return BattlePassReward(
-      rewardId: json['rewardId'] as String,
-      type: json['type'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      icon: json['icon'] as String,
-      value: json['value'] as Map<String, dynamic>? ?? {},
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'rewardId': rewardId,
+        'type': type,
+        'name': name,
+        'description': description,
+        'icon': icon,
+        'value': value,
+      };
 }
 
 /// Player's battle pass progress
 class PlayerBattlePassProgress {
-  final String playerId;
-  final String seasonId;
-  final int currentLevel;
-  final int currentExperience;
-  final bool hasPremiumPass;
-  final List<int> claimedFreeRewards;
-  final List<int> claimedPremiumRewards;
-  final DateTime? purchasedAt;
-  final DateTime updatedAt;
-
   PlayerBattlePassProgress({
     required this.playerId,
     required this.seasonId,
@@ -467,21 +456,31 @@ class PlayerBattlePassProgress {
     this.purchasedAt,
   });
 
-  factory PlayerBattlePassProgress.fromJson(Map<String, dynamic> json) {
-    return PlayerBattlePassProgress(
-      playerId: json['playerId'] as String,
-      seasonId: json['seasonId'] as String,
-      currentLevel: json['currentLevel'] as int? ?? 1,
-      currentExperience: json['currentExperience'] as int? ?? 0,
-      hasPremiumPass: json['hasPremiumPass'] as bool? ?? false,
-      claimedFreeRewards: List<int>.from(json['claimedFreeRewards'] as List? ?? []),
-      claimedPremiumRewards: List<int>.from(json['claimedPremiumRewards'] as List? ?? []),
-      purchasedAt: json['purchasedAt'] != null
-          ? (json['purchasedAt'] as Timestamp).toDate()
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? (json['updatedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
-  }
+  factory PlayerBattlePassProgress.fromJson(Map<String, dynamic> json) =>
+      PlayerBattlePassProgress(
+        playerId: json['playerId'] as String,
+        seasonId: json['seasonId'] as String,
+        currentLevel: json['currentLevel'] as int? ?? 1,
+        currentExperience: json['currentExperience'] as int? ?? 0,
+        hasPremiumPass: json['hasPremiumPass'] as bool? ?? false,
+        claimedFreeRewards:
+            List<int>.from(json['claimedFreeRewards'] as List? ?? []),
+        claimedPremiumRewards:
+            List<int>.from(json['claimedPremiumRewards'] as List? ?? []),
+        purchasedAt: json['purchasedAt'] != null
+            ? (json['purchasedAt'] as Timestamp).toDate()
+            : null,
+        updatedAt: json['updatedAt'] != null
+            ? (json['updatedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+      );
+  final String playerId;
+  final String seasonId;
+  final int currentLevel;
+  final int currentExperience;
+  final bool hasPremiumPass;
+  final List<int> claimedFreeRewards;
+  final List<int> claimedPremiumRewards;
+  final DateTime? purchasedAt;
+  final DateTime updatedAt;
 }

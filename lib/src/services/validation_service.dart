@@ -1,8 +1,7 @@
 /// Exception thrown when validation fails.
 class ValidationException implements Exception {
-  final String message;
-
   ValidationException(this.message);
+  final String message;
 
   @override
   String toString() => message;
@@ -26,8 +25,7 @@ class ValidationService {
     }
 
     // RFC 5322 simplified email regex
-    const pattern =
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+    const pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
     if (!RegExp(pattern).hasMatch(trimmed)) {
       throw ValidationException('Please enter a valid email address');
     }
@@ -74,7 +72,8 @@ class ValidationService {
     }
 
     if (!RegExp(r'[0-9]').hasMatch(password)) {
-      throw ValidationException('Password must contain at least one number (0-9)');
+      throw ValidationException(
+          'Password must contain at least one number (0-9)');
     }
 
     if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
@@ -111,7 +110,8 @@ class ValidationService {
     }
 
     if (!RegExp(r'[a-zA-Z]').hasMatch(trimmed)) {
-      throw ValidationException('Display name must contain at least one letter');
+      throw ValidationException(
+          'Display name must contain at least one letter');
     }
 
     // Allow alphanumeric, spaces, hyphens, and apostrophes
@@ -132,11 +132,10 @@ class ValidationService {
     required String email,
     required String password,
     required String displayName,
-  }) {
-    return {
-      'email': validateEmail(email),
-      'password': validatePassword(password),
-      'displayName': validateDisplayName(displayName),
-    };
-  }
+  }) =>
+      {
+        'email': validateEmail(email),
+        'password': validatePassword(password),
+        'displayName': validateDisplayName(displayName),
+      };
 }

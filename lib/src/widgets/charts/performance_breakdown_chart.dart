@@ -4,16 +4,15 @@ import 'chart_utils.dart';
 
 /// Bar chart displaying performance breakdown by category
 class PerformanceBreakdownChart extends StatelessWidget {
+  const PerformanceBreakdownChart({
+    required this.performanceData,
+    required this.title,
+    Key? key,
+    this.horizontal = true,
+  }) : super(key: key);
   final Map<String, int> performanceData;
   final String title;
   final bool horizontal;
-
-  const PerformanceBreakdownChart({
-    Key? key,
-    required this.performanceData,
-    required this.title,
-    this.horizontal = true,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,7 @@ class PerformanceBreakdownChart extends StatelessWidget {
     }
 
     final entries = performanceData.entries.toList();
-    final maxValue = 100.0; // Win percentage max is 100%
+    const maxValue = 100.0; // Win percentage max is 100%
 
     // Create bar chart data
     final barGroups = <BarChartGroupData>[];
@@ -70,15 +69,11 @@ class PerformanceBreakdownChart extends StatelessWidget {
                   show: true,
                   drawVerticalLine: false,
                   horizontalInterval: 20,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withOpacity(0.3),
-                      strokeWidth: 1,
-                    );
-                  },
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                    strokeWidth: 1,
+                  ),
                 ),
                 titlesData: FlTitlesData(
                   show: true,
@@ -110,12 +105,10 @@ class PerformanceBreakdownChart extends StatelessWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       reservedSize: 40,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          '${value.toInt()}%',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        );
-                      },
+                      getTitlesWidget: (value, meta) => Text(
+                        '${value.toInt()}%',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ),
                   ),
                   topTitles: const AxisTitles(
@@ -145,15 +138,14 @@ class PerformanceBreakdownChart extends StatelessWidget {
                     tooltipBorder: BorderSide(
                       color: Theme.of(context).colorScheme.outline,
                     ),
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      return BarTooltipItem(
-                        '${rod.toY.toInt()}%',
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) =>
+                        BarTooltipItem(
+                      '${rod.toY.toInt()}%',
+                      TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),

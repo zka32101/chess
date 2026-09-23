@@ -13,100 +13,95 @@ class AnimationTransitions {
   static Route<T> fadeTransition<T>(
     Widget page, {
     Duration duration = const Duration(milliseconds: 300),
-  }) {
-    return PageRouteBuilder<T>(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(opacity: animation, child: child);
-      },
-      transitionDuration: duration,
-    );
-  }
+  }) =>
+      PageRouteBuilder<T>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+        transitionDuration: duration,
+      );
 
   /// Slide transition for pages (left to right)
   static Route<T> slideTransition<T>(
     Widget page, {
     Duration duration = const Duration(milliseconds: 400),
     Axis direction = Axis.horizontal,
-  }) {
-    return PageRouteBuilder<T>(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        Offset begin;
-        if (direction == Axis.horizontal) {
-          begin = const Offset(1.0, 0.0);
-        } else {
-          begin = const Offset(0.0, 1.0);
-        }
+  }) =>
+      PageRouteBuilder<T>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          Offset begin;
+          if (direction == Axis.horizontal) {
+            begin = const Offset(1, 0);
+          } else {
+            begin = const Offset(0, 1);
+          }
 
-        const end = Offset.zero;
-        const curve = Curves.easeInOutCubic;
+          const end = Offset.zero;
+          const curve = Curves.easeInOutCubic;
 
-        final tween = Tween(begin: begin, end: end)
-            .chain(CurveTween(curve: curve));
+          final tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-      transitionDuration: duration,
-    );
-  }
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: duration,
+      );
 
   /// Scale transition for pages
   static Route<T> scaleTransition<T>(
     Widget page, {
     Duration duration = const Duration(milliseconds: 400),
-  }) {
-    return PageRouteBuilder<T>(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const curve = Curves.easeInOutCubic;
-        final tween = Tween<double>(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: curve));
+  }) =>
+      PageRouteBuilder<T>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const curve = Curves.easeInOutCubic;
+          final tween =
+              Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: curve));
 
-        return ScaleTransition(
-          scale: animation.drive(tween),
-          child: child,
-        );
-      },
-      transitionDuration: duration,
-    );
-  }
+          return ScaleTransition(
+            scale: animation.drive(tween),
+            child: child,
+          );
+        },
+        transitionDuration: duration,
+      );
 
   /// Combined fade and slide transition
   static Route<T> fadeSlideTransition<T>(
     Widget page, {
     Duration duration = const Duration(milliseconds: 400),
-  }) {
-    return PageRouteBuilder<T>(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const curve = Curves.easeInOutCubic;
+  }) =>
+      PageRouteBuilder<T>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const curve = Curves.easeInOutCubic;
 
-        // Slide animation
-        final slideBegin = Offset(0.3, 0.0);
-        final slideTween = Tween(begin: slideBegin, end: Offset.zero)
-            .chain(CurveTween(curve: curve));
-        final slideAnimation = animation.drive(slideTween);
+          // Slide animation
+          const slideBegin = Offset(0.3, 0);
+          final slideTween = Tween(begin: slideBegin, end: Offset.zero)
+              .chain(CurveTween(curve: curve));
+          final slideAnimation = animation.drive(slideTween);
 
-        // Fade animation
-        final fadeTween = Tween<double>(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: curve));
-        final fadeAnimation = animation.drive(fadeTween);
+          // Fade animation
+          final fadeTween =
+              Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: curve));
+          final fadeAnimation = animation.drive(fadeTween);
 
-        return FadeTransition(
-          opacity: fadeAnimation,
-          child: SlideTransition(
-            position: slideAnimation,
-            child: child,
-          ),
-        );
-      },
-      transitionDuration: duration,
-    );
-  }
+          return FadeTransition(
+            opacity: fadeAnimation,
+            child: SlideTransition(
+              position: slideAnimation,
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: duration,
+      );
 
   // ============================================================
   // Micro-interactions
@@ -117,26 +112,24 @@ class AnimationTransitions {
     required Widget child,
     required VoidCallback onPressed,
     Duration pressDuration = const Duration(milliseconds: 150),
-  }) {
-    return _AnimatedPressButton(
-      onPressed: onPressed,
-      duration: pressDuration,
-      child: child,
-    );
-  }
+  }) =>
+      _AnimatedPressButton(
+        onPressed: onPressed,
+        duration: pressDuration,
+        child: child,
+      );
 
   /// Animated icon button with rotation
   static Widget createRotatingIconButton({
     required IconData icon,
     required VoidCallback onPressed,
     Duration rotateDuration = const Duration(milliseconds: 600),
-  }) {
-    return _RotatingIconButton(
-      icon: icon,
-      onPressed: onPressed,
-      duration: rotateDuration,
-    );
-  }
+  }) =>
+      _RotatingIconButton(
+        icon: icon,
+        onPressed: onPressed,
+        duration: rotateDuration,
+      );
 
   /// Animated scale on tap
   static Widget createTapScaleAnimation({
@@ -145,39 +138,36 @@ class AnimationTransitions {
     Duration duration = const Duration(milliseconds: 200),
     double minScale = 0.9,
     double maxScale = 1.0,
-  }) {
-    return _TapScaleAnimation(
-      onTap: onTap,
-      duration: duration,
-      minScale: minScale,
-      maxScale: maxScale,
-      child: child,
-    );
-  }
+  }) =>
+      _TapScaleAnimation(
+        onTap: onTap,
+        duration: duration,
+        minScale: minScale,
+        maxScale: maxScale,
+        child: child,
+      );
 
   /// Animated slide-in from bottom
   static Widget createSlideInAnimation({
     required Widget child,
     Duration duration = const Duration(milliseconds: 400),
     Curve curve = Curves.easeOut,
-  }) {
-    return _SlideInAnimation(
-      duration: duration,
-      curve: curve,
-      child: child,
-    );
-  }
+  }) =>
+      _SlideInAnimation(
+        duration: duration,
+        curve: curve,
+        child: child,
+      );
 
   /// Animated bounce effect
   static Widget createBounceAnimation({
     required Widget child,
     Duration duration = const Duration(milliseconds: 500),
-  }) {
-    return _BounceAnimation(
-      duration: duration,
-      child: child,
-    );
-  }
+  }) =>
+      _BounceAnimation(
+        duration: duration,
+        child: child,
+      );
 }
 
 // ============================================================
@@ -185,15 +175,14 @@ class AnimationTransitions {
 // ============================================================
 
 class _AnimatedPressButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onPressed;
-  final Duration duration;
-
   const _AnimatedPressButton({
     required this.child,
     required this.onPressed,
     required this.duration,
   });
+  final Widget child;
+  final VoidCallback onPressed;
+  final Duration duration;
 
   @override
   State<_AnimatedPressButton> createState() => _AnimatedPressButtonState();
@@ -212,24 +201,22 @@ class _AnimatedPressButtonState extends State<_AnimatedPressButton>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.95).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _scaleAnimation,
-      child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
-        onTapUp: (_) => _controller.reverse(),
-        onTapCancel: () => _controller.reverse(),
-        onTap: widget.onPressed,
-        child: widget.child,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => ScaleTransition(
+        scale: _scaleAnimation,
+        child: GestureDetector(
+          onTapDown: (_) => _controller.forward(),
+          onTapUp: (_) => _controller.reverse(),
+          onTapCancel: () => _controller.reverse(),
+          onTap: widget.onPressed,
+          child: widget.child,
+        ),
+      );
 
   @override
   void dispose() {
@@ -239,15 +226,14 @@ class _AnimatedPressButtonState extends State<_AnimatedPressButton>
 }
 
 class _RotatingIconButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final Duration duration;
-
   const _RotatingIconButton({
     required this.icon,
     required this.onPressed,
     required this.duration,
   });
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Duration duration;
 
   @override
   State<_RotatingIconButton> createState() => _RotatingIconButtonState();
@@ -267,20 +253,18 @@ class _RotatingIconButtonState extends State<_RotatingIconButton>
   }
 
   void _handlePress() {
-    _controller.forward(from: 0.0);
+    _controller.forward(from: 0);
     widget.onPressed();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return RotationTransition(
-      turns: _controller,
-      child: IconButton(
-        icon: Icon(widget.icon),
-        onPressed: _handlePress,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => RotationTransition(
+        turns: _controller,
+        child: IconButton(
+          icon: Icon(widget.icon),
+          onPressed: _handlePress,
+        ),
+      );
 
   @override
   void dispose() {
@@ -290,12 +274,6 @@ class _RotatingIconButtonState extends State<_RotatingIconButton>
 }
 
 class _TapScaleAnimation extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  final Duration duration;
-  final double minScale;
-  final double maxScale;
-
   const _TapScaleAnimation({
     required this.child,
     required this.onTap,
@@ -303,6 +281,11 @@ class _TapScaleAnimation extends StatefulWidget {
     required this.minScale,
     required this.maxScale,
   });
+  final Widget child;
+  final VoidCallback onTap;
+  final Duration duration;
+  final double minScale;
+  final double maxScale;
 
   @override
   State<_TapScaleAnimation> createState() => _TapScaleAnimationState();
@@ -335,15 +318,13 @@ class _TapScaleAnimationState extends State<_TapScaleAnimation>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: widget.child,
-      ),
-    );
-  }
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: _handleTap,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: widget.child,
+        ),
+      );
 
   @override
   void dispose() {
@@ -353,15 +334,14 @@ class _TapScaleAnimationState extends State<_TapScaleAnimation>
 }
 
 class _SlideInAnimation extends StatefulWidget {
-  final Widget child;
-  final Duration duration;
-  final Curve curve;
-
   const _SlideInAnimation({
     required this.child,
     required this.duration,
     required this.curve,
   });
+  final Widget child;
+  final Duration duration;
+  final Curve curve;
 
   @override
   State<_SlideInAnimation> createState() => _SlideInAnimationState();
@@ -381,7 +361,7 @@ class _SlideInAnimationState extends State<_SlideInAnimation>
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 1.0),
+      begin: const Offset(0, 1),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(parent: _controller, curve: widget.curve),
@@ -391,12 +371,10 @@ class _SlideInAnimationState extends State<_SlideInAnimation>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _slideAnimation,
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) => SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      );
 
   @override
   void dispose() {
@@ -406,13 +384,12 @@ class _SlideInAnimationState extends State<_SlideInAnimation>
 }
 
 class _BounceAnimation extends StatefulWidget {
-  final Widget child;
-  final Duration duration;
-
   const _BounceAnimation({
     required this.child,
     required this.duration,
   });
+  final Widget child;
+  final Duration duration;
 
   @override
   State<_BounceAnimation> createState() => _BounceAnimationState();
@@ -431,7 +408,7 @@ class _BounceAnimationState extends State<_BounceAnimation>
       vsync: this,
     );
 
-    _bounceAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _bounceAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
     );
 
@@ -439,12 +416,10 @@ class _BounceAnimationState extends State<_BounceAnimation>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _bounceAnimation,
-      child: widget.child,
-    );
-  }
+  Widget build(BuildContext context) => ScaleTransition(
+        scale: _bounceAnimation,
+        child: widget.child,
+      );
 
   @override
   void dispose() {

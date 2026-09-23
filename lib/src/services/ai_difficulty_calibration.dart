@@ -1,4 +1,3 @@
-import 'dart:math' show Random;
 import 'package:chess/chess.dart' as chess_lib;
 
 /// Enhanced AI difficulty levels with precise calibration
@@ -289,7 +288,7 @@ class MoveQualityScorer {
 
   /// Calculate accuracy percentage for a set of moves
   static double calculateAccuracy(List<int> moveQualities) {
-    if (moveQualities.isEmpty) return 0.0;
+    if (moveQualities.isEmpty) return 0;
 
     // Count good (75+) and excellent (85+) moves
     final goodMoves = moveQualities.where((q) => q >= 75).length;

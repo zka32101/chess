@@ -4,14 +4,13 @@ import '../models/phase_k_models.dart';
 
 /// Tournament management service for organized competitive play
 class TournamentService {
+  factory TournamentService() => _instance;
+  TournamentService._internal();
   static final TournamentService _instance = TournamentService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, Tournament> _tournamentCache = {};
   final Map<String, List<TournamentMatch>> _matchCache = {};
   final Map<String, TournamentStandings> _standingsCache = {};
-
-  factory TournamentService() => _instance;
-  TournamentService._internal();
 
   static TournamentService get instance => _instance;
 
@@ -140,12 +139,11 @@ class TournamentService {
       participants.sort((a, b) => b.seedRating.compareTo(a.seedRating));
 
       final matches = <TournamentMatch>[];
-      int round = 1;
+      const int round = 1;
 
       // Simple pairing for round 1
       for (int i = 0; i < participants.length - 1; i += 2) {
-        final matchId =
-            DateTime.now().millisecondsSinceEpoch.toString() + '_$i';
+        final matchId = '${DateTime.now().millisecondsSinceEpoch}_$i';
 
         matches.add(TournamentMatch(
           matchId: matchId,
@@ -154,7 +152,7 @@ class TournamentService {
           player1Id: participants[i].userId,
           player2Id: participants[i + 1].userId,
           status: 'scheduled',
-          scheduledAt: DateTime.now().add(Duration(hours: round)),
+          scheduledAt: DateTime.now().add(const Duration(hours: round)),
           startedAt: null,
           completedAt: null,
           winnerId: null,
@@ -297,7 +295,7 @@ class TournamentService {
           wins: doc['wins'] ?? 0,
           losses: doc['losses'] ?? 0,
           draws: doc['draws'] ?? 0,
-          buchholz: 0.0,
+          buchholz: 0,
           performance: 0,
         );
       }).toList();
@@ -423,66 +421,61 @@ class TournamentService {
 
 // Extension methods for Tournament.fromJson
 extension TournamentFromJson on Tournament {
-  static Tournament fromJson(Map<String, dynamic> json) {
-    return Tournament(
-      tournamentId: json['tournamentId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      status: json['status'] as String,
-      startDate: (json['startDate'] as Timestamp).toDate(),
-      endDate: (json['endDate'] as Timestamp).toDate(),
-      format: json['format'] as String,
-      maxParticipants: json['maxParticipants'] as int,
-      currentParticipants: json['currentParticipants'] as int,
-      timeControl: json['timeControl'] as String,
-      entryFee: json['entryFee'] as int,
-      prizePool: json['prizePool'] as int,
-      createdBy: json['createdBy'] as String,
-      participantIds: List<String>.from(json['participantIds'] as List),
-    );
-  }
+  static Tournament fromJson(Map<String, dynamic> json) => Tournament(
+        tournamentId: json['tournamentId'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        status: json['status'] as String,
+        startDate: (json['startDate'] as Timestamp).toDate(),
+        endDate: (json['endDate'] as Timestamp).toDate(),
+        format: json['format'] as String,
+        maxParticipants: json['maxParticipants'] as int,
+        currentParticipants: json['currentParticipants'] as int,
+        timeControl: json['timeControl'] as String,
+        entryFee: json['entryFee'] as int,
+        prizePool: json['prizePool'] as int,
+        createdBy: json['createdBy'] as String,
+        participantIds: List<String>.from(json['participantIds'] as List),
+      );
 }
 
 // Extension methods for TournamentParticipant.fromJson
 extension TournamentParticipantFromJson on TournamentParticipant {
-  static TournamentParticipant fromJson(Map<String, dynamic> json) {
-    return TournamentParticipant(
-      participantId: json['participantId'] as String,
-      tournamentId: json['tournamentId'] as String,
-      userId: json['userId'] as String,
-      username: json['username'] as String,
-      seedRating: json['seedRating'] as int,
-      joinedAt: (json['joinedAt'] as Timestamp).toDate(),
-      status: json['status'] as String,
-      points: json['points'] as int? ?? 0,
-      wins: json['wins'] as int? ?? 0,
-      losses: json['losses'] as int? ?? 0,
-      draws: json['draws'] as int? ?? 0,
-      opponentIds: List<String>.from(json['opponentIds'] as List? ?? []),
-    );
-  }
+  static TournamentParticipant fromJson(Map<String, dynamic> json) =>
+      TournamentParticipant(
+        participantId: json['participantId'] as String,
+        tournamentId: json['tournamentId'] as String,
+        userId: json['userId'] as String,
+        username: json['username'] as String,
+        seedRating: json['seedRating'] as int,
+        joinedAt: (json['joinedAt'] as Timestamp).toDate(),
+        status: json['status'] as String,
+        points: json['points'] as int? ?? 0,
+        wins: json['wins'] as int? ?? 0,
+        losses: json['losses'] as int? ?? 0,
+        draws: json['draws'] as int? ?? 0,
+        opponentIds: List<String>.from(json['opponentIds'] as List? ?? []),
+      );
 }
 
 // Extension methods for TournamentMatch.fromJson
 extension TournamentMatchFromJson on TournamentMatch {
-  static TournamentMatch fromJson(Map<String, dynamic> json) {
-    return TournamentMatch(
-      matchId: json['matchId'] as String,
-      tournamentId: json['tournamentId'] as String,
-      round: json['round'] as int,
-      player1Id: json['player1Id'] as String,
-      player2Id: json['player2Id'] as String,
-      status: json['status'] as String,
-      scheduledAt: (json['scheduledAt'] as Timestamp).toDate(),
-      startedAt: json['startedAt'] != null
-          ? (json['startedAt'] as Timestamp).toDate()
-          : null,
-      completedAt: json['completedAt'] != null
-          ? (json['completedAt'] as Timestamp).toDate()
-          : null,
-      winnerId: json['winnerId'] as String?,
-      loserId: json['loserId'] as String?,
-      gameId: json['gameId'] as String?,
-    );
-  }
+  static TournamentMatch fromJson(Map<String, dynamic> json) => TournamentMatch(
+        matchId: json['matchId'] as String,
+        tournamentId: json['tournamentId'] as String,
+        round: json['round'] as int,
+        player1Id: json['player1Id'] as String,
+        player2Id: json['player2Id'] as String,
+        status: json['status'] as String,
+        scheduledAt: (json['scheduledAt'] as Timestamp).toDate(),
+        startedAt: json['startedAt'] != null
+            ? (json['startedAt'] as Timestamp).toDate()
+            : null,
+        completedAt: json['completedAt'] != null
+            ? (json['completedAt'] as Timestamp).toDate()
+            : null,
+        winnerId: json['winnerId'] as String?,
+        loserId: json['loserId'] as String?,
+        gameId: json['gameId'] as String?,
+      );
 }

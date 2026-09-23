@@ -3,14 +3,13 @@ import 'package:logger/logger.dart';
 
 /// Manages time-limited events and special modes
 class SeasonalEventService {
+  SeasonalEventService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _eventsCollection = 'seasonal_events';
   static const String _playerEventCollection = 'player_event_progress';
-
-  SeasonalEventService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Get all active events for a season
   Future<List<SeasonalEvent>> getActiveEvents({
@@ -27,7 +26,7 @@ class SeasonalEventService {
           .get();
 
       return snapshot.docs
-          .map((doc) => SeasonalEvent.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => SeasonalEvent.fromJson(doc.data()))
           .toList();
     } catch (e, st) {
       _logger.e('Failed to get active events', error: e, stackTrace: st);
@@ -38,10 +37,8 @@ class SeasonalEventService {
   /// Get event details by ID
   Future<SeasonalEvent?> getEventDetails(String eventId) async {
     try {
-      final doc = await _firestore
-          .collection(_eventsCollection)
-          .doc(eventId)
-          .get();
+      final doc =
+          await _firestore.collection(_eventsCollection).doc(eventId).get();
 
       if (!doc.exists) {
         return null;
@@ -73,7 +70,8 @@ class SeasonalEventService {
 
       return EventParticipation.fromJson(doc.data()!);
     } catch (e, st) {
-      _logger.e('Failed to get player event progress', error: e, stackTrace: st);
+      _logger.e('Failed to get player event progress',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -208,7 +206,7 @@ class SeasonalEventService {
           .get();
 
       return snapshot.docs
-          .map((doc) => EventLeaderboardEntry.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => EventLeaderboardEntry.fromJson(doc.data()))
           .toList();
     } catch (e, st) {
       _logger.e('Failed to get event leaderboard', error: e, stackTrace: st);
@@ -230,10 +228,11 @@ class SeasonalEventService {
           .get();
 
       return snapshot.docs
-          .map((doc) => EventParticipation.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => EventParticipation.fromJson(doc.data()))
           .toList();
     } catch (e, st) {
-      _logger.e('Failed to get top event participants', error: e, stackTrace: st);
+      _logger.e('Failed to get top event participants',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -297,7 +296,8 @@ class SeasonalEventService {
         'source': 'event',
       });
 
-      _logger.i('Event reward distributed to $playerId for rank $rank in event $eventId');
+      _logger.i(
+          'Event reward distributed to $playerId for rank $rank in event $eventId');
     } catch (e, st) {
       _logger.e('Failed to distribute event reward', error: e, stackTrace: st);
       rethrow;
@@ -307,19 +307,6 @@ class SeasonalEventService {
 
 /// Seasonal event
 class SeasonalEvent {
-  final String eventId;
-  final String seasonId;
-  final String name;
-  final String description;
-  final String type;        // tournament, challenge_rush, rating_boost
-  final DateTime startDate;
-  final DateTime endDate;
-  final int maxParticipants;
-  final int currentParticipants;
-  final List<EventReward> rewards;
-  final bool isActive;
-  final String? bannerUrl;
-
   SeasonalEvent({
     required this.eventId,
     required this.seasonId,
@@ -335,55 +322,54 @@ class SeasonalEvent {
     this.bannerUrl,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'eventId': eventId,
-      'seasonId': seasonId,
-      'name': name,
-      'description': description,
-      'type': type,
-      'startDate': Timestamp.fromDate(startDate),
-      'endDate': Timestamp.fromDate(endDate),
-      'maxParticipants': maxParticipants,
-      'currentParticipants': currentParticipants,
-      'rewards': rewards.map((r) => r.toJson()).toList(),
-      'isActive': isActive,
-      'bannerUrl': bannerUrl,
-    };
-  }
+  factory SeasonalEvent.fromJson(Map<String, dynamic> json) => SeasonalEvent(
+        eventId: json['eventId'] as String,
+        seasonId: json['seasonId'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        type: json['type'] as String,
+        startDate: (json['startDate'] as Timestamp).toDate(),
+        endDate: (json['endDate'] as Timestamp).toDate(),
+        maxParticipants: json['maxParticipants'] as int,
+        currentParticipants: json['currentParticipants'] as int? ?? 0,
+        rewards: (json['rewards'] as List<dynamic>?)
+                ?.map((r) => EventReward.fromJson(r as Map<String, dynamic>))
+                .toList() ??
+            [],
+        isActive: json['isActive'] as bool? ?? true,
+        bannerUrl: json['bannerUrl'] as String?,
+      );
+  final String eventId;
+  final String seasonId;
+  final String name;
+  final String description;
+  final String type; // tournament, challenge_rush, rating_boost
+  final DateTime startDate;
+  final DateTime endDate;
+  final int maxParticipants;
+  final int currentParticipants;
+  final List<EventReward> rewards;
+  final bool isActive;
+  final String? bannerUrl;
 
-  factory SeasonalEvent.fromJson(Map<String, dynamic> json) {
-    return SeasonalEvent(
-      eventId: json['eventId'] as String,
-      seasonId: json['seasonId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      type: json['type'] as String,
-      startDate: (json['startDate'] as Timestamp).toDate(),
-      endDate: (json['endDate'] as Timestamp).toDate(),
-      maxParticipants: json['maxParticipants'] as int,
-      currentParticipants: json['currentParticipants'] as int? ?? 0,
-      rewards: (json['rewards'] as List<dynamic>?)
-          ?.map((r) => EventReward.fromJson(r as Map<String, dynamic>))
-          .toList() ?? [],
-      isActive: json['isActive'] as bool? ?? true,
-      bannerUrl: json['bannerUrl'] as String?,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'eventId': eventId,
+        'seasonId': seasonId,
+        'name': name,
+        'description': description,
+        'type': type,
+        'startDate': Timestamp.fromDate(startDate),
+        'endDate': Timestamp.fromDate(endDate),
+        'maxParticipants': maxParticipants,
+        'currentParticipants': currentParticipants,
+        'rewards': rewards.map((r) => r.toJson()).toList(),
+        'isActive': isActive,
+        'bannerUrl': bannerUrl,
+      };
 }
 
 /// Event participation record
 class EventParticipation {
-  final String playerId;
-  final String eventId;
-  final String seasonId;
-  final DateTime joinedAt;
-  final int currentScore;
-  final int rank;
-  final bool hasWithdrawn;
-  final DateTime? withdrawnAt;
-  final DateTime updatedAt;
-
   EventParticipation({
     required this.playerId,
     required this.eventId,
@@ -396,32 +382,33 @@ class EventParticipation {
     this.withdrawnAt,
   });
 
-  factory EventParticipation.fromJson(Map<String, dynamic> json) {
-    return EventParticipation(
-      playerId: json['playerId'] as String,
-      eventId: json['eventId'] as String,
-      seasonId: json['seasonId'] as String,
-      joinedAt: (json['joinedAt'] as Timestamp).toDate(),
-      currentScore: json['currentScore'] as int? ?? 0,
-      rank: json['rank'] as int? ?? -1,
-      hasWithdrawn: json['hasWithdrawn'] as bool? ?? false,
-      withdrawnAt: json['withdrawnAt'] != null
-          ? (json['withdrawnAt'] as Timestamp).toDate()
-          : null,
-      updatedAt: (json['updatedAt'] as Timestamp).toDate(),
-    );
-  }
+  factory EventParticipation.fromJson(Map<String, dynamic> json) =>
+      EventParticipation(
+        playerId: json['playerId'] as String,
+        eventId: json['eventId'] as String,
+        seasonId: json['seasonId'] as String,
+        joinedAt: (json['joinedAt'] as Timestamp).toDate(),
+        currentScore: json['currentScore'] as int? ?? 0,
+        rank: json['rank'] as int? ?? -1,
+        hasWithdrawn: json['hasWithdrawn'] as bool? ?? false,
+        withdrawnAt: json['withdrawnAt'] != null
+            ? (json['withdrawnAt'] as Timestamp).toDate()
+            : null,
+        updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+      );
+  final String playerId;
+  final String eventId;
+  final String seasonId;
+  final DateTime joinedAt;
+  final int currentScore;
+  final int rank;
+  final bool hasWithdrawn;
+  final DateTime? withdrawnAt;
+  final DateTime updatedAt;
 }
 
 /// Event leaderboard entry
 class EventLeaderboardEntry {
-  final String playerId;
-  final String username;
-  final int rank;
-  final int score;
-  final String? avatar;
-  final DateTime timestamp;
-
   EventLeaderboardEntry({
     required this.playerId,
     required this.username,
@@ -431,25 +418,26 @@ class EventLeaderboardEntry {
     this.avatar,
   });
 
-  factory EventLeaderboardEntry.fromJson(Map<String, dynamic> json) {
-    return EventLeaderboardEntry(
-      playerId: json['playerId'] as String,
-      username: json['username'] as String,
-      rank: json['rank'] as int,
-      score: json['score'] as int,
-      avatar: json['avatar'] as String?,
-      timestamp: (json['timestamp'] as Timestamp).toDate(),
-    );
-  }
+  factory EventLeaderboardEntry.fromJson(Map<String, dynamic> json) =>
+      EventLeaderboardEntry(
+        playerId: json['playerId'] as String,
+        username: json['username'] as String,
+        rank: json['rank'] as int,
+        score: json['score'] as int,
+        avatar: json['avatar'] as String?,
+        timestamp: (json['timestamp'] as Timestamp).toDate(),
+      );
+  final String playerId;
+  final String username;
+  final int rank;
+  final int score;
+  final String? avatar;
+  final DateTime timestamp;
 }
 
 /// Event reward tier
 class EventReward {
-  final int minRank;
-  final int maxRank;
-  final String rewardType;      // championship, participation
-  final Map<String, dynamic> rewards;  // items and amounts
-  final String rarity;          // common, rare, epic, legendary
+  // common, rare, epic, legendary
 
   EventReward({
     required this.minRank,
@@ -459,23 +447,24 @@ class EventReward {
     required this.rarity,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'minRank': minRank,
-      'maxRank': maxRank,
-      'rewardType': rewardType,
-      'rewards': rewards,
-      'rarity': rarity,
-    };
-  }
+  factory EventReward.fromJson(Map<String, dynamic> json) => EventReward(
+        minRank: json['minRank'] as int,
+        maxRank: json['maxRank'] as int,
+        rewardType: json['rewardType'] as String,
+        rewards: json['rewards'] as Map<String, dynamic>? ?? {},
+        rarity: json['rarity'] as String? ?? 'common',
+      );
+  final int minRank;
+  final int maxRank;
+  final String rewardType; // championship, participation
+  final Map<String, dynamic> rewards; // items and amounts
+  final String rarity;
 
-  factory EventReward.fromJson(Map<String, dynamic> json) {
-    return EventReward(
-      minRank: json['minRank'] as int,
-      maxRank: json['maxRank'] as int,
-      rewardType: json['rewardType'] as String,
-      rewards: json['rewards'] as Map<String, dynamic>? ?? {},
-      rarity: json['rarity'] as String? ?? 'common',
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'minRank': minRank,
+        'maxRank': maxRank,
+        'rewardType': rewardType,
+        'rewards': rewards,
+        'rarity': rarity,
+      };
 }

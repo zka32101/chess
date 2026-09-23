@@ -2,16 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 class AchievementService {
+  factory AchievementService() => _instance;
+
+  AchievementService._internal();
   static final AchievementService _instance = AchievementService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, List<AchievementDefinition>> _achievementCache = {};
   final Map<String, Timer> _cacheTimers = {};
-
-  factory AchievementService() {
-    return _instance;
-  }
-
-  AchievementService._internal();
 
   Future<List<UserAchievement>> getUserAchievements(String userId) async {
     try {
@@ -52,7 +49,7 @@ class AchievementService {
       _cacheTimers['all']?.cancel();
 
       // Set new timer for cache invalidation
-      _cacheTimers['all'] = Timer(Duration(hours: 1), () {
+      _cacheTimers['all'] = Timer(const Duration(hours: 1), () {
         _achievementCache.remove('all');
         _cacheTimers.remove('all');
       });
@@ -183,15 +180,6 @@ class AchievementService {
 }
 
 class AchievementDefinition {
-  final String achievementId;
-  final String name;
-  final String description;
-  final String icon;
-  final String tier;
-  final Map<String, dynamic> condition;
-  final int points;
-  final bool isHidden;
-
   AchievementDefinition({
     required this.achievementId,
     required this.name,
@@ -203,26 +191,28 @@ class AchievementDefinition {
     required this.isHidden,
   });
 
-  factory AchievementDefinition.fromJson(Map<String, dynamic> json) {
-    return AchievementDefinition(
-      achievementId: json['achievementId'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      icon: json['icon'] ?? '',
-      tier: json['tier'] ?? 'Bronze',
-      condition: json['condition'] ?? {},
-      points: json['points'] ?? 0,
-      isHidden: json['isHidden'] ?? false,
-    );
-  }
+  factory AchievementDefinition.fromJson(Map<String, dynamic> json) =>
+      AchievementDefinition(
+        achievementId: json['achievementId'] ?? '',
+        name: json['name'] ?? '',
+        description: json['description'] ?? '',
+        icon: json['icon'] ?? '',
+        tier: json['tier'] ?? 'Bronze',
+        condition: json['condition'] ?? {},
+        points: json['points'] ?? 0,
+        isHidden: json['isHidden'] ?? false,
+      );
+  final String achievementId;
+  final String name;
+  final String description;
+  final String icon;
+  final String tier;
+  final Map<String, dynamic> condition;
+  final int points;
+  final bool isHidden;
 }
 
 class UserAchievement {
-  final String userId;
-  final String achievementId;
-  final DateTime unlockedAt;
-  final int progressPercentage;
-
   UserAchievement({
     required this.userId,
     required this.achievementId,
@@ -230,25 +220,22 @@ class UserAchievement {
     required this.progressPercentage,
   });
 
-  factory UserAchievement.fromJson(Map<String, dynamic> json) {
-    return UserAchievement(
-      userId: json['userId'] ?? '',
-      achievementId: json['achievementId'] ?? '',
-      unlockedAt: json['unlockedAt'] != null
-          ? (json['unlockedAt'] as Timestamp).toDate()
-          : DateTime.now(),
-      progressPercentage: json['progressPercentage'] ?? 0,
-    );
-  }
+  factory UserAchievement.fromJson(Map<String, dynamic> json) =>
+      UserAchievement(
+        userId: json['userId'] ?? '',
+        achievementId: json['achievementId'] ?? '',
+        unlockedAt: json['unlockedAt'] != null
+            ? (json['unlockedAt'] as Timestamp).toDate()
+            : DateTime.now(),
+        progressPercentage: json['progressPercentage'] ?? 0,
+      );
+  final String userId;
+  final String achievementId;
+  final DateTime unlockedAt;
+  final int progressPercentage;
 }
 
 class AchievementProgress {
-  final String achievementId;
-  final bool isUnlocked;
-  final int currentValue;
-  final int targetValue;
-  final DateTime? unlockedAt;
-
   AchievementProgress({
     required this.achievementId,
     required this.isUnlocked,
@@ -256,21 +243,25 @@ class AchievementProgress {
     required this.targetValue,
     this.unlockedAt,
   });
+  final String achievementId;
+  final bool isUnlocked;
+  final int currentValue;
+  final int targetValue;
+  final DateTime? unlockedAt;
 
   double get progressPercentage =>
       targetValue > 0 ? (currentValue / targetValue * 100).clamp(0, 100) : 0;
 }
 
 class NearbyAchievement {
-  final AchievementDefinition achievement;
-  final int currentValue;
-  final int targetValue;
-  final double progressPercentage;
-
   NearbyAchievement({
     required this.achievement,
     required this.currentValue,
     required this.targetValue,
     required this.progressPercentage,
   });
+  final AchievementDefinition achievement;
+  final int currentValue;
+  final int targetValue;
+  final double progressPercentage;
 }

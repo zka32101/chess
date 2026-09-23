@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/services/comparison_service.dart';
-import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
-import 'package:chess_tactics_master/src/models/match_record.dart';
+import '../services/comparison_service.dart';
+import '../models/head_to_head_stats.dart';
+import '../models/match_record.dart';
 
 /// Provider for comparison service
-final comparisonServiceProvider = Provider((ref) {
-  return ComparisonService();
-});
+final comparisonServiceProvider = Provider((ref) => ComparisonService());
 
 /// Head-to-head stats provider for two players
 final headToHeadStatsProvider = StreamProvider.family<HeadToHeadStats,

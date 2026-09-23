@@ -36,13 +36,12 @@ class NotificationOverlay extends ConsumerWidget {
 
 /// Individual notification card
 class _NotificationCard extends StatefulWidget {
-  final AppNotification notification;
-  final VoidCallback onDismiss;
-
   const _NotificationCard({
     required this.notification,
     required this.onDismiss,
   });
+  final AppNotification notification;
+  final VoidCallback onDismiss;
 
   @override
   State<_NotificationCard> createState() => _NotificationCardState();
@@ -89,7 +88,7 @@ class _NotificationCardState extends State<_NotificationCard>
     final severity = widget.notification.severity;
 
     return SlideTransition(
-      position: Tween<Offset>(begin: Offset.zero, end: const Offset(2.0, 0.0))
+      position: Tween<Offset>(begin: Offset.zero, end: const Offset(2, 0))
           .animate(_dismissController),
       child: Material(
         color: Colors.transparent,

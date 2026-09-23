@@ -56,9 +56,8 @@ class CountermoveHeuristic {
   }
 
   /// Get counter-moves for a specific opponent move
-  List<String> getCountermoves(String opponentMove) {
-    return _countermoves[opponentMove] ?? [];
-  }
+  List<String> getCountermoves(String opponentMove) =>
+      _countermoves[opponentMove] ?? [];
 
   /// Check if a move is a known counter-move
   bool isCountermove(String opponentMove, String counterMove) {
@@ -115,7 +114,7 @@ class CountermoveHeuristic {
                       sum + (_pairScores['${e.key}→$counter'] ?? 0)),
             })
         .toList()
-      ..sort((a, b) => (b['score'] as int).compareTo(a['score'] as int));
+      ..sort((a, b) => (b['score']! as int).compareTo(a['score']! as int));
 
     return entries.take(count).toList();
   }
@@ -125,14 +124,13 @@ class CountermoveHeuristic {
 ///
 /// Integrates killer moves, countermoves, and history into unified system
 class AdvancedMoveOrderer {
+  AdvancedMoveOrderer({CountermoveHeuristic? countermoves})
+      : countermoves = countermoves ?? CountermoveHeuristic();
   final CountermoveHeuristic countermoves;
   final Map<String, int> _moveHistory = {};
   final Map<String, int> _killerMoves = {};
 
   String? _lastOpponentMove;
-
-  AdvancedMoveOrderer({CountermoveHeuristic? countermoves})
-      : countermoves = countermoves ?? CountermoveHeuristic();
 
   /// Set the last opponent move (for countermove heuristic)
   void setLastOpponentMove(String moveUci) {
@@ -228,14 +226,12 @@ class AdvancedMoveOrderer {
   }
 
   /// Get combined statistics
-  Map<String, dynamic> getStatistics() {
-    return {
-      'countermoveStats': countermoves.getStatistics(),
-      'killerMoves': _killerMoves.length,
-      'historyMoves': _moveHistory.length,
-      'lastOpponentMove': _lastOpponentMove,
-    };
-  }
+  Map<String, dynamic> getStatistics() => {
+        'countermoveStats': countermoves.getStatistics(),
+        'killerMoves': _killerMoves.length,
+        'historyMoves': _moveHistory.length,
+        'lastOpponentMove': _lastOpponentMove,
+      };
 
   /// Convert move to UCI
   String _moveToUci(chess_lib.Move move) {
@@ -267,9 +263,7 @@ class PrincipalVariationCache {
   }
 
   /// Get PV move at depth
-  String? getPVMove(int depth) {
-    return _pvMoves[depth];
-  }
+  String? getPVMove(int depth) => _pvMoves[depth];
 
   /// Record PV cutoff (when PV move caused cutoff)
   void recordPVCutoff() {
@@ -283,7 +277,7 @@ class PrincipalVariationCache {
 
   /// Get PV cutoff rate
   double getPVCutoffRate() {
-    if (_pvSearches == 0) return 0.0;
+    if (_pvSearches == 0) return 0;
     return _pvCutoffs / _pvSearches;
   }
 
@@ -294,9 +288,7 @@ class PrincipalVariationCache {
   }
 
   /// Get principal variation
-  List<String> getPrincipalVariation() {
-    return List.from(_principalVariation);
-  }
+  List<String> getPrincipalVariation() => List.from(_principalVariation);
 
   /// Clear cache
   void clear() {
@@ -307,12 +299,10 @@ class PrincipalVariationCache {
   }
 
   /// Get statistics
-  Map<String, dynamic> getStatistics() {
-    return {
-      'pvLength': _principalVariation.length,
-      'pvCutoffs': _pvCutoffs,
-      'pvSearches': _pvSearches,
-      'pvCutoffRate': getPVCutoffRate(),
-    };
-  }
+  Map<String, dynamic> getStatistics() => {
+        'pvLength': _principalVariation.length,
+        'pvCutoffs': _pvCutoffs,
+        'pvSearches': _pvSearches,
+        'pvCutoffRate': getPVCutoffRate(),
+      };
 }

@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/head_to_head_stats.dart';
-import 'package:chess_tactics_master/src/models/match_record.dart';
+import '../models/head_to_head_stats.dart';
+import '../models/match_record.dart';
 
 /// Service for managing player-to-player comparisons
 class ComparisonService {
-  final FirebaseFirestore _firestore;
-
   ComparisonService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
 
   /// Get head-to-head statistics between two players
   Future<HeadToHeadStats> getHeadToHeadStats(
@@ -61,8 +60,8 @@ class ComparisonService {
         player1Wins: 0,
         player2Wins: 0,
         draws: 0,
-        player1WinRate: 0.0,
-        player2WinRate: 0.0,
+        player1WinRate: 0,
+        player2WinRate: 0,
         ratingDifference: 0,
         lastMatch: DateTime.now(),
         recentMatches: [],
@@ -149,17 +148,17 @@ class ComparisonService {
   /// Using ELO probability formula: P = 1 / (1 + 10^(-ratingDiff/400))
   double calculateWinProbability(int ratingDiff) {
     final exponent = -ratingDiff / 400.0;
-    return 1.0 / (1.0 + pow(10.0, exponent) as double);
+    return 1.0 / (1.0 + pow(10, exponent));
   }
 
   /// Get numeric power function (to avoid importing dart:math for just this)
   double pow(double base, double exponent) {
     // Using iterative approach for small exponents
-    if (exponent == 0) return 1.0;
+    if (exponent == 0) return 1;
     if (exponent == 1) return base;
 
-    double result = 1.0;
-    double absExp = exponent.abs();
+    double result = 1;
+    final double absExp = exponent.abs();
 
     for (int i = 0; i < absExp.toInt(); i++) {
       result *= base;
@@ -168,7 +167,7 @@ class ComparisonService {
     // Handle fractional part
     if (exponent - exponent.toInt() != 0) {
       // Use approximation for fractional exponents
-      double frac = exponent - exponent.toInt();
+      final double frac = exponent - exponent.toInt();
       result *= _powFractional(base, frac);
     }
 
@@ -182,7 +181,7 @@ class ComparisonService {
   /// Helper for fractional powers using binary exponentiation
   double _powFractional(double base, double frac) {
     // Simplified: use 10 iterations for approximation
-    double result = 1.0;
+    double result = 1;
     for (int i = 0; i < 10; i++) {
       result = (result + base / result) / 2;
     }

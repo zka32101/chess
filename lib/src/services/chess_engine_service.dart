@@ -4,12 +4,11 @@ import 'move_validation_service.dart';
 
 /// Service for chess game logic and move validation
 class ChessEngineService {
-  late chess_lib.Chess _chess;
-  final List<Map<String, dynamic>> _moveHistory = [];
-
   ChessEngineService() {
     _chess = chess_lib.Chess();
   }
+  late chess_lib.Chess _chess;
+  final List<Map<String, dynamic>> _moveHistory = [];
 
   /// The underlying chess_lib.Chess instance, for callers (e.g. Zobrist
   /// hashing) that need to operate on the raw position directly.
@@ -28,36 +27,29 @@ class ChessEngineService {
   String getCurrentFen() => _chess.fen;
 
   /// Get current board as an 8x8 array (row 0 = rank 8, column 0 = file a).
-  List<List<chess_lib.Piece?>> getBoard() {
-    return List.generate(
-      8,
-      (rank) => List.generate(
+  List<List<chess_lib.Piece?>> getBoard() => List.generate(
         8,
-        (file) => _chess.get(indicesToSquare(rank, file)),
-      ),
-    );
-  }
+        (rank) => List.generate(
+          8,
+          (file) => _chess.get(indicesToSquare(rank, file)),
+        ),
+      );
 
   /// Get all legal moves for current position
   List<chess_lib.Move> getLegalMoves() =>
       _chess.moves({'asObjects': true}).cast<chess_lib.Move>();
 
   /// Get legal moves for a specific square with detailed information
-  List<LegalMove> getLegalMovesForSquareDetailed(String square) {
-    return MoveValidationService.getLegalMovesFromSquare(_chess, square);
-  }
+  List<LegalMove> getLegalMovesForSquareDetailed(String square) =>
+      MoveValidationService.getLegalMovesFromSquare(_chess, square);
 
   /// Get legal moves for a specific square (e.g., "e2")
-  List<chess_lib.Move> getLegalMovesForSquare(String square) {
-    return getLegalMoves()
-        .where((move) => move.fromAlgebraic == square)
-        .toList();
-  }
+  List<chess_lib.Move> getLegalMovesForSquare(String square) =>
+      getLegalMoves().where((move) => move.fromAlgebraic == square).toList();
 
   /// Analyze current position for tactical patterns and material balance
-  PositionAnalysis analyzePosition() {
-    return MoveValidationService.analyzePosition(_chess);
-  }
+  PositionAnalysis analyzePosition() =>
+      MoveValidationService.analyzePosition(_chess);
 
   /// Validate if a move is legal with detailed error reporting
   bool isLegalMove(String from, String to, {String? promotion}) {
@@ -68,10 +60,9 @@ class ChessEngineService {
 
   /// Validate move and get detailed error information
   MoveValidationResult validateMoveDetailed(String from, String to,
-      {String? promotion}) {
-    return MoveValidationService.validateMove(_chess, from, to,
-        promotion: promotion);
-  }
+          {String? promotion}) =>
+      MoveValidationService.validateMove(_chess, from, to,
+          promotion: promotion);
 
   /// Make a move (returns true if successful)
   bool makeMove(String from, String to, {String? promotion}) {
@@ -147,15 +138,12 @@ class ChessEngineService {
   }
 
   /// Get draw reasons if game is a draw
-  List<String> getDrawReasons() {
-    return DrawDetectionService.getDrawReasons(
-        _chess, _chess.fen, _moveHistory);
-  }
+  List<String> getDrawReasons() =>
+      DrawDetectionService.getDrawReasons(_chess, _chess.fen, _moveHistory);
 
   /// Check if player can claim draw
-  bool canClaimDraw() {
-    return DrawDetectionService.canClaimDraw(_chess, _chess.fen, _moveHistory);
-  }
+  bool canClaimDraw() =>
+      DrawDetectionService.canClaimDraw(_chess, _chess.fen, _moveHistory);
 
   /// Get whose turn it is (true = white, false = black)
   bool isWhiteTurn() => _chess.turn == chess_lib.Color.WHITE;
@@ -173,12 +161,8 @@ class ChessEngineService {
   String getPgnMoves() => _chess.moves().toString();
 
   /// Get detailed move information
-  List<Map<String, dynamic>> getMoveHistory() {
-    return _chess
-        .moves({'verbose': true})
-        .cast<Map<String, dynamic>>()
-        .toList();
-  }
+  List<Map<String, dynamic>> getMoveHistory() =>
+      _chess.moves({'verbose': true}).cast<Map<String, dynamic>>().toList();
 
   /// Get best moves for CPU (simple evaluation)
   List<chess_lib.Move> getBestMoves({int depth = 2}) {
@@ -266,16 +250,12 @@ class ChessEngineService {
   }
 
   /// Convert square name to board indices
-  static Map<String, int> squareToIndices(String square) {
-    return {
-      'file': square.codeUnitAt(0) - 'a'.codeUnitAt(0),
-      'rank': 8 - (int.parse(square[1])),
-    };
-  }
+  static Map<String, int> squareToIndices(String square) => {
+        'file': square.codeUnitAt(0) - 'a'.codeUnitAt(0),
+        'rank': 8 - (int.parse(square[1])),
+      };
 
   /// Convert board indices to square name
-  static String indicesToSquare(int rank, int file) {
-    return String.fromCharCode('a'.codeUnitAt(0) + file) +
-        (8 - rank).toString();
-  }
+  static String indicesToSquare(int rank, int file) =>
+      String.fromCharCode('a'.codeUnitAt(0) + file) + (8 - rank).toString();
 }

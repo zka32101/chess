@@ -7,6 +7,15 @@ typedef OnMoveMade = void Function(String from, String to);
 
 /// Chess board widget with piece rendering and interaction
 class ChessBoard extends StatefulWidget {
+  const ChessBoard({
+    required this.engine,
+    Key? key,
+    this.onMoveMade,
+    this.size = 350,
+    this.enabled = true,
+    this.showCoordinates = true,
+    this.theme = BoardThemeCatalog.classic,
+  }) : super(key: key);
   final ChessEngineService engine;
   final OnMoveMade? onMoveMade;
   final double size;
@@ -18,16 +27,6 @@ class ChessBoard extends StatefulWidget {
   /// caller keeps rendering exactly as before.
   final BoardTheme theme;
 
-  const ChessBoard({
-    Key? key,
-    required this.engine,
-    this.onMoveMade,
-    this.size = 350,
-    this.enabled = true,
-    this.showCoordinates = true,
-    this.theme = BoardThemeCatalog.classic,
-  }) : super(key: key);
-
   @override
   State<ChessBoard> createState() => _ChessBoardState();
 }
@@ -37,73 +36,69 @@ class _ChessBoardState extends State<ChessBoard> {
   List<String> _legalMovesForSelected = [];
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: widget.enabled ? _handleTap : null,
-      child: Container(
-        width: widget.size,
-        height: widget.size,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Stack(
-          children: [
-            // Board background
-            CustomPaint(
-              painter: _ChessBoardPainter(
-                size: widget.size,
-                showCoordinates: widget.showCoordinates,
-                theme: widget.theme,
+  Widget build(BuildContext context) => GestureDetector(
+        onTapDown: widget.enabled ? _handleTap : null,
+        child: Container(
+          width: widget.size,
+          height: widget.size,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade400, width: 2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Stack(
+            children: [
+              // Board background
+              CustomPaint(
+                painter: _ChessBoardPainter(
+                  size: widget.size,
+                  showCoordinates: widget.showCoordinates,
+                  theme: widget.theme,
+                ),
+                size: Size(widget.size, widget.size),
               ),
-              size: Size(widget.size, widget.size),
-            ),
 
-            // Legal move indicators
-            if (_selectedSquare != null && widget.enabled)
-              _buildLegalMoveIndicators(),
+              // Legal move indicators
+              if (_selectedSquare != null && widget.enabled)
+                _buildLegalMoveIndicators(),
 
-            // Pieces
-            _buildPieces(),
-          ],
+              // Pieces
+              _buildPieces(),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
-  Widget _buildLegalMoveIndicators() {
-    return Stack(
-      children: _legalMovesForSelected.map((square) {
-        final indices = ChessEngineService.squareToIndices(square);
-        final squareSize = widget.size / 8;
-        final offsetX = indices['file']! * squareSize;
-        final offsetY = indices['rank']! * squareSize;
+  Widget _buildLegalMoveIndicators() => Stack(
+        children: _legalMovesForSelected.map((square) {
+          final indices = ChessEngineService.squareToIndices(square);
+          final squareSize = widget.size / 8;
+          final offsetX = indices['file']! * squareSize;
+          final offsetY = indices['rank']! * squareSize;
 
-        return Positioned(
-          left: offsetX,
-          top: offsetY,
-          child: Container(
-            width: squareSize,
-            height: squareSize,
-            decoration: BoxDecoration(
-              color: widget.theme.legalMoveIndicatorColor.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(squareSize / 2),
-            ),
-            child: Center(
-              child: Container(
-                width: squareSize / 3,
-                height: squareSize / 3,
-                decoration: BoxDecoration(
-                  color: widget.theme.legalMoveIndicatorColor,
-                  shape: BoxShape.circle,
+          return Positioned(
+            left: offsetX,
+            top: offsetY,
+            child: Container(
+              width: squareSize,
+              height: squareSize,
+              decoration: BoxDecoration(
+                color: widget.theme.legalMoveIndicatorColor.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(squareSize / 2),
+              ),
+              child: Center(
+                child: Container(
+                  width: squareSize / 3,
+                  height: squareSize / 3,
+                  decoration: BoxDecoration(
+                    color: widget.theme.legalMoveIndicatorColor,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      }).toList(),
-    );
-  }
+          );
+        }).toList(),
+      );
 
   Widget _buildPieces() {
     final squareSize = widget.size / 8;
@@ -267,15 +262,14 @@ class _ChessBoardState extends State<ChessBoard> {
 
 /// Custom painter for chess board
 class _ChessBoardPainter extends CustomPainter {
-  final double size;
-  final bool showCoordinates;
-  final BoardTheme theme;
-
   _ChessBoardPainter({
     required this.size,
     required this.showCoordinates,
     required this.theme,
   });
+  final double size;
+  final bool showCoordinates;
+  final BoardTheme theme;
 
   @override
   void paint(Canvas canvas, Size canvasSize) {
@@ -359,9 +353,8 @@ class _ChessBoardPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ChessBoardPainter oldDelegate) {
-    return oldDelegate.size != size ||
-        oldDelegate.showCoordinates != showCoordinates ||
-        oldDelegate.theme != theme;
-  }
+  bool shouldRepaint(_ChessBoardPainter oldDelegate) =>
+      oldDelegate.size != size ||
+      oldDelegate.showCoordinates != showCoordinates ||
+      oldDelegate.theme != theme;
 }

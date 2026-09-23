@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:chess_tactics_master/src/utils/animations.dart';
 
 /// Time clock widget for displaying remaining time in online games
 ///
@@ -9,6 +8,15 @@ import 'package:chess_tactics_master/src/utils/animations.dart';
 /// - Pulsing animation when time is critically low
 /// - Smooth updates without frame stuttering
 class TimeClock extends StatefulWidget {
+  const TimeClock({
+    required this.timeMs,
+    Key? key,
+    this.isCurrentPlayer = false,
+    this.onTimeExpired,
+    this.showCentiseconds = true,
+    this.size = ClockSize.standard,
+  }) : super(key: key);
+
   /// Time remaining in milliseconds
   final int timeMs;
 
@@ -23,15 +31,6 @@ class TimeClock extends StatefulWidget {
 
   /// Clock size - standard, large, or custom
   final ClockSize size;
-
-  const TimeClock({
-    Key? key,
-    required this.timeMs,
-    this.isCurrentPlayer = false,
-    this.onTimeExpired,
-    this.showCentiseconds = true,
-    this.size = ClockSize.standard,
-  }) : super(key: key);
 
   @override
   State<TimeClock> createState() => _TimeClockState();
@@ -53,7 +52,7 @@ class _TimeClockState extends State<TimeClock>
       vsync: this,
     )..repeat(reverse: true);
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+    _pulseAnimation = Tween<double>(begin: 1, end: 1.15).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
@@ -212,6 +211,16 @@ class _TimeClockState extends State<TimeClock>
 ///
 /// Combines player information (name, rating) with an animated time clock
 class PlayerTimeClock extends StatelessWidget {
+  const PlayerTimeClock({
+    required this.playerName,
+    required this.rating,
+    required this.timeMs,
+    Key? key,
+    this.isCurrentPlayer = false,
+    this.onTimeExpired,
+    this.backgroundColor,
+  }) : super(key: key);
+
   /// Player name
   final String playerName;
 
@@ -230,57 +239,45 @@ class PlayerTimeClock extends StatelessWidget {
   /// Custom background color override
   final Color? backgroundColor;
 
-  const PlayerTimeClock({
-    Key? key,
-    required this.playerName,
-    required this.rating,
-    required this.timeMs,
-    this.isCurrentPlayer = false,
-    this.onTimeExpired,
-    this.backgroundColor,
-  }) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: backgroundColor ??
-          (isCurrentPlayer ? Colors.blue[50] : Colors.transparent),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Player info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  playerName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) => Container(
+        color: backgroundColor ??
+            (isCurrentPlayer ? Colors.blue[50] : Colors.transparent),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Player info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    playerName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  'Rating: $rating',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                ),
-              ],
+                  Text(
+                    'Rating: $rating',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-          // Time clock
-          SizedBox(
-            width: 90,
-            child: TimeClock(
-              timeMs: timeMs,
-              isCurrentPlayer: isCurrentPlayer,
-              onTimeExpired: onTimeExpired,
-              size: ClockSize.standard,
+            // Time clock
+            SizedBox(
+              width: 90,
+              child: TimeClock(
+                timeMs: timeMs,
+                isCurrentPlayer: isCurrentPlayer,
+                onTimeExpired: onTimeExpired,
+                size: ClockSize.standard,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

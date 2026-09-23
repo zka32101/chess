@@ -22,6 +22,18 @@ enum RecoveryStrategy {
 
 /// Comprehensive error model
 class AppError {
+  AppError({
+    required this.code,
+    required this.message,
+    required this.severity,
+    this.userMessage,
+    this.originalError,
+    this.stackTrace,
+    this.context,
+    this.suggestedRecovery,
+    DateTime? timestamp,
+  })  : timestamp = timestamp ?? DateTime.now(),
+        id = 'ERR_${DateTime.now().millisecondsSinceEpoch}_${code.hashCode}';
   final String id;
   final String code;
   final String message;
@@ -32,19 +44,6 @@ class AppError {
   final Map<String, dynamic>? context;
   final DateTime timestamp;
   final RecoveryStrategy? suggestedRecovery;
-
-  AppError({
-    required this.code,
-    required this.message,
-    this.userMessage,
-    required this.severity,
-    this.originalError,
-    this.stackTrace,
-    this.context,
-    this.suggestedRecovery,
-    DateTime? timestamp,
-  })  : timestamp = timestamp ?? DateTime.now(),
-        id = 'ERR_${DateTime.now().millisecondsSinceEpoch}_${code.hashCode}';
 
   /// User-friendly error message
   String getDisplayMessage() => userMessage ?? message;
@@ -75,26 +74,23 @@ typedef ErrorRecoveryHandler = Future<bool> Function(AppError error);
 
 /// Global error handling manager
 class ErrorHandlingManager {
+  factory ErrorHandlingManager() => _instance;
+
+  ErrorHandlingManager._internal();
   static final ErrorHandlingManager _instance =
       ErrorHandlingManager._internal();
 
   final _errorLog = <AppError>[];
   final _recoveryHandlers = <ErrorSeverity, List<ErrorRecoveryHandler>>{};
   final _errorCallbacks = <Function(AppError)>[];
-  int _maxErrorsKept = 100;
-
-  factory ErrorHandlingManager() {
-    return _instance;
-  }
-
-  ErrorHandlingManager._internal();
+  final int _maxErrorsKept = 100;
 
   /// Handle an error with recovery attempt
   Future<bool> handleError({
     required String code,
     required String message,
-    String? userMessage,
     required ErrorSeverity severity,
+    String? userMessage,
     dynamic originalError,
     StackTrace? stackTrace,
     Map<String, dynamic>? context,
@@ -192,9 +188,8 @@ class ErrorHandlingManager {
       getErrorsBySeverity(ErrorSeverity.critical);
 
   /// Get recent errors
-  List<AppError> getRecentErrors({int limit = 10}) {
-    return _errorLog.reversed.take(limit).toList();
-  }
+  List<AppError> getRecentErrors({int limit = 10}) =>
+      _errorLog.reversed.take(limit).toList();
 
   /// Clear error log
   void clearErrorLog() {

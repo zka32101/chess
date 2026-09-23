@@ -4,121 +4,112 @@ import '../../providers/phase_m_analytics_providers.dart';
 import '../../widgets/analytics_charts.dart';
 
 class CacheDashboard extends ConsumerWidget {
+  const CacheDashboard({Key? key, this.days = 7}) : super(key: key);
   final int days;
 
-  const CacheDashboard({Key? key, this.days = 7}) : super(key: key);
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cache Analytics'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _CacheSectionTitle(days: days),
-              const SizedBox(height: 16),
-              _CacheOverviewCards(),
-              const SizedBox(height: 24),
-              Text(
-                'Cache Details',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              _CacheAnalyticsDetail(days: days),
-            ],
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Cache Analytics'),
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _CacheSectionTitle(days: days),
+                const SizedBox(height: 16),
+                _CacheOverviewCards(),
+                const SizedBox(height: 24),
+                Text(
+                  'Cache Details',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                _CacheAnalyticsDetail(days: days),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _CacheSectionTitle extends StatelessWidget {
+  const _CacheSectionTitle({required this.days});
   final int days;
 
-  const _CacheSectionTitle({required this.days});
-
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Last $days Days',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Last $days Days',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          PopupMenuButton<int>(
+            onSelected: (result) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => CacheDashboard(days: result),
+                ),
+              );
+            },
+            itemBuilder: (context) => <PopupMenuEntry<int>>[
+              const PopupMenuItem<int>(
+                value: 7,
+                child: Text('Last 7 Days'),
               ),
-        ),
-        PopupMenuButton<int>(
-          onSelected: (int result) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => CacheDashboard(days: result),
+              const PopupMenuItem<int>(
+                value: 30,
+                child: Text('Last 30 Days'),
               ),
-            );
-          },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-            const PopupMenuItem<int>(
-              value: 7,
-              child: Text('Last 7 Days'),
-            ),
-            const PopupMenuItem<int>(
-              value: 30,
-              child: Text('Last 30 Days'),
-            ),
-            const PopupMenuItem<int>(
-              value: 90,
-              child: Text('Last 90 Days'),
-            ),
-          ],
-          child: const Chip(label: Text('View Options')),
-        ),
-      ],
-    );
-  }
+              const PopupMenuItem<int>(
+                value: 90,
+                child: Text('Last 90 Days'),
+              ),
+            ],
+            child: const Chip(label: Text('View Options')),
+          ),
+        ],
+      );
 }
 
 class _CacheOverviewCards extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: KPICard(
-            label: 'Overall Hit Rate',
-            value: '87.3',
-            unit: '%',
-            trend: '↑ 2.1%',
-            trendColor: Colors.green,
+  Widget build(BuildContext context) => const Row(
+        children: [
+          Expanded(
+            child: KPICard(
+              label: 'Overall Hit Rate',
+              value: '87.3',
+              unit: '%',
+              trend: '↑ 2.1%',
+              trendColor: Colors.green,
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: KPICard(
-            label: 'Avg Lookup Time',
-            value: '2.4',
-            unit: 'ms',
-            trend: '↓ 0.3ms',
-            trendColor: Colors.green,
+          SizedBox(width: 12),
+          Expanded(
+            child: KPICard(
+              label: 'Avg Lookup Time',
+              value: '2.4',
+              unit: 'ms',
+              trend: '↓ 0.3ms',
+              trendColor: Colors.green,
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 }
 
 class _CacheAnalyticsDetail extends ConsumerWidget {
-  final int days;
-
   const _CacheAnalyticsDetail({required this.days});
+  final int days;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -143,9 +134,9 @@ class _CacheAnalyticsDetail extends ConsumerWidget {
         return Column(
           children: [
             ...caches.map((analytics) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: CacheAnalyticsCard(analytics: analytics),
-            )),
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: CacheAnalyticsCard(analytics: analytics),
+                )),
           ],
         );
       },

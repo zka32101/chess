@@ -17,94 +17,88 @@ class AppTheme {
   static const Color darkError = Color(0xFFCF6679);
 
   /// Light theme data
-  static ThemeData lightTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      primaryColor: lightPrimary,
-      scaffoldBackgroundColor: lightBackground,
-      cardColor: lightSurface,
-      colorScheme: const ColorScheme.light(
-        primary: lightPrimary,
-        secondary: lightAccent,
-        error: lightError,
-        background: lightBackground,
-        surface: lightSurface,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: lightSurface,
-        foregroundColor: Color(0xFF212121),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      cardTheme: CardTheme(
-        color: lightSurface,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+  static ThemeData lightTheme() => ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
+        primaryColor: lightPrimary,
+        scaffoldBackgroundColor: lightBackground,
+        cardColor: lightSurface,
+        colorScheme: const ColorScheme.light(
+          primary: lightPrimary,
+          secondary: lightAccent,
+          error: lightError,
+          surface: lightSurface,
         ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: lightPrimary,
-          foregroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: lightSurface,
+          foregroundColor: Color(0xFF212121),
+          elevation: 0,
+          centerTitle: true,
+        ),
+        cardTheme: CardTheme(
+          color: lightSurface,
+          elevation: 1,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
-      ),
-      textTheme: _buildTextTheme(isDark: false),
-      inputDecorationTheme: _buildInputDecorationTheme(isDark: false),
-    );
-  }
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: lightPrimary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+        ),
+        textTheme: _buildTextTheme(isDark: false),
+        inputDecorationTheme: _buildInputDecorationTheme(isDark: false),
+      );
 
   /// Dark theme data
-  static ThemeData darkTheme() {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      primaryColor: darkPrimary,
-      scaffoldBackgroundColor: darkBackground,
-      cardColor: darkSurface,
-      colorScheme: const ColorScheme.dark(
-        primary: darkPrimary,
-        secondary: darkAccent,
-        error: darkError,
-        background: darkBackground,
-        surface: darkSurface,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: darkSurface,
-        foregroundColor: Color(0xFFFFFFFF),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      cardTheme: CardTheme(
-        color: darkSurface,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+  static ThemeData darkTheme() => ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        primaryColor: darkPrimary,
+        scaffoldBackgroundColor: darkBackground,
+        cardColor: darkSurface,
+        colorScheme: const ColorScheme.dark(
+          primary: darkPrimary,
+          secondary: darkAccent,
+          error: darkError,
+          surface: darkSurface,
         ),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: darkPrimary,
-          foregroundColor: Color(0xFF121212),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: darkSurface,
+          foregroundColor: Color(0xFFFFFFFF),
+          elevation: 0,
+          centerTitle: true,
+        ),
+        cardTheme: CardTheme(
+          color: darkSurface,
+          elevation: 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
-      ),
-      textTheme: _buildTextTheme(isDark: true),
-      inputDecorationTheme: _buildInputDecorationTheme(isDark: true),
-    );
-  }
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: darkPrimary,
+            foregroundColor: const Color(0xFF121212),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+        ),
+        textTheme: _buildTextTheme(isDark: true),
+        inputDecorationTheme: _buildInputDecorationTheme(isDark: true),
+      );
 
   /// Build consistent text theme
   static TextTheme _buildTextTheme({required bool isDark}) {
-    final baseColor = isDark ? Colors.white : Color(0xFF212121);
+    final baseColor = isDark ? Colors.white : const Color(0xFF212121);
     final subtleColor = isDark ? Colors.grey[400] : Colors.grey[600];
 
     return TextTheme(
@@ -177,36 +171,37 @@ class AppTheme {
   }
 
   /// Build input decoration theme
-  static InputDecorationTheme _buildInputDecorationTheme({required bool isDark}) {
-    return InputDecorationTheme(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+  static InputDecorationTheme _buildInputDecorationTheme(
+          {required bool isDark}) =>
+      InputDecorationTheme(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
         ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+          ),
         ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary,
-          width: 2,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? AppTheme.darkPrimary : AppTheme.lightPrimary,
+            width: 2,
+          ),
         ),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: isDark ? AppTheme.darkError : AppTheme.lightError,
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: isDark ? AppTheme.darkError : AppTheme.lightError,
+          ),
         ),
-      ),
-      filled: true,
-      fillColor: isDark ? Colors.grey[900] : Colors.grey[50],
-    );
-  }
+        filled: true,
+        fillColor: isDark ? Colors.grey[900] : Colors.grey[50],
+      );
 }

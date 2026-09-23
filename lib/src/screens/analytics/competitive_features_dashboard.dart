@@ -4,149 +4,142 @@ import '../../providers/phase_m_analytics_providers.dart';
 import '../../widgets/analytics_charts.dart';
 
 class CompetitiveFeaturesDashboard extends ConsumerWidget {
+  const CompetitiveFeaturesDashboard({Key? key, this.days = 7})
+      : super(key: key);
   final int days;
 
-  const CompetitiveFeaturesDashboard({Key? key, this.days = 7}) : super(key: key);
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Feature Analytics'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _FeatureSectionTitle(days: days),
-              const SizedBox(height: 16),
-              _FeatureOverviewCards(),
-              const SizedBox(height: 24),
-              Text(
-                'Feature Adoption Details',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              _CompetitiveFeaturesList(days: days),
-            ],
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Feature Analytics'),
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _FeatureSectionTitle(days: days),
+                const SizedBox(height: 16),
+                _FeatureOverviewCards(),
+                const SizedBox(height: 24),
+                Text(
+                  'Feature Adoption Details',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                _CompetitiveFeaturesList(days: days),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _FeatureSectionTitle extends StatelessWidget {
+  const _FeatureSectionTitle({required this.days});
   final int days;
 
-  const _FeatureSectionTitle({required this.days});
-
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Last $days Days',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+  Widget build(BuildContext context) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Last $days Days',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          PopupMenuButton<int>(
+            onSelected: (result) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CompetitiveFeaturesDashboard(days: result),
+                ),
+              );
+            },
+            itemBuilder: (context) => <PopupMenuEntry<int>>[
+              const PopupMenuItem<int>(
+                value: 7,
+                child: Text('Last 7 Days'),
               ),
-        ),
-        PopupMenuButton<int>(
-          onSelected: (int result) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => CompetitiveFeaturesDashboard(days: result),
+              const PopupMenuItem<int>(
+                value: 30,
+                child: Text('Last 30 Days'),
               ),
-            );
-          },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-            const PopupMenuItem<int>(
-              value: 7,
-              child: Text('Last 7 Days'),
-            ),
-            const PopupMenuItem<int>(
-              value: 30,
-              child: Text('Last 30 Days'),
-            ),
-            const PopupMenuItem<int>(
-              value: 90,
-              child: Text('Last 90 Days'),
-            ),
-          ],
-          child: const Chip(label: Text('View Options')),
-        ),
-      ],
-    );
-  }
+              const PopupMenuItem<int>(
+                value: 90,
+                child: Text('Last 90 Days'),
+              ),
+            ],
+            child: const Chip(label: Text('View Options')),
+          ),
+        ],
+      );
 }
 
 class _FeatureOverviewCards extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: KPICard(
-                label: 'Active Leaderboard Users',
-                value: '1,245',
-                unit: 'users',
-                trend: '↑ 12%',
-                trendColor: Colors.green,
+  Widget build(BuildContext context) => const Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: KPICard(
+                  label: 'Active Leaderboard Users',
+                  value: '1,245',
+                  unit: 'users',
+                  trend: '↑ 12%',
+                  trendColor: Colors.green,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: KPICard(
-                label: 'Challenge Participants',
-                value: '3,456',
-                unit: 'users',
-                trend: '↑ 5%',
-                trendColor: Colors.green,
+              SizedBox(width: 12),
+              Expanded(
+                child: KPICard(
+                  label: 'Challenge Participants',
+                  value: '3,456',
+                  unit: 'users',
+                  trend: '↑ 5%',
+                  trendColor: Colors.green,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: KPICard(
-                label: 'Tournament Entries',
-                value: '892',
-                unit: 'users',
-                trend: '↓ 2%',
-                trendColor: Colors.red,
+            ],
+          ),
+          SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: KPICard(
+                  label: 'Tournament Entries',
+                  value: '892',
+                  unit: 'users',
+                  trend: '↓ 2%',
+                  trendColor: Colors.red,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: KPICard(
-                label: 'Avg Interactions',
-                value: '4.2',
-                unit: 'per user',
-                trend: '↑ 0.3',
-                trendColor: Colors.green,
+              SizedBox(width: 12),
+              Expanded(
+                child: KPICard(
+                  label: 'Avg Interactions',
+                  value: '4.2',
+                  unit: 'per user',
+                  trend: '↑ 0.3',
+                  trendColor: Colors.green,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+            ],
+          ),
+        ],
+      );
 }
 
 class _CompetitiveFeaturesList extends ConsumerWidget {
-  final int days;
-
   const _CompetitiveFeaturesList({required this.days});
+  final int days;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -171,9 +164,9 @@ class _CompetitiveFeaturesList extends ConsumerWidget {
         return Column(
           children: [
             ...features.map((stats) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: FeatureAdoptionCard(stats: stats),
-            )),
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: FeatureAdoptionCard(stats: stats),
+                )),
           ],
         );
       },

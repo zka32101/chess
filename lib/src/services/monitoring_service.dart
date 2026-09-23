@@ -5,6 +5,9 @@ import 'package:flutter/foundation.dart';
 
 /// Service for comprehensive post-launch monitoring
 class MonitoringService {
+  // MB
+
+  MonitoringService._();
   static final MonitoringService _instance = MonitoringService._();
   final FirebaseCrashlytics _crashlytics = FirebaseCrashlytics.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -20,9 +23,7 @@ class MonitoringService {
   static const int STARTUP_TARGET = 2500; // 2.5 seconds
   static const int NAVIGATION_TARGET = 300;
   static const int MOVE_EXECUTION_TARGET = 50;
-  static const int MEMORY_TARGET = 120; // MB
-
-  MonitoringService._();
+  static const int MEMORY_TARGET = 120;
 
   static MonitoringService get instance => _instance;
 
@@ -243,7 +244,7 @@ class MonitoringService {
         (sum, doc) => sum + (doc['durationMs'] as int? ?? 0),
       );
 
-      return (total / query.docs.length).toInt();
+      return total ~/ query.docs.length;
     } catch (e) {
       debugPrint('Error getting average metric: $e');
       return 0;
@@ -274,8 +275,8 @@ class MonitoringService {
         startupTimeMs: 0,
         navigationTimeMs: 0,
         moveExecutionTimeMs: 0,
-        crashFreeRate: 1.0,
-        anrRate: 0.0,
+        crashFreeRate: 1,
+        anrRate: 0,
         period: period,
       );
     }
@@ -361,13 +362,6 @@ class MonitoringService {
 
 /// Performance summary data class
 class PerformanceSummary {
-  final int startupTimeMs;
-  final int navigationTimeMs;
-  final int moveExecutionTimeMs;
-  final double crashFreeRate;
-  final double anrRate;
-  final Duration period;
-
   PerformanceSummary({
     required this.startupTimeMs,
     required this.navigationTimeMs,
@@ -376,6 +370,12 @@ class PerformanceSummary {
     required this.anrRate,
     required this.period,
   });
+  final int startupTimeMs;
+  final int navigationTimeMs;
+  final int moveExecutionTimeMs;
+  final double crashFreeRate;
+  final double anrRate;
+  final Duration period;
 
   bool get startupExceedsTarget =>
       startupTimeMs > MonitoringService.STARTUP_TARGET;

@@ -4,15 +4,14 @@ import 'firestore_result_cache_service.dart';
 
 /// Comprehensive analytics dashboard service for player statistics.
 class AnalyticsDashboardService {
+  factory AnalyticsDashboardService() => _instance;
+
+  AnalyticsDashboardService._internal();
   static final AnalyticsDashboardService _instance =
       AnalyticsDashboardService._internal();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirestoreResultCacheService _cache = FirestoreResultCacheService();
-
-  factory AnalyticsDashboardService() => _instance;
-
-  AnalyticsDashboardService._internal();
 
   /// Get comprehensive player analytics dashboard
   Future<PlayerAnalyticsDashboard> getPlayerDashboard(String userId) async {
@@ -60,9 +59,9 @@ class AnalyticsDashboardService {
       final data = game.data();
       final result = data['result'] as String?;
 
-      if (result == 'win')
+      if (result == 'win') {
         wins++;
-      else if (result == 'loss')
+      } else if (result == 'loss')
         losses++;
       else if (result == 'draw') draws++;
 
@@ -100,8 +99,7 @@ class AnalyticsDashboardService {
       currentWinStreak: (data['currentWinStreak'] as int?) ?? 0,
       longestWinStreak: (data['longestWinStreak'] as int?) ?? 0,
       longestStreakDate:
-          ((data['longestStreakDate'] as Timestamp?)?.toDate()) ??
-              DateTime.now(),
+          (data['longestStreakDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
       currentLossStreak: (data['currentLossStreak'] as int?) ?? 0,
       longestLossStreak: (data['longestLossStreak'] as int?) ?? 0,
     );

@@ -11,14 +11,6 @@ enum SecuritySeverity {
 
 /// Security audit finding
 class SecurityFinding {
-  final String id;
-  final String title;
-  final String description;
-  final SecuritySeverity severity;
-  final String? mitigation;
-  final String? cveReference;
-  final DateTime foundAt;
-
   SecurityFinding({
     required this.title,
     required this.description,
@@ -28,6 +20,13 @@ class SecurityFinding {
     DateTime? foundAt,
   })  : id = 'SEC_${DateTime.now().millisecondsSinceEpoch}',
         foundAt = foundAt ?? DateTime.now();
+  final String id;
+  final String title;
+  final String description;
+  final SecuritySeverity severity;
+  final String? mitigation;
+  final String? cveReference;
+  final DateTime foundAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -45,15 +44,12 @@ class SecurityFinding {
 
 /// Comprehensive security auditor
 class SecurityAuditor {
+  factory SecurityAuditor() => _instance;
+
+  SecurityAuditor._internal();
   static final SecurityAuditor _instance = SecurityAuditor._internal();
 
   final _findings = <SecurityFinding>[];
-
-  factory SecurityAuditor() {
-    return _instance;
-  }
-
-  SecurityAuditor._internal();
 
   /// Run full security audit
   Future<void> runFullAudit() async {
@@ -70,7 +66,8 @@ class SecurityAuditor {
     await _auditDependencies();
     await _auditLogging();
 
-    debugPrint('[SecurityAuditor] Security audit complete. Findings: ${_findings.length}');
+    debugPrint(
+        '[SecurityAuditor] Security audit complete. Findings: ${_findings.length}');
   }
 
   /// Audit authentication
@@ -79,9 +76,11 @@ class SecurityAuditor {
       _findings.add(
         SecurityFinding(
           title: 'Firebase Auth Configuration',
-          description: 'Verify Firebase Authentication is configured with strong security rules',
+          description:
+              'Verify Firebase Authentication is configured with strong security rules',
           severity: SecuritySeverity.high,
-          mitigation: 'Enable MFA, enforce strong passwords, implement rate limiting',
+          mitigation:
+              'Enable MFA, enforce strong passwords, implement rate limiting',
         ),
       );
 
@@ -99,7 +98,8 @@ class SecurityAuditor {
           title: 'Data Encryption in Transit',
           description: 'All network traffic should use HTTPS/TLS 1.2+',
           severity: SecuritySeverity.critical,
-          mitigation: 'Enable HTTPS only, pin SSL certificates for critical endpoints',
+          mitigation:
+              'Enable HTTPS only, pin SSL certificates for critical endpoints',
         ),
       );
 
@@ -142,18 +142,22 @@ class SecurityAuditor {
       _findings.add(
         SecurityFinding(
           title: 'API Keys and Secrets',
-          description: 'No hardcoded secrets, API keys, or tokens in source code',
+          description:
+              'No hardcoded secrets, API keys, or tokens in source code',
           severity: SecuritySeverity.critical,
-          mitigation: 'Use environment variables or secure key management service',
+          mitigation:
+              'Use environment variables or secure key management service',
         ),
       );
 
       _findings.add(
         SecurityFinding(
           title: 'Firebase Configuration',
-          description: 'Firebase configuration should not expose sensitive credentials',
+          description:
+              'Firebase configuration should not expose sensitive credentials',
           severity: SecuritySeverity.high,
-          mitigation: 'Review firebase_options.dart permissions and access controls',
+          mitigation:
+              'Review firebase_options.dart permissions and access controls',
         ),
       );
 
@@ -180,7 +184,8 @@ class SecurityAuditor {
           title: 'Secure Headers',
           description: 'Implement security headers for web APIs',
           severity: SecuritySeverity.medium,
-          mitigation: 'Add HSTS, CSP, X-Frame-Options, X-Content-Type-Options headers',
+          mitigation:
+              'Add HSTS, CSP, X-Frame-Options, X-Content-Type-Options headers',
         ),
       );
 
@@ -196,7 +201,8 @@ class SecurityAuditor {
       _findings.add(
         SecurityFinding(
           title: 'App Permissions',
-          description: 'Request only necessary permissions at app initialization',
+          description:
+              'Request only necessary permissions at app initialization',
           severity: SecuritySeverity.medium,
           mitigation: 'Review and minimize requested permissions in manifest',
         ),
@@ -207,7 +213,8 @@ class SecurityAuditor {
           title: 'Secure File Storage',
           description: 'Sensitive files stored in app-private directories',
           severity: SecuritySeverity.high,
-          mitigation: 'Use getApplicationDocumentsDirectory() for sensitive data',
+          mitigation:
+              'Use getApplicationDocumentsDirectory() for sensitive data',
         ),
       );
 
@@ -225,7 +232,8 @@ class SecurityAuditor {
           title: 'Dependency Vulnerabilities',
           description: 'Scan dependencies for known security vulnerabilities',
           severity: SecuritySeverity.high,
-          mitigation: 'Run `dart pub outdated --up-to-date` and update vulnerable packages',
+          mitigation:
+              'Run `dart pub outdated --up-to-date` and update vulnerable packages',
         ),
       );
 
@@ -241,7 +249,8 @@ class SecurityAuditor {
       _findings.add(
         SecurityFinding(
           title: 'Secure Logging',
-          description: 'Do not log sensitive information (passwords, tokens, PII)',
+          description:
+              'Do not log sensitive information (passwords, tokens, PII)',
           severity: SecuritySeverity.high,
           mitigation: 'Audit logging statements and remove sensitive data logs',
         ),
@@ -273,7 +282,8 @@ class SecurityAuditor {
     final bySeverity = <SecuritySeverity, int>{};
 
     for (final severity in SecuritySeverity.values) {
-      bySeverity[severity] = _findings.where((f) => f.severity == severity).length;
+      bySeverity[severity] =
+          _findings.where((f) => f.severity == severity).length;
     }
 
     buffer.writeln('''
@@ -298,7 +308,8 @@ class SecurityAuditor {
     ''');
 
     for (final finding in _findings) {
-      final severity = finding.severity.toString().split('.').last.toUpperCase();
+      final severity =
+          finding.severity.toString().split('.').last.toUpperCase();
       buffer.writeln('║ [$severity] ${finding.title}');
       buffer.writeln('║   Description: ${finding.description}');
       if (finding.mitigation != null) {

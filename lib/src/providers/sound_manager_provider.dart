@@ -4,10 +4,9 @@ import 'sound_preferences_provider.dart';
 
 /// Sound manager that combines sound service with user preferences
 class SoundManager {
+  SoundManager(this._soundService, this._preferences);
   final SoundService _soundService;
   final SoundPreferences _preferences;
-
-  SoundManager(this._soundService, this._preferences);
 
   /// Play a sound effect if it's allowed by user preferences
   Future<void> play(SoundEffect sound) async {
@@ -40,14 +39,11 @@ class SoundManager {
   }
 
   /// Check if sound is enabled for a category
-  bool isCategoryEnabled(SoundCategory category) {
-    return _preferences.isCategoryEnabled(category);
-  }
+  bool isCategoryEnabled(SoundCategory category) =>
+      _preferences.isCategoryEnabled(category);
 
   /// Check if any sound is enabled
-  bool hasAnySoundEnabled() {
-    return _preferences.hasAnySoundEnabled();
-  }
+  bool hasAnySoundEnabled() => _preferences.hasAnySoundEnabled();
 }
 
 /// Sound manager provider that handles all sound playback

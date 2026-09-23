@@ -8,20 +8,14 @@ import '../services/performance_trend_service.dart';
 /// Provides reactive access to player comparison, rating prediction, and performance analysis
 
 // Service Providers
-final playerComparisonServiceProvider =
-    Provider<PlayerComparisonService>((ref) {
-  return PlayerComparisonService(firestore: FirebaseFirestore.instance);
-});
+final playerComparisonServiceProvider = Provider<PlayerComparisonService>(
+    (ref) => PlayerComparisonService(firestore: FirebaseFirestore.instance));
 
-final ratingPredictionServiceProvider =
-    Provider<RatingPredictionService>((ref) {
-  return RatingPredictionService(firestore: FirebaseFirestore.instance);
-});
+final ratingPredictionServiceProvider = Provider<RatingPredictionService>(
+    (ref) => RatingPredictionService(firestore: FirebaseFirestore.instance));
 
-final performanceTrendServiceProvider =
-    Provider<PerformanceTrendService>((ref) {
-  return PerformanceTrendService(firestore: FirebaseFirestore.instance);
-});
+final performanceTrendServiceProvider = Provider<PerformanceTrendService>(
+    (ref) => PerformanceTrendService(firestore: FirebaseFirestore.instance));
 
 // Player Comparison Providers
 
@@ -118,7 +112,7 @@ final playerAnalyticsDashboardProvider =
     (playerId: playerId, daysAhead: 30),
   ));
 
-  return await Future.wait([
+  return Future.wait([
     profileAsync.when(
       data: (data) async => data,
       error: (err, st) => throw err,
@@ -139,27 +133,24 @@ final playerAnalyticsDashboardProvider =
       error: (err, st) => throw err,
       loading: () => throw Exception('Loading prediction'),
     ),
-  ]).then((results) {
-    return PlayerAnalyticsDashboard(
-      profile: results[0] as PlayerProfile,
-      trends: results[1] as PerformanceTrends,
-      volatility: results[2] as RatingVolatility,
-      forecast: results[3] as RatingForecast,
-    );
-  });
+  ]).then((results) => PlayerAnalyticsDashboard(
+        profile: results[0] as PlayerProfile,
+        trends: results[1] as PerformanceTrends,
+        volatility: results[2] as RatingVolatility,
+        forecast: results[3] as RatingForecast,
+      ));
 });
 
 /// Combined data class for complete player analytics dashboard
 class PlayerAnalyticsDashboard {
-  final PlayerProfile profile;
-  final PerformanceTrends trends;
-  final RatingVolatility volatility;
-  final RatingForecast forecast;
-
   PlayerAnalyticsDashboard({
     required this.profile,
     required this.trends,
     required this.volatility,
     required this.forecast,
   });
+  final PlayerProfile profile;
+  final PerformanceTrends trends;
+  final RatingVolatility volatility;
+  final RatingForecast forecast;
 }

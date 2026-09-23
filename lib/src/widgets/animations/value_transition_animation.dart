@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 
 /// Animates value changes with smooth transitions
 class ValueTransitionAnimation extends StatefulWidget {
+  const ValueTransitionAnimation({
+    required this.value,
+    required this.builder,
+    Key? key,
+    this.duration = const Duration(milliseconds: 300),
+    this.curve = Curves.easeInOut,
+  }) : super(key: key);
   final int value;
   final Widget Function(BuildContext context, int value) builder;
   final Duration duration;
   final Curve curve;
-
-  const ValueTransitionAnimation({
-    Key? key,
-    required this.value,
-    required this.builder,
-    this.duration = const Duration(milliseconds: 300),
-    this.curve = Curves.easeInOut,
-  }) : super(key: key);
 
   @override
   State<ValueTransitionAnimation> createState() =>
@@ -38,7 +37,7 @@ class _ValueTransitionAnimationState extends State<ValueTransitionAnimation>
       vsync: this,
     );
 
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _animation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: widget.curve),
     );
   }
@@ -63,16 +62,14 @@ class _ValueTransitionAnimationState extends State<ValueTransitionAnimation>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        final interpolatedValue = (_previousValue +
-                (_currentValue - _previousValue) * _animation.value)
-            .toInt();
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          final interpolatedValue = (_previousValue +
+                  (_currentValue - _previousValue) * _animation.value)
+              .toInt();
 
-        return widget.builder(context, interpolatedValue);
-      },
-    );
-  }
+          return widget.builder(context, interpolatedValue);
+        },
+      );
 }

@@ -92,10 +92,9 @@ class MaterialValues {
 
 /// Position evaluator for chess positions
 class PositionEvaluator {
+  PositionEvaluator(this.chess, this.difficulty);
   final ChessEngineService chess;
   final AIDifficulty difficulty;
-
-  PositionEvaluator(this.chess, this.difficulty);
 
   /// Evaluate the current position
   /// Positive score = better for white, negative = better for black
@@ -242,6 +241,9 @@ class PositionEvaluator {
 
 /// AI opponent engine using minimax with alpha-beta pruning
 class AIOpponentEngine {
+  AIOpponentEngine(this.chess, this.difficulty) {
+    _evaluator = PositionEvaluator(chess, difficulty);
+  }
   final ChessEngineService chess;
   final AIDifficulty difficulty;
   late final PositionEvaluator _evaluator;
@@ -252,10 +254,6 @@ class AIOpponentEngine {
 
   // Random number generator for opening book move selection
   final Random _random = Random();
-
-  AIOpponentEngine(this.chess, this.difficulty) {
-    _evaluator = PositionEvaluator(chess, difficulty);
-  }
 
   /// Get the best move for the current position
   /// Returns move in UCI notation (e.g., "e2e4")
@@ -286,7 +284,7 @@ class AIOpponentEngine {
         if (difficulty == AIDifficulty.easy) {
           // Easy: pick randomly from first 3 moves (more variety)
           final moveIndex = _random
-              .nextInt((legalBookMoves.length < 3 ? legalBookMoves.length : 3));
+              .nextInt(legalBookMoves.length < 3 ? legalBookMoves.length : 3);
           return legalBookMoves[moveIndex];
         } else {
           // Medium/Hard: mostly play the best move, sometimes alternatives
@@ -464,13 +462,11 @@ class AIOpponentEngine {
   }
 
   /// Get debug info about the search
-  Map<String, dynamic> getSearchStats() {
-    return {
-      'nodesEvaluated': _nodesEvaluated,
-      'depth': difficulty.searchDepth,
-      'difficulty': difficulty.displayName,
-    };
-  }
+  Map<String, dynamic> getSearchStats() => {
+        'nodesEvaluated': _nodesEvaluated,
+        'depth': difficulty.searchDepth,
+        'difficulty': difficulty.displayName,
+      };
 
   /// Clear transposition table
   void clearCache() {

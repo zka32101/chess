@@ -8,14 +8,11 @@ import '../services/bracket_generation_service.dart';
 
 // Service Providers
 final tournamentManagementServiceProvider =
-    Provider<TournamentManagementService>((ref) {
-  return TournamentManagementService(firestore: FirebaseFirestore.instance);
-});
+    Provider<TournamentManagementService>((ref) =>
+        TournamentManagementService(firestore: FirebaseFirestore.instance));
 
-final bracketGenerationServiceProvider =
-    Provider<BracketGenerationService>((ref) {
-  return BracketGenerationService(firestore: FirebaseFirestore.instance);
-});
+final bracketGenerationServiceProvider = Provider<BracketGenerationService>(
+    (ref) => BracketGenerationService(firestore: FirebaseFirestore.instance));
 
 // Tournament Providers
 
@@ -80,10 +77,9 @@ final tournamentOperationNotifierProvider = StateNotifierProvider<
 
 class TournamentCreationNotifier
     extends StateNotifier<TournamentCreationState> {
-  final TournamentManagementService _service;
-
   TournamentCreationNotifier(this._service)
       : super(const TournamentCreationState());
+  final TournamentManagementService _service;
 
   Future<void> createTournament({
     required String name,
@@ -126,11 +122,10 @@ class TournamentCreationNotifier
 
 class TournamentOperationNotifier
     extends StateNotifier<TournamentOperationState> {
-  final TournamentManagementService _managementService;
-  final BracketGenerationService _bracketService;
-
   TournamentOperationNotifier(this._managementService, this._bracketService)
       : super(const TournamentOperationState());
+  final TournamentManagementService _managementService;
+  final BracketGenerationService _bracketService;
 
   Future<void> registerParticipant({
     required String tournamentId,
@@ -210,49 +205,45 @@ class TournamentOperationNotifier
 // State classes
 
 class TournamentCreationState {
-  final bool isLoading;
-  final Tournament? createdTournament;
-  final String? error;
-
   const TournamentCreationState({
     this.isLoading = false,
     this.createdTournament,
     this.error,
   });
+  final bool isLoading;
+  final Tournament? createdTournament;
+  final String? error;
 
   TournamentCreationState copyWith({
     bool? isLoading,
     Tournament? createdTournament,
     String? error,
-  }) {
-    return TournamentCreationState(
-      isLoading: isLoading ?? this.isLoading,
-      createdTournament: createdTournament ?? this.createdTournament,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      TournamentCreationState(
+        isLoading: isLoading ?? this.isLoading,
+        createdTournament: createdTournament ?? this.createdTournament,
+        error: error ?? this.error,
+      );
 }
 
 class TournamentOperationState {
-  final bool isLoading;
-  final String? lastOperation;
-  final String? error;
-
   const TournamentOperationState({
     this.isLoading = false,
     this.lastOperation,
     this.error,
   });
+  final bool isLoading;
+  final String? lastOperation;
+  final String? error;
 
   TournamentOperationState copyWith({
     bool? isLoading,
     String? lastOperation,
     String? error,
-  }) {
-    return TournamentOperationState(
-      isLoading: isLoading ?? this.isLoading,
-      lastOperation: lastOperation ?? this.lastOperation,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      TournamentOperationState(
+        isLoading: isLoading ?? this.isLoading,
+        lastOperation: lastOperation ?? this.lastOperation,
+        error: error ?? this.error,
+      );
 }

@@ -1,12 +1,6 @@
 import 'dart:async';
 
 class PerformanceMetric {
-  final String name;
-  final Duration duration;
-  final DateTime timestamp;
-  final bool success;
-  final String? error;
-
   PerformanceMetric({
     required this.name,
     required this.duration,
@@ -14,6 +8,11 @@ class PerformanceMetric {
     required this.success,
     this.error,
   });
+  final String name;
+  final Duration duration;
+  final DateTime timestamp;
+  final bool success;
+  final String? error;
 
   @override
   String toString() =>
@@ -21,13 +20,12 @@ class PerformanceMetric {
 }
 
 class PerformanceMonitor {
+  factory PerformanceMonitor() => _instance;
+  PerformanceMonitor._internal({this.maxMetrics = 1000});
   static final PerformanceMonitor _instance = PerformanceMonitor._internal();
   final List<PerformanceMetric> _metrics = [];
   final int maxMetrics;
   final Map<String, Stopwatch> _activeTimers = {};
-
-  factory PerformanceMonitor() => _instance;
-  PerformanceMonitor._internal({this.maxMetrics = 1000});
 
   static PerformanceMonitor get instance => _instance;
 
@@ -92,27 +90,25 @@ class PerformanceMonitor {
   }
 
   /// Get metrics for specific operation
-  List<PerformanceMetric> getMetricsForOperation(String operationName) {
-    return _metrics.where((m) => m.name == operationName).toList();
-  }
+  List<PerformanceMetric> getMetricsForOperation(String operationName) =>
+      _metrics.where((m) => m.name == operationName).toList();
 
   /// Get average duration for operation
   Duration getAverageDuration(String operationName) {
     final operationMetrics = getMetricsForOperation(operationName);
     if (operationMetrics.isEmpty) return Duration.zero;
 
-    final totalMs = operationMetrics
-        .fold<int>(0, (sum, m) => sum + m.duration.inMilliseconds);
+    final totalMs = operationMetrics.fold<int>(
+        0, (sum, m) => sum + m.duration.inMilliseconds);
     return Duration(milliseconds: totalMs ~/ operationMetrics.length);
   }
 
   /// Get success rate for operation
   double getSuccessRate(String operationName) {
     final operationMetrics = getMetricsForOperation(operationName);
-    if (operationMetrics.isEmpty) return 0.0;
+    if (operationMetrics.isEmpty) return 0;
 
-    final successCount =
-        operationMetrics.where((m) => m.success).length;
+    final successCount = operationMetrics.where((m) => m.success).length;
     return successCount / operationMetrics.length;
   }
 
@@ -120,11 +116,9 @@ class PerformanceMonitor {
   List<PerformanceMetric> getAllMetrics() => List.from(_metrics);
 
   /// Get recent metrics (last N)
-  List<PerformanceMetric> getRecentMetrics(int count) {
-    return _metrics.sublist(
-      (_metrics.length - count).clamp(0, _metrics.length),
-    );
-  }
+  List<PerformanceMetric> getRecentMetrics(int count) => _metrics.sublist(
+        (_metrics.length - count).clamp(0, _metrics.length),
+      );
 
   /// Get performance summary
   Map<String, PerformanceSummary> getSummary() {
@@ -138,11 +132,11 @@ class PerformanceMonitor {
         callCount: metrics.length,
         averageDuration: getAverageDuration(name),
         minDuration: metrics.map((m) => m.duration).reduce(
-          (a, b) => a < b ? a : b,
-        ),
+              (a, b) => a < b ? a : b,
+            ),
         maxDuration: metrics.map((m) => m.duration).reduce(
-          (a, b) => a > b ? a : b,
-        ),
+              (a, b) => a > b ? a : b,
+            ),
         successRate: getSuccessRate(name),
       );
     }
@@ -164,19 +158,11 @@ class PerformanceMonitor {
   }
 
   /// Get failed operations
-  List<PerformanceMetric> getFailedOperations() {
-    return _metrics.where((m) => !m.success).toList();
-  }
+  List<PerformanceMetric> getFailedOperations() =>
+      _metrics.where((m) => !m.success).toList();
 }
 
 class PerformanceSummary {
-  final String operationName;
-  final int callCount;
-  final Duration averageDuration;
-  final Duration minDuration;
-  final Duration maxDuration;
-  final double successRate;
-
   PerformanceSummary({
     required this.operationName,
     required this.callCount,
@@ -185,6 +171,12 @@ class PerformanceSummary {
     required this.maxDuration,
     required this.successRate,
   });
+  final String operationName;
+  final int callCount;
+  final Duration averageDuration;
+  final Duration minDuration;
+  final Duration maxDuration;
+  final double successRate;
 
   @override
   String toString() =>
@@ -192,27 +184,25 @@ class PerformanceSummary {
 }
 
 class PerformanceThreshold {
-  final String operationName;
-  final Duration warningThreshold;
-  final Duration errorThreshold;
-
   PerformanceThreshold({
     required this.operationName,
     required this.warningThreshold,
     required this.errorThreshold,
   });
+  final String operationName;
+  final Duration warningThreshold;
+  final Duration errorThreshold;
 }
 
 class PerformanceAlert {
-  final PerformanceThreshold threshold;
-  final PerformanceMetric metric;
-  final AlertLevel level;
-
   PerformanceAlert({
     required this.threshold,
     required this.metric,
     required this.level,
   });
+  final PerformanceThreshold threshold;
+  final PerformanceMetric metric;
+  final AlertLevel level;
 
   @override
   String toString() =>

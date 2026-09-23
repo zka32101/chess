@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/models/player_leaderboard.dart';
+import '../models/player_leaderboard.dart';
 
 /// Leaderboard screen displaying player rankings
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -88,57 +88,53 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Leaderboard'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          _buildFilterChips(),
-          Expanded(
-            child: _buildLeaderboardList(),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Leaderboard'),
+          centerTitle: true,
+          elevation: 0,
+        ),
+        body: Column(
+          children: [
+            _buildFilterChips(),
+            Expanded(
+              child: _buildLeaderboardList(),
+            ),
+          ],
+        ),
+      );
 
   /// Build filter chips
-  Widget _buildFilterChips() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: LeaderboardFilter.values.map((filter) {
-            final isSelected = filter == selectedFilter;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: FilterChip(
-                label: Text(filter.label),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    selectedFilter = filter;
-                  });
-                },
-                backgroundColor: Colors.grey[200],
-                selectedColor: Colors.blue[100],
-                labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
-                      color: isSelected ? Colors.blue[900] : Colors.grey[700],
-                    ),
-              ),
-            );
-          }).toList(),
+  Widget _buildFilterChips() => Container(
+        padding: const EdgeInsets.all(12),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: LeaderboardFilter.values.map((filter) {
+              final isSelected = filter == selectedFilter;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: FilterChip(
+                  label: Text(filter.label),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      selectedFilter = filter;
+                    });
+                  },
+                  backgroundColor: Colors.grey[200],
+                  selectedColor: Colors.blue[100],
+                  labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w400,
+                        color: isSelected ? Colors.blue[900] : Colors.grey[700],
+                      ),
+                ),
+              );
+            }).toList(),
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Build leaderboard list
   Widget _buildLeaderboardList() {
@@ -269,22 +265,20 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   /// Build stat badge
-  Widget _buildStatBadge(String label, int count, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(3),
-      ),
-      child: Text(
-        '$label$count',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
-      ),
-    );
-  }
+  Widget _buildStatBadge(String label, int count, Color color) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(3),
+        ),
+        child: Text(
+          '$label$count',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+      );
 
   /// Get rank badge color
   Color _getRankBadgeColor(int rank) {
@@ -294,7 +288,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       case 2:
         return Colors.grey[400]!; // Silver
       case 3:
-        return Color(0xFFCD7F32); // Bronze
+        return const Color(0xFFCD7F32); // Bronze
       default:
         return Colors.blue;
     }
@@ -303,12 +297,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
 /// Player profile preview (tap on leaderboard entry)
 class PlayerProfilePreview extends StatelessWidget {
-  final LeaderboardEntry entry;
-
   const PlayerProfilePreview({
-    Key? key,
     required this.entry,
+    Key? key,
   }) : super(key: key);
+  final LeaderboardEntry entry;
 
   @override
   Widget build(BuildContext context) {
@@ -336,39 +329,38 @@ class PlayerProfilePreview extends StatelessWidget {
   }
 
   /// Build profile header
-  Widget _buildProfileHeader() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              entry.playerName,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.blue[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '#${entry.rank} - ${entry.rating} Rating',
+  Widget _buildProfileHeader() => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Text(
+                entry.playerName,
                 style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.blue,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '#${entry.rank} - ${entry.rating} Rating',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Build stats grid
   Widget _buildStatsGrid() {
@@ -392,80 +384,74 @@ class PlayerProfilePreview extends StatelessWidget {
   }
 
   /// Build stat card
-  Widget _buildStatCard(String label, String value, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build detailed stats
-  Widget _buildDetailedStats() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+  Widget _buildStatCard(String label, String value, Color color) => Container(
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Game Statistics',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 12,
+              ),
             ),
-            const SizedBox(height: 12),
-            _buildStatRow('Total Games', entry.totalGamesPlayed.toString()),
-            _buildStatRow('Wins',
-                '${entry.wins} (${(entry.wins / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
-            _buildStatRow('Draws',
-                '${entry.draws} (${(entry.draws / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
-            _buildStatRow('Losses',
-                '${entry.losses} (${(entry.losses / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
-            const SizedBox(height: 12),
-            _buildStatRow('Rating', entry.rating.toString()),
-            _buildStatRow('Rank', '#${entry.rank}'),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
           ],
         ),
-      ),
-    );
-  }
+      );
+
+  /// Build detailed stats
+  Widget _buildDetailedStats() => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Game Statistics',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              _buildStatRow('Total Games', entry.totalGamesPlayed.toString()),
+              _buildStatRow('Wins',
+                  '${entry.wins} (${(entry.wins / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
+              _buildStatRow('Draws',
+                  '${entry.draws} (${(entry.draws / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
+              _buildStatRow('Losses',
+                  '${entry.losses} (${(entry.losses / entry.totalGamesPlayed * 100).toStringAsFixed(1)}%)'),
+              const SizedBox(height: 12),
+              _buildStatRow('Rating', entry.rating.toString()),
+              _buildStatRow('Rank', '#${entry.rank}'),
+            ],
+          ),
+        ),
+      );
 
   /// Build stat row
-  Widget _buildStatRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildStatRow(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label),
+            Text(
+              value,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      );
 }

@@ -3,13 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../models/phase_k_models.dart';
 
 class FriendService {
+  factory FriendService() => _instance;
+  FriendService._internal();
   static final FriendService _instance = FriendService._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Map<String, List<Friend>> _friendsCache = {};
   final Map<String, List<FriendRequest>> _requestsCache = {};
-
-  factory FriendService() => _instance;
-  FriendService._internal();
 
   static FriendService get instance => _instance;
 
@@ -27,9 +26,8 @@ class FriendService {
           .orderBy('connectedAt', descending: true)
           .get();
 
-      final friends = snapshot.docs
-          .map((doc) => Friend.fromJson(doc.data()))
-          .toList();
+      final friends =
+          snapshot.docs.map((doc) => Friend.fromJson(doc.data())).toList();
 
       _friendsCache[userId] = friends;
       return friends;
@@ -122,10 +120,7 @@ class FriendService {
             });
 
         // Add to friend's friends
-        final userData = await _firestore
-            .collection('users')
-            .doc(userId)
-            .get();
+        final userData = await _firestore.collection('users').doc(userId).get();
 
         transaction.set(
             _firestore
@@ -389,9 +384,9 @@ class FriendService {
             .collection('list')
             .doc(userId)
             .update({
-              'isOnline': isOnline,
-              'lastSeen': isOnline ? null : FieldValue.serverTimestamp(),
-            });
+          'isOnline': isOnline,
+          'lastSeen': isOnline ? null : FieldValue.serverTimestamp(),
+        });
       }
     } catch (e) {
       debugPrint('Error updating online status: $e');

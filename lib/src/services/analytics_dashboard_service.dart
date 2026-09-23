@@ -4,12 +4,11 @@ import 'package:flutter/foundation.dart';
 
 /// Service for comprehensive analytics dashboard
 class AnalyticsDashboardService {
+  AnalyticsDashboardService._();
   static final AnalyticsDashboardService _instance =
       AnalyticsDashboardService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  AnalyticsDashboardService._();
 
   static AnalyticsDashboardService get instance => _instance;
 
@@ -68,7 +67,7 @@ class AnalyticsDashboardService {
       );
     } catch (e) {
       debugPrint('Error calculating retention: $e');
-      return RetentionMetrics(d1: 0.0, d7: 0.0, d14: 0.0, d30: 0.0);
+      return RetentionMetrics(d1: 0, d7: 0, d14: 0, d30: 0);
     }
   }
 
@@ -95,7 +94,7 @@ class AnalyticsDashboardService {
     } catch (e) {
       debugPrint('Error calculating conversion: $e');
       return ConversionMetrics(
-          totalUsers: 0, subscribers: 0, conversionRate: 0.0);
+          totalUsers: 0, subscribers: 0, conversionRate: 0);
     }
   }
 
@@ -133,7 +132,7 @@ class AnalyticsDashboardService {
       );
     } catch (e) {
       debugPrint('Error calculating crash metrics: $e');
-      return CrashMetrics(crashes: 0, sessions: 0, crashFreeRate: 1.0);
+      return CrashMetrics(crashes: 0, sessions: 0, crashFreeRate: 1);
     }
   }
 
@@ -154,7 +153,7 @@ class AnalyticsDashboardService {
       if (sessions.docs.isEmpty) {
         return EngagementMetrics(
           avgSessionLength: const Duration(),
-          sessionsPerDay: 0.0,
+          sessionsPerDay: 0,
           totalSessions: 0,
         );
       }
@@ -165,8 +164,8 @@ class AnalyticsDashboardService {
       }
 
       return EngagementMetrics(
-        avgSessionLength: Duration(
-            milliseconds: (totalDuration / sessions.docs.length).toInt()),
+        avgSessionLength:
+            Duration(milliseconds: totalDuration ~/ sessions.docs.length),
         sessionsPerDay: sessions.docs.length / 7.0,
         totalSessions: sessions.docs.length,
       );
@@ -174,7 +173,7 @@ class AnalyticsDashboardService {
       debugPrint('Error calculating engagement: $e');
       return EngagementMetrics(
         avgSessionLength: const Duration(),
-        sessionsPerDay: 0.0,
+        sessionsPerDay: 0,
         totalSessions: 0,
       );
     }
@@ -257,7 +256,7 @@ class AnalyticsDashboardService {
     } catch (e) {
       debugPrint('Error analyzing funnel: $e');
       return FunnelAnalysis(
-          funnelName: funnelName, steps: {}, conversionRate: 0.0);
+          funnelName: funnelName, steps: {}, conversionRate: 0);
     }
   }
 
@@ -266,7 +265,7 @@ class AnalyticsDashboardService {
     final stages = ['view', 'interested', 'action', 'conversion'];
     final firstStageCount = steps['view'] ?? 0;
 
-    if (firstStageCount == 0) return 0.0;
+    if (firstStageCount == 0) return 0;
 
     final lastStageCount = steps['conversion'] ?? 0;
     return lastStageCount / firstStageCount;
@@ -338,9 +337,9 @@ class AnalyticsDashboardService {
       debugPrint('Error getting KPI trend: $e');
       return KPITrend(
         kpiName: kpiName,
-        currentValue: 0.0,
-        previousValue: 0.0,
-        percentageChange: 0.0,
+        currentValue: 0,
+        previousValue: 0,
+        percentageChange: 0,
         trend: 'flat',
       );
     }
@@ -349,15 +348,6 @@ class AnalyticsDashboardService {
 
 /// Dashboard summary data class
 class DashboardSummary {
-  final DateTime timestamp;
-  final int installations;
-  final int activeUsers;
-  final RetentionMetrics retention;
-  final ConversionMetrics conversion;
-  final CrashMetrics crashes;
-  final EngagementMetrics engagement;
-  final double arpu;
-
   DashboardSummary({
     required this.timestamp,
     required this.installations,
@@ -373,106 +363,104 @@ class DashboardSummary {
         timestamp: DateTime.now(),
         installations: 0,
         activeUsers: 0,
-        retention: RetentionMetrics(d1: 0.0, d7: 0.0, d14: 0.0, d30: 0.0),
-        conversion: ConversionMetrics(
-            totalUsers: 0, subscribers: 0, conversionRate: 0.0),
-        crashes: CrashMetrics(crashes: 0, sessions: 0, crashFreeRate: 1.0),
+        retention: RetentionMetrics(d1: 0, d7: 0, d14: 0, d30: 0),
+        conversion:
+            ConversionMetrics(totalUsers: 0, subscribers: 0, conversionRate: 0),
+        crashes: CrashMetrics(crashes: 0, sessions: 0, crashFreeRate: 1),
         engagement: EngagementMetrics(
           avgSessionLength: Duration.zero,
-          sessionsPerDay: 0.0,
+          sessionsPerDay: 0,
           totalSessions: 0,
         ),
-        arpu: 0.0,
+        arpu: 0,
       );
+  final DateTime timestamp;
+  final int installations;
+  final int activeUsers;
+  final RetentionMetrics retention;
+  final ConversionMetrics conversion;
+  final CrashMetrics crashes;
+  final EngagementMetrics engagement;
+  final double arpu;
 }
 
 /// Retention metrics
 class RetentionMetrics {
-  final double d1;
-  final double d7;
-  final double d14;
-  final double d30;
-
   RetentionMetrics({
     required this.d1,
     required this.d7,
     required this.d14,
     required this.d30,
   });
+  final double d1;
+  final double d7;
+  final double d14;
+  final double d30;
 }
 
 /// Conversion metrics
 class ConversionMetrics {
-  final int totalUsers;
-  final int subscribers;
-  final double conversionRate;
-
   ConversionMetrics({
     required this.totalUsers,
     required this.subscribers,
     required this.conversionRate,
   });
+  final int totalUsers;
+  final int subscribers;
+  final double conversionRate;
 }
 
 /// Crash metrics
 class CrashMetrics {
-  final int crashes;
-  final int sessions;
-  final double crashFreeRate;
-
   CrashMetrics({
     required this.crashes,
     required this.sessions,
     required this.crashFreeRate,
   });
+  final int crashes;
+  final int sessions;
+  final double crashFreeRate;
 }
 
 /// Engagement metrics
 class EngagementMetrics {
-  final Duration avgSessionLength;
-  final double sessionsPerDay;
-  final int totalSessions;
-
   EngagementMetrics({
     required this.avgSessionLength,
     required this.sessionsPerDay,
     required this.totalSessions,
   });
+  final Duration avgSessionLength;
+  final double sessionsPerDay;
+  final int totalSessions;
 }
 
 /// Funnel analysis
 class FunnelAnalysis {
-  final String funnelName;
-  final Map<String, int> steps;
-  final double conversionRate;
-
   FunnelAnalysis({
     required this.funnelName,
     required this.steps,
     required this.conversionRate,
   });
+  final String funnelName;
+  final Map<String, int> steps;
+  final double conversionRate;
 }
 
 /// Cohort analysis
 class CohortAnalysis {
-  final DateTime cohortDate;
-  final int cohortSize;
-  final Map<int, double> retention;
-
   CohortAnalysis({
     required this.cohortDate,
     required this.cohortSize,
     required this.retention,
   });
+  final DateTime cohortDate;
+  final int cohortSize;
+  final Map<int, double> retention;
 }
 
 /// KPI trend
 class KPITrend {
-  final String kpiName;
-  final double currentValue;
-  final double previousValue;
-  final double percentageChange;
-  final String trend; // 'up', 'down', 'flat'
+  // 'up', 'down', 'flat'
 
   KPITrend({
     required this.kpiName,
@@ -481,4 +469,9 @@ class KPITrend {
     required this.percentageChange,
     required this.trend,
   });
+  final String kpiName;
+  final double currentValue;
+  final double previousValue;
+  final double percentageChange;
+  final String trend;
 }

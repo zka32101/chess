@@ -23,6 +23,13 @@ enum JobStatus {
 
 /// CI/CD job
 class PipelineJob {
+  PipelineJob({
+    required this.stage,
+    String? id,
+    DateTime? createdAt,
+  })  : id = id ?? 'JOB_${DateTime.now().millisecondsSinceEpoch}',
+        status = JobStatus.queued,
+        createdAt = createdAt ?? DateTime.now();
   final String id;
   final PipelineStage stage;
   JobStatus status;
@@ -31,14 +38,6 @@ class PipelineJob {
   DateTime? completedAt;
   String? errorMessage;
   List<String> logs = [];
-
-  PipelineJob({
-    required this.stage,
-    String? id,
-    DateTime? createdAt,
-  })  : id = id ?? 'JOB_${DateTime.now().millisecondsSinceEpoch}',
-        status = JobStatus.queued,
-        createdAt = createdAt ?? DateTime.now();
 
   Duration? get duration {
     if (startedAt == null || completedAt == null) return null;
@@ -78,13 +77,6 @@ class PipelineJob {
 
 /// CI/CD pipeline run
 class PipelineRun {
-  final String id;
-  final String commitHash;
-  final String branch;
-  final List<PipelineJob> jobs = [];
-  DateTime createdAt;
-  DateTime? completedAt;
-
   PipelineRun({
     required this.commitHash,
     required this.branch,
@@ -92,20 +84,35 @@ class PipelineRun {
     DateTime? createdAt,
   })  : id = id ?? 'RUN_${DateTime.now().millisecondsSinceEpoch}',
         createdAt = createdAt ?? DateTime.now();
+  final String id;
+  final String commitHash;
+  final String branch;
+  final List<PipelineJob> jobs = [];
+  DateTime createdAt;
+  DateTime? completedAt;
 
   void addJob(PipelineJob job) {
     jobs.add(job);
   }
 
-  bool get isPassed => jobs.every((j) => j.status == JobStatus.success || j.status == JobStatus.skipped);
+  bool get isPassed => jobs.every(
+      (j) => j.status == JobStatus.success || j.status == JobStatus.skipped);
   bool get isRunning => jobs.any((j) => j.status == JobStatus.running);
   bool get isComplete => !isRunning;
 
   Duration? get totalDuration {
     if (jobs.isEmpty) return null;
-    final firstStart = jobs.where((j) => j.startedAt != null).map((j) => j.startedAt!).fold<DateTime?>(null, (prev, curr) => prev == null || curr.isBefore(prev) ? curr : prev);
-    final lastEnd = jobs.where((j) => j.completedAt != null).map((j) => j.completedAt!).fold<DateTime?>(null, (prev, curr) => prev == null || curr.isAfter(prev) ? curr : prev);
-    
+    final firstStart = jobs
+        .where((j) => j.startedAt != null)
+        .map((j) => j.startedAt!)
+        .fold<DateTime?>(null,
+            (prev, curr) => prev == null || curr.isBefore(prev) ? curr : prev);
+    final lastEnd = jobs
+        .where((j) => j.completedAt != null)
+        .map((j) => j.completedAt!)
+        .fold<DateTime?>(null,
+            (prev, curr) => prev == null || curr.isAfter(prev) ? curr : prev);
+
     if (firstStart == null || lastEnd == null) return null;
     return lastEnd.difference(firstStart);
   }
@@ -126,20 +133,18 @@ class PipelineRun {
       };
 
   @override
-  String toString() => 'PipelineRun($branch - ${isPassed ? "PASSED" : "FAILED"})';
+  String toString() =>
+      'PipelineRun($branch - ${isPassed ? "PASSED" : "FAILED"})';
 }
 
 /// CI/CD Pipeline manager
 class CICDPipeline {
+  factory CICDPipeline() => _instance;
+
+  CICDPipeline._internal();
   static final CICDPipeline _instance = CICDPipeline._internal();
 
   final _runs = <PipelineRun>[];
-
-  factory CICDPipeline() {
-    return _instance;
-  }
-
-  CICDPipeline._internal();
 
   /// Start new pipeline run
   PipelineRun startRun(String commitHash, String branch) {
@@ -170,8 +175,6 @@ class CICDPipeline {
         orElse: () => null as dynamic,
       );
 
-      if (run == null) return;
-
       for (final job in run.jobs) {
         job.start();
         job.addLog('${job.stage.toString().split('.').last} stage started');
@@ -180,11 +183,13 @@ class CICDPipeline {
         await Future.delayed(const Duration(milliseconds: 100));
 
         job.complete(success: true);
-        job.addLog('${job.stage.toString().split('.').last} stage completed successfully');
+        job.addLog(
+            '${job.stage.toString().split('.').last} stage completed successfully');
       }
 
       run.complete();
-      debugPrint('[CICDPipeline] Pipeline run completed: ${run.isPassed ? "PASSED" : "FAILED"}');
+      debugPrint(
+          '[CICDPipeline] Pipeline run completed: ${run.isPassed ? "PASSED" : "FAILED"}');
     } catch (e) {
       debugPrint('[CICDPipeline] Pipeline execution error: $e');
     }
@@ -201,8 +206,7 @@ class CICDPipeline {
       _runs.where((r) => r.branch == branch).toList();
 
   /// Get passed runs
-  List<PipelineRun> getPassedRuns() =>
-      _runs.where((r) => r.isPassed).toList();
+  List<PipelineRun> getPassedRuns() => _runs.where((r) => r.isPassed).toList();
 
   /// Generate pipeline report
   String generateReport() {
@@ -224,14 +228,17 @@ class CICDPipeline {
 
     for (final run in _runs.reversed.take(10)) {
       final status = run.isPassed ? '✓ PASSED' : '✗ FAILED';
-      buffer.writeln('║ [$status] ${run.branch.padRight(30)}: ${run.commitHash.substring(0, 7)}');
+      buffer.writeln(
+          '║ [$status] ${run.branch.padRight(30)}: ${run.commitHash.substring(0, 7)}');
       for (final job in run.jobs) {
         final jobStatus = job.status.toString().split('.').last;
-        buffer.writeln('║   ${job.stage.toString().split('.').last.padRight(15)}: $jobStatus');
+        buffer.writeln(
+            '║   ${job.stage.toString().split('.').last.padRight(15)}: $jobStatus');
       }
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 

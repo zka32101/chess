@@ -2,6 +2,15 @@ import 'package:flutter/foundation.dart';
 
 /// Beta tester profile
 class BetaTester {
+  BetaTester({
+    required this.email,
+    required this.name,
+    required this.deviceInfo,
+    String? id,
+    DateTime? invitedAt,
+  })  : id = id ?? 'BT_${DateTime.now().millisecondsSinceEpoch}',
+        isActive = false,
+        invitedAt = invitedAt ?? DateTime.now();
   final String id;
   final String email;
   final String name;
@@ -12,16 +21,6 @@ class BetaTester {
   final List<String> feedback = [];
   int bugsReported = 0;
   int bugsFixed = 0;
-
-  BetaTester({
-    required this.email,
-    required this.name,
-    required this.deviceInfo,
-    String? id,
-    DateTime? invitedAt,
-  })  : id = id ?? 'BT_${DateTime.now().millisecondsSinceEpoch}',
-        isActive = false,
-        invitedAt = invitedAt ?? DateTime.now();
 
   void acceptInvitation() {
     isActive = true;
@@ -51,6 +50,12 @@ class BetaTester {
 
 /// Beta testing session
 class BetaTestingSession {
+  BetaTestingSession({
+    required this.versionTested,
+    String? id,
+    DateTime? startDate,
+  })  : id = id ?? 'BTS_${DateTime.now().millisecondsSinceEpoch}',
+        startDate = startDate ?? DateTime.now();
   final String id;
   final String versionTested;
   final DateTime startDate;
@@ -58,14 +63,7 @@ class BetaTestingSession {
   final List<BetaTester> testers = [];
   int totalBugsReported = 0;
   int totalBugsFixed = 0;
-  double averageFeedbackScore = 0.0;
-
-  BetaTestingSession({
-    required this.versionTested,
-    String? id,
-    DateTime? startDate,
-  })  : id = id ?? 'BTS_${DateTime.now().millisecondsSinceEpoch}',
-        startDate = startDate ?? DateTime.now();
+  double averageFeedbackScore = 0;
 
   void addTester(BetaTester tester) {
     testers.add(tester);
@@ -79,9 +77,10 @@ class BetaTestingSession {
   void _calculateMetrics() {
     totalBugsReported = testers.fold<int>(0, (sum, t) => sum + t.bugsReported);
     totalBugsFixed = testers.fold<int>(0, (sum, t) => sum + t.bugsFixed);
-    
+
     if (testers.isNotEmpty) {
-      final totalFeedback = testers.fold<int>(0, (sum, t) => sum + t.feedback.length);
+      final totalFeedback =
+          testers.fold<int>(0, (sum, t) => sum + t.feedback.length);
       averageFeedbackScore = totalFeedback / testers.length;
     }
   }
@@ -98,21 +97,19 @@ class BetaTestingSession {
       };
 
   @override
-  String toString() => 'BetaTestingSession(v$versionTested with ${testers.length} testers)';
+  String toString() =>
+      'BetaTestingSession(v$versionTested with ${testers.length} testers)';
 }
 
 /// Beta testing manager
 class BetaTestingManager {
+  factory BetaTestingManager() => _instance;
+
+  BetaTestingManager._internal();
   static final BetaTestingManager _instance = BetaTestingManager._internal();
 
   final _testers = <BetaTester>[];
   final _sessions = <BetaTestingSession>[];
-
-  factory BetaTestingManager() {
-    return _instance;
-  }
-
-  BetaTestingManager._internal();
 
   /// Add beta tester
   BetaTester addBetaTester({
@@ -138,10 +135,9 @@ class BetaTestingManager {
       orElse: () => null as dynamic,
     );
 
-    if (tester != null) {
-      tester.acceptInvitation();
-      debugPrint('[BetaTestingManager] Tester accepted invitation: ${tester.email}');
-    }
+    tester.acceptInvitation();
+    debugPrint(
+        '[BetaTestingManager] Tester accepted invitation: ${tester.email}');
   }
 
   /// Report bug from tester
@@ -151,11 +147,9 @@ class BetaTestingManager {
       orElse: () => null as dynamic,
     );
 
-    if (tester != null) {
-      tester.bugsReported++;
-      tester.addFeedback(description);
-      debugPrint('[BetaTestingManager] Bug reported by ${tester.name}');
-    }
+    tester.bugsReported++;
+    tester.addFeedback(description);
+    debugPrint('[BetaTestingManager] Bug reported by ${tester.name}');
   }
 
   /// Mark bug as fixed
@@ -165,9 +159,7 @@ class BetaTestingManager {
       orElse: () => null as dynamic,
     );
 
-    if (tester != null) {
-      tester.bugsFixed++;
-    }
+    tester.bugsFixed++;
   }
 
   /// Start beta testing session
@@ -190,10 +182,9 @@ class BetaTestingManager {
       orElse: () => null as dynamic,
     );
 
-    if (session != null) {
-      session.endSession();
-      debugPrint('[BetaTestingManager] Beta session ended: ${session.versionTested}');
-    }
+    session.endSession();
+    debugPrint(
+        '[BetaTestingManager] Beta session ended: ${session.versionTested}');
   }
 
   /// Get all testers
@@ -210,7 +201,8 @@ class BetaTestingManager {
   String generateBetaReport() {
     final buffer = StringBuffer();
     final activeTesterCount = getActiveTesters().length;
-    final totalBugsReported = _testers.fold<int>(0, (sum, t) => sum + t.bugsReported);
+    final totalBugsReported =
+        _testers.fold<int>(0, (sum, t) => sum + t.bugsReported);
 
     buffer.writeln('''
 ╔══════════════════════════════════════════════════════════════════╗
@@ -226,7 +218,8 @@ class BetaTestingManager {
 
     for (final tester in _testers) {
       final status = tester.isActive ? '✓' : '○';
-      buffer.writeln('║ $status ${tester.name.padRight(30)}: ${tester.bugsReported} bugs, ${tester.feedback.length} feedback');
+      buffer.writeln(
+          '║ $status ${tester.name.padRight(30)}: ${tester.bugsReported} bugs, ${tester.feedback.length} feedback');
     }
 
     buffer.writeln('''
@@ -235,10 +228,12 @@ class BetaTestingManager {
     ''');
 
     for (final session in _sessions) {
-      buffer.writeln('║ v${session.versionTested.padRight(25)}: ${session.testers.length} testers, ${session.totalBugsReported} bugs');
+      buffer.writeln(
+          '║ v${session.versionTested.padRight(25)}: ${session.testers.length} testers, ${session.totalBugsReported} bugs');
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 

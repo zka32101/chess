@@ -5,6 +5,24 @@ import '../utils/query_cache.dart';
 import '../utils/pagination_helper.dart';
 
 class FriendServiceOptimized {
+  factory FriendServiceOptimized() => _instance;
+  FriendServiceOptimized._internal() {
+    _friendsCache = SmartCache(
+      fetcher: _getUserFriendsFromDb,
+      cacheTtl: const Duration(minutes: 10),
+    );
+    _requestsCache = SmartCache(
+      fetcher: _getPendingRequestsFromDb,
+      cacheTtl: const Duration(minutes: 5),
+    );
+    _activityCache = SmartCache(
+      fetcher: _getActivityFeedFromDb,
+      cacheTtl: const Duration(minutes: 2),
+    );
+    _friendCountCache = MonitoredCache(
+      cacheTtl: const Duration(minutes: 15),
+    );
+  }
   static final FriendServiceOptimized _instance =
       FriendServiceOptimized._internal();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,25 +31,6 @@ class FriendServiceOptimized {
   late final SmartCache<String, List<FriendRequest>> _requestsCache;
   late final SmartCache<String, List<FriendActivity>> _activityCache;
   late final MonitoredCache<String, int> _friendCountCache;
-
-  factory FriendServiceOptimized() => _instance;
-  FriendServiceOptimized._internal() {
-    _friendsCache = SmartCache(
-      fetcher: (userId) => _getUserFriendsFromDb(userId),
-      cacheTtl: const Duration(minutes: 10),
-    );
-    _requestsCache = SmartCache(
-      fetcher: (userId) => _getPendingRequestsFromDb(userId),
-      cacheTtl: const Duration(minutes: 5),
-    );
-    _activityCache = SmartCache(
-      fetcher: (userId) => _getActivityFeedFromDb(userId),
-      cacheTtl: const Duration(minutes: 2),
-    );
-    _friendCountCache = MonitoredCache(
-      cacheTtl: const Duration(minutes: 15),
-    );
-  }
 
   static FriendServiceOptimized get instance => _instance;
 
@@ -54,14 +53,14 @@ class FriendServiceOptimized {
           .orderBy('connectedAt', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => Friend.fromJson(data),
+        Friend.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching paginated friends: $e');
@@ -88,14 +87,14 @@ class FriendServiceOptimized {
           .orderBy('createdAt', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => FriendRequest.fromJson(data),
+        FriendRequest.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching paginated requests: $e');
@@ -121,14 +120,14 @@ class FriendServiceOptimized {
           .orderBy('timestamp', descending: true);
 
       query = QueryOptimizer.applyPagination(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
       );
 
       return await QueryOptimizer.executePaginatedQuery(
-        query as Query<Map<String, dynamic>>,
+        query,
         params,
-        (data) => FriendActivity.fromJson(data),
+        FriendActivity.fromJson,
       );
     } catch (e) {
       debugPrint('Error fetching activity feed: $e');
@@ -137,22 +136,20 @@ class FriendServiceOptimized {
   }
 
   /// Get user's friend list with caching
-  Future<List<Friend>> getUserFriendsOptimized(String userId) async {
-    return _friendsCache.get(userId);
-  }
+  Future<List<Friend>> getUserFriendsOptimized(String userId) async =>
+      _friendsCache.get(userId);
 
   /// Get pending requests with caching
-  Future<List<FriendRequest>> getPendingRequestsOptimized(String userId) async {
-    return _requestsCache.get(userId);
-  }
+  Future<List<FriendRequest>> getPendingRequestsOptimized(
+          String userId) async =>
+      _requestsCache.get(userId);
 
   /// Get activity feed with caching
   Future<List<FriendActivity>> getActivityFeedOptimized(
     String userId, {
     int limit = 50,
-  }) async {
-    return _activityCache.get(userId);
-  }
+  }) async =>
+      _activityCache.get(userId);
 
   /// Get friend count (cached)
   Future<int> getFriendCount(String userId) async {

@@ -13,17 +13,6 @@ enum LeaderboardFilter {
 
 /// Leaderboard view state
 class LeaderboardState {
-  final List<RankingEntry> entries;
-  final RankingStats? stats;
-  final bool isLoading;
-  final String? error;
-  final int currentPage;
-  final LeaderboardFilter filter;
-  final String?
-      shogiRankFilter; // Used when filter == LeaderboardFilter.byShogi
-  final String? monthKeyFilter; // Used when filter == LeaderboardFilter.monthly
-  final DateTime? lastRefreshed;
-
   LeaderboardState({
     required this.entries,
     this.stats,
@@ -35,6 +24,16 @@ class LeaderboardState {
     this.monthKeyFilter,
     this.lastRefreshed,
   });
+  final List<RankingEntry> entries;
+  final RankingStats? stats;
+  final bool isLoading;
+  final String? error;
+  final int currentPage;
+  final LeaderboardFilter filter;
+  final String?
+      shogiRankFilter; // Used when filter == LeaderboardFilter.byShogi
+  final String? monthKeyFilter; // Used when filter == LeaderboardFilter.monthly
+  final DateTime? lastRefreshed;
 
   LeaderboardState copyWith({
     List<RankingEntry>? entries,
@@ -46,29 +45,27 @@ class LeaderboardState {
     String? shogiRankFilter,
     String? monthKeyFilter,
     DateTime? lastRefreshed,
-  }) {
-    return LeaderboardState(
-      entries: entries ?? this.entries,
-      stats: stats ?? this.stats,
-      isLoading: isLoading ?? this.isLoading,
-      error: error,
-      currentPage: currentPage ?? this.currentPage,
-      filter: filter ?? this.filter,
-      shogiRankFilter: shogiRankFilter ?? this.shogiRankFilter,
-      monthKeyFilter: monthKeyFilter ?? this.monthKeyFilter,
-      lastRefreshed: lastRefreshed ?? this.lastRefreshed,
-    );
-  }
+  }) =>
+      LeaderboardState(
+        entries: entries ?? this.entries,
+        stats: stats ?? this.stats,
+        isLoading: isLoading ?? this.isLoading,
+        error: error,
+        currentPage: currentPage ?? this.currentPage,
+        filter: filter ?? this.filter,
+        shogiRankFilter: shogiRankFilter ?? this.shogiRankFilter,
+        monthKeyFilter: monthKeyFilter ?? this.monthKeyFilter,
+        lastRefreshed: lastRefreshed ?? this.lastRefreshed,
+      );
 }
 
 /// Leaderboard notifier for managing state
 class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
-  final RankingService rankingService;
-
   LeaderboardNotifier(this.rankingService)
       : super(LeaderboardState(entries: [])) {
     _initialize();
   }
+  final RankingService rankingService;
 
   Future<void> _initialize() async {
     await loadGlobalRanking();
@@ -225,13 +222,12 @@ class LeaderboardNotifier extends StateNotifier<LeaderboardState> {
 
 /// User rank notifier for tracking individual user rank
 class UserRankNotifier extends StateNotifier<AsyncValue<int?>> {
-  final RankingService rankingService;
-  final String uid;
-
   UserRankNotifier(this.rankingService, this.uid)
       : super(const AsyncValue.loading()) {
     _initialize();
   }
+  final RankingService rankingService;
+  final String uid;
 
   Future<void> _initialize() async {
     await loadUserRank();
@@ -255,13 +251,12 @@ class UserRankNotifier extends StateNotifier<AsyncValue<int?>> {
 /// Nearby rankings notifier
 class NearbyRankingsNotifier
     extends StateNotifier<AsyncValue<List<RankingEntry>>> {
-  final RankingService rankingService;
-  final String uid;
-
   NearbyRankingsNotifier(this.rankingService, this.uid)
       : super(const AsyncValue.loading()) {
     _initialize();
   }
+  final RankingService rankingService;
+  final String uid;
 
   Future<void> _initialize() async {
     await loadNearbyRankings();
@@ -286,9 +281,7 @@ class NearbyRankingsNotifier
 }
 
 /// RankingService provider
-final rankingServiceProvider = Provider((ref) {
-  return RankingService();
-});
+final rankingServiceProvider = Provider((ref) => RankingService());
 
 /// Main leaderboard provider
 final leaderboardProvider =

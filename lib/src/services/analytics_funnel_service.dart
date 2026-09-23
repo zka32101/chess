@@ -5,17 +5,14 @@ import 'package:logger/logger.dart';
 ///
 /// Tracks the conversion funnel from free users through various purchase stages
 class AnalyticsFunnelService {
+  factory AnalyticsFunnelService() => _instance;
+
+  AnalyticsFunnelService._internal();
   static final AnalyticsFunnelService _instance =
       AnalyticsFunnelService._internal();
 
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   final Logger _logger = Logger();
-
-  AnalyticsFunnelService._internal();
-
-  factory AnalyticsFunnelService() {
-    return _instance;
-  }
 
   /// Track paywall view
   ///
@@ -443,7 +440,8 @@ class AnalyticsFunnelService {
         'stage_name': stageName,
         'stage_number': stageNumber,
         'total_stages': totalStages,
-        'completion_percent': ((stageNumber / totalStages) * 100).toStringAsFixed(1),
+        'completion_percent':
+            ((stageNumber / totalStages) * 100).toStringAsFixed(1),
         'timestamp': DateTime.now().toIso8601String(),
         ...?customData,
       };

@@ -10,6 +10,19 @@ import 'package:flutter/material.dart';
 /// - Total moves played
 /// - Time elapsed
 class GameInfoPanel extends StatelessWidget {
+  const GameInfoPanel({
+    required this.gameId,
+    required this.gameType,
+    required this.status,
+    required this.timeControl,
+    required this.totalMoves,
+    required this.elapsedSeconds,
+    required this.whitePlayerName,
+    required this.blackPlayerName,
+    Key? key,
+    this.currentTurn,
+  }) : super(key: key);
+
   /// Unique game identifier
   final String gameId;
 
@@ -36,19 +49,6 @@ class GameInfoPanel extends StatelessWidget {
 
   /// Current turn player (white or black)
   final String? currentTurn;
-
-  const GameInfoPanel({
-    Key? key,
-    required this.gameId,
-    required this.gameType,
-    required this.status,
-    required this.timeControl,
-    required this.totalMoves,
-    required this.elapsedSeconds,
-    required this.whitePlayerName,
-    required this.blackPlayerName,
-    this.currentTurn,
-  }) : super(key: key);
 
   /// Format elapsed time as MM:SS
   String _formatElapsedTime(int seconds) {
@@ -260,42 +260,40 @@ class GameInfoPanel extends StatelessWidget {
   }
 
   /// Build player row
-  Widget _buildPlayerRow(String color, String playerName) {
-    return Row(
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: color.toLowerCase() == 'white'
-                ? Colors.grey[300]
-                : Colors.grey[800],
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey[400]!),
-          ),
-        ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 50,
-          child: Text(
-            color,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey,
+  Widget _buildPlayerRow(String color, String playerName) => Row(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: color.toLowerCase() == 'white'
+                  ? Colors.grey[300]
+                  : Colors.grey[800],
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.grey[400]!),
             ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            playerName,
-            style: const TextStyle(fontSize: 12),
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 50,
+            child: Text(
+              color,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
           ),
-        ),
-      ],
-    );
-  }
+          Expanded(
+            child: Text(
+              playerName,
+              style: const TextStyle(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      );
 
   /// Build game ID row with copy button
   Widget _buildGameIdRow(BuildContext context) {
@@ -357,6 +355,13 @@ class GameInfoPanel extends StatelessWidget {
 
 /// Compact game info for display in headers
 class CompactGameInfo extends StatelessWidget {
+  const CompactGameInfo({
+    required this.gameType,
+    required this.timeControl,
+    required this.totalMoves,
+    Key? key,
+  }) : super(key: key);
+
   /// Game type
   final String gameType;
 
@@ -366,42 +371,31 @@ class CompactGameInfo extends StatelessWidget {
   /// Total moves
   final int totalMoves;
 
-  const CompactGameInfo({
-    Key? key,
-    required this.gameType,
-    required this.timeControl,
-    required this.totalMoves,
-  }) : super(key: key);
-
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildTag(gameType),
-        const SizedBox(width: 8),
-        _buildTag(timeControl),
-        const SizedBox(width: 8),
-        _buildTag('Moves: $totalMoves'),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTag(gameType),
+          const SizedBox(width: 8),
+          _buildTag(timeControl),
+          const SizedBox(width: 8),
+          _buildTag('Moves: $totalMoves'),
+        ],
+      );
 
   /// Build individual tag
-  Widget _buildTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
+  Widget _buildTag(String text) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(4),
         ),
-      ),
-    );
-  }
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
 }

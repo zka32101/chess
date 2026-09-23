@@ -120,10 +120,9 @@ final gameByIdProvider =
 
 // Game service for creating and managing games
 class GameService {
+  GameService(this._firestore, this._auth);
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  GameService(this._firestore, this._auth);
 
   Future<GameModel> createGame({
     required String opponentId,
@@ -144,8 +143,8 @@ class GameService {
         throw Exception('User or opponent not found');
       }
 
-      final currentUserData = currentUserDoc.data() as Map<String, dynamic>;
-      final opponentData = opponentDoc.data() as Map<String, dynamic>;
+      final currentUserData = currentUserDoc.data()!;
+      final opponentData = opponentDoc.data()!;
 
       final whitePlayerId = currentUser.uid;
       final blackPlayerId = opponentId;
@@ -212,7 +211,7 @@ class GameService {
 
       if (!gameDoc.exists) throw Exception('Game not found');
 
-      final gameData = gameDoc.data() as Map<String, dynamic>;
+      final gameData = gameDoc.data()!;
       final currentMoves =
           List<Map<String, dynamic>>.from(gameData['moves'] ?? []);
 
@@ -270,7 +269,7 @@ class GameService {
 
       if (!gameDoc.exists) throw Exception('Game not found');
 
-      final gameData = gameDoc.data() as Map<String, dynamic>;
+      final gameData = gameDoc.data()!;
       final whitePlayerId = gameData['whitePlayerId'] as String;
 
       // Determine result based on who resigned
@@ -334,7 +333,7 @@ class GameService {
 
       if (!gameDoc.exists) return;
 
-      final gameData = gameDoc.data() as Map<String, dynamic>;
+      final gameData = gameDoc.data()!;
       final whitePlayerId = gameData['whitePlayerId'] as String;
       final blackPlayerId = gameData['blackPlayerId'] as String;
       final whiteRating = gameData['whiteRating'] as int;

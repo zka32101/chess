@@ -4,6 +4,8 @@ import 'dart:math';
 
 /// Bracket generation for different tournament formats
 class BracketGenerationService {
+  BracketGenerationService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -11,9 +13,6 @@ class BracketGenerationService {
   static const String _participantsSubcollection = 'participants';
   static const String _bracketSubcollection = 'bracket';
   static const String _matchesSubcollection = 'matches';
-
-  BracketGenerationService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Generate bracket based on tournament format
   Future<void> generateBracket(
@@ -91,8 +90,7 @@ class BracketGenerationService {
           player2Id: participants[j],
           round: 1,
           status: 'scheduled',
-          scheduledTime:
-              DateTime.now().add(Duration(hours: matchNumber * 2)),
+          scheduledTime: DateTime.now().add(Duration(hours: matchNumber * 2)),
         );
 
         await _firestore
@@ -187,7 +185,8 @@ class BracketGenerationService {
       final match = TournamentMatch.fromJson(matchDoc.data()!);
 
       // Determine loser and points
-      final loserId = match.player1Id == winnerId ? match.player2Id : match.player1Id;
+      final loserId =
+          match.player1Id == winnerId ? match.player2Id : match.player1Id;
       int winnerPoints = 1;
       int loserPoints = 0;
 
@@ -202,9 +201,8 @@ class BracketGenerationService {
           .doc(tournamentId)
           .collection('participants');
 
-      final winnerDoc = await participantsRef
-          .where('playerId', isEqualTo: winnerId)
-          .get();
+      final winnerDoc =
+          await participantsRef.where('playerId', isEqualTo: winnerId).get();
       final loserDoc =
           await participantsRef.where('playerId', isEqualTo: loserId).get();
 
@@ -247,6 +245,32 @@ class BracketGenerationService {
 
 /// Tournament match
 class TournamentMatch {
+  TournamentMatch({
+    required this.matchId,
+    required this.player1Id,
+    required this.round,
+    required this.status,
+    required this.scheduledTime,
+    this.player2Id,
+    this.winnerId,
+    this.result,
+    this.completedAt,
+  });
+
+  factory TournamentMatch.fromJson(Map<String, dynamic> json) =>
+      TournamentMatch(
+        matchId: json['matchId'] as String,
+        player1Id: json['player1Id'] as String,
+        player2Id: json['player2Id'] as String?,
+        round: json['round'] as int,
+        status: json['status'] as String,
+        scheduledTime: (json['scheduledTime'] as Timestamp).toDate(),
+        winnerId: json['winnerId'] as String?,
+        result: json['result'] as String?,
+        completedAt: json['completedAt'] != null
+            ? (json['completedAt'] as Timestamp).toDate()
+            : null,
+      );
   final String matchId;
   final String player1Id;
   final String? player2Id;
@@ -257,45 +281,16 @@ class TournamentMatch {
   String? result;
   DateTime? completedAt;
 
-  TournamentMatch({
-    required this.matchId,
-    required this.player1Id,
-    this.player2Id,
-    required this.round,
-    required this.status,
-    required this.scheduledTime,
-    this.winnerId,
-    this.result,
-    this.completedAt,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'matchId': matchId,
-      'player1Id': player1Id,
-      'player2Id': player2Id,
-      'round': round,
-      'status': status,
-      'scheduledTime': Timestamp.fromDate(scheduledTime),
-      'winnerId': winnerId,
-      'result': result,
-      'completedAt': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
-    };
-  }
-
-  factory TournamentMatch.fromJson(Map<String, dynamic> json) {
-    return TournamentMatch(
-      matchId: json['matchId'] as String,
-      player1Id: json['player1Id'] as String,
-      player2Id: json['player2Id'] as String?,
-      round: json['round'] as int,
-      status: json['status'] as String,
-      scheduledTime: (json['scheduledTime'] as Timestamp).toDate(),
-      winnerId: json['winnerId'] as String?,
-      result: json['result'] as String?,
-      completedAt: json['completedAt'] != null
-          ? (json['completedAt'] as Timestamp).toDate()
-          : null,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'matchId': matchId,
+        'player1Id': player1Id,
+        'player2Id': player2Id,
+        'round': round,
+        'status': status,
+        'scheduledTime': Timestamp.fromDate(scheduledTime),
+        'winnerId': winnerId,
+        'result': result,
+        'completedAt':
+            completedAt != null ? Timestamp.fromDate(completedAt!) : null,
+      };
 }

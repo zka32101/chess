@@ -93,9 +93,7 @@ class OpeningBook {
   }
 
   /// Check if a position is in the opening book
-  static bool isInBook(String fen) {
-    return getRecommendedMoves(fen).isNotEmpty;
-  }
+  static bool isInBook(String fen) => getRecommendedMoves(fen).isNotEmpty;
 
   /// Get the depth of the opening book line for a position
   /// Useful for determining when to exit book and start using AI search
@@ -151,19 +149,17 @@ class OpeningBook {
   }
 
   /// Statistical summary of opening book
-  static Map<String, dynamic> getBookStatistics() {
-    return {
-      'totalPositions': _bookPositions.length,
-      'totalMoveEntries': _bookPositions.values
-          .fold<int>(0, (sum, moves) => sum + moves.length),
-      'maxMoves': _bookPositions.values
-          .map((moves) => moves.length)
-          .fold<int>(0, (max, length) => length > max ? length : max),
-      'averageMoveOptions': _bookPositions.values.isNotEmpty
-          ? (_bookPositions.values.fold<int>(
-                  0, (sum, moves) => sum + moves.length) /
-              _bookPositions.length)
-          : 0,
-    };
-  }
+  static Map<String, dynamic> getBookStatistics() => {
+        'totalPositions': _bookPositions.length,
+        'totalMoveEntries': _bookPositions.values
+            .fold<int>(0, (sum, moves) => sum + moves.length),
+        'maxMoves': _bookPositions.values
+            .map((moves) => moves.length)
+            .fold<int>(0, (max, length) => length > max ? length : max),
+        'averageMoveOptions': _bookPositions.values.isNotEmpty
+            ? (_bookPositions.values
+                    .fold<int>(0, (sum, moves) => sum + moves.length) /
+                _bookPositions.length)
+            : 0,
+      };
 }

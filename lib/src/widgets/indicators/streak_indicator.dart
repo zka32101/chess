@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 /// Displays current and longest streaks with animated circular progress
 class StreakIndicator extends StatefulWidget {
-  final int currentStreak; // +/- value, positive for win streak, negative for loss streak
-  final int longestWin;
-  final int longestLoss;
-
   const StreakIndicator({
-    Key? key,
     required this.currentStreak,
     required this.longestWin,
     required this.longestLoss,
+    Key? key,
   }) : super(key: key);
+  final int
+      currentStreak; // +/- value, positive for win streak, negative for loss streak
+  final int longestWin;
+  final int longestLoss;
 
   @override
   State<StreakIndicator> createState() => _StreakIndicatorState();
@@ -30,7 +30,7 @@ class _StreakIndicatorState extends State<StreakIndicator>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
 
@@ -146,36 +146,35 @@ class _StreakIndicatorState extends State<StreakIndicator>
     required String label,
     required int value,
     required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+  }) =>
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+          ),
+          borderRadius: BorderRadius.circular(8),
         ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value.toString(),
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value.toString(),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+      );
 
   Color _getStreakColor(bool isWinStreak) {
     if (isWinStreak) {

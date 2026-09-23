@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 /// Service for managing chess lessons, openings, tactics, and strategy content
 class ChessLessonsService {
+  ChessLessonsService._();
   static final ChessLessonsService _instance = ChessLessonsService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -11,8 +12,6 @@ class ChessLessonsService {
   // Cache for lessons
   final Map<String, ChessLesson> _lessonCache = {};
   final Map<String, OpeningExplanation> _openingCache = {};
-
-  ChessLessonsService._();
 
   static ChessLessonsService get instance => _instance;
 
@@ -53,7 +52,7 @@ class ChessLessonsService {
 
       if (!doc.exists) return null;
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data()!;
       final opening = OpeningExplanation(
         id: doc.id,
         title: data['name'] as String? ?? '',
@@ -132,7 +131,7 @@ class ChessLessonsService {
         userId: userId,
         lessonId: lessonId,
         status: 'in_progress',
-        percentageComplete: 0.0,
+        percentageComplete: 0,
         timesReviewed: 0,
         lastAccessed: DateTime.now(),
         selfAssessmentScore: 0,
@@ -164,7 +163,7 @@ class ChessLessonsService {
         userId: userId,
         lessonId: lessonId,
         status: 'error',
-        percentageComplete: 0.0,
+        percentageComplete: 0,
         timesReviewed: 0,
         lastAccessed: DateTime.now(),
         selfAssessmentScore: 0,
@@ -279,14 +278,14 @@ class ChessLessonsService {
           totalLessonsReviewed: 0,
           totalTimeSpent: Duration.zero,
           currentStreak: 0,
-          averageDifficulty: 1.0,
+          averageDifficulty: 1,
           topicsMastered: [],
           topicsToImprove: [],
-          overallProgress: 0.0,
+          overallProgress: 0,
         );
       }
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data()!;
 
       return LearningStatistics(
         lessonsStarted: data['lessonsStarted'] as int? ?? 0,
@@ -311,10 +310,10 @@ class ChessLessonsService {
         totalLessonsReviewed: 0,
         totalTimeSpent: Duration.zero,
         currentStreak: 0,
-        averageDifficulty: 1.0,
+        averageDifficulty: 1,
         topicsMastered: [],
         topicsToImprove: [],
-        overallProgress: 0.0,
+        overallProgress: 0,
       );
     }
   }
@@ -345,33 +344,31 @@ class ChessLessonsService {
   ChessLesson _parseChessLesson(
     Map<String, dynamic> data,
     String type,
-  ) {
-    return ChessLesson(
-      id: data['id'] as String? ?? '',
-      title: data['title'] as String? ?? data['name'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      contentType: type,
-      difficulty: data['difficulty'] as int? ?? 1,
-      pgn: data['pgn'] as String? ?? '',
-      keyPoints: List<String>.from(data['keyPoints'] as List? ?? []),
-      commonMistakes: List<String>.from(data['commonMistakes'] as List? ?? []),
-      prerequisites: data['prerequisites'] as String? ?? '',
-      relatedTopics: List<String>.from(data['relatedTopics'] as List? ?? []),
-      estimatedDuration: Duration(
-        minutes: data['estimatedDuration'] as int? ?? 15,
-      ),
-      statistics: data['statistics'] as Map<String, dynamic>? ?? {},
-    );
-  }
+  ) =>
+      ChessLesson(
+        id: data['id'] as String? ?? '',
+        title: data['title'] as String? ?? data['name'] as String? ?? '',
+        description: data['description'] as String? ?? '',
+        contentType: type,
+        difficulty: data['difficulty'] as int? ?? 1,
+        pgn: data['pgn'] as String? ?? '',
+        keyPoints: List<String>.from(data['keyPoints'] as List? ?? []),
+        commonMistakes:
+            List<String>.from(data['commonMistakes'] as List? ?? []),
+        prerequisites: data['prerequisites'] as String? ?? '',
+        relatedTopics: List<String>.from(data['relatedTopics'] as List? ?? []),
+        estimatedDuration: Duration(
+          minutes: data['estimatedDuration'] as int? ?? 15,
+        ),
+        statistics: data['statistics'] as Map<String, dynamic>? ?? {},
+      );
 
   /// Parse win rates from statistics
-  Map<String, double> _parseWinRates(Map<String, dynamic> stats) {
-    return {
-      'white': (stats['whiteWinRate'] as num? ?? 0).toDouble(),
-      'black': (stats['blackWinRate'] as num? ?? 0).toDouble(),
-      'draws': (stats['drawRate'] as num? ?? 0).toDouble(),
-    };
-  }
+  Map<String, double> _parseWinRates(Map<String, dynamic> stats) => {
+        'white': (stats['whiteWinRate'] as num? ?? 0).toDouble(),
+        'black': (stats['blackWinRate'] as num? ?? 0).toDouble(),
+        'draws': (stats['drawRate'] as num? ?? 0).toDouble(),
+      };
 
   /// Update user statistics after lesson completion
   Future<void> _updateStatistics(String userId) async {
@@ -403,7 +400,7 @@ class ChessLessonsService {
         'lessonsStarted': started,
         'lessonsCompleted': completed,
         'totalLessonsReviewed':
-            progress.fold(0, (sum, p) => sum + (p.timesReviewed as int)),
+            progress.fold(0, (sum, p) => sum + (p.timesReviewed)),
         'totalTimeSpent': totalTime,
         'currentStreak': _calculateStreak(progress),
         'averageDifficulty': avgDifficulty,
@@ -419,7 +416,7 @@ class ChessLessonsService {
   /// Get difficulty from lesson ID
   double _getDifficultyFromLesson(String lessonId) {
     // Simplified - would fetch from lesson data
-    return 1.0;
+    return 1;
   }
 
   /// Calculate current learning streak
@@ -445,22 +442,19 @@ class ChessLessonsService {
   }
 
   /// Get topics user has mastered
-  List<String> _getTopicsMastered(List<UserLessonProgress> progress) {
-    return progress
-        .where((p) => p.status == 'reviewed' && p.selfAssessmentScore >= 4)
-        .map((p) => _getTopicFromLesson(p.lessonId))
-        .toSet()
-        .toList();
-  }
+  List<String> _getTopicsMastered(List<UserLessonProgress> progress) => progress
+      .where((p) => p.status == 'reviewed' && p.selfAssessmentScore >= 4)
+      .map((p) => _getTopicFromLesson(p.lessonId))
+      .toSet()
+      .toList();
 
   /// Get topics needing improvement
-  List<String> _getTopicsToImprove(List<UserLessonProgress> progress) {
-    return progress
-        .where((p) => p.percentageComplete < 0.5)
-        .map((p) => _getTopicFromLesson(p.lessonId))
-        .toSet()
-        .toList();
-  }
+  List<String> _getTopicsToImprove(List<UserLessonProgress> progress) =>
+      progress
+          .where((p) => p.percentageComplete < 0.5)
+          .map((p) => _getTopicFromLesson(p.lessonId))
+          .toSet()
+          .toList();
 
   /// Get topic from lesson ID
   String _getTopicFromLesson(String lessonId) {
@@ -471,19 +465,6 @@ class ChessLessonsService {
 
 /// ChessLesson base class
 class ChessLesson {
-  final String id;
-  final String title;
-  final String description;
-  final String contentType;
-  final int difficulty;
-  final String pgn;
-  final List<String> keyPoints;
-  final List<String> commonMistakes;
-  final String prerequisites;
-  final List<String> relatedTopics;
-  final Duration estimatedDuration;
-  final Map<String, dynamic> statistics;
-
   ChessLesson({
     required this.id,
     required this.title,
@@ -498,18 +479,22 @@ class ChessLesson {
     required this.estimatedDuration,
     required this.statistics,
   });
+  final String id;
+  final String title;
+  final String description;
+  final String contentType;
+  final int difficulty;
+  final String pgn;
+  final List<String> keyPoints;
+  final List<String> commonMistakes;
+  final String prerequisites;
+  final List<String> relatedTopics;
+  final Duration estimatedDuration;
+  final Map<String, dynamic> statistics;
 }
 
 /// OpeningExplanation extends ChessLesson
 class OpeningExplanation extends ChessLesson {
-  final String ecoCode;
-  final List<String> mainLines;
-  final List<String> alternativeLines;
-  final Map<String, double> winRates;
-  final List<String> typicalPlans;
-  final List<String> historicalNotes;
-  final int totalGames;
-
   OpeningExplanation({
     required String id,
     required String title,
@@ -543,16 +528,17 @@ class OpeningExplanation extends ChessLesson {
           estimatedDuration: estimatedDuration,
           statistics: statistics,
         );
+  final String ecoCode;
+  final List<String> mainLines;
+  final List<String> alternativeLines;
+  final Map<String, double> winRates;
+  final List<String> typicalPlans;
+  final List<String> historicalNotes;
+  final int totalGames;
 }
 
 /// TacticsPattern extends ChessLesson
 class TacticsPattern extends ChessLesson {
-  final List<String> motifs;
-  final String executionSteps;
-  final List<String> examples;
-  final int frequency;
-  final double complexity;
-
   TacticsPattern({
     required String id,
     required String title,
@@ -584,20 +570,15 @@ class TacticsPattern extends ChessLesson {
           estimatedDuration: estimatedDuration,
           statistics: statistics,
         );
+  final List<String> motifs;
+  final String executionSteps;
+  final List<String> examples;
+  final int frequency;
+  final double complexity;
 }
 
 /// User's lesson progress tracking
 class UserLessonProgress {
-  final String userId;
-  final String lessonId;
-  final String status;
-  final double percentageComplete;
-  final int timesReviewed;
-  final DateTime lastAccessed;
-  final int selfAssessmentScore;
-  final List<String> userNotes;
-  final Duration totalTimeSpent;
-
   UserLessonProgress({
     required this.userId,
     required this.lessonId,
@@ -609,20 +590,19 @@ class UserLessonProgress {
     required this.userNotes,
     required this.totalTimeSpent,
   });
+  final String userId;
+  final String lessonId;
+  final String status;
+  final double percentageComplete;
+  final int timesReviewed;
+  final DateTime lastAccessed;
+  final int selfAssessmentScore;
+  final List<String> userNotes;
+  final Duration totalTimeSpent;
 }
 
 /// Learning statistics for user
 class LearningStatistics {
-  final int lessonsStarted;
-  final int lessonsCompleted;
-  final int totalLessonsReviewed;
-  final Duration totalTimeSpent;
-  final int currentStreak;
-  final double averageDifficulty;
-  final List<String> topicsMastered;
-  final List<String> topicsToImprove;
-  final double overallProgress;
-
   LearningStatistics({
     required this.lessonsStarted,
     required this.lessonsCompleted,
@@ -634,4 +614,13 @@ class LearningStatistics {
     required this.topicsToImprove,
     required this.overallProgress,
   });
+  final int lessonsStarted;
+  final int lessonsCompleted;
+  final int totalLessonsReviewed;
+  final Duration totalTimeSpent;
+  final int currentStreak;
+  final double averageDifficulty;
+  final List<String> topicsMastered;
+  final List<String> topicsToImprove;
+  final double overallProgress;
 }

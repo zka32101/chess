@@ -6,9 +6,8 @@ import 'package:logger/logger.dart';
 /// Crashlytics service provider (singleton)
 ///
 /// Provides Firebase Crashlytics for error reporting and crash tracking
-final crashlyticsProvider = Provider<FirebaseCrashlytics>((ref) {
-  return FirebaseCrashlytics.instance;
-});
+final crashlyticsProvider =
+    Provider<FirebaseCrashlytics>((ref) => FirebaseCrashlytics.instance);
 
 /// Crashlytics initialization provider
 ///

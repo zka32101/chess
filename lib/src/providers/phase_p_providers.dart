@@ -1,33 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/services/realtime_sync_service.dart';
-import 'package:chess_tactics_master/src/services/advanced_timeout_service.dart';
-import 'package:chess_tactics_master/src/services/enhanced_rating_system.dart';
-import 'package:chess_tactics_master/src/services/optimized_matchmaking_service.dart';
+import '../services/realtime_sync_service.dart';
+import '../services/advanced_timeout_service.dart';
+import '../services/enhanced_rating_system.dart';
+import '../services/optimized_matchmaking_service.dart';
 
 // ============================================================================
 // Service Providers
 // ============================================================================
 
 /// Real-time synchronization service provider
-final realtimeSyncServiceProvider = Provider<RealtimeSyncService>((ref) {
-  return RealtimeSyncService();
-});
+final realtimeSyncServiceProvider =
+    Provider<RealtimeSyncService>((ref) => RealtimeSyncService());
 
 /// Advanced timeout service provider
-final advancedTimeoutServiceProvider = Provider<AdvancedTimeoutService>((ref) {
-  return AdvancedTimeoutService();
-});
+final advancedTimeoutServiceProvider =
+    Provider<AdvancedTimeoutService>((ref) => AdvancedTimeoutService());
 
 /// Enhanced rating system provider
-final enhancedRatingSystemProvider = Provider<EnhancedRatingSystem>((ref) {
-  return EnhancedRatingSystem();
-});
+final enhancedRatingSystemProvider =
+    Provider<EnhancedRatingSystem>((ref) => EnhancedRatingSystem());
 
 /// Optimized matchmaking service provider
 final optimizedMatchmakingServiceProvider =
-    Provider<OptimizedMatchmakingService>((ref) {
-  return OptimizedMatchmakingService();
-});
+    Provider<OptimizedMatchmakingService>(
+        (ref) => OptimizedMatchmakingService());
 
 // ============================================================================
 // Game Synchronization Providers
@@ -114,9 +110,8 @@ final ratingChangeCalculatorProvider =
 /// Matchmaking queue entry notifier
 class MatchmakingQueueNotifier
     extends StateNotifier<AsyncValue<MatchmakingQueue?>> {
-  final OptimizedMatchmakingService _service;
-
   MatchmakingQueueNotifier(this._service) : super(const AsyncValue.data(null));
+  final OptimizedMatchmakingService _service;
 
   Future<void> enqueuePlayer({
     required String playerId,
@@ -168,10 +163,9 @@ final matchFindingProvider =
 
 /// Notifier for timeout operations
 class TimeoutOperationNotifier extends StateNotifier<AsyncValue<void>> {
+  TimeoutOperationNotifier(this._service) : super(const AsyncValue.data(null));
   final AdvancedTimeoutService _service;
   RealtimeTimeoutManager? _currentManager;
-
-  TimeoutOperationNotifier(this._service) : super(const AsyncValue.data(null));
 
   Future<void> startTimeoutMonitoring({
     required String gameId,
@@ -210,9 +204,8 @@ final timeoutOperationProvider =
 
 /// Notifier for rating operations
 class RatingOperationNotifier extends StateNotifier<AsyncValue<void>> {
-  final EnhancedRatingSystem _service;
-
   RatingOperationNotifier(this._service) : super(const AsyncValue.data(null));
+  final EnhancedRatingSystem _service;
 
   Future<void> recordRatingChange({
     required String playerId,
@@ -251,14 +244,6 @@ final ratingOperationProvider =
 
 /// Parameters for rating change calculation
 class RatingCalculationParams {
-  final String whitePlayerId;
-  final String blackPlayerId;
-  final int whiteCurrentRating;
-  final int blackCurrentRating;
-  final String result;
-  final String timeControl;
-  final int? timeControlMs;
-
   RatingCalculationParams({
     required this.whitePlayerId,
     required this.blackPlayerId,
@@ -268,6 +253,13 @@ class RatingCalculationParams {
     required this.timeControl,
     this.timeControlMs,
   });
+  final String whitePlayerId;
+  final String blackPlayerId;
+  final int whiteCurrentRating;
+  final int blackCurrentRating;
+  final String result;
+  final String timeControl;
+  final int? timeControlMs;
 }
 
 typedef VoidCallback = void Function();

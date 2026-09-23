@@ -5,17 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // User preferences model
 class UserPreferences {
-  final String userId;
-  final ThemeMode themeMode; // light, dark, system
-  final String language; // 'en', 'ja', etc.
-  final bool soundEnabled;
-  final bool notificationsEnabled;
-  final int boardSize; // 300-600 pixels
-  final bool showCoordinates;
-  final String pieceStyle; // 'default', 'wooden', 'classic'
-  final String boardStyle; // 'default', 'wooden', 'marble'
-  final DateTime? lastUpdated;
-
   UserPreferences({
     required this.userId,
     this.themeMode = ThemeMode.system,
@@ -28,21 +17,6 @@ class UserPreferences {
     this.boardStyle = 'default',
     this.lastUpdated,
   });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'themeMode': themeMode.toString().split('.').last,
-      'language': language,
-      'soundEnabled': soundEnabled,
-      'notificationsEnabled': notificationsEnabled,
-      'boardSize': boardSize,
-      'showCoordinates': showCoordinates,
-      'pieceStyle': pieceStyle,
-      'boardStyle': boardStyle,
-      'lastUpdated': FieldValue.serverTimestamp(),
-    };
-  }
 
   factory UserPreferences.fromMap(Map<String, dynamic> map) {
     ThemeMode themeMode = ThemeMode.system;
@@ -68,6 +42,29 @@ class UserPreferences {
           : null,
     );
   }
+  final String userId;
+  final ThemeMode themeMode; // light, dark, system
+  final String language; // 'en', 'ja', etc.
+  final bool soundEnabled;
+  final bool notificationsEnabled;
+  final int boardSize; // 300-600 pixels
+  final bool showCoordinates;
+  final String pieceStyle; // 'default', 'wooden', 'classic'
+  final String boardStyle; // 'default', 'wooden', 'marble'
+  final DateTime? lastUpdated;
+
+  Map<String, dynamic> toMap() => {
+        'userId': userId,
+        'themeMode': themeMode.toString().split('.').last,
+        'language': language,
+        'soundEnabled': soundEnabled,
+        'notificationsEnabled': notificationsEnabled,
+        'boardSize': boardSize,
+        'showCoordinates': showCoordinates,
+        'pieceStyle': pieceStyle,
+        'boardStyle': boardStyle,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      };
 
   UserPreferences copyWith({
     String? userId,
@@ -80,28 +77,26 @@ class UserPreferences {
     String? pieceStyle,
     String? boardStyle,
     DateTime? lastUpdated,
-  }) {
-    return UserPreferences(
-      userId: userId ?? this.userId,
-      themeMode: themeMode ?? this.themeMode,
-      language: language ?? this.language,
-      soundEnabled: soundEnabled ?? this.soundEnabled,
-      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      boardSize: boardSize ?? this.boardSize,
-      showCoordinates: showCoordinates ?? this.showCoordinates,
-      pieceStyle: pieceStyle ?? this.pieceStyle,
-      boardStyle: boardStyle ?? this.boardStyle,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-    );
-  }
+  }) =>
+      UserPreferences(
+        userId: userId ?? this.userId,
+        themeMode: themeMode ?? this.themeMode,
+        language: language ?? this.language,
+        soundEnabled: soundEnabled ?? this.soundEnabled,
+        notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+        boardSize: boardSize ?? this.boardSize,
+        showCoordinates: showCoordinates ?? this.showCoordinates,
+        pieceStyle: pieceStyle ?? this.pieceStyle,
+        boardStyle: boardStyle ?? this.boardStyle,
+        lastUpdated: lastUpdated ?? this.lastUpdated,
+      );
 }
 
 // User preferences service
 class UserPreferencesService {
+  UserPreferencesService(this._firestore, this._auth);
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  UserPreferencesService(this._firestore, this._auth);
 
   // Get user preferences
   Future<UserPreferences> getPreferences() async {
@@ -109,7 +104,8 @@ class UserPreferencesService {
     if (user == null) throw Exception('No user logged in');
 
     try {
-      final doc = await _firestore.collection('user_preferences').doc(user.uid).get();
+      final doc =
+          await _firestore.collection('user_preferences').doc(user.uid).get();
 
       if (doc.exists) {
         return UserPreferences.fromMap({
@@ -288,8 +284,7 @@ final userPreferencesServiceProvider = Provider((ref) {
 });
 
 // User preferences provider (cached)
-final userPreferencesProvider =
-    FutureProvider<UserPreferences>((ref) async {
+final userPreferencesProvider = FutureProvider<UserPreferences>((ref) async {
   final service = ref.watch(userPreferencesServiceProvider);
   return service.getPreferences();
 });

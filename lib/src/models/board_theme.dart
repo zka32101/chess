@@ -8,16 +8,6 @@ import 'package:flutter/material.dart';
 /// static [BoardThemeCatalog], never from JSON/Firestore, so there's no
 /// need for generated `fromJson`/`copyWith` boilerplate.
 class BoardTheme {
-  final String id;
-  final String displayName;
-  final Color lightSquareColor;
-  final Color darkSquareColor;
-  final Color whitePieceColor;
-  final Color blackPieceColor;
-  final Color selectedSquareColor;
-  final Color legalMoveIndicatorColor;
-  final bool isPremium;
-
   const BoardTheme({
     required this.id,
     required this.displayName,
@@ -29,6 +19,15 @@ class BoardTheme {
     required this.legalMoveIndicatorColor,
     this.isPremium = false,
   });
+  final String id;
+  final String displayName;
+  final Color lightSquareColor;
+  final Color darkSquareColor;
+  final Color whitePieceColor;
+  final Color blackPieceColor;
+  final Color selectedSquareColor;
+  final Color legalMoveIndicatorColor;
+  final bool isPremium;
 }
 
 /// Built-in catalog of board/piece theme packs. Some are free, some require
@@ -118,7 +117,6 @@ class BoardThemeCatalog {
   /// [BoardTheme.isPremium] entries in [all].
   static const String premiumFeatureKey = 'custom_board_themes';
 
-  static BoardTheme byId(String id) {
-    return all.firstWhere((theme) => theme.id == id, orElse: () => classic);
-  }
+  static BoardTheme byId(String id) =>
+      all.firstWhere((theme) => theme.id == id, orElse: () => classic);
 }

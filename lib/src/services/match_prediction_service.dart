@@ -4,14 +4,13 @@ import 'dart:math' show pow;
 
 /// Match outcome prediction and probability analysis
 class MatchPredictionService {
+  MatchPredictionService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _usersCollection = 'users';
   static const String _gamesCollection = 'games';
-
-  MatchPredictionService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Predict match outcome probabilities between two players
   Future<MatchOutcomePrediction> predictMatchOutcome(
@@ -20,10 +19,14 @@ class MatchPredictionService {
   ) async {
     try {
       // Get player ratings
-      final whiteDoc =
-          await _firestore.collection(_usersCollection).doc(whitePlayerId).get();
-      final blackDoc =
-          await _firestore.collection(_usersCollection).doc(blackPlayerId).get();
+      final whiteDoc = await _firestore
+          .collection(_usersCollection)
+          .doc(whitePlayerId)
+          .get();
+      final blackDoc = await _firestore
+          .collection(_usersCollection)
+          .doc(blackPlayerId)
+          .get();
 
       if (!whiteDoc.exists || !blackDoc.exists) {
         throw Exception('One or both players not found');
@@ -33,7 +36,7 @@ class MatchPredictionService {
       final blackRating = blackDoc.data()!['rating'] as int? ?? 1200;
 
       // Calculate expected scores using ELO formula
-      const double D = 400.0;
+      const double D = 400;
       final whiteExpected =
           1.0 / (1.0 + pow(10, (blackRating - whiteRating) / D).toDouble());
       final blackExpected = 1.0 - whiteExpected;
@@ -129,7 +132,8 @@ class MatchPredictionService {
     String blackPlayerId,
   ) async {
     try {
-      final prediction = await predictMatchOutcome(whitePlayerId, blackPlayerId);
+      final prediction =
+          await predictMatchOutcome(whitePlayerId, blackPlayerId);
 
       // Competitiveness is highest when win probabilities are close to 50-50
       // Calculate how close to 0.5 each probability is
@@ -138,8 +142,8 @@ class MatchPredictionService {
 
       // Perfect match would be 50-50 for both win chances
       // Score decreases as one side becomes more favored
-      final competitivenessScore =
-          (1.0 - (whiteProb - 0.5).abs() * 2) * (1.0 - (blackProb - 0.5).abs() * 2);
+      final competitivenessScore = (1.0 - (whiteProb - 0.5).abs() * 2) *
+          (1.0 - (blackProb - 0.5).abs() * 2);
 
       return MatchCompetitiveness(
         whitePlayerId: whitePlayerId,
@@ -292,17 +296,6 @@ class MatchPredictionService {
 
 /// Match outcome prediction result
 class MatchOutcomePrediction {
-  final String whitePlayerId;
-  final String blackPlayerId;
-  final int whiteRating;
-  final int blackRating;
-  final double whiteWinProbability;
-  final double blackWinProbability;
-  final double drawProbability;
-  final (int, int) expectedRatingChange;
-  final int matchDifficulty;
-  final double confidence;
-
   MatchOutcomePrediction({
     required this.whitePlayerId,
     required this.blackPlayerId,
@@ -315,19 +308,20 @@ class MatchOutcomePrediction {
     required this.matchDifficulty,
     required this.confidence,
   });
+  final String whitePlayerId;
+  final String blackPlayerId;
+  final int whiteRating;
+  final int blackRating;
+  final double whiteWinProbability;
+  final double blackWinProbability;
+  final double drawProbability;
+  final (int, int) expectedRatingChange;
+  final int matchDifficulty;
+  final double confidence;
 }
 
 /// Skill gap analysis between two players
 class SkillGapAnalysis {
-  final String player1Id;
-  final String player2Id;
-  final int rating1;
-  final int rating2;
-  final int ratingDifference;
-  final String skillGapCategory;
-  final int gamesDifference;
-  final String expectedOutcome;
-
   SkillGapAnalysis({
     required this.player1Id,
     required this.player2Id,
@@ -338,16 +332,18 @@ class SkillGapAnalysis {
     required this.gamesDifference,
     required this.expectedOutcome,
   });
+  final String player1Id;
+  final String player2Id;
+  final int rating1;
+  final int rating2;
+  final int ratingDifference;
+  final String skillGapCategory;
+  final int gamesDifference;
+  final String expectedOutcome;
 }
 
 /// Match competitiveness analysis
 class MatchCompetitiveness {
-  final String whitePlayerId;
-  final String blackPlayerId;
-  final int competitivenessScore;
-  final double winProbabilityGap;
-  final bool isCompetitiveMatch;
-
   MatchCompetitiveness({
     required this.whitePlayerId,
     required this.blackPlayerId,
@@ -355,17 +351,15 @@ class MatchCompetitiveness {
     required this.winProbabilityGap,
     required this.isCompetitiveMatch,
   });
+  final String whitePlayerId;
+  final String blackPlayerId;
+  final int competitivenessScore;
+  final double winProbabilityGap;
+  final bool isCompetitiveMatch;
 }
 
 /// Opponent recommendation with scoring
 class OpponentRecommendation {
-  final String opponentId;
-  final String opponentName;
-  final int opponentRating;
-  final int competitivenessScore;
-  final double winProbability;
-  final int predictedDifficulty;
-
   OpponentRecommendation({
     required this.opponentId,
     required this.opponentName,
@@ -374,4 +368,10 @@ class OpponentRecommendation {
     required this.winProbability,
     required this.predictedDifficulty,
   });
+  final String opponentId;
+  final String opponentName;
+  final int opponentRating;
+  final int competitivenessScore;
+  final double winProbability;
+  final int predictedDifficulty;
 }

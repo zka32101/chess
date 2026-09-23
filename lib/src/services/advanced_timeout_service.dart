@@ -4,6 +4,8 @@ import 'dart:async';
 
 /// Manages advanced timeout detection and handling
 class AdvancedTimeoutService {
+  AdvancedTimeoutService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -12,9 +14,6 @@ class AdvancedTimeoutService {
   static const int _inactivityTimeoutMs = 60000; // 1 minute inactivity timeout
 
   RealtimeTimeoutManager? _currentManager;
-
-  AdvancedTimeoutService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Start timeout monitoring for a game
   RealtimeTimeoutManager startTimeoutMonitoring({
@@ -92,12 +91,12 @@ class AdvancedTimeoutService {
             : 0,
         whiteTimedOut: whiteTimeMs <= 0,
         blackTimedOut: blackTimeMs <= 0,
-        whiteInactive: (whiteLastActivity != null &&
+        whiteInactive: whiteLastActivity != null &&
             now.difference(whiteLastActivity).inMilliseconds >
-                _inactivityTimeoutMs),
-        blackInactive: (blackLastActivity != null &&
+                _inactivityTimeoutMs,
+        blackInactive: blackLastActivity != null &&
             now.difference(blackLastActivity).inMilliseconds >
-                _inactivityTimeoutMs),
+                _inactivityTimeoutMs,
       );
     } catch (e, st) {
       _logger.e('Failed to get timeout status', error: e, stackTrace: st);
@@ -131,6 +130,17 @@ class AdvancedTimeoutService {
 
 /// Manages real-time timeout tracking during a game
 class RealtimeTimeoutManager {
+  RealtimeTimeoutManager({
+    required this.gameId,
+    required this.initialWhiteTime,
+    required this.initialBlackTime,
+    required this.onWhiteTimeout,
+    required this.onBlackTimeout,
+    required this.onInactivityDetected,
+    required this.firestore,
+    required this.logger,
+  })  : _whiteTimeRemaining = initialWhiteTime,
+        _blackTimeRemaining = initialBlackTime;
   final String gameId;
   final int initialWhiteTime;
   final int initialBlackTime;
@@ -150,18 +160,6 @@ class RealtimeTimeoutManager {
   DateTime? _blackLastActivity;
   bool _isRunning = false;
 
-  RealtimeTimeoutManager({
-    required this.gameId,
-    required this.initialWhiteTime,
-    required this.initialBlackTime,
-    required this.onWhiteTimeout,
-    required this.onBlackTimeout,
-    required this.onInactivityDetected,
-    required this.firestore,
-    required this.logger,
-  })  : _whiteTimeRemaining = initialWhiteTime,
-        _blackTimeRemaining = initialBlackTime;
-
   void start() {
     if (_isRunning) return;
     _isRunning = true;
@@ -170,7 +168,7 @@ class RealtimeTimeoutManager {
     _blackLastActivity = DateTime.now();
 
     // Check time every 100ms
-    _whiteTimeTimer = Timer.periodic(Duration(milliseconds: 100), (_) {
+    _whiteTimeTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       _whiteTimeRemaining -= 100;
       if (_whiteTimeRemaining <= 0 && !_isRunning) {
         onWhiteTimeout();
@@ -178,7 +176,7 @@ class RealtimeTimeoutManager {
       }
     });
 
-    _blackTimeTimer = Timer.periodic(Duration(milliseconds: 100), (_) {
+    _blackTimeTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       _blackTimeRemaining -= 100;
       if (_blackTimeRemaining <= 0 && !_isRunning) {
         onBlackTimeout();
@@ -187,7 +185,7 @@ class RealtimeTimeoutManager {
     });
 
     // Check inactivity every 5 seconds
-    _inactivityCheckTimer = Timer.periodic(Duration(seconds: 5), (_) {
+    _inactivityCheckTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       _checkInactivity();
     });
 
@@ -237,16 +235,6 @@ class RealtimeTimeoutManager {
 
 /// Data class for timeout status
 class TimeoutStatus {
-  final String gameId;
-  final int whiteTimeRemaining;
-  final int blackTimeRemaining;
-  final int whiteInactivityDuration;
-  final int blackInactivityDuration;
-  final bool whiteTimedOut;
-  final bool blackTimedOut;
-  final bool whiteInactive;
-  final bool blackInactive;
-
   TimeoutStatus({
     required this.gameId,
     required this.whiteTimeRemaining,
@@ -258,6 +246,15 @@ class TimeoutStatus {
     required this.whiteInactive,
     required this.blackInactive,
   });
+  final String gameId;
+  final int whiteTimeRemaining;
+  final int blackTimeRemaining;
+  final int whiteInactivityDuration;
+  final int blackInactivityDuration;
+  final bool whiteTimedOut;
+  final bool blackTimedOut;
+  final bool whiteInactive;
+  final bool blackInactive;
 
   bool get anyPlayerTimedOut => whiteTimedOut || blackTimedOut;
   bool get anyPlayerInactive => whiteInactive || blackInactive;
@@ -265,15 +262,14 @@ class TimeoutStatus {
 
 /// Data class for time control
 class TimeControl {
-  final String timeControl;
-  final int totalTimeMs;
-  final int incrementMs;
-
   TimeControl({
     required this.timeControl,
     required this.totalTimeMs,
     required this.incrementMs,
   });
+  final String timeControl;
+  final int totalTimeMs;
+  final int incrementMs;
 }
 
 typedef VoidCallback = void Function();

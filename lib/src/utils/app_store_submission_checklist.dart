@@ -2,14 +2,6 @@ import 'package:flutter/foundation.dart';
 
 /// App store submission requirement
 class SubmissionRequirement {
-  final String id;
-  final String title;
-  final String description;
-  final String platform; // 'both', 'ios', 'android'
-  bool isCompleted;
-  String? notes;
-  final DateTime createdAt;
-
   SubmissionRequirement({
     required this.title,
     required this.description,
@@ -19,6 +11,13 @@ class SubmissionRequirement {
     DateTime? createdAt,
   })  : id = 'REQ_${DateTime.now().millisecondsSinceEpoch}',
         createdAt = createdAt ?? DateTime.now();
+  final String id;
+  final String title;
+  final String description;
+  final String platform; // 'both', 'ios', 'android'
+  bool isCompleted;
+  String? notes;
+  final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -36,18 +35,15 @@ class SubmissionRequirement {
 
 /// App store submission checklist
 class AppStoreSubmissionChecklist {
-  static final AppStoreSubmissionChecklist _instance =
-      AppStoreSubmissionChecklist._internal();
-
-  final _requirements = <SubmissionRequirement>[];
-
-  factory AppStoreSubmissionChecklist() {
-    return _instance;
-  }
+  factory AppStoreSubmissionChecklist() => _instance;
 
   AppStoreSubmissionChecklist._internal() {
     _initializeRequirements();
   }
+  static final AppStoreSubmissionChecklist _instance =
+      AppStoreSubmissionChecklist._internal();
+
+  final _requirements = <SubmissionRequirement>[];
 
   /// Initialize requirements
   void _initializeRequirements() {
@@ -197,7 +193,8 @@ class AppStoreSubmissionChecklist {
       'both',
     );
 
-    debugPrint('[AppStoreSubmissionChecklist] Initialized with ${_requirements.length} requirements');
+    debugPrint(
+        '[AppStoreSubmissionChecklist] Initialized with ${_requirements.length} requirements');
   }
 
   /// Create requirement
@@ -231,7 +228,7 @@ class AppStoreSubmissionChecklist {
 
   /// Get completion percentage
   double getCompletionPercentage() {
-    if (_requirements.isEmpty) return 0.0;
+    if (_requirements.isEmpty) return 0;
     return (getCompletedRequirements().length / _requirements.length) * 100;
   }
 
@@ -240,19 +237,17 @@ class AppStoreSubmissionChecklist {
 
   /// Mark requirement as completed
   void markCompleted(String id, {String? notes}) {
-    final req = _requirements.firstWhere((r) => r.id == id, orElse: () => null as dynamic);
-    if (req != null) {
-      req.isCompleted = true;
-      req.notes = notes;
-    }
+    final req = _requirements.firstWhere((r) => r.id == id,
+        orElse: () => null as dynamic);
+    req.isCompleted = true;
+    req.notes = notes;
   }
 
   /// Mark requirement as incomplete
   void markIncomplete(String id) {
-    final req = _requirements.firstWhere((r) => r.id == id, orElse: () => null as dynamic);
-    if (req != null) {
-      req.isCompleted = false;
-    }
+    final req = _requirements.firstWhere((r) => r.id == id,
+        orElse: () => null as dynamic);
+    req.isCompleted = false;
   }
 
   /// Generate submission checklist report

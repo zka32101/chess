@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/phase_k_providers.dart';
-import '../models/phase_k_models.dart';
 
 // ========== Leaderboard Screen ==========
 
@@ -38,7 +37,7 @@ class FriendsListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ''; // TODO: Get from auth
+    const userId = ''; // TODO: Get from auth
     final friends = ref.watch(userFriendsProvider(userId));
 
     return friends.when(
@@ -50,7 +49,8 @@ class FriendsListScreen extends ConsumerWidget {
             leading: CircleAvatar(child: Text(friend.friendUsername[0])),
             title: Text(friend.friendUsername),
             subtitle: Text('Rating: ${friend.friendRating}'),
-            trailing: Icon(friend.isOnline ? Icons.circle : Icons.circle_outlined),
+            trailing:
+                Icon(friend.isOnline ? Icons.circle : Icons.circle_outlined),
           );
         },
       ),
@@ -67,7 +67,7 @@ class PendingChallengesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userId = ''; // TODO: Get from auth
+    const userId = ''; // TODO: Get from auth
     final challenges = ref.watch(pendingChallengesProvider(userId));
 
     return challenges.when(
@@ -78,7 +78,8 @@ class PendingChallengesScreen extends ConsumerWidget {
           return Card(
             child: ListTile(
               title: Text('Challenge from ${challenge.challengerUsername}'),
-              subtitle: Text('${challenge.timeControl} • ${challenge.wagerPoints} points'),
+              subtitle: Text(
+                  '${challenge.timeControl} • ${challenge.wagerPoints} points'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -123,7 +124,8 @@ class ChallengeStreaksScreen extends ConsumerWidget {
           return ListTile(
             leading: Text('${index + 1}'),
             title: Text('${streak.currentStreak} streak'),
-            subtitle: Text('${streak.totalChallengesWon}W ${streak.totalChallengesLost}L'),
+            subtitle: Text(
+                '${streak.totalChallengesWon}W ${streak.totalChallengesLost}L'),
             trailing: Text('${(streak.winRate * 100).toStringAsFixed(1)}%'),
           );
         },
@@ -151,7 +153,8 @@ class TournamentsListScreen extends ConsumerWidget {
           return Card(
             child: ListTile(
               title: Text(tournament.name),
-              subtitle: Text('${tournament.currentParticipants}/${tournament.maxParticipants} • ${tournament.format}'),
+              subtitle: Text(
+                  '${tournament.currentParticipants}/${tournament.maxParticipants} • ${tournament.format}'),
               trailing: Chip(
                 label: Text(tournament.status),
                 backgroundColor: tournament.status == 'registration'
@@ -174,12 +177,11 @@ class TournamentsListScreen extends ConsumerWidget {
 // ========== Tournament Details Screen ==========
 
 class TournamentDetailsScreen extends ConsumerWidget {
-  final String tournamentId;
-
   const TournamentDetailsScreen({
-    Key? key,
     required this.tournamentId,
+    Key? key,
   }) : super(key: key);
+  final String tournamentId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -201,19 +203,21 @@ class TournamentDetailsScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${tournamentData.currentParticipants}/${tournamentData.maxParticipants} Participants'),
-                      SizedBox(height: 16),
-                      Text('Standings'),
+                      Text(
+                          '${tournamentData.currentParticipants}/${tournamentData.maxParticipants} Participants'),
+                      const SizedBox(height: 16),
+                      const Text('Standings'),
                       ListView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         itemCount: standingsData.rankings.length,
                         itemBuilder: (context, index) {
                           final ranking = standingsData.rankings[index];
                           return ListTile(
                             leading: Text('${ranking.position}'),
                             title: Text(ranking.username),
-                            subtitle: Text('${ranking.wins}W ${ranking.losses}L ${ranking.draws}D'),
+                            subtitle: Text(
+                                '${ranking.wins}W ${ranking.losses}L ${ranking.draws}D'),
                             trailing: Text('${ranking.points} pts'),
                           );
                         },
@@ -237,12 +241,11 @@ class TournamentDetailsScreen extends ConsumerWidget {
 // ========== Social Stats Widget ==========
 
 class SocialStatsWidget extends ConsumerWidget {
-  final String userId;
-
   const SocialStatsWidget({
-    Key? key,
     required this.userId,
+    Key? key,
   }) : super(key: key);
+  final String userId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -262,13 +265,16 @@ class SocialStatsWidget extends ConsumerWidget {
                   _StatColumn('Rating', '${socialStats.currentRating}'),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _StatColumn('Challenges', '${socialStats.activeChallengesCount}'),
-                  _StatColumn('Win Rate', '${(socialStats.winRate * 100).toStringAsFixed(1)}%'),
-                  _StatColumn('Requests', '${socialStats.pendingRequestsCount}'),
+                  _StatColumn(
+                      'Challenges', '${socialStats.activeChallengesCount}'),
+                  _StatColumn('Win Rate',
+                      '${(socialStats.winRate * 100).toStringAsFixed(1)}%'),
+                  _StatColumn(
+                      'Requests', '${socialStats.pendingRequestsCount}'),
                 ],
               ),
             ],
@@ -282,20 +288,17 @@ class SocialStatsWidget extends ConsumerWidget {
 }
 
 class _StatColumn extends StatelessWidget {
+  const _StatColumn(this.label, this.value);
   final String label;
   final String value;
 
-  const _StatColumn(this.label, this.value);
-
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value, style: Theme.of(context).textTheme.headlineSmall),
-        Text(label, style: Theme.of(context).textTheme.labelSmall),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Column(
+        children: [
+          Text(value, style: Theme.of(context).textTheme.headlineSmall),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+        ],
+      );
 }
 
 // ========== Skeleton Loader ==========
@@ -304,12 +307,10 @@ class Skeleton extends StatelessWidget {
   const Skeleton({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.grey.shade300,
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+        color: Colors.grey.shade300,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
 }

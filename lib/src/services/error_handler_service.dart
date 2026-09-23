@@ -12,14 +12,6 @@ enum ErrorSeverity {
 
 /// Error context for logging
 class ErrorContext {
-  final String message;
-  final Object? error;
-  final StackTrace? stackTrace;
-  final ErrorSeverity severity;
-  final String? userId;
-  final String? context;
-  final Map<String, dynamic>? metadata;
-
   ErrorContext({
     required this.message,
     this.error,
@@ -29,10 +21,18 @@ class ErrorContext {
     this.context,
     this.metadata,
   });
+  final String message;
+  final Object? error;
+  final StackTrace? stackTrace;
+  final ErrorSeverity severity;
+  final String? userId;
+  final String? context;
+  final Map<String, dynamic>? metadata;
 }
 
 /// Centralized error handling and logging service
 class ErrorHandlerService {
+  ErrorHandlerService._();
   static final ErrorHandlerService _instance = ErrorHandlerService._();
   final Logger _logger = Logger(
     printer: PrettyPrinter(
@@ -45,8 +45,6 @@ class ErrorHandlerService {
     ),
   );
 
-  ErrorHandlerService._();
-
   static ErrorHandlerService get instance => _instance;
 
   /// Log an error with context
@@ -55,16 +53,20 @@ class ErrorHandlerService {
 
     switch (context.severity) {
       case ErrorSeverity.info:
-        _logger.i(formattedMessage, error: context.error, stackTrace: context.stackTrace);
+        _logger.i(formattedMessage,
+            error: context.error, stackTrace: context.stackTrace);
         break;
       case ErrorSeverity.warning:
-        _logger.w(formattedMessage, error: context.error, stackTrace: context.stackTrace);
+        _logger.w(formattedMessage,
+            error: context.error, stackTrace: context.stackTrace);
         break;
       case ErrorSeverity.error:
-        _logger.e(formattedMessage, error: context.error, stackTrace: context.stackTrace);
+        _logger.e(formattedMessage,
+            error: context.error, stackTrace: context.stackTrace);
         break;
       case ErrorSeverity.critical:
-        _logger.wtf(formattedMessage, error: context.error, stackTrace: context.stackTrace);
+        _logger.wtf(formattedMessage,
+            error: context.error, stackTrace: context.stackTrace);
         break;
     }
 
@@ -103,7 +105,8 @@ class ErrorHandlerService {
   }
 
   /// Handle validation errors
-  String? validateInput(String? input, {required String fieldName, int? minLength, int? maxLength}) {
+  String? validateInput(String? input,
+      {required String fieldName, int? minLength, int? maxLength}) {
     if (input == null || input.isEmpty) {
       logError(ErrorContext(
         message: 'Validation error: $fieldName is empty',
@@ -128,7 +131,8 @@ class ErrorHandlerService {
   /// Format error message with context
   String _formatMessage(ErrorContext context) {
     final buffer = StringBuffer();
-    buffer.writeln('[${context.severity.name.toUpperCase()}] ${context.message}');
+    buffer
+        .writeln('[${context.severity.name.toUpperCase()}] ${context.message}');
 
     if (context.context != null) {
       buffer.writeln('Context: ${context.context}');

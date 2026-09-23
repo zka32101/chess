@@ -6,9 +6,7 @@ import '../models/analytics_models.dart';
 
 /// Singleton analytics dashboard service
 final analyticsDashboardServiceProvider =
-    Provider<AnalyticsDashboardService>((ref) {
-  return AnalyticsDashboardService();
-});
+    Provider<AnalyticsDashboardService>((ref) => AnalyticsDashboardService());
 
 /// Get player analytics dashboard
 final playerAnalyticsDashboardProvider =
@@ -60,9 +58,8 @@ final playerComparisonProvider =
 });
 
 /// Dashboard refresh trigger
-final dashboardRefreshProvider = StateProvider<DateTime>((ref) {
-  return DateTime.now();
-});
+final dashboardRefreshProvider =
+    StateProvider<DateTime>((ref) => DateTime.now());
 
 /// Invalidation notifier
 final analyticsInvalidationProvider =
@@ -73,9 +70,8 @@ final analyticsInvalidationProvider =
 
 /// Notifier for manual analytics invalidation
 class AnalyticsInvalidationNotifier extends StateNotifier<List<String>> {
-  final AnalyticsDashboardService _service;
-
   AnalyticsInvalidationNotifier(this._service) : super([]);
+  final AnalyticsDashboardService _service;
 
   void invalidatePlayer(String userId) {
     _service.invalidatePlayerAnalytics(userId);

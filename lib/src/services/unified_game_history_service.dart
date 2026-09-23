@@ -3,20 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/logger.dart';
 import 'dart:async' show TimeoutException;
 import 'dart:io' show SocketException;
-import '../models/game.dart';
 import 'error_logging_service.dart';
 
 /// Exception thrown for game history service errors
 class GameHistoryException implements Exception {
-  final String message;
-  final String? code;
-  final dynamic originalError;
-
   GameHistoryException(
     this.message, {
     this.code,
     this.originalError,
   });
+  final String message;
+  final String? code;
+  final dynamic originalError;
 
   @override
   String toString() => message;
@@ -38,15 +36,14 @@ class GameHistoryException implements Exception {
 /// - CSV export
 /// - Statistics aggregation
 class UnifiedGameHistoryService {
-  final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
-  final Logger _logger = Logger();
-
   UnifiedGameHistoryService({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance;
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
+  final Logger _logger = Logger();
 
   /// Get current user ID
   String get _userId =>
@@ -95,7 +92,7 @@ class UnifiedGameHistoryService {
       final matches = snapshot.docs
           .map((doc) => {
                 'gameId': doc.id,
-                ...doc.data() as Map<String, dynamic>,
+                ...doc.data()! as Map<String, dynamic>,
               })
           .toList();
 
@@ -118,35 +115,33 @@ class UnifiedGameHistoryService {
   }
 
   /// Stream live match history updates
-  Stream<List<Map<String, dynamic>>> watchMatchHistory() {
-    return _firestore
-        .collection('games')
-        .where(
-          Filter.or(
-            Filter('whitePlayerId', isEqualTo: _userId),
-            Filter('blackPlayerId', isEqualTo: _userId),
-          ),
-        )
-        .where('status', isEqualTo: 'completed')
-        .orderBy('endedAt', descending: true)
-        .limit(100)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => {
-                  'gameId': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                })
-            .toList())
-        .handleError((e, stackTrace) async {
-      await ErrorLoggingService.logError(
-        e,
-        stackTrace as StackTrace,
-        context: 'watchMatchHistory',
-        reason: 'Stream error while watching match history',
-      );
-      return [];
-    });
-  }
+  Stream<List<Map<String, dynamic>>> watchMatchHistory() => _firestore
+          .collection('games')
+          .where(
+            Filter.or(
+              Filter('whitePlayerId', isEqualTo: _userId),
+              Filter('blackPlayerId', isEqualTo: _userId),
+            ),
+          )
+          .where('status', isEqualTo: 'completed')
+          .orderBy('endedAt', descending: true)
+          .limit(100)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => {
+                    'gameId': doc.id,
+                    ...doc.data(),
+                  })
+              .toList())
+          .handleError((e, stackTrace) async {
+        await ErrorLoggingService.logError(
+          e,
+          stackTrace as StackTrace,
+          context: 'watchMatchHistory',
+          reason: 'Stream error while watching match history',
+        );
+        return [];
+      });
 
   /// Filter games by multiple criteria
   ///
@@ -203,7 +198,7 @@ class UnifiedGameHistoryService {
       var games = snapshot.docs
           .map((doc) => {
                 'gameId': doc.id,
-                ...doc.data() as Map<String, dynamic>,
+                ...doc.data()! as Map<String, dynamic>,
               })
           .toList();
 
@@ -326,7 +321,7 @@ class UnifiedGameHistoryService {
         'Calculate player statistics',
       );
 
-      int totalGames = snapshot.size;
+      final int totalGames = snapshot.size;
       int wins = 0;
       int losses = 0;
       int draws = 0;

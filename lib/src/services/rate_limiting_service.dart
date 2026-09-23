@@ -1,12 +1,10 @@
-import 'dart:async';
 import 'package:logger/logger.dart';
 
 /// Exception thrown when rate limit is exceeded.
 class RateLimitException implements Exception {
+  RateLimitException(this.message, {this.retryAfter});
   final String message;
   final Duration? retryAfter;
-
-  RateLimitException(this.message, {this.retryAfter});
 
   @override
   String toString() => message;
@@ -22,6 +20,9 @@ class RateLimitException implements Exception {
 /// - SignUp endpoint: max 3 attempts per 24 hours per IP
 /// - Password reset: max 3 attempts per 24 hours
 class RateLimitingService {
+  factory RateLimitingService() => _instance;
+
+  RateLimitingService._internal();
   static final RateLimitingService _instance = RateLimitingService._internal();
   static final _logger = Logger();
 
@@ -33,10 +34,6 @@ class RateLimitingService {
 
   /// Map of endpoint to consecutive error count
   final Map<String, int> _consecutiveErrors = {};
-
-  RateLimitingService._internal();
-
-  factory RateLimitingService() => _instance;
 
   /// Rate limit configuration per endpoint
   static const Map<String, _RateLimitConfig> _limits = {
@@ -253,6 +250,12 @@ class RateLimitingService {
 
 /// Rate limit configuration for an endpoint
 class _RateLimitConfig {
+  const _RateLimitConfig({
+    required this.maxAttempts,
+    required this.windowDuration,
+    required this.lockoutDuration,
+  });
+
   /// Maximum attempts allowed in window
   final int maxAttempts;
 
@@ -261,10 +264,4 @@ class _RateLimitConfig {
 
   /// How long endpoint is locked after exceeding limit
   final Duration lockoutDuration;
-
-  const _RateLimitConfig({
-    required this.maxAttempts,
-    required this.windowDuration,
-    required this.lockoutDuration,
-  });
 }

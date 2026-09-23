@@ -18,8 +18,6 @@ final selectedBoardThemeProvider = Provider<BoardTheme>((ref) {
 });
 
 /// Whether the signed-in user has unlocked the premium board themes.
-final boardThemesUnlockedProvider = FutureProvider<bool>((ref) {
-  return ref.watch(
-    premiumFeatureProvider(BoardThemeCatalog.premiumFeatureKey).future,
-  );
-});
+final boardThemesUnlockedProvider = FutureProvider<bool>((ref) => ref.watch(
+      premiumFeatureProvider(BoardThemeCatalog.premiumFeatureKey).future,
+    ));

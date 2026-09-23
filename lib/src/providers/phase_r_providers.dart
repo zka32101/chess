@@ -7,9 +7,8 @@ import '../services/adaptive_matchmaking_service.dart';
 /// Provides reactive access to match prediction and adaptive matchmaking
 
 // Service Providers
-final matchPredictionServiceProvider = Provider<MatchPredictionService>((ref) {
-  return MatchPredictionService(firestore: FirebaseFirestore.instance);
-});
+final matchPredictionServiceProvider = Provider<MatchPredictionService>(
+    (ref) => MatchPredictionService(firestore: FirebaseFirestore.instance));
 
 final adaptiveMatchmakingServiceProvider =
     Provider<AdaptiveMatchmakingService>((ref) {
@@ -134,7 +133,7 @@ final comprehensiveMatchAnalysisProvider = FutureProvider.family<
       opponentId: params.opponentId!,
     )));
 
-    return await Future.wait([
+    return Future.wait([
       predictionAsync.when(
         data: (data) async => data,
         error: (err, st) => throw err,
@@ -150,23 +149,19 @@ final comprehensiveMatchAnalysisProvider = FutureProvider.family<
         error: (err, st) => throw err,
         loading: () => throw Exception('Loading suggestions'),
       ),
-    ]).then((results) {
-      return ComprehensiveMatchAnalysis(
-        playerId: params.playerId,
-        prediction: results[0] as MatchOutcomePrediction,
-        quality: results[1] as MatchQualityMetrics,
-        suggestions: results[2] as List<MatchSuggestion>,
-      );
-    });
+    ]).then((results) => ComprehensiveMatchAnalysis(
+          playerId: params.playerId,
+          prediction: results[0] as MatchOutcomePrediction,
+          quality: results[1] as MatchQualityMetrics,
+          suggestions: results[2] as List<MatchSuggestion>,
+        ));
   }
 
   return await suggestionsAsync.when(
-    data: (suggestions) async {
-      return ComprehensiveMatchAnalysis(
-        playerId: params.playerId,
-        suggestions: suggestions,
-      );
-    },
+    data: (suggestions) async => ComprehensiveMatchAnalysis(
+      playerId: params.playerId,
+      suggestions: suggestions,
+    ),
     error: (err, st) => throw err,
     loading: () => throw Exception('Loading suggestions'),
   );
@@ -174,15 +169,14 @@ final comprehensiveMatchAnalysisProvider = FutureProvider.family<
 
 /// Comprehensive match analysis data class
 class ComprehensiveMatchAnalysis {
+  ComprehensiveMatchAnalysis({
+    required this.playerId,
+    required this.suggestions,
+    this.prediction,
+    this.quality,
+  });
   final String playerId;
   final MatchOutcomePrediction? prediction;
   final MatchQualityMetrics? quality;
   final List<MatchSuggestion> suggestions;
-
-  ComprehensiveMatchAnalysis({
-    required this.playerId,
-    this.prediction,
-    this.quality,
-    required this.suggestions,
-  });
 }

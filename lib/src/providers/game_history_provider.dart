@@ -1,22 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:chess_tactics_master/src/models/game_history.dart';
-import 'package:chess_tactics_master/src/services/game_history_service.dart';
-import 'package:chess_tactics_master/src/services/firebase_game_history_service.dart';
-import 'package:chess_tactics_master/src/services/hybrid_game_history_service.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine_enhanced.dart';
+import '../models/game_history.dart';
+import '../services/game_history_service.dart';
+import '../services/firebase_game_history_service.dart';
+import '../services/hybrid_game_history_service.dart';
+import '../services/ai_opponent_engine_enhanced.dart';
 
 /// Provider for Firebase Auth state
-final firebaseAuthProvider = StreamProvider<User?>((ref) {
-  return FirebaseAuth.instance.authStateChanges();
-});
+final firebaseAuthProvider =
+    StreamProvider<User?>((ref) => FirebaseAuth.instance.authStateChanges());
 
 /// Provider for game history service (local or Firebase)
 final gameHistoryServiceProvider = Provider<GameHistoryService>((ref) {
   final authState = ref.watch(firebaseAuthProvider);
 
   return authState.when(
-    loading: () => LocalGameHistoryService(),
+    loading: LocalGameHistoryService.new,
     error: (_, __) => LocalGameHistoryService(),
     data: (user) {
       if (user != null) {
@@ -38,9 +37,9 @@ final firebaseGameHistoryServiceProvider =
     Provider<FirebaseGameHistoryService?>((ref) {
   final authState = ref.watch(firebaseAuthProvider);
 
-  return authState.whenData((user) {
-    return user != null ? FirebaseGameHistoryService() : null;
-  }).value;
+  return authState
+      .whenData((user) => user != null ? FirebaseGameHistoryService() : null)
+      .value;
 });
 
 /// Provider for player statistics
@@ -142,9 +141,8 @@ final allGamesStreamProvider = StreamProvider<List<GameRecord>>((ref) {
 
 /// Notifier for game history operations
 class GameHistoryNotifier extends StateNotifier<AsyncValue<void>> {
-  final GameHistoryService _service;
-
   GameHistoryNotifier(this._service) : super(const AsyncValue.data(null));
+  final GameHistoryService _service;
 
   /// Save a game
   Future<void> saveGame(GameRecord game) async {

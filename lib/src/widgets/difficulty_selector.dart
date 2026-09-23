@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:chess_tactics_master/src/services/ai_opponent_engine.dart';
+import '../services/ai_opponent_engine.dart';
 
 /// Widget for selecting AI difficulty level
 class DifficultySelector extends StatefulWidget {
-  final Function(AIDifficulty) onDifficultySelected;
-  final AIDifficulty? initialDifficulty;
-
   const DifficultySelector({
-    Key? key,
     required this.onDifficultySelected,
+    Key? key,
     this.initialDifficulty,
   }) : super(key: key);
+  final Function(AIDifficulty) onDifficultySelected;
+  final AIDifficulty? initialDifficulty;
 
   @override
   State<DifficultySelector> createState() => _DifficultySelectorState();
@@ -26,71 +25,67 @@ class _DifficultySelectorState extends State<DifficultySelector> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
-            child: Text(
-              'Select AI Difficulty',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-          ),
-          ...AIDifficulty.values.map((difficulty) {
-            return Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: Card(
-                child: ListTile(
-                  title: Text(difficulty.displayName),
-                  subtitle: Text(difficulty.description),
-                  trailing: Radio<AIDifficulty>(
-                    value: difficulty,
-                    groupValue: _selectedDifficulty,
-                    onChanged: (AIDifficulty? value) {
-                      setState(() {
-                        if (value != null) {
-                          _selectedDifficulty = value;
-                        }
-                      });
-                    },
-                  ),
-                  onTap: () {
-                    setState(() {
-                      _selectedDifficulty = difficulty;
-                    });
-                  },
-                ),
+  Widget build(BuildContext context) => SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                'Select AI Difficulty',
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            );
-          }).toList(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      widget.onDifficultySelected(_selectedDifficulty);
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('Start Game'),
-                  ),
-                ),
-              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            ...AIDifficulty.values.map((difficulty) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Card(
+                    child: ListTile(
+                      title: Text(difficulty.displayName),
+                      subtitle: Text(difficulty.description),
+                      trailing: Radio<AIDifficulty>(
+                        value: difficulty,
+                        groupValue: _selectedDifficulty,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value != null) {
+                              _selectedDifficulty = value;
+                            }
+                          });
+                        },
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _selectedDifficulty = difficulty;
+                        });
+                      },
+                    ),
+                  ),
+                )),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        widget.onDifficultySelected(_selectedDifficulty);
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Start Game'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
 }

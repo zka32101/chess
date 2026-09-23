@@ -53,9 +53,8 @@ class ZobristHash {
   }
 
   /// Generate random 64-bit integer
-  static int _randomInt64() {
-    return (_rng.nextInt(0x100000000) << 32) | _rng.nextInt(0x100000000);
-  }
+  static int _randomInt64() =>
+      (_rng.nextInt(0x100000000) << 32) | _rng.nextInt(0x100000000);
 
   /// Get piece index for Zobrist table lookup
   /// Returns 0-11 based on piece type and color
@@ -213,10 +212,7 @@ class ZobristHash {
 
 /// Transposition table entry
 class TranspositionEntry {
-  final int hash;
-  final int score;
-  final int depth;
-  final int flag; // 0 = exact, 1 = lower bound, 2 = upper bound
+  // 0 = exact, 1 = lower bound, 2 = upper bound
 
   TranspositionEntry({
     required this.hash,
@@ -224,6 +220,10 @@ class TranspositionEntry {
     required this.depth,
     required this.flag,
   });
+  final int hash;
+  final int score;
+  final int depth;
+  final int flag;
 
   bool isExact() => flag == 0;
   bool isLowerBound() => flag == 1;
@@ -236,6 +236,8 @@ class TranspositionEntry {
 /// Uses 64-bit Zobrist keys instead of FEN strings.
 /// Faster lookup and lower memory usage than string-based approach.
 class ZobristTranspositionTable {
+  ZobristTranspositionTable({int maxSize = 100000}) : _maxSize = maxSize;
+
   /// Transposition table storage
   final Map<int, TranspositionEntry> _table = {};
 
@@ -246,8 +248,6 @@ class ZobristTranspositionTable {
   int _hits = 0;
   int _misses = 0;
   int _overwrites = 0;
-
-  ZobristTranspositionTable({int maxSize = 100000}) : _maxSize = maxSize;
 
   /// Store a position evaluation
   void store(int hash, int score, int depth, int flag) {

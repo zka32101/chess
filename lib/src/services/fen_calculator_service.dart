@@ -38,7 +38,7 @@ class FenCalculatorService {
         'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   }) {
     try {
-      var chess = chess_lib.Chess.fromFEN(startingFen);
+      final chess = chess_lib.Chess.fromFEN(startingFen);
 
       for (final moveData in moves) {
         final from = moveData['from'] as String;
@@ -71,24 +71,16 @@ class FenCalculatorService {
   }
 
   /// Extract piece placement from FEN
-  static String getPiecePlacement(String fen) {
-    return fen.split(' ')[0];
-  }
+  static String getPiecePlacement(String fen) => fen.split(' ')[0];
 
   /// Extract active color from FEN
-  static String getActiveColor(String fen) {
-    return fen.split(' ')[1];
-  }
+  static String getActiveColor(String fen) => fen.split(' ')[1];
 
   /// Extract castling rights from FEN
-  static String getCastlingRights(String fen) {
-    return fen.split(' ')[2];
-  }
+  static String getCastlingRights(String fen) => fen.split(' ')[2];
 
   /// Extract en passant target square from FEN
-  static String getEnPassantTarget(String fen) {
-    return fen.split(' ')[3];
-  }
+  static String getEnPassantTarget(String fen) => fen.split(' ')[3];
 
   /// Extract halfmove clock from FEN
   static int getHalfmoveClock(String fen) {

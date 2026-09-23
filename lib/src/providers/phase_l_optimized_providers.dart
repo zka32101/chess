@@ -11,29 +11,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // ========== Optimized Service Providers ==========
 
 /// Access to optimized LeaderboardService
-final leaderboardServiceOptimizedProvider = Provider((ref) {
-  return LeaderboardServiceOptimized.instance;
-});
+final leaderboardServiceOptimizedProvider =
+    Provider((ref) => LeaderboardServiceOptimized.instance);
 
 /// Access to optimized FriendService
-final friendServiceOptimizedProvider = Provider((ref) {
-  return FriendServiceOptimized.instance;
-});
+final friendServiceOptimizedProvider =
+    Provider((ref) => FriendServiceOptimized.instance);
 
 /// Access to optimized FriendChallengeService
-final friendChallengeServiceOptimizedProvider = Provider((ref) {
-  return FriendChallengeServiceOptimized.instance;
-});
+final friendChallengeServiceOptimizedProvider =
+    Provider((ref) => FriendChallengeServiceOptimized.instance);
 
 /// Access to optimized TournamentService
-final tournamentServiceOptimizedProvider = Provider((ref) {
-  return TournamentServiceOptimized.instance;
-});
+final tournamentServiceOptimizedProvider =
+    Provider((ref) => TournamentServiceOptimized.instance);
 
 /// Performance monitoring
-final performanceMonitorProvider = Provider((ref) {
-  return PerformanceMonitor.instance;
-});
+final performanceMonitorProvider =
+    Provider((ref) => PerformanceMonitor.instance);
 
 // ========== Paginated Leaderboard Providers ==========
 
@@ -350,17 +345,16 @@ final cacheInvalidationProvider = Provider<CacheInvalidationHelper>((ref) {
 // ========== Helper Classes ==========
 
 class CacheInvalidationHelper {
-  final LeaderboardServiceOptimized leaderboardService;
-  final FriendServiceOptimized friendService;
-  final FriendChallengeServiceOptimized challengeService;
-  final TournamentServiceOptimized tournamentService;
-
   CacheInvalidationHelper({
     required this.leaderboardService,
     required this.friendService,
     required this.challengeService,
     required this.tournamentService,
   });
+  final LeaderboardServiceOptimized leaderboardService;
+  final FriendServiceOptimized friendService;
+  final FriendChallengeServiceOptimized challengeService;
+  final TournamentServiceOptimized tournamentService;
 
   void invalidateUserAllCaches(String userId) {
     leaderboardService.invalidateUserCache(userId);

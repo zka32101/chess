@@ -7,7 +7,7 @@ class AccessibilityHelper {
   AccessibilityHelper._();
 
   /// Minimum touch target size (WCAG 2.1 AA)
-  static const double minTouchTargetSize = 48.0;
+  static const double minTouchTargetSize = 48;
 
   /// Check if two colors have sufficient contrast ratio for WCAG AA
   /// - Normal text: requires 4.5:1
@@ -71,20 +71,19 @@ class AccessibilityHelper {
     String? hint,
     Widget? child,
     double? minSize = minTouchTargetSize,
-  }) {
-    return Semantics(
-      button: true,
-      enabled: true,
-      label: label,
-      hint: hint,
-      onTap: onTap,
-      child: SizedBox(
-        width: minSize,
-        height: minSize,
-        child: child ?? Text(label),
-      ),
-    );
-  }
+  }) =>
+      Semantics(
+        button: true,
+        enabled: true,
+        label: label,
+        hint: hint,
+        onTap: onTap,
+        child: SizedBox(
+          width: minSize,
+          height: minSize,
+          child: child ?? Text(label),
+        ),
+      );
 
   /// Create an accessible switch
   static Widget createAccessibleSwitch({
@@ -92,22 +91,21 @@ class AccessibilityHelper {
     required bool value,
     required ValueChanged<bool> onChanged,
     String? hint,
-  }) {
-    return Semantics(
-      enabled: true,
-      label: label,
-      hint: hint,
-      toggled: value,
-      onTap: () => onChanged(!value),
-      child: GestureDetector(
+  }) =>
+      Semantics(
+        enabled: true,
+        label: label,
+        hint: hint,
+        toggled: value,
         onTap: () => onChanged(!value),
-        child: Switch(
-          value: value,
-          onChanged: onChanged,
+        child: GestureDetector(
+          onTap: () => onChanged(!value),
+          child: Switch(
+            value: value,
+            onChanged: onChanged,
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   /// Create an accessible slider
   static Widget createAccessibleSlider({
@@ -147,33 +145,30 @@ class AccessibilityHelper {
   static TextStyle ensureTextScaling(
     TextStyle style, {
     required double maxScaleFactor,
-  }) {
-    return style.copyWith(
-      // TextScaler.linear will be applied by the widget
-    );
-  }
+  }) =>
+      style.copyWith(
+          // TextScaler.linear will be applied by the widget
+          );
 
   /// Create an accessible image that works with screen readers
   static Widget createAccessibleImage({
     required ImageProvider image,
     required String semanticLabel,
     required BoxFit fit,
-  }) {
-    return Semantics(
-      image: true,
-      label: semanticLabel,
-      child: Image(
-        image: image,
-        fit: fit,
-        semanticLabel: semanticLabel,
-      ),
-    );
-  }
+  }) =>
+      Semantics(
+        image: true,
+        label: semanticLabel,
+        child: Image(
+          image: image,
+          fit: fit,
+          semanticLabel: semanticLabel,
+        ),
+      );
 
   /// Check if a widget has adequate touch target size
-  static bool hasSufficientTouchTarget(Size size) {
-    return size.width >= minTouchTargetSize && size.height >= minTouchTargetSize;
-  }
+  static bool hasSufficientTouchTarget(Size size) =>
+      size.width >= minTouchTargetSize && size.height >= minTouchTargetSize;
 
   /// Format color value for accessibility (for error messages, etc)
   static String getColorName(Color color) {

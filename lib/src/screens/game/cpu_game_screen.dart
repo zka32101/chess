@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess/chess.dart' as chess_lib;
 import '../../models/cpu_game_state.dart';
 import '../../services/ai_opponent_engine.dart';
 import '../../widgets/game_board.dart';
@@ -10,14 +9,13 @@ import '../../providers/cpu_game_provider.dart';
 import '../../providers/board_theme_provider.dart';
 
 class CPUGameScreen extends ConsumerStatefulWidget {
-  final AIDifficulty difficulty;
-  final bool playerIsWhite;
-
   const CPUGameScreen({
     Key? key,
     this.difficulty = AIDifficulty.medium,
     this.playerIsWhite = true,
   }) : super(key: key);
+  final AIDifficulty difficulty;
+  final bool playerIsWhite;
 
   @override
   ConsumerState<CPUGameScreen> createState() => _CPUGameScreenState();
@@ -76,7 +74,7 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // Turn indicator and status
@@ -97,7 +95,7 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
               onUndo: gameState.moves.isNotEmpty
                   ? () => ref.read(cpuGameProvider.notifier).undoMove()
                   : null,
-              onResign: () => _showResignDialog(),
+              onResign: _showResignDialog,
               moveHistory: gameState.moves,
               isPlayerTurn: gameState.isPlayerTurn,
               showMaterial: true,
@@ -132,7 +130,7 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
         Expanded(
           flex: 2,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 _buildStatusBar(gameState),
@@ -151,7 +149,7 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
                     onUndo: gameState.moves.isNotEmpty
                         ? () => ref.read(cpuGameProvider.notifier).undoMove()
                         : null,
-                    onResign: () => _showResignDialog(),
+                    onResign: _showResignDialog,
                     moveHistory: gameState.moves,
                     isPlayerTurn: gameState.isPlayerTurn,
                     showMaterial: true,
@@ -170,7 +168,7 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
                   left: BorderSide(color: Colors.grey[300] ?? Colors.grey)),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -200,131 +198,123 @@ class _CPUGameScreenState extends ConsumerState<CPUGameScreen> {
     );
   }
 
-  Widget _buildStatusBar(CpuGameState gameState) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                gameState.playerIsWhite ? 'You (White)' : 'You (Black)',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              Text(
-                gameState.isPlayerTurn ? 'Your Turn' : 'Thinking...',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          if (gameState.isAIThinking)
-            const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          else
-            Text(
-              'Difficulty: ${widget.difficulty.displayName}',
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                gameState.playerIsWhite ? 'CPU (Black)' : 'CPU (White)',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              Text(
-                gameState.isPlayerTurn ? 'Idle' : 'Playing...',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGameInfoPanel(CpuGameState gameState) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Game Info',
-          style: Theme.of(context).textTheme.titleSmall,
+  Widget _buildStatusBar(CpuGameState gameState) => Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
         ),
-        const SizedBox(height: 12),
-        _buildInfoRow(
-          'Moves',
-          (gameState.moves.length / 2).ceil().toString(),
-        ),
-        _buildInfoRow(
-          'Duration',
-          _formatDuration(gameState.gameDuration),
-        ),
-        _buildInfoRow(
-          'Difficulty',
-          widget.difficulty.displayName,
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: () => _showResignDialog(),
-            child: const Text('Resign'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  gameState.playerIsWhite ? 'You (White)' : 'You (Black)',
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
+                Text(
+                  gameState.isPlayerTurn ? 'Your Turn' : 'Thinking...',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+            if (gameState.isAIThinking)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Text(
+                'Difficulty: ${widget.difficulty.displayName}',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  gameState.playerIsWhite ? 'CPU (Black)' : 'CPU (White)',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                Text(
+                  gameState.isPlayerTurn ? 'Idle' : 'Playing...',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+
+  Widget _buildGameInfoPanel(CpuGameState gameState) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Game Info',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            'Moves',
+            (gameState.moves.length / 2).ceil().toString(),
+          ),
+          _buildInfoRow(
+            'Duration',
+            _formatDuration(gameState.gameDuration),
+          ),
+          _buildInfoRow(
+            'Difficulty',
+            widget.difficulty.displayName,
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _showResignDialog,
+              child: const Text('Resign'),
+            ),
           ),
         ],
-      ),
-    );
-  }
+      );
 
-  Widget _buildGameOverScreen(CpuGameState gameState) {
-    return Center(
-      child: GameResult(
-        result: gameState.result ?? 'draw',
-        method: gameState.endReason ?? 'unknown',
-        moves: (gameState.moves.length / 2).ceil(),
-        duration: gameState.gameDuration,
-        onNewGame: () {
-          ref.read(cpuGameProvider.notifier).reset();
-        },
-        onHome: () {
-          Navigator.of(context).pop();
-        },
-        onAnalyze: () {
-          // TODO: Implement game analysis
-        },
-      ),
-    );
-  }
+  Widget _buildInfoRow(String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _buildGameOverScreen(CpuGameState gameState) => Center(
+        child: GameResult(
+          result: gameState.result ?? 'draw',
+          method: gameState.endReason ?? 'unknown',
+          moves: (gameState.moves.length / 2).ceil(),
+          duration: gameState.gameDuration,
+          onNewGame: () {
+            ref.read(cpuGameProvider.notifier).reset();
+          },
+          onHome: () {
+            Navigator.of(context).pop();
+          },
+          onAnalyze: () {
+            // TODO: Implement game analysis
+          },
+        ),
+      );
 
   void _showResignDialog() {
     showDialog(

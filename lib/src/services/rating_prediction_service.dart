@@ -4,14 +4,13 @@ import 'dart:math' show pow, sqrt;
 
 /// Rating prediction and forecasting service
 class RatingPredictionService {
+  RatingPredictionService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _usersCollection = 'users';
   static const String _ratingHistorySubcollection = 'ratingHistory';
-
-  RatingPredictionService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Predict player's rating in N days
   Future<RatingForecast> predictFutureRating(
@@ -51,7 +50,7 @@ class RatingPredictionService {
           daysAhead: daysAhead,
           trend: 'stable',
           confidence: 0.3,
-          averageDailyChange: 0.0,
+          averageDailyChange: 0,
           predictedWinRate: 0.5,
           improvements: [],
         );
@@ -121,10 +120,10 @@ class RatingPredictionService {
       if (historySnapshot.docs.isEmpty) {
         return RatingVolatility(
           playerId: playerId,
-          volatilityScore: 0.0,
+          volatilityScore: 0,
           maxGain: 0,
           maxLoss: 0,
-          averageChange: 0.0,
+          averageChange: 0,
           stabilityTrend: 'stable',
         );
       }
@@ -144,10 +143,15 @@ class RatingPredictionService {
         maxGain: maxGain,
         maxLoss: maxLoss,
         averageChange: averageChange,
-        stabilityTrend: volatility < 10 ? 'stable' : volatility < 20 ? 'variable' : 'volatile',
+        stabilityTrend: volatility < 10
+            ? 'stable'
+            : volatility < 20
+                ? 'variable'
+                : 'volatile',
       );
     } catch (e, st) {
-      _logger.e('Failed to analyze rating volatility', error: e, stackTrace: st);
+      _logger.e('Failed to analyze rating volatility',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -247,7 +251,8 @@ class RatingPredictionService {
     if (changes.length < 5) return 'stable';
 
     final recentChanges = changes.take(5).toList();
-    final recentAverage = recentChanges.reduce((a, b) => a + b) / recentChanges.length;
+    final recentAverage =
+        recentChanges.reduce((a, b) => a + b) / recentChanges.length;
     final overallAverage = changes.reduce((a, b) => a + b) / changes.length;
 
     if (recentAverage > overallAverage + 5) return 'improving';
@@ -256,23 +261,24 @@ class RatingPredictionService {
   }
 
   double _calculateVolatility(List<int> changes) {
-    if (changes.length < 2) return 0.0;
+    if (changes.length < 2) return 0;
 
     final mean = changes.reduce((a, b) => a + b) / changes.length;
-    final variance = changes
-        .map((change) => pow(change - mean, 2))
-        .reduce((a, b) => a + b) /
-        changes.length;
+    final variance =
+        changes.map((change) => pow(change - mean, 2)).reduce((a, b) => a + b) /
+            changes.length;
 
-    return sqrt(variance as double);
+    return sqrt(variance);
   }
 
   double _calculateConfidence(int gamesPlayed, double volatility) {
     // Higher confidence for more games and lower volatility
     final gamesConfidence = (gamesPlayed / 100).clamp(0.0, 1.0);
-    final volatilityConfidence = (1.0 / (1.0 + (volatility / 10)));
+    final volatilityConfidence = 1.0 / (1.0 + (volatility / 10));
 
-    return ((gamesConfidence * 0.6 + volatilityConfidence * 0.4) * 100).toInt() / 100;
+    return ((gamesConfidence * 0.6 + volatilityConfidence * 0.4) * 100)
+            .toInt() /
+        100;
   }
 
   double _calculateExpectedWinRate(int rating) {
@@ -322,16 +328,6 @@ class RatingPredictionService {
 
 /// Rating forecast data
 class RatingForecast {
-  final String playerId;
-  final int currentRating;
-  final int forecastedRating;
-  final int daysAhead;
-  final String trend;
-  final double confidence;
-  final double averageDailyChange;
-  final double predictedWinRate;
-  final List<String> improvements;
-
   RatingForecast({
     required this.playerId,
     required this.currentRating,
@@ -343,17 +339,19 @@ class RatingForecast {
     required this.predictedWinRate,
     required this.improvements,
   });
+  final String playerId;
+  final int currentRating;
+  final int forecastedRating;
+  final int daysAhead;
+  final String trend;
+  final double confidence;
+  final double averageDailyChange;
+  final double predictedWinRate;
+  final List<String> improvements;
 }
 
 /// Rating volatility analysis
 class RatingVolatility {
-  final String playerId;
-  final double volatilityScore;
-  final int maxGain;
-  final int maxLoss;
-  final double averageChange;
-  final String stabilityTrend;
-
   RatingVolatility({
     required this.playerId,
     required this.volatilityScore,
@@ -362,17 +360,16 @@ class RatingVolatility {
     required this.averageChange,
     required this.stabilityTrend,
   });
+  final String playerId;
+  final double volatilityScore;
+  final int maxGain;
+  final int maxLoss;
+  final double averageChange;
+  final String stabilityTrend;
 }
 
 /// Rating progression over time
 class RatingProgression {
-  final String playerId;
-  final List<RatingChange> changes;
-  final List<MonthlyRatingData> monthlyData;
-  final int peakRating;
-  final int lowestRating;
-  final int totalGamesInPeriod;
-
   RatingProgression({
     required this.playerId,
     required this.changes,
@@ -381,33 +378,30 @@ class RatingProgression {
     required this.lowestRating,
     required this.totalGamesInPeriod,
   });
+  final String playerId;
+  final List<RatingChange> changes;
+  final List<MonthlyRatingData> monthlyData;
+  final int peakRating;
+  final int lowestRating;
+  final int totalGamesInPeriod;
 }
 
 /// Individual rating change record
 class RatingChange {
-  final int ratingChange;
-  final int newRating;
-  final DateTime timestamp;
-  final String result;
-
   RatingChange({
     required this.ratingChange,
     required this.newRating,
     required this.timestamp,
     required this.result,
   });
+  final int ratingChange;
+  final int newRating;
+  final DateTime timestamp;
+  final String result;
 }
 
 /// Monthly rating data
 class MonthlyRatingData {
-  final String month;
-  int startRating;
-  int endRating;
-  int gamesPlayed;
-  int wins;
-  int losses;
-  int draws;
-
   MonthlyRatingData({
     required this.month,
     required this.startRating,
@@ -417,8 +411,14 @@ class MonthlyRatingData {
     required this.losses,
     required this.draws,
   });
+  final String month;
+  int startRating;
+  int endRating;
+  int gamesPlayed;
+  int wins;
+  int losses;
+  int draws;
 
-  double get winRate =>
-      gamesPlayed > 0 ? (wins / gamesPlayed * 100) : 0.0;
+  double get winRate => gamesPlayed > 0 ? (wins / gamesPlayed * 100) : 0.0;
   int get ratingDelta => endRating - startRating;
 }

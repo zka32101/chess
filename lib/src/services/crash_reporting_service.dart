@@ -3,11 +3,10 @@ import 'package:flutter/foundation.dart';
 
 /// Service for crash reporting and error tracking via Firebase Crashlytics
 class CrashReportingService {
+  CrashReportingService._();
   static final CrashReportingService _instance = CrashReportingService._();
   final FirebaseCrashlytics _crashlytics = FirebaseCrashlytics.instance;
   bool _initialized = false;
-
-  CrashReportingService._();
 
   static CrashReportingService get instance => _instance;
 

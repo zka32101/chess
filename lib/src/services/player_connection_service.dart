@@ -3,15 +3,14 @@ import 'package:logger/logger.dart';
 
 /// Manages friend relationships and player connections
 class PlayerConnectionService {
+  PlayerConnectionService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _playersCollection = 'players';
   static const String _connectionsSubcollection = 'connections';
   static const String _requestsSubcollection = 'friend_requests';
-
-  PlayerConnectionService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Send friend request to another player
   Future<void> sendFriendRequest({
@@ -295,13 +294,6 @@ class PlayerConnectionService {
 
 /// Player connection record
 class PlayerConnection {
-  final String connectionId;
-  final String player1Id;
-  final String player2Id;
-  final String status; // active, pending, blocked
-  final DateTime connectedDate;
-  final DateTime? updatedAt;
-
   PlayerConnection({
     required this.connectionId,
     required this.player1Id,
@@ -311,40 +303,36 @@ class PlayerConnection {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'connectionId': connectionId,
-      'player1Id': player1Id,
-      'player2Id': player2Id,
-      'status': status,
-      'connectedDate': Timestamp.fromDate(connectedDate),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
-    };
-  }
+  factory PlayerConnection.fromJson(Map<String, dynamic> json) =>
+      PlayerConnection(
+        connectionId: json['connectionId'] as String,
+        player1Id: json['player1Id'] as String,
+        player2Id: json['player2Id'] as String,
+        status: json['status'] as String,
+        connectedDate: (json['connectedDate'] as Timestamp).toDate(),
+        updatedAt: json['updatedAt'] != null
+            ? (json['updatedAt'] as Timestamp).toDate()
+            : null,
+      );
+  final String connectionId;
+  final String player1Id;
+  final String player2Id;
+  final String status; // active, pending, blocked
+  final DateTime connectedDate;
+  final DateTime? updatedAt;
 
-  factory PlayerConnection.fromJson(Map<String, dynamic> json) {
-    return PlayerConnection(
-      connectionId: json['connectionId'] as String,
-      player1Id: json['player1Id'] as String,
-      player2Id: json['player2Id'] as String,
-      status: json['status'] as String,
-      connectedDate: (json['connectedDate'] as Timestamp).toDate(),
-      updatedAt: json['updatedAt'] != null
-          ? (json['updatedAt'] as Timestamp).toDate()
-          : null,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'connectionId': connectionId,
+        'player1Id': player1Id,
+        'player2Id': player2Id,
+        'status': status,
+        'connectedDate': Timestamp.fromDate(connectedDate),
+        'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      };
 }
 
 /// Friend request
 class FriendRequest {
-  final String requestId;
-  final String fromPlayerId;
-  final String toPlayerId;
-  final String status; // pending, accepted, declined
-  final DateTime sentDate;
-  final DateTime? respondedDate;
-
   FriendRequest({
     required this.requestId,
     required this.fromPlayerId,
@@ -354,41 +342,42 @@ class FriendRequest {
     this.respondedDate,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'requestId': requestId,
-      'fromPlayerId': fromPlayerId,
-      'toPlayerId': toPlayerId,
-      'status': status,
-      'sentDate': Timestamp.fromDate(sentDate),
-      'respondedDate':
-          respondedDate != null ? Timestamp.fromDate(respondedDate!) : null,
-    };
-  }
+  factory FriendRequest.fromJson(Map<String, dynamic> json) => FriendRequest(
+        requestId: json['requestId'] as String,
+        fromPlayerId: json['fromPlayerId'] as String,
+        toPlayerId: json['toPlayerId'] as String,
+        status: json['status'] as String,
+        sentDate: (json['sentDate'] as Timestamp).toDate(),
+        respondedDate: json['respondedDate'] != null
+            ? (json['respondedDate'] as Timestamp).toDate()
+            : null,
+      );
+  final String requestId;
+  final String fromPlayerId;
+  final String toPlayerId;
+  final String status; // pending, accepted, declined
+  final DateTime sentDate;
+  final DateTime? respondedDate;
 
-  factory FriendRequest.fromJson(Map<String, dynamic> json) {
-    return FriendRequest(
-      requestId: json['requestId'] as String,
-      fromPlayerId: json['fromPlayerId'] as String,
-      toPlayerId: json['toPlayerId'] as String,
-      status: json['status'] as String,
-      sentDate: (json['sentDate'] as Timestamp).toDate(),
-      respondedDate: json['respondedDate'] != null
-          ? (json['respondedDate'] as Timestamp).toDate()
-          : null,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'requestId': requestId,
+        'fromPlayerId': fromPlayerId,
+        'toPlayerId': toPlayerId,
+        'status': status,
+        'sentDate': Timestamp.fromDate(sentDate),
+        'respondedDate':
+            respondedDate != null ? Timestamp.fromDate(respondedDate!) : null,
+      };
 }
 
 /// Friendship status
 class FriendshipStatus {
-  final bool isFriend;
-  final String status; // none, pending_incoming, pending_outgoing, active
-  final DateTime? connectedDate;
-
   FriendshipStatus({
     required this.isFriend,
     required this.status,
     this.connectedDate,
   });
+  final bool isFriend;
+  final String status; // none, pending_incoming, pending_outgoing, active
+  final DateTime? connectedDate;
 }

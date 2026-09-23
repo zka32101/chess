@@ -8,10 +8,9 @@ import 'package:logger/logger.dart';
 /// 2. .env file (local development)
 /// 3. Environment variables
 class RevenueCatConfig {
-  static final Logger _logger = Logger();
-
   // Private constructor to prevent instantiation
   RevenueCatConfig._();
+  static final Logger _logger = Logger();
 
   static late String _apiKey;
 
@@ -32,8 +31,8 @@ class RevenueCatConfig {
       await dotenv.load(fileName: '.env');
 
       // Try to get API key from environment first (GitHub Secrets, etc.)
-      _apiKey = const String.fromEnvironment('REVENUEAT_API_KEY',
-          defaultValue: '');
+      _apiKey =
+          const String.fromEnvironment('REVENUEAT_API_KEY', defaultValue: '');
 
       // If not found, try .env file
       if (_apiKey.isEmpty) {
@@ -42,14 +41,12 @@ class RevenueCatConfig {
 
       // Log status
       if (_apiKey.isEmpty) {
-        _logger.w(
-            'RevenueCat API key not configured. '
+        _logger.w('RevenueCat API key not configured. '
             'Set REVENUEAT_API_KEY environment variable or add to .env file');
       } else {
         _logger.i('RevenueCat configuration loaded successfully');
         _logger.d('API Key prefix: ${_apiKey.substring(0, 8)}...');
       }
-
     } catch (e) {
       _logger.e('Error loading RevenueCat configuration', error: e);
       _apiKey = '';
@@ -73,16 +70,15 @@ class RevenueCatConfig {
   static bool get isProduction {
     // In production, API key would be from GitHub Secrets
     // In development, it's from .env file
-    return !_apiKey.isEmpty;
+    return _apiKey.isNotEmpty;
   }
 
   /// Get configuration status for diagnostics
-  static Map<String, dynamic> getStatus() {
-    return {
-      'configured': _apiKey.isNotEmpty,
-      'apiKeyPresent': _apiKey.isNotEmpty,
-      'apiKeyPrefix': _apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : 'NOT SET',
-      'environment': isProduction ? 'production' : 'development',
-    };
-  }
+  static Map<String, dynamic> getStatus() => {
+        'configured': _apiKey.isNotEmpty,
+        'apiKeyPresent': _apiKey.isNotEmpty,
+        'apiKeyPrefix':
+            _apiKey.isNotEmpty ? '${_apiKey.substring(0, 8)}...' : 'NOT SET',
+        'environment': isProduction ? 'production' : 'development',
+      };
 }

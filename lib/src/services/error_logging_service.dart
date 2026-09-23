@@ -49,7 +49,8 @@ class ErrorLoggingService {
     Object? error,
     StackTrace? stackTrace,
   }) async {
-    _logger.w('[$context] Warning: $message', error: error, stackTrace: stackTrace);
+    _logger.w('[$context] Warning: $message',
+        error: error, stackTrace: stackTrace);
 
     // Only report to Crashlytics if there's an associated error
     if (error != null && stackTrace != null) {

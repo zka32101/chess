@@ -11,6 +11,15 @@ import 'ai_opponent_engine.dart';
 
 /// Result of iterative deepening search
 class IterativeDeepeningResult {
+  IterativeDeepeningResult({
+    required this.bestMove,
+    required this.score,
+    required this.depthReached,
+    required this.timeSpentMs,
+    required this.nodesEvaluated,
+    required this.timeLimit,
+  });
+
   /// Best move found (in UCI notation)
   final String? bestMove;
 
@@ -28,19 +37,13 @@ class IterativeDeepeningResult {
 
   /// Whether search was interrupted by time limit
   final bool timeLimit;
-
-  IterativeDeepeningResult({
-    required this.bestMove,
-    required this.score,
-    required this.depthReached,
-    required this.timeSpentMs,
-    required this.nodesEvaluated,
-    required this.timeLimit,
-  });
 }
 
 /// Iterative Deepening Search Engine
 class IterativeDeepeningEngine {
+  IterativeDeepeningEngine(this.chess, this.difficulty) {
+    _baseEngine = AIOpponentEngine(chess, difficulty);
+  }
   final ChessEngineService chess;
   final AIDifficulty difficulty;
   late final AIOpponentEngine _baseEngine;
@@ -49,10 +52,6 @@ class IterativeDeepeningEngine {
   bool _isSearching = false;
   late DateTime _searchStart;
   int _totalNodesEvaluated = 0;
-
-  IterativeDeepeningEngine(this.chess, this.difficulty) {
-    _baseEngine = AIOpponentEngine(chess, difficulty);
-  }
 
   /// Get best move using iterative deepening
   /// Searches progressively deeper until timeLimit is reached
@@ -295,12 +294,10 @@ class IterativeDeepeningEngine {
   }
 
   /// Get search statistics
-  Map<String, dynamic> getSearchStats() {
-    return {
-      'isSearching': _isSearching,
-      'totalNodesEvaluated': _totalNodesEvaluated,
-    };
-  }
+  Map<String, dynamic> getSearchStats() => {
+        'isSearching': _isSearching,
+        'totalNodesEvaluated': _totalNodesEvaluated,
+      };
 
   /// Cancel ongoing search
   void cancelSearch() {

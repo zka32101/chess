@@ -1,22 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/services/analytics_service.dart';
-import 'package:chess_tactics_master/src/services/trend_aggregation_service.dart';
-import 'package:chess_tactics_master/src/services/cohort_analytics_service.dart';
-import 'package:chess_tactics_master/src/models/analytics_models.dart';
+import '../services/analytics_service.dart';
+import '../services/trend_aggregation_service.dart';
+import '../services/cohort_analytics_service.dart';
+import '../models/analytics_models.dart';
 
 // Service providers
-final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
-  return AnalyticsService.instance;
-});
+final analyticsServiceProvider =
+    Provider<AnalyticsService>((ref) => AnalyticsService.instance);
 
-final trendAggregationServiceProvider =
-    Provider<TrendAggregationService>((ref) {
-  return TrendAggregationService.instance;
-});
+final trendAggregationServiceProvider = Provider<TrendAggregationService>(
+    (ref) => TrendAggregationService.instance);
 
-final cohortAnalyticsServiceProvider = Provider<CohortAnalyticsService>((ref) {
-  return CohortAnalyticsService.instance;
-});
+final cohortAnalyticsServiceProvider =
+    Provider<CohortAnalyticsService>((ref) => CohortAnalyticsService.instance);
 
 // Performance trend providers
 final queryPerformanceTrendsProvider = FutureProvider.family<
@@ -103,7 +99,7 @@ final dashboardKPIsProvider = FutureProvider<List<DashboardKPI>>((ref) async {
   final features = await ref.watch(competitiveFeatureStatsProvider(7).future);
 
   return [
-    DashboardKPI(
+    const DashboardKPI(
       label: 'Query P50 Latency',
       value: '150ms',
       unit: 'ms',
@@ -126,7 +122,7 @@ final dashboardKPIsProvider = FutureProvider<List<DashboardKPI>>((ref) async {
       trend: '+2',
       trendPercent: '',
     ),
-    DashboardKPI(
+    const DashboardKPI(
       label: 'APK Size',
       value: '100',
       unit: 'MB',

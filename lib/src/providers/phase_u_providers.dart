@@ -10,10 +10,9 @@ import '../services/seasonal_event_service.dart';
 // Parameter classes for family providers (Dart 2.17+ compatibility)
 @immutable
 class SeasonPaginationParams {
+  const SeasonPaginationParams({required this.limit, required this.offset});
   final int limit;
   final int offset;
-
-  SeasonPaginationParams({required this.limit, required this.offset});
 
   @override
   bool operator ==(Object other) =>
@@ -29,15 +28,14 @@ class SeasonPaginationParams {
 
 @immutable
 class BattlePassRewardsParams {
-  final String playerId;
-  final String seasonId;
-  final bool isPremium;
-
-  BattlePassRewardsParams({
+  const BattlePassRewardsParams({
     required this.playerId,
     required this.seasonId,
     required this.isPremium,
   });
+  final String playerId;
+  final String seasonId;
+  final bool isPremium;
 
   @override
   bool operator ==(Object other) =>
@@ -55,10 +53,9 @@ class BattlePassRewardsParams {
 
 @immutable
 class ChallengesParams {
+  const ChallengesParams({required this.seasonId, this.type});
   final String seasonId;
   final String? type;
-
-  const ChallengesParams({required this.seasonId, this.type});
 
   @override
   bool operator ==(Object other) =>
@@ -74,13 +71,12 @@ class ChallengesParams {
 
 @immutable
 class ChallengeDifficultyParams {
-  final String seasonId;
-  final String difficulty;
-
   const ChallengeDifficultyParams({
     required this.seasonId,
     required this.difficulty,
   });
+  final String seasonId;
+  final String difficulty;
 
   @override
   bool operator ==(Object other) =>
@@ -96,13 +92,12 @@ class ChallengeDifficultyParams {
 
 @immutable
 class PlayerChallengeParams {
-  final String playerId;
-  final String challengeId;
-
   const PlayerChallengeParams({
     required this.playerId,
     required this.challengeId,
   });
+  final String playerId;
+  final String challengeId;
 
   @override
   bool operator ==(Object other) =>
@@ -118,13 +113,12 @@ class PlayerChallengeParams {
 
 @immutable
 class SeasonChallengesParams {
-  final String playerId;
-  final String seasonId;
-
   const SeasonChallengesParams({
     required this.playerId,
     required this.seasonId,
   });
+  final String playerId;
+  final String seasonId;
 
   @override
   bool operator ==(Object other) =>
@@ -140,10 +134,9 @@ class SeasonChallengesParams {
 
 @immutable
 class EventLeaderboardParams {
+  const EventLeaderboardParams({required this.eventId, required this.limit});
   final String eventId;
   final int limit;
-
-  const EventLeaderboardParams({required this.eventId, required this.limit});
 
   @override
   bool operator ==(Object other) =>
@@ -159,13 +152,12 @@ class EventLeaderboardParams {
 
 @immutable
 class EventParticipationParams {
-  final String playerId;
-  final String eventId;
-
   const EventParticipationParams({
     required this.playerId,
     required this.eventId,
   });
+  final String playerId;
+  final String eventId;
 
   @override
   bool operator ==(Object other) =>
@@ -181,13 +173,12 @@ class EventParticipationParams {
 
 @immutable
 class TopEventParticipantsParams {
-  final String eventId;
-  final int limit;
-
   const TopEventParticipantsParams({
     required this.eventId,
     required this.limit,
   });
+  final String eventId;
+  final int limit;
 
   @override
   bool operator ==(Object other) =>
@@ -203,13 +194,12 @@ class TopEventParticipantsParams {
 
 @immutable
 class EventChallengesParams {
-  final String seasonId;
-  final String eventId;
-
   const EventChallengesParams({
     required this.seasonId,
     required this.eventId,
   });
+  final String seasonId;
+  final String eventId;
 
   @override
   bool operator ==(Object other) =>
@@ -225,15 +215,14 @@ class EventChallengesParams {
 
 @immutable
 class RewardHistoryParams {
+  const RewardHistoryParams({
+    required this.playerId,
+    required this.limit,
+    this.seasonId,
+  });
   final String playerId;
   final String? seasonId;
   final int limit;
-
-  const RewardHistoryParams({
-    required this.playerId,
-    this.seasonId,
-    required this.limit,
-  });
 
   @override
   bool operator ==(Object other) =>
@@ -250,10 +239,9 @@ class RewardHistoryParams {
 
 @immutable
 class RewardCodeParams {
+  const RewardCodeParams({required this.playerId, required this.code});
   final String playerId;
   final String code;
-
-  const RewardCodeParams({required this.playerId, required this.code});
 
   @override
   bool operator ==(Object other) =>
@@ -269,10 +257,9 @@ class RewardCodeParams {
 
 @immutable
 class RewardsByTypeParams {
+  const RewardsByTypeParams({required this.seasonId, required this.type});
   final String seasonId;
   final String type;
-
-  const RewardsByTypeParams({required this.seasonId, required this.type});
 
   @override
   bool operator ==(Object other) =>
@@ -291,26 +278,20 @@ class RewardsByTypeParams {
 
 // Service Providers
 
-final seasonManagementServiceProvider =
-    Provider<SeasonManagementService>((ref) {
-  return SeasonManagementService(firestore: FirebaseFirestore.instance);
-});
+final seasonManagementServiceProvider = Provider<SeasonManagementService>(
+    (ref) => SeasonManagementService(firestore: FirebaseFirestore.instance));
 
-final battlePassServiceProvider = Provider<BattlePassService>((ref) {
-  return BattlePassService(firestore: FirebaseFirestore.instance);
-});
+final battlePassServiceProvider = Provider<BattlePassService>(
+    (ref) => BattlePassService(firestore: FirebaseFirestore.instance));
 
-final seasonChallengeServiceProvider = Provider<SeasonChallengeService>((ref) {
-  return SeasonChallengeService(firestore: FirebaseFirestore.instance);
-});
+final seasonChallengeServiceProvider = Provider<SeasonChallengeService>(
+    (ref) => SeasonChallengeService(firestore: FirebaseFirestore.instance));
 
-final seasonalRewardServiceProvider = Provider<SeasonalRewardService>((ref) {
-  return SeasonalRewardService(firestore: FirebaseFirestore.instance);
-});
+final seasonalRewardServiceProvider = Provider<SeasonalRewardService>(
+    (ref) => SeasonalRewardService(firestore: FirebaseFirestore.instance));
 
-final seasonalEventServiceProvider = Provider<SeasonalEventService>((ref) {
-  return SeasonalEventService(firestore: FirebaseFirestore.instance);
-});
+final seasonalEventServiceProvider = Provider<SeasonalEventService>(
+    (ref) => SeasonalEventService(firestore: FirebaseFirestore.instance));
 
 // Season Providers
 
@@ -610,9 +591,8 @@ final rewardClaimNotifierProvider =
 // Notifier Implementations
 
 class BattlePassClaimNotifier extends StateNotifier<BattlePassClaimState> {
-  final BattlePassService _service;
-
   BattlePassClaimNotifier(this._service) : super(const BattlePassClaimState());
+  final BattlePassService _service;
 
   Future<void> claimReward({
     required String playerId,
@@ -670,10 +650,9 @@ class BattlePassClaimNotifier extends StateNotifier<BattlePassClaimState> {
 }
 
 class ChallengeCompleteNotifier extends StateNotifier<ChallengeCompleteState> {
-  final SeasonChallengeService _service;
-
   ChallengeCompleteNotifier(this._service)
       : super(const ChallengeCompleteState());
+  final SeasonChallengeService _service;
 
   Future<void> completeChallenge({
     required String playerId,
@@ -721,10 +700,9 @@ class ChallengeCompleteNotifier extends StateNotifier<ChallengeCompleteState> {
 
 class EventParticipationNotifier
     extends StateNotifier<EventParticipationState> {
-  final SeasonalEventService _service;
-
   EventParticipationNotifier(this._service)
       : super(const EventParticipationState());
+  final SeasonalEventService _service;
 
   Future<void> joinEvent({
     required String playerId,
@@ -780,9 +758,8 @@ class EventParticipationNotifier
 }
 
 class RewardClaimNotifier extends StateNotifier<RewardClaimState> {
-  final SeasonalRewardService _service;
-
   RewardClaimNotifier(this._service) : super(const RewardClaimState());
+  final SeasonalRewardService _service;
 
   Future<bool> redeemCode({
     required String playerId,
@@ -816,101 +793,93 @@ class RewardClaimNotifier extends StateNotifier<RewardClaimState> {
 // State Classes
 
 class BattlePassClaimState {
-  final bool isLoading;
-  final int? lastClaimedLevel;
-  final bool isPremiumUpgraded;
-  final String? error;
-
   const BattlePassClaimState({
     this.isLoading = false,
     this.lastClaimedLevel,
     this.isPremiumUpgraded = false,
     this.error,
   });
+  final bool isLoading;
+  final int? lastClaimedLevel;
+  final bool isPremiumUpgraded;
+  final String? error;
 
   BattlePassClaimState copyWith({
     bool? isLoading,
     int? lastClaimedLevel,
     bool? isPremiumUpgraded,
     String? error,
-  }) {
-    return BattlePassClaimState(
-      isLoading: isLoading ?? this.isLoading,
-      lastClaimedLevel: lastClaimedLevel ?? this.lastClaimedLevel,
-      isPremiumUpgraded: isPremiumUpgraded ?? this.isPremiumUpgraded,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      BattlePassClaimState(
+        isLoading: isLoading ?? this.isLoading,
+        lastClaimedLevel: lastClaimedLevel ?? this.lastClaimedLevel,
+        isPremiumUpgraded: isPremiumUpgraded ?? this.isPremiumUpgraded,
+        error: error ?? this.error,
+      );
 }
 
 class ChallengeCompleteState {
-  final bool isLoading;
-  final String? lastCompletedId;
-  final String? error;
-
   const ChallengeCompleteState({
     this.isLoading = false,
     this.lastCompletedId,
     this.error,
   });
+  final bool isLoading;
+  final String? lastCompletedId;
+  final String? error;
 
   ChallengeCompleteState copyWith({
     bool? isLoading,
     String? lastCompletedId,
     String? error,
-  }) {
-    return ChallengeCompleteState(
-      isLoading: isLoading ?? this.isLoading,
-      lastCompletedId: lastCompletedId ?? this.lastCompletedId,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      ChallengeCompleteState(
+        isLoading: isLoading ?? this.isLoading,
+        lastCompletedId: lastCompletedId ?? this.lastCompletedId,
+        error: error ?? this.error,
+      );
 }
 
 class EventParticipationState {
-  final bool isLoading;
-  final List<String> joinedEventIds;
-  final String? error;
-
   const EventParticipationState({
     this.isLoading = false,
     this.joinedEventIds = const [],
     this.error,
   });
+  final bool isLoading;
+  final List<String> joinedEventIds;
+  final String? error;
 
   EventParticipationState copyWith({
     bool? isLoading,
     List<String>? joinedEventIds,
     String? error,
-  }) {
-    return EventParticipationState(
-      isLoading: isLoading ?? this.isLoading,
-      joinedEventIds: joinedEventIds ?? this.joinedEventIds,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      EventParticipationState(
+        isLoading: isLoading ?? this.isLoading,
+        joinedEventIds: joinedEventIds ?? this.joinedEventIds,
+        error: error ?? this.error,
+      );
 }
 
 class RewardClaimState {
-  final bool isLoading;
-  final String? lastRedeemedCode;
-  final String? error;
-
   const RewardClaimState({
     this.isLoading = false,
     this.lastRedeemedCode,
     this.error,
   });
+  final bool isLoading;
+  final String? lastRedeemedCode;
+  final String? error;
 
   RewardClaimState copyWith({
     bool? isLoading,
     String? lastRedeemedCode,
     String? error,
-  }) {
-    return RewardClaimState(
-      isLoading: isLoading ?? this.isLoading,
-      lastRedeemedCode: lastRedeemedCode ?? this.lastRedeemedCode,
-      error: error ?? this.error,
-    );
-  }
+  }) =>
+      RewardClaimState(
+        isLoading: isLoading ?? this.isLoading,
+        lastRedeemedCode: lastRedeemedCode ?? this.lastRedeemedCode,
+        error: error ?? this.error,
+      );
 }

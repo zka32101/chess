@@ -115,16 +115,15 @@ class ScreenViewData with _$ScreenViewData {
 /// Analytics session
 @freezed
 class AnalyticsSession with _$AnalyticsSession {
-  const AnalyticsSession._();
-
   const factory AnalyticsSession({
     required String sessionId,
     required String userId,
     required DateTime startTime,
-    DateTime? endTime,
     required List<AnalyticsEvent> events,
     required int eventCount,
+    DateTime? endTime,
   }) = _AnalyticsSession;
+  const AnalyticsSession._();
 
   factory AnalyticsSession.fromJson(Map<String, dynamic> json) =>
       _$AnalyticsSessionFromJson(json);

@@ -126,7 +126,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -191,7 +191,7 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
                         ? _buildSearchingState(stats)
                         : matchmakingStatus == MatchmakingStatus.found
                             ? pendingMatch.when(
-                                data: (match) => _buildMatchFoundState(match),
+                                data: _buildMatchFoundState,
                                 loading: () => const Center(
                                   child: CircularProgressIndicator(),
                                 ),
@@ -257,85 +257,81 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
     );
   }
 
-  Widget _buildIdleState() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.handshake,
-          size: 80,
-          color: Colors.blue.shade300,
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Ready to Play?',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+  Widget _buildIdleState() => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.handshake,
+            size: 80,
+            color: Colors.blue.shade300,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Find a player and start a real-time game',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey.shade600,
+          const SizedBox(height: 24),
+          const Text(
+            'Ready to Play?',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
+          const SizedBox(height: 12),
+          Text(
+            'Find a player and start a real-time game',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
 
-  Widget _buildSearchingState(AsyncValue stats) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(
-          width: 80,
-          height: 80,
-          child: CircularProgressIndicator(
-            strokeWidth: 6,
+  Widget _buildSearchingState(AsyncValue stats) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 80,
+            height: 80,
+            child: CircularProgressIndicator(
+              strokeWidth: 6,
+            ),
           ),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'Searching for Opponent',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 24),
+          const Text(
+            'Searching for Opponent',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        stats.when(
-          data: (data) => Text(
-            'Players in queue: ${data['queueSize'] ?? 0}',
-            style: TextStyle(color: Colors.grey.shade600),
+          const SizedBox(height: 12),
+          stats.when(
+            data: (data) => Text(
+              'Players in queue: ${data['queueSize'] ?? 0}',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            loading: () => const Text('Loading...'),
+            error: (_, __) => const Text(''),
           ),
-          loading: () => const Text('Loading...'),
-          error: (_, __) => const Text(''),
-        ),
-        const SizedBox(height: 32),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.info_outline, size: 16),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Waiting for a suitable opponent...',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
+          const SizedBox(height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.info_outline, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Waiting for a suitable opponent...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+            ],
+          ),
+        ],
+      );
 
   Widget _buildMatchFoundState(Map<String, dynamic>? match) {
     if (match == null) {

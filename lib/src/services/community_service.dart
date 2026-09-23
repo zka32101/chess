@@ -3,10 +3,6 @@ import '../models/community.dart';
 
 /// Community Service for user engagement and social features
 class CommunityService {
-  static final CommunityService _instance = CommunityService._internal();
-
-  FirebaseFirestore _firestore;
-
   factory CommunityService({FirebaseFirestore? firestore}) {
     if (firestore != null) {
       _instance._firestore = firestore;
@@ -15,6 +11,9 @@ class CommunityService {
   }
 
   CommunityService._internal() : _firestore = FirebaseFirestore.instance;
+  static final CommunityService _instance = CommunityService._internal();
+
+  FirebaseFirestore _firestore;
 
   /// Create user profile
   Future<void> createUserProfile(String userId, UserProfile profile) async {
@@ -35,7 +34,7 @@ class CommunityService {
       final doc =
           await _firestore.collection('user_profiles').doc(userId).get();
       if (!doc.exists) return null;
-      return UserProfile.fromJson(doc.data() as Map<String, dynamic>);
+      return UserProfile.fromJson(doc.data()!);
     } catch (e) {
       print('Error fetching user profile: $e');
       return null;
@@ -175,8 +174,7 @@ class CommunityService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              CommunityPost.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => CommunityPost.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching community feed: $e');
@@ -194,8 +192,7 @@ class CommunityService {
           .get();
 
       return querySnapshot.docs
-          .map(
-              (doc) => UserProfile.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => UserProfile.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching leaderboard: $e');
@@ -240,8 +237,7 @@ class CommunityService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              PuzzleChallenge.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => PuzzleChallenge.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching active challenges: $e');
@@ -259,8 +255,7 @@ class CommunityService {
           .get();
 
       return querySnapshot.docs
-          .map((doc) =>
-              CommunityGroup.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) => CommunityGroup.fromJson(doc.data()))
           .toList();
     } catch (e) {
       print('Error fetching community groups: $e');

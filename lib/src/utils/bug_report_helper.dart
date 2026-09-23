@@ -22,6 +22,22 @@ enum ReproductionFrequency {
 
 /// Bug report model
 class BugReport {
+  BugReport({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.severity,
+    required this.reproductionFrequency,
+    required this.deviceInfo,
+    required this.appState,
+    required this.steps,
+    this.stackTrace,
+    this.expectedBehavior,
+    this.actualBehavior,
+    DateTime? reportedAt,
+    this.resolvedAt,
+    this.resolution,
+  }) : reportedAt = reportedAt ?? DateTime.now();
   final String id;
   final String title;
   final String description;
@@ -37,30 +53,14 @@ class BugReport {
   final String? resolvedAt;
   final String? resolution;
 
-  BugReport({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.severity,
-    required this.reproductionFrequency,
-    this.stackTrace,
-    required this.deviceInfo,
-    required this.appState,
-    required this.steps,
-    this.expectedBehavior,
-    this.actualBehavior,
-    DateTime? reportedAt,
-    this.resolvedAt,
-    this.resolution,
-  }) : reportedAt = reportedAt ?? DateTime.now();
-
   /// Convert to JSON for logging/sending
   Map<String, dynamic> toJson() => {
         'id': id,
         'title': title,
         'description': description,
         'severity': severity.toString().split('.').last,
-        'reproductionFrequency': reproductionFrequency.toString().split('.').last,
+        'reproductionFrequency':
+            reproductionFrequency.toString().split('.').last,
         'stackTrace': stackTrace,
         'deviceInfo': deviceInfo,
         'appState': appState,
@@ -77,8 +77,10 @@ class BugReport {
     final buffer = StringBuffer();
     buffer.writeln('Bug Report: $title');
     buffer.writeln('ID: $id');
-    buffer.writeln('Severity: ${severity.toString().split('.').last.toUpperCase()}');
-    buffer.writeln('Reproduction Frequency: ${reproductionFrequency.toString().split('.').last}');
+    buffer.writeln(
+        'Severity: ${severity.toString().split('.').last.toUpperCase()}');
+    buffer.writeln(
+        'Reproduction Frequency: ${reproductionFrequency.toString().split('.').last}');
     buffer.writeln('Reported: ${reportedAt.toString()}');
     buffer.writeln('');
     buffer.writeln('Description:');
@@ -112,16 +114,13 @@ class BugReport {
 
 /// Bug report helper for collecting and managing bug reports
 class BugReportHelper {
+  factory BugReportHelper() => _instance;
+
+  BugReportHelper._internal();
   static final BugReportHelper _instance = BugReportHelper._internal();
 
   final _reports = <BugReport>[];
   final _reportIdGenerator = _ReportIdGenerator();
-
-  factory BugReportHelper() {
-    return _instance;
-  }
-
-  BugReportHelper._internal();
 
   /// Create and store a new bug report
   Future<BugReport> createBugReport({
@@ -129,10 +128,10 @@ class BugReportHelper {
     required String description,
     required BugSeverity severity,
     required ReproductionFrequency reproductionFrequency,
+    required List<String> steps,
     String? stackTrace,
     Map<String, dynamic>? deviceInfo,
     Map<String, dynamic>? appState,
-    required List<String> steps,
     String? expectedBehavior,
     String? actualBehavior,
   }) async {
@@ -174,18 +173,17 @@ class BugReportHelper {
     required StackTrace stackTrace,
     BugSeverity severity = BugSeverity.high,
     Map<String, dynamic>? additionalContext,
-  }) async {
-    return createBugReport(
-      title: title,
-      description: exception.toString(),
-      severity: severity,
-      reproductionFrequency: ReproductionFrequency.unknown,
-      stackTrace: stackTrace.toString(),
-      appState: additionalContext,
-      steps: ['Error occurred during application operation'],
-      actualBehavior: 'Exception thrown: ${exception.toString()}',
-    );
-  }
+  }) async =>
+      createBugReport(
+        title: title,
+        description: exception.toString(),
+        severity: severity,
+        reproductionFrequency: ReproductionFrequency.unknown,
+        stackTrace: stackTrace.toString(),
+        appState: additionalContext,
+        steps: ['Error occurred during application operation'],
+        actualBehavior: 'Exception thrown: ${exception.toString()}',
+      );
 
   /// Mark bug as resolved
   void resolveBugReport(String reportId, {String? resolution}) {
@@ -257,7 +255,8 @@ class BugReportHelper {
       );
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 

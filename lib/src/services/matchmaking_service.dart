@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'package:chess_tactics_master/src/models/online_game.dart';
+import '../models/online_game.dart';
 
 /// Manages matchmaking queue and player pairing
 class MatchmakingService {
+  MatchmakingService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -18,9 +20,6 @@ class MatchmakingService {
     20: 200, // 20-30 seconds: ±200
     30: 300, // 30+ seconds: ±300
   };
-
-  MatchmakingService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Add player to matchmaking queue
   Future<MatchmakingQueueEntry> joinQueue({
@@ -178,7 +177,7 @@ class MatchmakingService {
     double total = 0;
     for (final doc in docs) {
       final entry =
-          MatchmakingQueueEntry.fromJson(doc.data() as Map<String, dynamic>);
+          MatchmakingQueueEntry.fromJson(doc.data()! as Map<String, dynamic>);
       total += entry.waitTimeSeconds;
     }
 

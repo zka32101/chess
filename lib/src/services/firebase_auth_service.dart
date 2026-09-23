@@ -7,20 +7,18 @@ import 'dart:async' show TimeoutException;
 import 'dart:io' show SocketException;
 import '../models/user.dart';
 import 'validation_service.dart';
-import 'error_logging_service.dart';
 import 'rate_limiting_service.dart';
 
 /// Exception thrown for network-related errors.
 class NetworkException implements Exception {
-  final String message;
-  final int? retryCount;
-  final Duration? retryAfter;
-
   NetworkException(
     this.message, {
     this.retryCount,
     this.retryAfter,
   });
+  final String message;
+  final int? retryCount;
+  final Duration? retryAfter;
 
   @override
   String toString() => message;
@@ -105,7 +103,7 @@ class FirebaseAuthService {
         _rateLimiting.recordSuccess('signUp');
         _logger.i('User registered successfully: ${firebaseUser.uid}');
         return newUser;
-      } on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException {
         _rateLimiting.recordFailure('signUp');
         rethrow;
       }
@@ -144,7 +142,7 @@ class FirebaseAuthService {
           password: password,
         );
         _rateLimiting.recordSuccess('signIn');
-      } on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException {
         _rateLimiting.recordFailure('signIn');
         rethrow;
       }
@@ -268,7 +266,7 @@ class FirebaseAuthService {
         throw NetworkException(
           'Network error: Unable to connect to sign-in service. Please check your internet connection and try again.',
         );
-      } on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException {
         _rateLimiting.recordFailure('signInWithGoogle');
         rethrow;
       }
@@ -411,7 +409,7 @@ class FirebaseAuthService {
         throw NetworkException(
           'Network error: Unable to connect to sign-in service. Please check your internet connection and try again.',
         );
-      } on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException {
         _rateLimiting.recordFailure('signInWithApple');
         rethrow;
       }
@@ -449,7 +447,7 @@ class FirebaseAuthService {
         );
         _rateLimiting.recordSuccess('passwordReset');
         _logger.i('Password reset email sent');
-      } on FirebaseAuthException catch (e) {
+      } on FirebaseAuthException {
         _rateLimiting.recordFailure('passwordReset');
         rethrow;
       }

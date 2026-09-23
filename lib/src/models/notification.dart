@@ -24,8 +24,6 @@ enum NotificationPriority { low, normal, high }
 /// Game notification model
 @freezed
 class AppNotification with _$AppNotification {
-  const AppNotification._();
-
   const factory AppNotification({
     required String notificationId,
     required String userId,
@@ -40,6 +38,7 @@ class AppNotification with _$AppNotification {
     String? actionUrl,
     @Default(NotificationPriority.normal) NotificationPriority priority,
   }) = _AppNotification;
+  const AppNotification._();
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
       _$AppNotificationFromJson(json);
@@ -50,21 +49,20 @@ class AppNotification with _$AppNotification {
     required String userId,
     required String opponentName,
     required String gameId,
-  }) {
-    return AppNotification(
-      notificationId: notificationId,
-      userId: userId,
-      type: NotificationType.gameMatched,
-      title: 'Opponent Found!',
-      body: 'You matched with $opponentName. Game is starting!',
-      createdAt: DateTime.now(),
-      isRead: false,
-      opponentName: opponentName,
-      gameId: gameId,
-      actionUrl: '/game/$gameId',
-      priority: NotificationPriority.high,
-    );
-  }
+  }) =>
+      AppNotification(
+        notificationId: notificationId,
+        userId: userId,
+        type: NotificationType.gameMatched,
+        title: 'Opponent Found!',
+        body: 'You matched with $opponentName. Game is starting!',
+        createdAt: DateTime.now(),
+        isRead: false,
+        opponentName: opponentName,
+        gameId: gameId,
+        actionUrl: '/game/$gameId',
+        priority: NotificationPriority.high,
+      );
 
   /// Create your turn notification
   static AppNotification gameTurn({
@@ -72,21 +70,20 @@ class AppNotification with _$AppNotification {
     required String userId,
     required String opponentName,
     required String gameId,
-  }) {
-    return AppNotification(
-      notificationId: notificationId,
-      userId: userId,
-      type: NotificationType.gameTurn,
-      title: 'Your Move!',
-      body: '$opponentName is waiting for your move.',
-      createdAt: DateTime.now(),
-      isRead: false,
-      opponentName: opponentName,
-      gameId: gameId,
-      actionUrl: '/game/$gameId',
-      priority: NotificationPriority.high,
-    );
-  }
+  }) =>
+      AppNotification(
+        notificationId: notificationId,
+        userId: userId,
+        type: NotificationType.gameTurn,
+        title: 'Your Move!',
+        body: '$opponentName is waiting for your move.',
+        createdAt: DateTime.now(),
+        isRead: false,
+        opponentName: opponentName,
+        gameId: gameId,
+        actionUrl: '/game/$gameId',
+        priority: NotificationPriority.high,
+      );
 
   /// Create game ended notification
   static AppNotification gameEnded({
@@ -152,18 +149,17 @@ class AppNotification with _$AppNotification {
     required String userId,
     required String achievementName,
     required String description,
-  }) {
-    return AppNotification(
-      notificationId: notificationId,
-      userId: userId,
-      type: NotificationType.achievement,
-      title: 'Achievement Unlocked!',
-      body: '$achievementName: $description',
-      createdAt: DateTime.now(),
-      isRead: false,
-      priority: NotificationPriority.high,
-    );
-  }
+  }) =>
+      AppNotification(
+        notificationId: notificationId,
+        userId: userId,
+        type: NotificationType.achievement,
+        title: 'Achievement Unlocked!',
+        body: '$achievementName: $description',
+        createdAt: DateTime.now(),
+        isRead: false,
+        priority: NotificationPriority.high,
+      );
 
   /// Get notification icon based on type
   String getIcon() {
@@ -209,31 +205,26 @@ class AppNotification with _$AppNotification {
 /// Notification batch for multiple notifications
 @freezed
 class NotificationBatch with _$NotificationBatch {
-  const NotificationBatch._();
-
   const factory NotificationBatch({
     required List<AppNotification> notifications,
     required int unreadCount,
     required DateTime lastFetchedAt,
   }) = _NotificationBatch;
+  const NotificationBatch._();
 
   factory NotificationBatch.fromJson(Map<String, dynamic> json) =>
       _$NotificationBatchFromJson(json);
 
   /// Get unread notifications only
-  List<AppNotification> getUnreadNotifications() {
-    return notifications.where((n) => !n.isRead).toList();
-  }
+  List<AppNotification> getUnreadNotifications() =>
+      notifications.where((n) => !n.isRead).toList();
 
   /// Get notifications of specific type
-  List<AppNotification> getNotificationsOfType(NotificationType type) {
-    return notifications.where((n) => n.type == type).toList();
-  }
+  List<AppNotification> getNotificationsOfType(NotificationType type) =>
+      notifications.where((n) => n.type == type).toList();
 
   /// Get high priority notifications
-  List<AppNotification> getHighPriorityNotifications() {
-    return notifications
-        .where((n) => n.priority == NotificationPriority.high && !n.isRead)
-        .toList();
-  }
+  List<AppNotification> getHighPriorityNotifications() => notifications
+      .where((n) => n.priority == NotificationPriority.high && !n.isRead)
+      .toList();
 }

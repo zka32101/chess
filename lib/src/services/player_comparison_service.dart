@@ -3,14 +3,13 @@ import 'package:logger/logger.dart';
 
 /// Player comparison and head-to-head analysis service
 class PlayerComparisonService {
+  PlayerComparisonService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   static const String _gamesCollection = 'games';
   static const String _usersCollection = 'users';
-
-  PlayerComparisonService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Get comprehensive head-to-head comparison between two players
   Future<HeadToHeadComparison> getHeadToHeadComparison(
@@ -25,10 +24,10 @@ class PlayerComparisonService {
       int player1Wins = 0;
       int player2Wins = 0;
       int draws = 0;
-      double player1AvgAccuracy = 0;
-      double player2AvgAccuracy = 0;
-      int player1TotalMoves = 0;
-      int player2TotalMoves = 0;
+      const double player1AvgAccuracy = 0;
+      const double player2AvgAccuracy = 0;
+      const int player1TotalMoves = 0;
+      const int player2TotalMoves = 0;
 
       for (final game in games) {
         if (game['result'] == 'white_win') {
@@ -130,15 +129,15 @@ class PlayerComparisonService {
         totalAccuracy += accuracy;
       }
 
-      double avgAccuracy =
+      final double avgAccuracy =
           recentGames.isNotEmpty ? totalAccuracy / recentGames.length : 0.0;
 
       // Determine play style based on win rates
-      String playStyle = _determinePlayStyle(wins, losses, draws);
+      final String playStyle = _determinePlayStyle(wins, losses, draws);
 
       // Calculate strengths and weaknesses
-      List<String> strengths = [];
-      List<String> weaknesses = [];
+      final List<String> strengths = [];
+      final List<String> weaknesses = [];
 
       if (wins > losses) {
         strengths.add('Consistent Winner');
@@ -342,25 +341,6 @@ class PlayerComparisonService {
 
 /// Head-to-head comparison data
 class HeadToHeadComparison {
-  final String player1Id;
-  final String player2Id;
-  final String player1Name;
-  final String player2Name;
-  final int player1Rating;
-  final int player2Rating;
-  final int totalGamesPlayed;
-  final int player1Wins;
-  final int player2Wins;
-  final int draws;
-  final double player1WinRate;
-  final double player2WinRate;
-  final double drawRate;
-  final List<Map<String, dynamic>> recentGames;
-  final int player1Elo;
-  final int player2Elo;
-  final int eloDifference;
-  final DateTime? lastMeetDate;
-
   HeadToHeadComparison({
     required this.player1Id,
     required this.player2Id,
@@ -381,20 +361,28 @@ class HeadToHeadComparison {
     required this.eloDifference,
     this.lastMeetDate,
   });
+  final String player1Id;
+  final String player2Id;
+  final String player1Name;
+  final String player2Name;
+  final int player1Rating;
+  final int player2Rating;
+  final int totalGamesPlayed;
+  final int player1Wins;
+  final int player2Wins;
+  final int draws;
+  final double player1WinRate;
+  final double player2WinRate;
+  final double drawRate;
+  final List<Map<String, dynamic>> recentGames;
+  final int player1Elo;
+  final int player2Elo;
+  final int eloDifference;
+  final DateTime? lastMeetDate;
 }
 
 /// Player profile with strengths and weaknesses
 class PlayerProfile {
-  final String playerId;
-  final String playerName;
-  final int rating;
-  final int gamesPlayed;
-  final double averageAccuracy;
-  final String playStyle;
-  final List<String> strengths;
-  final List<String> weaknesses;
-  final double winRate;
-
   PlayerProfile({
     required this.playerId,
     required this.playerName,
@@ -406,17 +394,19 @@ class PlayerProfile {
     required this.weaknesses,
     required this.winRate,
   });
+  final String playerId;
+  final String playerName;
+  final int rating;
+  final int gamesPlayed;
+  final double averageAccuracy;
+  final String playStyle;
+  final List<String> strengths;
+  final List<String> weaknesses;
+  final double winRate;
 }
 
 /// Matchup statistics against a specific opponent
 class MatchupStats {
-  final String opponentId;
-  final int totalGames;
-  final int playerWins;
-  final int playerLosses;
-  final int draws;
-  final double winRate;
-
   MatchupStats({
     required this.opponentId,
     required this.totalGames,
@@ -425,4 +415,10 @@ class MatchupStats {
     required this.draws,
     required this.winRate,
   });
+  final String opponentId;
+  final int totalGames;
+  final int playerWins;
+  final int playerLosses;
+  final int draws;
+  final double winRate;
 }

@@ -1,16 +1,15 @@
-import 'package:chess_tactics_master/src/models/ai_lesson.dart';
-import 'package:chess_tactics_master/src/models/game.dart';
+import '../models/ai_lesson.dart';
+import '../models/game.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Optimized AI analysis service
 /// Parallelizes move analysis and implements caching
 class AIAnalysisOptimizer {
+  AIAnalysisOptimizer({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Map<String, GameAnalysis> _analysisCache = {};
   final Map<String, ChessPosition> _positionCache = {};
-
-  AIAnalysisOptimizer({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Analyze game with optimizations:
   /// 1. Cache lookup
@@ -116,7 +115,7 @@ class AIAnalysisOptimizer {
         move: moves[moveIndex],
         currentFen: '',
         analysisType: AnalysisType.goodMove,
-        evaluationDifference: 0.0,
+        evaluationDifference: 0,
         bestMove: moves[moveIndex],
         explanation: 'Unable to analyze move',
         tacticPattern: '',
@@ -161,7 +160,7 @@ class AIAnalysisOptimizer {
     int mistakes = 0;
     int inaccuracies = 0;
     int bestMoves = 0;
-    double totalAccuracy = 0.0;
+    double totalAccuracy = 0;
     final weaknesses = <String>{};
 
     for (final analysis in moveAnalyses) {
@@ -232,16 +231,15 @@ class AIAnalysisOptimizer {
   }
 
   /// Explain move quality
-  String _explainMove(AnalysisType quality, List<String> tactics) {
-    return switch (quality) {
-      AnalysisType.blunder => 'Blunder - loses material or position',
-      AnalysisType.mistake => 'Mistake - weakens position',
-      AnalysisType.inaccuracy => 'Inaccuracy - not optimal',
-      AnalysisType.goodMove => 'Good move - solid play',
-      AnalysisType.excellentMove => 'Excellent move - strong advantage',
-      AnalysisType.bestMove => 'Best move - perfect continuation',
-    };
-  }
+  String _explainMove(AnalysisType quality, List<String> tactics) =>
+      switch (quality) {
+        AnalysisType.blunder => 'Blunder - loses material or position',
+        AnalysisType.mistake => 'Mistake - weakens position',
+        AnalysisType.inaccuracy => 'Inaccuracy - not optimal',
+        AnalysisType.goodMove => 'Good move - solid play',
+        AnalysisType.excellentMove => 'Excellent move - strong advantage',
+        AnalysisType.bestMove => 'Best move - perfect continuation',
+      };
 
   /// Generate a short overall assessment from accuracy/blunder counts
   String _generateOverallAssessment(double accuracy, int blunders) {
@@ -255,16 +253,15 @@ class AIAnalysisOptimizer {
   }
 
   /// Calculate evaluation difference
-  double _calculateEvalDifference(AnalysisType analysisType) {
-    return switch (analysisType) {
-      AnalysisType.blunder => 3.0,
-      AnalysisType.mistake => 1.5,
-      AnalysisType.inaccuracy => 0.5,
-      AnalysisType.goodMove => 0.0,
-      AnalysisType.excellentMove => -0.5,
-      AnalysisType.bestMove => -1.0,
-    };
-  }
+  double _calculateEvalDifference(AnalysisType analysisType) =>
+      switch (analysisType) {
+        AnalysisType.blunder => 3.0,
+        AnalysisType.mistake => 1.5,
+        AnalysisType.inaccuracy => 0.5,
+        AnalysisType.goodMove => 0.0,
+        AnalysisType.excellentMove => -0.5,
+        AnalysisType.bestMove => -1.0,
+      };
 
   /// Clear caches
   void clearCaches() {
@@ -273,19 +270,16 @@ class AIAnalysisOptimizer {
   }
 
   /// Get cache statistics
-  CacheStatistics getStats() {
-    return CacheStatistics(
-      analysisCount: _analysisCache.length,
-      positionCount: _positionCache.length,
-    );
-  }
+  CacheStatistics getStats() => CacheStatistics(
+        analysisCount: _analysisCache.length,
+        positionCount: _positionCache.length,
+      );
 }
 
 /// Chess position representation (simplified)
 class ChessPosition {
-  final String fen;
-
   ChessPosition({required this.fen});
+  final String fen;
 
   static ChessPosition get startingPosition =>
       ChessPosition(fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
@@ -299,13 +293,6 @@ class ChessPosition {
 
 /// Aggregated analysis results
 class _AggregatedAnalysis {
-  final double accuracy;
-  final int blunders;
-  final int mistakes;
-  final int inaccuracies;
-  final int bestMoves;
-  final List<String> weaknesses;
-
   _AggregatedAnalysis({
     required this.accuracy,
     required this.blunders,
@@ -314,17 +301,22 @@ class _AggregatedAnalysis {
     required this.bestMoves,
     required this.weaknesses,
   });
+  final double accuracy;
+  final int blunders;
+  final int mistakes;
+  final int inaccuracies;
+  final int bestMoves;
+  final List<String> weaknesses;
 }
 
 /// Cache statistics
 class CacheStatistics {
-  final int analysisCount;
-  final int positionCount;
-
   CacheStatistics({
     required this.analysisCount,
     required this.positionCount,
   });
+  final int analysisCount;
+  final int positionCount;
 
   int get totalCached => analysisCount + positionCount;
 }

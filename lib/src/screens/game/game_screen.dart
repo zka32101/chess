@@ -4,12 +4,11 @@ import '../../models/game.dart';
 import '../../providers/game_provider.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
-  final String gameId;
-
   const GameScreen({
-    Key? key,
     required this.gameId,
+    Key? key,
   }) : super(key: key);
+  final String gameId;
 
   @override
   ConsumerState<GameScreen> createState() => _GameScreenState();
@@ -70,7 +69,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 children: [
                   // Player info cards
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         // Black player (top)
@@ -102,11 +101,13 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                               final isLight = (row + col) % 2 == 0;
 
                               return Container(
-                                color: isLight ? Colors.amber[100] : Colors.amber[700],
-                                child: Center(
+                                color: isLight
+                                    ? Colors.amber[100]
+                                    : Colors.amber[700],
+                                child: const Center(
                                   child: Text(
                                     '', // Pieces would be rendered here
-                                    style: const TextStyle(fontSize: 24),
+                                    style: TextStyle(fontSize: 24),
                                   ),
                                 ),
                               );
@@ -129,7 +130,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
                   // Game info
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -215,7 +216,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                   // Action buttons (if game is active)
                   if (game.status == 'active')
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
                           Expanded(
@@ -259,7 +260,8 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
     String timeString;
     if (hours > 0) {
-      timeString = '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      timeString =
+          '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     } else if (minutes > 0) {
       timeString = '$minutes:${seconds.toString().padLeft(2, '0')}';
     } else {

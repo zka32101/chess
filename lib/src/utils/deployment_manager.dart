@@ -9,14 +9,6 @@ enum DeploymentEnvironment {
 
 /// Deployment configuration
 class DeploymentConfig {
-  final DeploymentEnvironment environment;
-  final String apiEndpoint;
-  final String firebaseProject;
-  final bool analyticsEnabled;
-  final bool crashReportingEnabled;
-  final String appVersion;
-  final int buildNumber;
-
   DeploymentConfig({
     required this.environment,
     required this.apiEndpoint,
@@ -26,6 +18,13 @@ class DeploymentConfig {
     required this.appVersion,
     required this.buildNumber,
   });
+  final DeploymentEnvironment environment;
+  final String apiEndpoint;
+  final String firebaseProject;
+  final bool analyticsEnabled;
+  final bool crashReportingEnabled;
+  final String appVersion;
+  final int buildNumber;
 
   Map<String, dynamic> toJson() => {
         'environment': environment.toString().split('.').last,
@@ -38,7 +37,8 @@ class DeploymentConfig {
       };
 
   @override
-  String toString() => 'DeploymentConfig($environment: v$appVersion build $buildNumber)';
+  String toString() =>
+      'DeploymentConfig($environment: v$appVersion build $buildNumber)';
 }
 
 /// Deployment status
@@ -52,17 +52,6 @@ enum DeploymentStatus {
 
 /// Deployment record
 class DeploymentRecord {
-  final String id;
-  final DeploymentEnvironment environment;
-  final String version;
-  final int buildNumber;
-  DeploymentStatus status;
-  final DateTime deployedAt;
-  DateTime? completedAt;
-  String? errorMessage;
-  String? commitHash;
-  final Map<String, dynamic> metadata;
-
   DeploymentRecord({
     required this.environment,
     required this.version,
@@ -75,6 +64,16 @@ class DeploymentRecord {
         deployedAt = deployedAt ?? DateTime.now(),
         commitHash = commitHash,
         metadata = metadata ?? {};
+  final String id;
+  final DeploymentEnvironment environment;
+  final String version;
+  final int buildNumber;
+  DeploymentStatus status;
+  final DateTime deployedAt;
+  DateTime? completedAt;
+  String? errorMessage;
+  String? commitHash;
+  final Map<String, dynamic> metadata;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -95,21 +94,19 @@ class DeploymentRecord {
 
 /// Deployment manager
 class DeploymentManager {
+  factory DeploymentManager() => _instance;
+
+  DeploymentManager._internal();
   static final DeploymentManager _instance = DeploymentManager._internal();
 
   final _deployments = <DeploymentRecord>[];
   DeploymentConfig? _currentConfig;
 
-  factory DeploymentManager() {
-    return _instance;
-  }
-
-  DeploymentManager._internal();
-
   /// Set deployment configuration
   void setConfig(DeploymentConfig config) {
     _currentConfig = config;
-    debugPrint('[DeploymentManager] Configuration set for ${config.environment}');
+    debugPrint(
+        '[DeploymentManager] Configuration set for ${config.environment}');
   }
 
   /// Get current configuration
@@ -158,12 +155,10 @@ class DeploymentManager {
       orElse: () => null as dynamic,
     );
 
-    if (deployment != null) {
-      deployment.status = DeploymentStatus.failed;
-      deployment.errorMessage = errorMessage;
-      deployment.completedAt = DateTime.now();
-      debugPrint('[DeploymentManager] Deployment marked failed: $errorMessage');
-    }
+    deployment.status = DeploymentStatus.failed;
+    deployment.errorMessage = errorMessage;
+    deployment.completedAt = DateTime.now();
+    debugPrint('[DeploymentManager] Deployment marked failed: $errorMessage');
   }
 
   /// Rollback deployment
@@ -174,11 +169,9 @@ class DeploymentManager {
         orElse: () => null as dynamic,
       );
 
-      if (deployment != null) {
-        deployment.status = DeploymentStatus.rolled_back;
-        deployment.completedAt = DateTime.now();
-        debugPrint('[DeploymentManager] Deployment rolled back');
-      }
+      deployment.status = DeploymentStatus.rolled_back;
+      deployment.completedAt = DateTime.now();
+      debugPrint('[DeploymentManager] Deployment rolled back');
     } catch (e) {
       debugPrint('[DeploymentManager] Rollback error: $e');
     }
@@ -188,7 +181,8 @@ class DeploymentManager {
   List<DeploymentRecord> getAllDeployments() => List.unmodifiable(_deployments);
 
   /// Get deployments by environment
-  List<DeploymentRecord> getDeploymentsByEnvironment(DeploymentEnvironment env) =>
+  List<DeploymentRecord> getDeploymentsByEnvironment(
+          DeploymentEnvironment env) =>
       _deployments.where((d) => d.environment == env).toList();
 
   /// Get latest deployment
@@ -196,14 +190,16 @@ class DeploymentManager {
       _deployments.isNotEmpty ? _deployments.last : null;
 
   /// Get successful deployments
-  List<DeploymentRecord> getSuccessfulDeployments() =>
-      _deployments.where((d) => d.status == DeploymentStatus.successful).toList();
+  List<DeploymentRecord> getSuccessfulDeployments() => _deployments
+      .where((d) => d.status == DeploymentStatus.successful)
+      .toList();
 
   /// Generate deployment report
   String generateReport() {
     final buffer = StringBuffer();
     final successful = getSuccessfulDeployments().length;
-    final failed = _deployments.where((d) => d.status == DeploymentStatus.failed).length;
+    final failed =
+        _deployments.where((d) => d.status == DeploymentStatus.failed).length;
 
     buffer.writeln('''
 ╔══════════════════════════════════════════════════════════════════╗
@@ -219,14 +215,16 @@ class DeploymentManager {
 
     for (final deployment in _deployments.reversed.take(10)) {
       final status = deployment.status.toString().split('.').last;
-      buffer.writeln('║ [${deployment.environment.toString().split('.').last.toUpperCase()}] v${deployment.version}');
+      buffer.writeln(
+          '║ [${deployment.environment.toString().split('.').last.toUpperCase()}] v${deployment.version}');
       buffer.writeln('║   Status: $status | Build: ${deployment.buildNumber}');
       if (deployment.errorMessage != null) {
         buffer.writeln('║   Error: ${deployment.errorMessage}');
       }
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 

@@ -11,7 +11,7 @@ void main() async {
 
   // Load environment variables from .env file
   // This is required for Firebase configuration
-  await dotenv.load(fileName: ".env").catchError(
+  await dotenv.load(fileName: '.env').catchError(
     (error) {
       // If .env doesn't exist, continue with defaults
       // This allows development/testing to work

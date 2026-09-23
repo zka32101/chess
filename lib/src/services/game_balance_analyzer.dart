@@ -3,15 +3,13 @@ import 'dart:math' show pow, sqrt;
 
 /// Game balance analyzer for puzzle difficulty and rating system validation
 class GameBalanceAnalyzer {
-  final FirebaseFirestore _firestore;
-
   GameBalanceAnalyzer(this._firestore);
+  final FirebaseFirestore _firestore;
 
   /// Puzzle difficulty analysis
   Future<PuzzleDifficultyAnalysis> analyzePuzzleDifficulty() async {
     try {
-      final puzzlesSnapshot =
-          await _firestore.collection('puzzles').get();
+      final puzzlesSnapshot = await _firestore.collection('puzzles').get();
 
       final puzzles = puzzlesSnapshot.docs;
       if (puzzles.isEmpty) {
@@ -25,7 +23,7 @@ class GameBalanceAnalyzer {
       final expert = <int>[];
       final master = <int>[];
 
-      for (var doc in puzzles) {
+      for (final doc in puzzles) {
         final rating = (doc['rating'] as num?)?.toInt() ?? 1500;
         if (rating < 1000) {
           beginner.add(rating);
@@ -46,8 +44,7 @@ class GameBalanceAnalyzer {
         'beginner': (beginner.length / totalPuzzles * 100).toStringAsFixed(1),
         'intermediate':
             (intermediate.length / totalPuzzles * 100).toStringAsFixed(1),
-        'advanced':
-            (advanced.length / totalPuzzles * 100).toStringAsFixed(1),
+        'advanced': (advanced.length / totalPuzzles * 100).toStringAsFixed(1),
         'expert': (expert.length / totalPuzzles * 100).toStringAsFixed(1),
         'master': (master.length / totalPuzzles * 100).toStringAsFixed(1),
       };
@@ -94,7 +91,7 @@ class GameBalanceAnalyzer {
       double zeroSumCount = 0;
       double totalGames = 0;
 
-      for (var gameDoc in games) {
+      for (final gameDoc in games) {
         final whiteRatingDelta =
             (gameDoc['whiteRatingDelta'] as num?)?.toInt() ?? 0;
         final blackRatingDelta =
@@ -110,9 +107,8 @@ class GameBalanceAnalyzer {
         totalGames++;
       }
 
-      final zeroSumPercentage = totalGames > 0
-          ? (zeroSumCount / totalGames * 100)
-          : 0.0;
+      final zeroSumPercentage =
+          totalGames > 0 ? (zeroSumCount / totalGames * 100) : 0.0;
 
       // Analyze rating distribution
       final allPlayersSnapshot =
@@ -125,7 +121,8 @@ class GameBalanceAnalyzer {
       return RatingSystemAnalysis(
         totalGamesAnalyzed: games.length,
         zeroSumCompliance: zeroSumPercentage,
-        averageRatingChange: _calculateMean(ratingChanges.map((r) => r).toList()),
+        averageRatingChange:
+            _calculateMean(ratingChanges.map((r) => r).toList()),
         medianRatingChange: _calculateMedian(ratingChanges),
         playerAverageRating: _calculateMean(ratings),
         ratingDistributionStdDev: _calculateStdDev(ratings),
@@ -164,7 +161,7 @@ class GameBalanceAnalyzer {
 
         double totalGameTime = 0;
 
-        for (var gameDoc in games) {
+        for (final gameDoc in games) {
           final result = gameDoc['result'] as String?;
           if (result == 'white_win') whiteWins++;
           if (result == 'black_win') blackWins++;
@@ -210,7 +207,7 @@ class GameBalanceAnalyzer {
       double totalProgressionScore = 0;
       int userCount = 0;
 
-      for (var userDoc in usersSnapshot.docs) {
+      for (final userDoc in usersSnapshot.docs) {
         final uid = userDoc.id;
         final userRating = (userDoc['rating'] as num?)?.toInt() ?? 1500;
 
@@ -231,7 +228,7 @@ class GameBalanceAnalyzer {
         // Calculate progression score
         if (puzzleRatings.isNotEmpty) {
           final avgPuzzleRating = _calculateMean(puzzleRatings);
-          final progressionScore = (avgPuzzleRating / userRating);
+          final progressionScore = avgPuzzleRating / userRating;
           totalProgressionScore += progressionScore;
           userCount++;
           progressionData[uid] = progressionScore;
@@ -243,7 +240,8 @@ class GameBalanceAnalyzer {
 
       return DifficultyProgressionAnalysis(
         averageProgressionScore: averageProgression,
-        healthyProgression: averageProgression >= 0.9 && averageProgression <= 1.1,
+        healthyProgression:
+            averageProgression >= 0.9 && averageProgression <= 1.1,
       );
     } catch (e) {
       throw Exception('Failed to analyze difficulty progression: $e');
@@ -253,7 +251,7 @@ class GameBalanceAnalyzer {
   // Statistical helper functions
 
   double _calculateMean(List<num> values) {
-    if (values.isEmpty) return 0.0;
+    if (values.isEmpty) return 0;
     return values.reduce((a, b) => a + b) / values.length;
   }
 
@@ -267,15 +265,15 @@ class GameBalanceAnalyzer {
   }
 
   double _calculateStdDev(List<num> values) {
-    if (values.isEmpty) return 0.0;
+    if (values.isEmpty) return 0;
     final mean = _calculateMean(values);
-    final variance = values.fold(0.0, (sum, val) => sum + pow(val - mean, 2)) /
-        values.length;
+    final variance =
+        values.fold<num>(0, (sum, val) => sum + pow(val - mean, 2)) /
+            values.length;
     return sqrt(variance).toDouble();
   }
 
-  bool _isTimeControlBalanced(
-      Map<String, TimeControlStats> stats) {
+  bool _isTimeControlBalanced(Map<String, TimeControlStats> stats) {
     for (final control in stats.values) {
       // Check if white/black win rates are balanced (close to 50-50)
       final whiteWinRate = control.whiteWinRate;
@@ -293,17 +291,6 @@ class GameBalanceAnalyzer {
 // Data classes for analysis results
 
 class PuzzleDifficultyAnalysis {
-  final int totalPuzzles;
-  final int beginnerCount;
-  final int intermediateCount;
-  final int advancedCount;
-  final int expertCount;
-  final int masterCount;
-  final Map<String, String> distribution;
-  final double averageRating;
-  final num medianRating;
-  final double standardDeviation;
-
   PuzzleDifficultyAnalysis({
     required this.totalPuzzles,
     required this.beginnerCount,
@@ -317,35 +304,42 @@ class PuzzleDifficultyAnalysis {
     required this.standardDeviation,
   });
 
-  factory PuzzleDifficultyAnalysis.empty() {
-    return PuzzleDifficultyAnalysis(
-      totalPuzzles: 0,
-      beginnerCount: 0,
-      intermediateCount: 0,
-      advancedCount: 0,
-      expertCount: 0,
-      masterCount: 0,
-      distribution: {},
-      averageRating: 0,
-      medianRating: 0,
-      standardDeviation: 0,
-    );
-  }
+  factory PuzzleDifficultyAnalysis.empty() => PuzzleDifficultyAnalysis(
+        totalPuzzles: 0,
+        beginnerCount: 0,
+        intermediateCount: 0,
+        advancedCount: 0,
+        expertCount: 0,
+        masterCount: 0,
+        distribution: {},
+        averageRating: 0,
+        medianRating: 0,
+        standardDeviation: 0,
+      );
+  final int totalPuzzles;
+  final int beginnerCount;
+  final int intermediateCount;
+  final int advancedCount;
+  final int expertCount;
+  final int masterCount;
+  final Map<String, String> distribution;
+  final double averageRating;
+  final num medianRating;
+  final double standardDeviation;
 
   bool get isBalanced {
     // Target distribution
-    final targetBeginnerPct = 15.0;
-    final targetIntermediatePct = 35.0;
-    final targetAdvancedPct = 30.0;
-    final targetExpertPct = 15.0;
-    final targetMasterPct = 5.0;
+    const targetBeginnerPct = 15.0;
+    const targetIntermediatePct = 35.0;
+    const targetAdvancedPct = 30.0;
+    const targetExpertPct = 15.0;
+    const targetMasterPct = 5.0;
 
-    final actualBeginnerPct = (beginnerCount / totalPuzzles * 100);
-    final actualIntermediatePct =
-        (intermediateCount / totalPuzzles * 100);
-    final actualAdvancedPct = (advancedCount / totalPuzzles * 100);
-    final actualExpertPct = (expertCount / totalPuzzles * 100);
-    final actualMasterPct = (masterCount / totalPuzzles * 100);
+    final actualBeginnerPct = beginnerCount / totalPuzzles * 100;
+    final actualIntermediatePct = intermediateCount / totalPuzzles * 100;
+    final actualAdvancedPct = advancedCount / totalPuzzles * 100;
+    final actualExpertPct = expertCount / totalPuzzles * 100;
+    final actualMasterPct = masterCount / totalPuzzles * 100;
 
     // Allow 5% deviation from target
     return (actualBeginnerPct - targetBeginnerPct).abs() <= 5 &&
@@ -356,8 +350,7 @@ class PuzzleDifficultyAnalysis {
   }
 
   @override
-  String toString() {
-    return '''
+  String toString() => '''
 Puzzle Difficulty Analysis
 ==========================
 Total Puzzles: $totalPuzzles
@@ -374,20 +367,9 @@ Statistics:
 
 Balance Status: ${isBalanced ? '✓ BALANCED' : '✗ IMBALANCED'}
 ''';
-  }
 }
 
 class RatingSystemAnalysis {
-  final int totalGamesAnalyzed;
-  final double zeroSumCompliance;
-  final double averageRatingChange;
-  final num medianRatingChange;
-  final double playerAverageRating;
-  final double ratingDistributionStdDev;
-  final int ratingRangeMin;
-  final int ratingRangeMax;
-  final bool zeroSumCompliant;
-
   RatingSystemAnalysis({
     required this.totalGamesAnalyzed,
     required this.zeroSumCompliance,
@@ -400,23 +382,29 @@ class RatingSystemAnalysis {
     required this.zeroSumCompliant,
   });
 
-  factory RatingSystemAnalysis.empty() {
-    return RatingSystemAnalysis(
-      totalGamesAnalyzed: 0,
-      zeroSumCompliance: 0.0,
-      averageRatingChange: 0.0,
-      medianRatingChange: 0,
-      playerAverageRating: 0.0,
-      ratingDistributionStdDev: 0.0,
-      ratingRangeMin: 0,
-      ratingRangeMax: 0,
-      zeroSumCompliant: false,
-    );
-  }
+  factory RatingSystemAnalysis.empty() => RatingSystemAnalysis(
+        totalGamesAnalyzed: 0,
+        zeroSumCompliance: 0,
+        averageRatingChange: 0,
+        medianRatingChange: 0,
+        playerAverageRating: 0,
+        ratingDistributionStdDev: 0,
+        ratingRangeMin: 0,
+        ratingRangeMax: 0,
+        zeroSumCompliant: false,
+      );
+  final int totalGamesAnalyzed;
+  final double zeroSumCompliance;
+  final double averageRatingChange;
+  final num medianRatingChange;
+  final double playerAverageRating;
+  final double ratingDistributionStdDev;
+  final int ratingRangeMin;
+  final int ratingRangeMax;
+  final bool zeroSumCompliant;
 
   @override
-  String toString() {
-    return '''
+  String toString() => '''
 Rating System Analysis
 ======================
 Total Games Analyzed: $totalGamesAnalyzed
@@ -434,17 +422,9 @@ Player Statistics:
 
 Overall Status: ${zeroSumCompliant ? '✓ HEALTHY' : '✗ NEEDS REVIEW'}
 ''';
-  }
 }
 
 class TimeControlStats {
-  final String timeControl;
-  final int totalGames;
-  final double whiteWinRate;
-  final double blackWinRate;
-  final double drawRate;
-  final int averageGameDuration;
-
   TimeControlStats({
     required this.timeControl,
     required this.totalGames,
@@ -453,6 +433,12 @@ class TimeControlStats {
     required this.drawRate,
     required this.averageGameDuration,
   });
+  final String timeControl;
+  final int totalGames;
+  final double whiteWinRate;
+  final double blackWinRate;
+  final double drawRate;
+  final int averageGameDuration;
 
   bool get isBalanced {
     final expectedWinRate = (1 - drawRate) / 2;
@@ -461,8 +447,7 @@ class TimeControlStats {
   }
 
   @override
-  String toString() {
-    return '''
+  String toString() => '''
 Time Control: $timeControl
 - Games: $totalGames
 - White Win Rate: ${(whiteWinRate * 100).toStringAsFixed(1)}%
@@ -471,23 +456,22 @@ Time Control: $timeControl
 - Avg Duration: ${averageGameDuration}ms
 - Balance: ${isBalanced ? '✓' : '✗'}
 ''';
-  }
 }
 
 class TimeControlAnalysis {
-  final Map<String, TimeControlStats> timeControlStats;
-  final bool balanced;
-
   TimeControlAnalysis({
     required this.timeControlStats,
     required this.balanced,
   });
+  final Map<String, TimeControlStats> timeControlStats;
+  final bool balanced;
 
   @override
   String toString() {
     final sb = StringBuffer('Time Control Analysis\n');
     sb.write('=======================\n');
-    sb.write('Overall Balance: ${balanced ? '✓ BALANCED' : '✗ IMBALANCED'}\n\n');
+    sb.write(
+        'Overall Balance: ${balanced ? '✓ BALANCED' : '✗ IMBALANCED'}\n\n');
 
     for (final stats in timeControlStats.values) {
       sb.write(stats);
@@ -499,24 +483,21 @@ class TimeControlAnalysis {
 }
 
 class DifficultyProgressionAnalysis {
-  final double averageProgressionScore;
-  final bool healthyProgression;
-
   DifficultyProgressionAnalysis({
     required this.averageProgressionScore,
     required this.healthyProgression,
   });
 
-  factory DifficultyProgressionAnalysis.empty() {
-    return DifficultyProgressionAnalysis(
-      averageProgressionScore: 0.0,
-      healthyProgression: false,
-    );
-  }
+  factory DifficultyProgressionAnalysis.empty() =>
+      DifficultyProgressionAnalysis(
+        averageProgressionScore: 0,
+        healthyProgression: false,
+      );
+  final double averageProgressionScore;
+  final bool healthyProgression;
 
   @override
-  String toString() {
-    return '''
+  String toString() => '''
 Difficulty Progression Analysis
 ================================
 Average Progression Score: ${averageProgressionScore.toStringAsFixed(2)}
@@ -526,5 +507,4 @@ Status: ${healthyProgression ? '✓ HEALTHY' : '✗ NEEDS ADJUSTMENT'}
 Note: Score > 1.0 means players are solving puzzles above their rating level
 Note: Score < 1.0 means players are solving puzzles below their rating level
 ''';
-  }
 }

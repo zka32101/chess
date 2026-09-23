@@ -3,6 +3,8 @@ import 'package:logger/logger.dart';
 
 /// Handles reward distribution and item management
 class SeasonalRewardService {
+  SeasonalRewardService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -10,13 +12,10 @@ class SeasonalRewardService {
   static const String _playerRewardHistoryCollection = 'player_reward_history';
   static const String _rewardCodesCollection = 'reward_codes';
 
-  SeasonalRewardService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
-
   /// Get rewards by type
   Future<List<Reward>> getRewardsByType({
     required String seasonId,
-    required String type,  // battle_pass, challenge, event, seasonal_end
+    required String type, // battle_pass, challenge, event, seasonal_end
   }) async {
     try {
       final snapshot = await _firestore
@@ -25,9 +24,7 @@ class SeasonalRewardService {
           .where('type', isEqualTo: type)
           .get();
 
-      return snapshot.docs
-          .map((doc) => Reward.fromJson(doc.data() as Map<String, dynamic>))
-          .toList();
+      return snapshot.docs.map((doc) => Reward.fromJson(doc.data())).toList();
     } catch (e, st) {
       _logger.e('Failed to get rewards by type', error: e, stackTrace: st);
       rethrow;
@@ -116,10 +113,12 @@ class SeasonalRewardService {
       final snapshot = await query.get();
 
       return snapshot.docs
-          .map((doc) => PlayerRewardHistory.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) =>
+              PlayerRewardHistory.fromJson(doc.data()! as Map<String, dynamic>))
           .toList();
     } catch (e, st) {
-      _logger.e('Failed to get player reward history', error: e, stackTrace: st);
+      _logger.e('Failed to get player reward history',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -154,7 +153,7 @@ class SeasonalRewardService {
 
       final rewards = <Reward>[];
       for (final doc in snapshot.docs) {
-        final reward = Reward.fromJson(doc.data() as Map<String, dynamic>);
+        final reward = Reward.fromJson(doc.data());
 
         // Filter by player achievement level
         if (reward.requirements?['minLevel'] != null) {
@@ -168,7 +167,8 @@ class SeasonalRewardService {
 
       return rewards;
     } catch (e, st) {
-      _logger.e('Failed to calculate season-end rewards', error: e, stackTrace: st);
+      _logger.e('Failed to calculate season-end rewards',
+          error: e, stackTrace: st);
       rethrow;
     }
   }
@@ -260,10 +260,8 @@ class SeasonalRewardService {
   /// Helper: Get reward by ID
   Future<Reward?> _getRewardById(String rewardId) async {
     try {
-      final doc = await _firestore
-          .collection(_rewardsCollection)
-          .doc(rewardId)
-          .get();
+      final doc =
+          await _firestore.collection(_rewardsCollection).doc(rewardId).get();
 
       if (!doc.exists) {
         return null;
@@ -279,16 +277,6 @@ class SeasonalRewardService {
 
 /// Reward definition
 class Reward {
-  final String rewardId;
-  final String seasonId;
-  final String type;        // battle_pass, challenge, event, seasonal_end
-  final String name;
-  final String description;
-  final List<RewardItem> items;
-  final String rarity;      // common, rare, epic, legendary
-  final Map<String, dynamic>? requirements;  // minLevel, minRating, etc.
-  final DateTime createdAt;
-
   Reward({
     required this.rewardId,
     required this.seasonId,
@@ -301,45 +289,45 @@ class Reward {
     this.requirements,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'rewardId': rewardId,
-      'seasonId': seasonId,
-      'type': type,
-      'name': name,
-      'description': description,
-      'items': items.map((i) => i.toJson()).toList(),
-      'rarity': rarity,
-      'requirements': requirements,
-      'createdAt': Timestamp.fromDate(createdAt),
-    };
-  }
+  factory Reward.fromJson(Map<String, dynamic> json) => Reward(
+        rewardId: json['rewardId'] as String,
+        seasonId: json['seasonId'] as String,
+        type: json['type'] as String,
+        name: json['name'] as String,
+        description: json['description'] as String,
+        items: (json['items'] as List<dynamic>?)
+                ?.map((i) => RewardItem.fromJson(i as Map<String, dynamic>))
+                .toList() ??
+            [],
+        rarity: json['rarity'] as String? ?? 'common',
+        requirements: json['requirements'] as Map<String, dynamic>?,
+        createdAt: (json['createdAt'] as Timestamp).toDate(),
+      );
+  final String rewardId;
+  final String seasonId;
+  final String type; // battle_pass, challenge, event, seasonal_end
+  final String name;
+  final String description;
+  final List<RewardItem> items;
+  final String rarity; // common, rare, epic, legendary
+  final Map<String, dynamic>? requirements; // minLevel, minRating, etc.
+  final DateTime createdAt;
 
-  factory Reward.fromJson(Map<String, dynamic> json) {
-    return Reward(
-      rewardId: json['rewardId'] as String,
-      seasonId: json['seasonId'] as String,
-      type: json['type'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      items: (json['items'] as List<dynamic>?)
-          ?.map((i) => RewardItem.fromJson(i as Map<String, dynamic>))
-          .toList() ?? [],
-      rarity: json['rarity'] as String? ?? 'common',
-      requirements: json['requirements'] as Map<String, dynamic>?,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'rewardId': rewardId,
+        'seasonId': seasonId,
+        'type': type,
+        'name': name,
+        'description': description,
+        'items': items.map((i) => i.toJson()).toList(),
+        'rarity': rarity,
+        'requirements': requirements,
+        'createdAt': Timestamp.fromDate(createdAt),
+      };
 }
 
 /// Individual reward item
 class RewardItem {
-  final String itemId;
-  final String type;        // currency, cosmetic, battle_pass_level
-  final String name;
-  final int quantity;
-  final String? icon;
-
   RewardItem({
     required this.itemId,
     required this.type,
@@ -348,39 +336,30 @@ class RewardItem {
     this.icon,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'itemId': itemId,
-      'type': type,
-      'name': name,
-      'quantity': quantity,
-      'icon': icon,
-    };
-  }
+  factory RewardItem.fromJson(Map<String, dynamic> json) => RewardItem(
+        itemId: json['itemId'] as String,
+        type: json['type'] as String,
+        name: json['name'] as String,
+        quantity: json['quantity'] as int,
+        icon: json['icon'] as String?,
+      );
+  final String itemId;
+  final String type; // currency, cosmetic, battle_pass_level
+  final String name;
+  final int quantity;
+  final String? icon;
 
-  factory RewardItem.fromJson(Map<String, dynamic> json) {
-    return RewardItem(
-      itemId: json['itemId'] as String,
-      type: json['type'] as String,
-      name: json['name'] as String,
-      quantity: json['quantity'] as int,
-      icon: json['icon'] as String?,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'itemId': itemId,
+        'type': type,
+        'name': name,
+        'quantity': quantity,
+        'icon': icon,
+      };
 }
 
 /// Player's reward history entry
 class PlayerRewardHistory {
-  final String playerId;
-  final String? seasonId;
-  final String? rewardId;
-  final String? rewardCode;
-  final String rewardType;
-  final List<RewardItem> items;
-  final DateTime claimedAt;
-  final bool isClaimed;
-  final bool isRead;
-
   PlayerRewardHistory({
     required this.playerId,
     required this.rewardType,
@@ -393,34 +372,34 @@ class PlayerRewardHistory {
     this.isRead = false,
   });
 
-  factory PlayerRewardHistory.fromJson(Map<String, dynamic> json) {
-    return PlayerRewardHistory(
-      playerId: json['playerId'] as String,
-      seasonId: json['seasonId'] as String?,
-      rewardId: json['rewardId'] as String?,
-      rewardCode: json['rewardCode'] as String?,
-      rewardType: json['rewardType'] as String,
-      items: (json['items'] as List<dynamic>?)
-          ?.map((i) => RewardItem.fromJson(i as Map<String, dynamic>))
-          .toList() ?? [],
-      claimedAt: (json['claimedAt'] as Timestamp).toDate(),
-      isClaimed: json['isClaimed'] as bool? ?? false,
-      isRead: json['isRead'] as bool? ?? false,
-    );
-  }
+  factory PlayerRewardHistory.fromJson(Map<String, dynamic> json) =>
+      PlayerRewardHistory(
+        playerId: json['playerId'] as String,
+        seasonId: json['seasonId'] as String?,
+        rewardId: json['rewardId'] as String?,
+        rewardCode: json['rewardCode'] as String?,
+        rewardType: json['rewardType'] as String,
+        items: (json['items'] as List<dynamic>?)
+                ?.map((i) => RewardItem.fromJson(i as Map<String, dynamic>))
+                .toList() ??
+            [],
+        claimedAt: (json['claimedAt'] as Timestamp).toDate(),
+        isClaimed: json['isClaimed'] as bool? ?? false,
+        isRead: json['isRead'] as bool? ?? false,
+      );
+  final String playerId;
+  final String? seasonId;
+  final String? rewardId;
+  final String? rewardCode;
+  final String rewardType;
+  final List<RewardItem> items;
+  final DateTime claimedAt;
+  final bool isClaimed;
+  final bool isRead;
 }
 
 /// Promotional reward code
 class RewardCode {
-  final String code;
-  final Map<String, dynamic> reward;  // reward items
-  final int maxRedemptions;
-  final int currentRedemptions;
-  final DateTime expiresAt;
-  final bool isActive;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
   RewardCode({
     required this.code,
     required this.reward,
@@ -432,16 +411,22 @@ class RewardCode {
     required this.updatedAt,
   });
 
-  factory RewardCode.fromJson(Map<String, dynamic> json) {
-    return RewardCode(
-      code: json['code'] as String,
-      reward: json['reward'] as Map<String, dynamic>? ?? {},
-      maxRedemptions: json['maxRedemptions'] as int,
-      currentRedemptions: json['currentRedemptions'] as int? ?? 0,
-      expiresAt: (json['expiresAt'] as Timestamp).toDate(),
-      isActive: json['isActive'] as bool? ?? true,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-      updatedAt: (json['updatedAt'] as Timestamp).toDate(),
-    );
-  }
+  factory RewardCode.fromJson(Map<String, dynamic> json) => RewardCode(
+        code: json['code'] as String,
+        reward: json['reward'] as Map<String, dynamic>? ?? {},
+        maxRedemptions: json['maxRedemptions'] as int,
+        currentRedemptions: json['currentRedemptions'] as int? ?? 0,
+        expiresAt: (json['expiresAt'] as Timestamp).toDate(),
+        isActive: json['isActive'] as bool? ?? true,
+        createdAt: (json['createdAt'] as Timestamp).toDate(),
+        updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+      );
+  final String code;
+  final Map<String, dynamic> reward; // reward items
+  final int maxRedemptions;
+  final int currentRedemptions;
+  final DateTime expiresAt;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 }

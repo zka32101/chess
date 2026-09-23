@@ -6,16 +6,14 @@ import 'package:logger/logger.dart';
 /// Tracks subscription purchases, upgrades, downgrades, and cancellations
 /// for monetization analytics
 class AnalyticsRevenueService {
-  static final AnalyticsRevenueService _instance = AnalyticsRevenueService._internal();
+  factory AnalyticsRevenueService() => _instance;
+
+  AnalyticsRevenueService._internal();
+  static final AnalyticsRevenueService _instance =
+      AnalyticsRevenueService._internal();
 
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   final Logger _logger = Logger();
-
-  AnalyticsRevenueService._internal();
-
-  factory AnalyticsRevenueService() {
-    return _instance;
-  }
 
   /// Track subscription purchase event
   ///
@@ -28,7 +26,8 @@ class AnalyticsRevenueService {
     String? transactionId,
   }) async {
     try {
-      _logger.i('Tracking subscription purchase: $subscriptionTier for $price $currency');
+      _logger.i(
+          'Tracking subscription purchase: $subscriptionTier for $price $currency');
 
       await _analytics.logEvent(
         name: 'subscription_purchase',
@@ -126,7 +125,8 @@ class AnalyticsRevenueService {
     String? reason,
   }) async {
     try {
-      _logger.i('Tracking subscription cancellation: $subscriptionTier after $daysActive days');
+      _logger.i(
+          'Tracking subscription cancellation: $subscriptionTier after $daysActive days');
 
       await _analytics.logEvent(
         name: 'subscription_cancellation',
@@ -154,7 +154,8 @@ class AnalyticsRevenueService {
     String? transactionId,
   }) async {
     try {
-      _logger.i('Tracking subscription renewal: $subscriptionTier for $renewalPrice $currency');
+      _logger.i(
+          'Tracking subscription renewal: $subscriptionTier for $renewalPrice $currency');
 
       await _analytics.logEvent(
         name: 'subscription_renewal',
@@ -207,7 +208,8 @@ class AnalyticsRevenueService {
     required String currency,
   }) async {
     try {
-      _logger.i('Tracking trial conversion: $subscriptionTier for $price $currency');
+      _logger.i(
+          'Tracking trial conversion: $subscriptionTier for $price $currency');
 
       await _analytics.logEvent(
         name: 'trial_converted_to_paid',
@@ -274,7 +276,8 @@ class AnalyticsRevenueService {
         value: isActive.toString(),
       );
 
-      _logger.d('User subscription properties set: $subscriptionTier (active: $isActive)');
+      _logger.d(
+          'User subscription properties set: $subscriptionTier (active: $isActive)');
     } catch (e) {
       _logger.e('Failed to set user subscription property', error: e);
     }

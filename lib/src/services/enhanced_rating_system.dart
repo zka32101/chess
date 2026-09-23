@@ -4,6 +4,8 @@ import 'package:logger/logger.dart';
 
 /// Enhanced ELO rating system with provisional ratings and bonuses
 class EnhancedRatingSystem {
+  EnhancedRatingSystem({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
@@ -11,13 +13,12 @@ class EnhancedRatingSystem {
   static const String _ratingHistorySubcollection = 'ratingHistory';
   static const int _kFactorProvisional = 48; // Higher K-factor for new players
   static const int _kFactorStandard = 32; // Standard K-factor
-  static const int _kFactorHighRated = 24; // Lower K-factor for high-rated players
-  static const int _provisionalGameThreshold = 30; // Games until provisional rating is considered
+  static const int _kFactorHighRated =
+      24; // Lower K-factor for high-rated players
+  static const int _provisionalGameThreshold =
+      30; // Games until provisional rating is considered
   static const int _ratingFloor = 600;
   static const int _ratingCeiling = 3000;
-
-  EnhancedRatingSystem({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Calculate rating change with advanced metrics
   Future<RatingChangeResult> calculateRatingChange({
@@ -56,14 +57,14 @@ class EnhancedRatingSystem {
       final (whiteScore, blackScore) = _getScoresFromResult(result);
 
       // Calculate base rating changes
-      var whiteChange = (whiteKFactor * (whiteScore - expectedScores['white']!))
-          .round();
-      var blackChange = (blackKFactor * (blackScore - expectedScores['black']!))
-          .round();
+      var whiteChange =
+          (whiteKFactor * (whiteScore - expectedScores['white']!)).round();
+      var blackChange =
+          (blackKFactor * (blackScore - expectedScores['black']!)).round();
 
       // Apply time control bonus/penalty
-      final (whiteTimeBonus, blackTimeBonus) =
-          _calculateTimeControlBonus(timeControl, whiteCurrentRating, blackCurrentRating);
+      final (whiteTimeBonus, blackTimeBonus) = _calculateTimeControlBonus(
+          timeControl, whiteCurrentRating, blackCurrentRating);
       whiteChange += whiteTimeBonus;
       blackChange += blackTimeBonus;
 
@@ -133,10 +134,7 @@ class EnhancedRatingSystem {
           .add(historyEntry);
 
       // Update current rating
-      await _firestore
-          .collection(_usersCollection)
-          .doc(playerId)
-          .update({
+      await _firestore.collection(_usersCollection).doc(playerId).update({
         'rating': newRating,
         'lastRatingUpdate': timestamp,
       });
@@ -187,13 +185,13 @@ class EnhancedRatingSystem {
       final history = await getRatingHistory(playerId, limit: 100);
 
       // Calculate rating trends
-      double ratingTrend = 0.0;
+      double ratingTrend = 0;
       if (history.length >= 10) {
         final recent = history.take(10).toList();
-        final ratingChanges = recent
-            .map((entry) => entry.ratingChange.toDouble())
-            .toList();
-        ratingTrend = ratingChanges.reduce((a, b) => a + b) / ratingChanges.length;
+        final ratingChanges =
+            recent.map((entry) => entry.ratingChange.toDouble()).toList();
+        ratingTrend =
+            ratingChanges.reduce((a, b) => a + b) / ratingChanges.length;
       }
 
       // Calculate peak and lowest ratings
@@ -249,7 +247,7 @@ class EnhancedRatingSystem {
 
   Map<String, double> _calculateExpectedScores(
       int whiteRating, int blackRating) {
-    const double D = 400.0;
+    const double D = 400;
     final whiteExpected =
         1.0 / (1.0 + pow(10, (blackRating - whiteRating) / D).toDouble());
     final blackExpected = 1.0 - whiteExpected;
@@ -296,25 +294,12 @@ class EnhancedRatingSystem {
     return (whiteBonus, blackBonus);
   }
 
-  int _applyFloorAndCeiling(int rating) {
-    return rating.clamp(_ratingFloor, _ratingCeiling);
-  }
+  int _applyFloorAndCeiling(int rating) =>
+      rating.clamp(_ratingFloor, _ratingCeiling);
 }
 
 /// Result of rating calculation
 class RatingChangeResult {
-  final int whiteChange;
-  final int blackChange;
-  final int whiteNewRating;
-  final int blackNewRating;
-  final int whiteKFactor;
-  final int blackKFactor;
-  final double whiteExpectedScore;
-  final double blackExpectedScore;
-  final (int, int) timeControlBonus;
-  final bool whiteIsProvisional;
-  final bool blackIsProvisional;
-
   RatingChangeResult({
     required this.whiteChange,
     required this.blackChange,
@@ -328,32 +313,33 @@ class RatingChangeResult {
     required this.whiteIsProvisional,
     required this.blackIsProvisional,
   });
+  final int whiteChange;
+  final int blackChange;
+  final int whiteNewRating;
+  final int blackNewRating;
+  final int whiteKFactor;
+  final int blackKFactor;
+  final double whiteExpectedScore;
+  final double blackExpectedScore;
+  final (int, int) timeControlBonus;
+  final bool whiteIsProvisional;
+  final bool blackIsProvisional;
 }
 
 /// Player profile for rating calculations
 class PlayerProfile {
-  final int gamesPlayed;
-  final int rating;
-  final bool isProvisional;
-
   PlayerProfile({
     required this.gamesPlayed,
     required this.rating,
     required this.isProvisional,
   });
+  final int gamesPlayed;
+  final int rating;
+  final bool isProvisional;
 }
 
 /// Rating history entry
 class RatingHistoryEntry {
-  final String gameId;
-  final String opponentId;
-  final int previousRating;
-  final int newRating;
-  final int ratingChange;
-  final String result;
-  final String timeControl;
-  final DateTime createdAt;
-
   RatingHistoryEntry({
     required this.gameId,
     required this.opponentId,
@@ -365,29 +351,29 @@ class RatingHistoryEntry {
     required this.createdAt,
   });
 
-  factory RatingHistoryEntry.fromJson(Map<String, dynamic> json) {
-    return RatingHistoryEntry(
-      gameId: json['gameId'] as String,
-      opponentId: json['opponentId'] as String,
-      previousRating: json['previousRating'] as int,
-      newRating: json['newRating'] as int,
-      ratingChange: json['ratingChange'] as int,
-      result: json['result'] as String,
-      timeControl: json['timeControl'] as String,
-      createdAt: (json['createdAt'] as Timestamp).toDate(),
-    );
-  }
+  factory RatingHistoryEntry.fromJson(Map<String, dynamic> json) =>
+      RatingHistoryEntry(
+        gameId: json['gameId'] as String,
+        opponentId: json['opponentId'] as String,
+        previousRating: json['previousRating'] as int,
+        newRating: json['newRating'] as int,
+        ratingChange: json['ratingChange'] as int,
+        result: json['result'] as String,
+        timeControl: json['timeControl'] as String,
+        createdAt: (json['createdAt'] as Timestamp).toDate(),
+      );
+  final String gameId;
+  final String opponentId;
+  final int previousRating;
+  final int newRating;
+  final int ratingChange;
+  final String result;
+  final String timeControl;
+  final DateTime createdAt;
 }
 
 /// Rating statistics
 class RatingStats {
-  final int currentRating;
-  final int gamesPlayed;
-  final int peakRating;
-  final int lowestRating;
-  final double averageRatingChange;
-  final bool isProvisional;
-
   RatingStats({
     required this.currentRating,
     required this.gamesPlayed,
@@ -396,6 +382,12 @@ class RatingStats {
     required this.averageRatingChange,
     required this.isProvisional,
   });
+  final int currentRating;
+  final int gamesPlayed;
+  final int peakRating;
+  final int lowestRating;
+  final double averageRatingChange;
+  final bool isProvisional;
 
   int get ratingDeltaFromLowest => currentRating - lowestRating;
   int get ratingDeltaFromPeak => peakRating - currentRating;

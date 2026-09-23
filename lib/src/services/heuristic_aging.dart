@@ -1,10 +1,3 @@
-/// Heuristic Aging and Adaptive Limits for Chess AI
-///
-/// Extends killer moves and countermoves with time-based decay,
-/// allowing the engine to adapt to changing position characteristics
-/// and reduce the impact of stale heuristic data.
-
-import 'package:chess/chess.dart' as chess_lib;
 import 'killer_move_heuristic.dart';
 import 'countermove_heuristic.dart';
 
@@ -14,6 +7,14 @@ import 'countermove_heuristic.dart';
 /// gradually lose their priority, allowing fresh tactical patterns
 /// to emerge as the search progresses.
 class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
+  AgedKillerMoveHeuristic({
+    int maxDepth = 12,
+    double decayFactor = 0.95,
+    int maxAge = 10,
+  })  : _decayFactor = decayFactor,
+        _maxAge = maxAge,
+        super(maxDepth: maxDepth);
+
   /// Age of each killer move (in number of resets)
   final Map<String, int> _moveAge = {};
 
@@ -23,14 +24,6 @@ class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
 
   /// Maximum age before move is discarded
   final int _maxAge;
-
-  AgedKillerMoveHeuristic({
-    int maxDepth = 12,
-    double decayFactor = 0.95,
-    int maxAge = 10,
-  })  : _decayFactor = decayFactor,
-        _maxAge = maxAge,
-        super(maxDepth: maxDepth);
 
   /// Get killer moves with age-based score adjustment
   List<String> getAgedKillers(int depth, {double timeRemaining = 1.0}) {
@@ -71,9 +64,7 @@ class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
   }
 
   /// Get move age
-  int getMoveAge(String moveUci) {
-    return _moveAge[moveUci] ?? 0;
-  }
+  int getMoveAge(String moveUci) => _moveAge[moveUci] ?? 0;
 
   /// Clear aging data
   @override
@@ -83,18 +74,16 @@ class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
   }
 
   /// Get aging statistics
-  Map<String, dynamic> getAgingStatistics() {
-    return {
-      ...getStatistics(),
-      'averageAge': _moveAge.isEmpty
-          ? 0.0
-          : _moveAge.values.fold<int>(0, (sum, age) => sum + age) /
-              _moveAge.length,
-      'agedMoves': _moveAge.length,
-      'decayFactor': _decayFactor,
-      'maxAge': _maxAge,
-    };
-  }
+  Map<String, dynamic> getAgingStatistics() => {
+        ...getStatistics(),
+        'averageAge': _moveAge.isEmpty
+            ? 0.0
+            : _moveAge.values.fold<int>(0, (sum, age) => sum + age) /
+                _moveAge.length,
+        'agedMoves': _moveAge.length,
+        'decayFactor': _decayFactor,
+        'maxAge': _maxAge,
+      };
 }
 
 /// Aging heuristic for countermoves with time-based decay
@@ -102,6 +91,13 @@ class AgedKillerMoveHeuristic extends KillerMoveHeuristic {
 /// Decays the effectiveness of counter-move pairs over time,
 /// allowing the engine to adapt when patterns change.
 class AgedCountermoveHeuristic extends CountermoveHeuristic {
+  AgedCountermoveHeuristic({
+    double decayFactor = 0.90,
+    int maxAge = 15,
+  })  : _decayFactor = decayFactor,
+        _maxAge = maxAge,
+        super();
+
   /// Timestamp (reset count) when pair was last used
   final Map<String, int> _pairAge = {};
 
@@ -110,13 +106,6 @@ class AgedCountermoveHeuristic extends CountermoveHeuristic {
 
   /// Maximum age before pair effectiveness resets
   final int _maxAge;
-
-  AgedCountermoveHeuristic({
-    double decayFactor = 0.90,
-    int maxAge = 15,
-  })  : _decayFactor = decayFactor,
-        _maxAge = maxAge,
-        super();
 
   /// Get counter-moves with age-based effectiveness adjustment
   List<String> getAgedCountermoves(String opponentMove) {
@@ -174,18 +163,16 @@ class AgedCountermoveHeuristic extends CountermoveHeuristic {
   }
 
   /// Get aging statistics
-  Map<String, dynamic> getAgingStatistics() {
-    return {
-      ...getStatistics(),
-      'averagePairAge': _pairAge.isEmpty
-          ? 0.0
-          : _pairAge.values.fold<int>(0, (sum, age) => sum + age) /
-              _pairAge.length,
-      'agedPairs': _pairAge.length,
-      'decayFactor': _decayFactor,
-      'maxAge': _maxAge,
-    };
-  }
+  Map<String, dynamic> getAgingStatistics() => {
+        ...getStatistics(),
+        'averagePairAge': _pairAge.isEmpty
+            ? 0.0
+            : _pairAge.values.fold<int>(0, (sum, age) => sum + age) /
+                _pairAge.length,
+        'agedPairs': _pairAge.length,
+        'decayFactor': _decayFactor,
+        'maxAge': _maxAge,
+      };
 }
 
 /// Extended opening book with adaptive position recognition
@@ -291,14 +278,12 @@ class ExtendedOpeningBook {
   };
 
   /// Get recommended moves for position with caching
-  static List<String> getRecommendedMoves(String fen) {
-    return _extendedBook[_normalizeFen(fen)] ?? [];
-  }
+  static List<String> getRecommendedMoves(String fen) =>
+      _extendedBook[_normalizeFen(fen)] ?? [];
 
   /// Check if position is in extended book
-  static bool isInBook(String fen) {
-    return _extendedBook.containsKey(_normalizeFen(fen));
-  }
+  static bool isInBook(String fen) =>
+      _extendedBook.containsKey(_normalizeFen(fen));
 
   /// Normalize FEN for flexible matching
   static String _normalizeFen(String fen) {
@@ -313,26 +298,24 @@ class ExtendedOpeningBook {
     // This is approximate
     final board = fen.split(' ')[0];
     final pieces = board.replaceAll(RegExp(r'[0-9/]'), '').length;
-    return ((32 - pieces) / 2).toInt();
+    return (32 - pieces) ~/ 2;
   }
 
   /// Get statistics about extended book
-  static Map<String, dynamic> getStatistics() {
-    return {
-      'totalPositions': _extendedBook.length,
-      'totalMoves':
-          _extendedBook.values.fold<int>(0, (sum, moves) => sum + moves.length),
-      'openings': [
-        'Ruy Lopez (8 positions)',
-        'Sicilian (3 positions)',
-        'French (2 positions)',
-        'Queens Gambit (4 positions)',
-        'English (2 positions)',
-        'Caro-Kann (2 positions)',
-        'Indian Systems (3 positions)',
-      ],
-    };
-  }
+  static Map<String, dynamic> getStatistics() => {
+        'totalPositions': _extendedBook.length,
+        'totalMoves': _extendedBook.values
+            .fold<int>(0, (sum, moves) => sum + moves.length),
+        'openings': [
+          'Ruy Lopez (8 positions)',
+          'Sicilian (3 positions)',
+          'French (2 positions)',
+          'Queens Gambit (4 positions)',
+          'English (2 positions)',
+          'Caro-Kann (2 positions)',
+          'Indian Systems (3 positions)',
+        ],
+      };
 }
 
 /// Adaptive heuristic manager with difficulty-based limits
@@ -343,6 +326,11 @@ class ExtendedOpeningBook {
 /// - Position phase (opening/midgame/endgame)
 /// - Search depth
 class AdaptiveHeuristicManager {
+  AdaptiveHeuristicManager({
+    AgedKillerMoveHeuristic? killerMoves,
+    AgedCountermoveHeuristic? countermoves,
+  })  : _killerMoves = killerMoves ?? AgedKillerMoveHeuristic(),
+        _countermoves = countermoves ?? AgedCountermoveHeuristic();
   final AgedKillerMoveHeuristic _killerMoves;
   final AgedCountermoveHeuristic _countermoves;
 
@@ -354,12 +342,6 @@ class AdaptiveHeuristicManager {
 
   /// Position phase (0=opening, 1=midgame, 2=endgame)
   int _positionPhase = 0;
-
-  AdaptiveHeuristicManager({
-    AgedKillerMoveHeuristic? killerMoves,
-    AgedCountermoveHeuristic? countermoves,
-  })  : _killerMoves = killerMoves ?? AgedKillerMoveHeuristic(),
-        _countermoves = countermoves ?? AgedCountermoveHeuristic();
 
   /// Set engine difficulty (0=Easy, 1=Medium, 2=Hard)
   void setDifficulty(int difficulty) {
@@ -381,8 +363,9 @@ class AdaptiveHeuristicManager {
     // Base: 2 killers
     // Adjust by difficulty and time
     if (_difficulty == 0) return 1; // Easy: fewer killers
-    if (_difficulty == 2 && _timeRemaining > 3000)
+    if (_difficulty == 2 && _timeRemaining > 3000) {
       return 3; // Hard + time: more killers
+    }
     return 2; // Medium or default
   }
 
@@ -391,8 +374,9 @@ class AdaptiveHeuristicManager {
     // Base: 4 countermoves per position
     // Reduce if time is low
     if (_timeRemaining < 1000) return 2; // Low time: fewer
-    if (_difficulty == 2 && _positionPhase == 0)
+    if (_difficulty == 2 && _positionPhase == 0) {
       return 5; // Hard in opening: more
+    }
     return 4; // Default
   }
 
@@ -413,18 +397,16 @@ class AdaptiveHeuristicManager {
   }
 
   /// Get statistics about adaptive settings
-  Map<String, dynamic> getAdaptiveStatistics() {
-    return {
-      'difficulty': _difficulty,
-      'timeRemaining': _timeRemaining,
-      'positionPhase': _positionPhase,
-      'adaptiveKillerLimit': getAdaptiveKillerLimit(),
-      'adaptiveCountermoveLimit': getAdaptiveCountermoveLimit(),
-      'decayFactor': getAdaptiveDecayFactor(),
-      'killerStats': _killerMoves.getAgingStatistics(),
-      'countermoveStats': _countermoves.getAgingStatistics(),
-    };
-  }
+  Map<String, dynamic> getAdaptiveStatistics() => {
+        'difficulty': _difficulty,
+        'timeRemaining': _timeRemaining,
+        'positionPhase': _positionPhase,
+        'adaptiveKillerLimit': getAdaptiveKillerLimit(),
+        'adaptiveCountermoveLimit': getAdaptiveCountermoveLimit(),
+        'decayFactor': getAdaptiveDecayFactor(),
+        'killerStats': _killerMoves.getAgingStatistics(),
+        'countermoveStats': _countermoves.getAgingStatistics(),
+      };
 
   /// Clear all heuristics
   void clear() {

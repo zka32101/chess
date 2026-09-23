@@ -1,23 +1,21 @@
 import 'dart:async';
 
 class CacheEntry<T> {
-  final T value;
-  final DateTime createdAt;
-  final Duration ttl;
-
   CacheEntry({
     required this.value,
     required this.ttl,
   }) : createdAt = DateTime.now();
+  final T value;
+  final DateTime createdAt;
+  final Duration ttl;
 
   bool get isExpired => DateTime.now().difference(createdAt) > ttl;
 }
 
 class QueryCache<K, V> {
+  QueryCache({this.defaultTtl = const Duration(minutes: 5)});
   final Map<K, CacheEntry<V>> _cache = {};
   final Duration defaultTtl;
-
-  QueryCache({this.defaultTtl = const Duration(minutes: 5)});
 
   V? get(K key) {
     final entry = _cache[key];
@@ -57,14 +55,13 @@ class QueryCache<K, V> {
 }
 
 class SmartCache<K, V> {
-  final QueryCache<K, V> _cache;
-  final Future<V> Function(K) fetcher;
-  final Map<K, Completer<V>> _inFlight = {};
-
   SmartCache({
     required this.fetcher,
     Duration cacheTtl = const Duration(minutes: 5),
   }) : _cache = QueryCache(defaultTtl: cacheTtl);
+  final QueryCache<K, V> _cache;
+  final Future<V> Function(K) fetcher;
+  final Map<K, Completer<V>> _inFlight = {};
 
   Future<V> get(K key, {Duration? ttl}) async {
     final cached = _cache.get(key);
@@ -103,8 +100,6 @@ class SmartCache<K, V> {
 }
 
 class CompositeCache<K, V> {
-  final List<QueryCache<K, V>> _tiers;
-
   CompositeCache({
     required int tiers,
     required List<Duration> ttls,
@@ -113,6 +108,7 @@ class CompositeCache<K, V> {
           tiers,
           (i) => QueryCache<K, V>(defaultTtl: ttls[i]),
         );
+  final List<QueryCache<K, V>> _tiers;
 
   V? get(K key) {
     for (final tier in _tiers) {
@@ -162,11 +158,10 @@ class CacheStats {
 }
 
 class MonitoredCache<K, V> {
-  final QueryCache<K, V> _cache;
-  final CacheStats _stats = CacheStats();
-
   MonitoredCache({Duration cacheTtl = const Duration(minutes: 5)})
       : _cache = QueryCache(defaultTtl: cacheTtl);
+  final QueryCache<K, V> _cache;
+  final CacheStats _stats = CacheStats();
 
   V? get(K key) {
     final value = _cache.get(key);

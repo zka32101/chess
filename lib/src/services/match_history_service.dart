@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:chess_tactics_master/src/models/match_record.dart';
+import '../models/match_record.dart';
 
 /// Service for managing and querying match history
 class MatchHistoryService {
-  final FirebaseFirestore _firestore;
-
   MatchHistoryService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
 
   /// Get paginated match history for a player
   Future<List<MatchRecord>> getMatchHistory(
@@ -28,8 +27,8 @@ class MatchHistoryService {
 
       final snapshot = await query.get();
       return snapshot.docs
-          .map(
-              (doc) => MatchRecord.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) =>
+              MatchRecord.fromJson(doc.data()! as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw Exception('Failed to get match history: $e');
@@ -37,19 +36,15 @@ class MatchHistoryService {
   }
 
   /// Stream match history updates
-  Stream<List<MatchRecord>> watchMatchHistory(String playerId) {
-    return _firestore
-        .collection('match_history')
-        .doc(playerId)
-        .collection('matches')
-        .orderBy('playedAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => MatchRecord.fromJson(doc.data()))
-            .toList())
-        .handleError(
-            (e) => throw Exception('Failed to watch match history: $e'));
-  }
+  Stream<List<MatchRecord>> watchMatchHistory(String playerId) => _firestore
+      .collection('match_history')
+      .doc(playerId)
+      .collection('matches')
+      .orderBy('playedAt', descending: true)
+      .snapshots()
+      .map((snapshot) =>
+          snapshot.docs.map((doc) => MatchRecord.fromJson(doc.data())).toList())
+      .handleError((e) => throw Exception('Failed to watch match history: $e'));
 
   /// Filter matches by criteria
   Future<List<MatchRecord>> filterMatches(
@@ -93,8 +88,8 @@ class MatchHistoryService {
 
       final snapshot = await query.get();
       return snapshot.docs
-          .map(
-              (doc) => MatchRecord.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) =>
+              MatchRecord.fromJson(doc.data()! as Map<String, dynamic>))
           .toList();
     } catch (e) {
       throw Exception('Failed to filter matches: $e');
@@ -232,7 +227,7 @@ class MatchHistoryService {
         if (match.result == 'win') wins++;
       }
 
-      return (wins / snapshot.size * 100);
+      return wins / snapshot.size * 100;
     } catch (e) {
       throw Exception('Failed to get win rate: $e');
     }

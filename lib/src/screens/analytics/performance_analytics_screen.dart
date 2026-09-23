@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/providers/performance_analytics_provider.dart';
-import 'package:chess_tactics_master/src/widgets/charts/rating_progression_chart.dart';
-import 'package:chess_tactics_master/src/widgets/charts/performance_breakdown_chart.dart';
-import 'package:chess_tactics_master/src/widgets/indicators/streak_indicator.dart';
-import 'package:chess_tactics_master/src/widgets/animations/chart_entrance_animation.dart';
+import '../../providers/performance_analytics_provider.dart';
+import '../../widgets/charts/rating_progression_chart.dart';
+import '../../widgets/charts/performance_breakdown_chart.dart';
+import '../../widgets/indicators/streak_indicator.dart';
+import '../../widgets/animations/chart_entrance_animation.dart';
 
 /// Screen for displaying performance analytics and trends
 class PerformanceAnalyticsScreen extends ConsumerWidget {
-  final String playerId;
-  final String playerName;
-
   const PerformanceAnalyticsScreen({
-    Key? key,
     required this.playerId,
     required this.playerName,
+    Key? key,
   }) : super(key: key);
+  final String playerId;
+  final String playerName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,31 +64,30 @@ class PerformanceAnalyticsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     dynamic stats,
-  ) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 16),
+  ) =>
+      SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
 
-          // Streak information
-          _buildStreakSection(context, ref),
-          const SizedBox(height: 24),
+            // Streak information
+            _buildStreakSection(context, ref),
+            const SizedBox(height: 24),
 
-          // Rating progression chart
-          _buildProgressionSection(context, ref),
-          const SizedBox(height: 24),
+            // Rating progression chart
+            _buildProgressionSection(context, ref),
+            const SizedBox(height: 24),
 
-          // Performance by time control
-          _buildPerformanceByTimeControl(context, ref),
-          const SizedBox(height: 24),
+            // Performance by time control
+            _buildPerformanceByTimeControl(context, ref),
+            const SizedBox(height: 24),
 
-          // Performance by opponent rank
-          _buildPerformanceByRank(context, ref),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
-  }
+            // Performance by opponent rank
+            _buildPerformanceByRank(context, ref),
+            const SizedBox(height: 24),
+          ],
+        ),
+      );
 
   Widget _buildStreakSection(BuildContext context, WidgetRef ref) {
     final streakInfo = ref.watch(streakInfoProvider(playerId));
@@ -117,50 +115,48 @@ class PerformanceAnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressionSection(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'レーティング進行',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildTimeRangeButton(context, '30日', 30),
-                  _buildTimeRangeButton(context, '90日', 90),
-                  _buildTimeRangeButton(context, '365日', 365),
-                ],
-              ),
-            ],
+  Widget _buildProgressionSection(BuildContext context, WidgetRef ref) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'レーティング進行',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildTimeRangeButton(context, '30日', 30),
+                    _buildTimeRangeButton(context, '90日', 90),
+                    _buildTimeRangeButton(context, '365日', 365),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        ChartEntranceAnimation(
-          child: RatingProgressionChart(
-            playerId: playerId,
-            days: 30,
+          const SizedBox(height: 12),
+          ChartEntranceAnimation(
+            child: RatingProgressionChart(
+              playerId: playerId,
+              days: 30,
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 
-  Widget _buildTimeRangeButton(BuildContext context, String label, int days) {
-    return OutlinedButton(
-      onPressed: () {
-        // TODO: Implement time range switching with state management
-      },
-      child: Text(label),
-    );
-  }
+  Widget _buildTimeRangeButton(BuildContext context, String label, int days) =>
+      OutlinedButton(
+        onPressed: () {
+          // TODO: Implement time range switching with state management
+        },
+        child: Text(label),
+      );
 
   Widget _buildPerformanceByTimeControl(BuildContext context, WidgetRef ref) {
     final performanceByTimeControl =

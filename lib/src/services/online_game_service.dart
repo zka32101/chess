@@ -2,19 +2,18 @@ import 'dart:math' show pow;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import 'package:chess_tactics_master/src/models/online_game.dart';
+import '../models/online_game.dart';
 
 /// Manages online multiplayer games in real-time
 class OnlineGameService {
+  OnlineGameService({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance;
   final FirebaseFirestore _firestore;
   final Logger _logger = Logger();
 
   // Game collection paths
   static const String _gamesCollection = 'games';
   static const String _gameMovesSubcollection = 'moves';
-
-  OnlineGameService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Create a new online game from matched players
   Future<OnlineGame> createGame({
@@ -91,10 +90,10 @@ class OnlineGameService {
     required int moveNumber,
     required String from,
     required String to,
-    String? promotion,
     required String playerId,
     required String updatedFen,
     required String updatedPgn,
+    String? promotion,
   }) async {
     try {
       final moveId = _firestore
@@ -205,8 +204,8 @@ class OnlineGameService {
       if (whiteRatingDelta == null || blackRatingDelta == null) {
         final ratingChange =
             _calculateRatingChange(game.whiteRating, game.blackRating, result);
-        whiteRatingDelta = ratingChange['whiteChange'] as int;
-        blackRatingDelta = ratingChange['blackChange'] as int;
+        whiteRatingDelta = ratingChange['whiteChange']!;
+        blackRatingDelta = ratingChange['blackChange']!;
       }
 
       whiteNewRating = game.whiteRating + whiteRatingDelta;
@@ -360,18 +359,16 @@ class OnlineGameService {
   }
 
   /// Stream real-time game updates
-  Stream<OnlineGame> watchGame(String gameId) {
-    return _firestore
-        .collection(_gamesCollection)
-        .doc(gameId)
-        .snapshots()
-        .map((snapshot) {
-      if (!snapshot.exists) {
-        throw Exception('Game not found');
-      }
-      return OnlineGame.fromJson(snapshot.data()!);
-    });
-  }
+  Stream<OnlineGame> watchGame(String gameId) => _firestore
+          .collection(_gamesCollection)
+          .doc(gameId)
+          .snapshots()
+          .map((snapshot) {
+        if (!snapshot.exists) {
+          throw Exception('Game not found');
+        }
+        return OnlineGame.fromJson(snapshot.data()!);
+      });
 
   /// Get player's active games
   Future<List<OnlineGame>> getPlayerActiveGames(String playerId) async {
@@ -450,8 +447,8 @@ class OnlineGameService {
   /// Calculate rating change based on ELO formula
   Map<String, int> _calculateRatingChange(
       int whiteRating, int blackRating, String result) {
-    const double K = 32.0; // K-factor (can be adjusted)
-    const double D = 400.0; // Rating difference divisor
+    const double K = 32; // K-factor (can be adjusted)
+    const double D = 400; // Rating difference divisor
 
     // Calculate expected scores
     final whiteExpected =

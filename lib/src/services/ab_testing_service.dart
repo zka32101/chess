@@ -6,15 +6,14 @@ import 'dart:math';
 
 /// Service for A/B testing and feature flags
 class ABTestingService {
+  ABTestingService._();
   static final ABTestingService _instance = ABTestingService._();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  
+
   // Cache for experiments
   final Map<String, Experiment> _experimentCache = {};
   final Map<String, String> _userVariantCache = {};
-
-  ABTestingService._();
 
   static ABTestingService get instance => _instance;
 
@@ -79,9 +78,9 @@ class ABTestingService {
       }
 
       // Create new assignment using consistent hashing
-      final experiment = _experimentCache[experimentId] ??
-          await _getExperiment(experimentId);
-      
+      final experiment =
+          _experimentCache[experimentId] ?? await _getExperiment(experimentId);
+
       final variant = _assignVariant(userId, experimentId, experiment.variants);
 
       await _firestore
@@ -130,7 +129,7 @@ class ABTestingService {
 
       if (!doc.exists) return null;
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data()!;
       return data[key] as T?;
     } catch (e) {
       debugPrint('Error getting variant value: $e');
@@ -178,8 +177,8 @@ class ABTestingService {
           .where('experimentId', isEqualTo: experimentId)
           .get();
 
-      final experiment = _experimentCache[experimentId] ??
-          await _getExperiment(experimentId);
+      final experiment =
+          _experimentCache[experimentId] ?? await _getExperiment(experimentId);
 
       final events = query.docs.map((doc) => doc.data()).toList();
       final variantStats = _calculateVariantStats(events, experiment.variants);
@@ -201,7 +200,8 @@ class ABTestingService {
   }
 
   /// Assign variant using consistent hashing
-  String _assignVariant(String userId, String experimentId, List<String> variants) {
+  String _assignVariant(
+      String userId, String experimentId, List<String> variants) {
     final salt = '$experimentId:${variants.join(':')}';
     final hash = _consistentHash(userId, salt);
     return variants[hash % variants.length];
@@ -212,7 +212,7 @@ class ABTestingService {
     final combined = '$input:$salt';
     final bytes = utf8.encode(combined);
     int hash = 5381;
-    for (int byte in bytes) {
+    for (final int byte in bytes) {
       hash = ((hash << 5) + hash) + byte;
     }
     return hash.abs();
@@ -226,16 +226,20 @@ class ABTestingService {
     final stats = <String, VariantStats>{};
 
     for (final variant in variants) {
-      final variantEvents = events.where((e) => e['variant'] == variant).toList();
+      final variantEvents =
+          events.where((e) => e['variant'] == variant).toList();
       final uniqueUsers = variantEvents.map((e) => e['userId']).toSet();
 
       stats[variant] = VariantStats(
         variant: variant,
         sampleSize: uniqueUsers.length,
-        conversions: variantEvents.where((e) => e['action'] == 'convert').length,
-        engagementScore:
-            variantEvents.where((e) => e['action'] == 'engage').length.toDouble() /
-                (uniqueUsers.isNotEmpty ? uniqueUsers.length : 1),
+        conversions:
+            variantEvents.where((e) => e['action'] == 'convert').length,
+        engagementScore: variantEvents
+                .where((e) => e['action'] == 'engage')
+                .length
+                .toDouble() /
+            (uniqueUsers.isNotEmpty ? uniqueUsers.length : 1),
       );
     }
 
@@ -243,13 +247,15 @@ class ABTestingService {
   }
 
   /// Determine statistical winner
-  String? _determineWinner(Map<String, VariantStats> stats, List<String> variants) {
+  String? _determineWinner(
+      Map<String, VariantStats> stats, List<String> variants) {
     if (stats.isEmpty) return null;
 
     VariantStats? best;
     for (final variant in variants) {
       final stat = stats[variant];
-      if (stat != null && (best == null || stat.conversionRate > best.conversionRate)) {
+      if (stat != null &&
+          (best == null || stat.conversionRate > best.conversionRate)) {
         best = stat;
       }
     }
@@ -259,22 +265,24 @@ class ABTestingService {
 
   /// Calculate statistical confidence
   double _calculateConfidence(Map<String, VariantStats> stats) {
-    if (stats.length < 2) return 0.0;
+    if (stats.length < 2) return 0;
 
     // Simplified chi-square test approximation
     final variants = stats.values.toList();
     final control = variants.first;
     final treatment = variants.length > 1 ? variants[1] : control;
 
-    if (control.sampleSize == 0 || treatment.sampleSize == 0) return 0.0;
+    if (control.sampleSize == 0 || treatment.sampleSize == 0) return 0;
 
     final p1 = control.conversionRate;
     final p2 = treatment.conversionRate;
     final pooled = (control.conversions + treatment.conversions).toDouble() /
         (control.sampleSize + treatment.sampleSize);
 
-    final se = sqrt(pooled * (1 - pooled) * (1 / control.sampleSize + 1 / treatment.sampleSize));
-    if (se == 0) return 0.0;
+    final se = sqrt(pooled *
+        (1 - pooled) *
+        (1 / control.sampleSize + 1 / treatment.sampleSize));
+    if (se == 0) return 0;
 
     final z = ((p1 - p2) / se).abs();
 
@@ -318,17 +326,6 @@ class ABTestingService {
 
 /// Experiment data class
 class Experiment {
-  final String id;
-  final String name;
-  final String hypothesis;
-  final List<String> variants;
-  final DateTime createdAt;
-  final DateTime endAt;
-  final int sampleSize;
-  final Map<String, dynamic> metadata;
-  final String status;
-  final Map<String, dynamic> results;
-
   Experiment({
     required this.id,
     required this.name,
@@ -342,59 +339,61 @@ class Experiment {
     required this.results,
   });
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'hypothesis': hypothesis,
-    'variants': variants,
-    'createdAt': Timestamp.fromDate(createdAt),
-    'endAt': Timestamp.fromDate(endAt),
-    'sampleSize': sampleSize,
-    'metadata': metadata,
-    'status': status,
-    'results': results,
-  };
-
   factory Experiment.fromJson(Map<String, dynamic> json) => Experiment(
-    id: json['id'] as String,
-    name: json['name'] as String,
-    hypothesis: json['hypothesis'] as String,
-    variants: List<String>.from(json['variants'] as List),
-    createdAt: (json['createdAt'] as Timestamp).toDate(),
-    endAt: (json['endAt'] as Timestamp).toDate(),
-    sampleSize: json['sampleSize'] as int,
-    metadata: json['metadata'] as Map<String, dynamic>? ?? {},
-    status: json['status'] as String,
-    results: json['results'] as Map<String, dynamic>? ?? {},
-  );
+        id: json['id'] as String,
+        name: json['name'] as String,
+        hypothesis: json['hypothesis'] as String,
+        variants: List<String>.from(json['variants'] as List),
+        createdAt: (json['createdAt'] as Timestamp).toDate(),
+        endAt: (json['endAt'] as Timestamp).toDate(),
+        sampleSize: json['sampleSize'] as int,
+        metadata: json['metadata'] as Map<String, dynamic>? ?? {},
+        status: json['status'] as String,
+        results: json['results'] as Map<String, dynamic>? ?? {},
+      );
+  final String id;
+  final String name;
+  final String hypothesis;
+  final List<String> variants;
+  final DateTime createdAt;
+  final DateTime endAt;
+  final int sampleSize;
+  final Map<String, dynamic> metadata;
+  final String status;
+  final Map<String, dynamic> results;
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'hypothesis': hypothesis,
+        'variants': variants,
+        'createdAt': Timestamp.fromDate(createdAt),
+        'endAt': Timestamp.fromDate(endAt),
+        'sampleSize': sampleSize,
+        'metadata': metadata,
+        'status': status,
+        'results': results,
+      };
 }
 
 /// Variant statistics
 class VariantStats {
-  final String variant;
-  final int sampleSize;
-  final int conversions;
-  final double engagementScore;
-
   VariantStats({
     required this.variant,
     required this.sampleSize,
     required this.conversions,
     required this.engagementScore,
   });
+  final String variant;
+  final int sampleSize;
+  final int conversions;
+  final double engagementScore;
 
   double get conversionRate => sampleSize > 0 ? conversions / sampleSize : 0.0;
 }
 
 /// Experiment results
 class ExperimentResults {
-  final String experimentId;
-  final Map<String, VariantStats> variantStats;
-  final String? winner;
-  final double confidenceLevel;
-  final int sampleSize;
-  final String recommendedAction;
-
   ExperimentResults({
     required this.experimentId,
     required this.variantStats,
@@ -403,4 +402,10 @@ class ExperimentResults {
     required this.sampleSize,
     required this.recommendedAction,
   });
+  final String experimentId;
+  final Map<String, VariantStats> variantStats;
+  final String? winner;
+  final double confidenceLevel;
+  final int sampleSize;
+  final String recommendedAction;
 }

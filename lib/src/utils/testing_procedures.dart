@@ -15,6 +15,14 @@ enum TestingPhase {
 
 /// Structured testing procedure
 class TestingProcedure {
+  TestingProcedure({
+    required this.name,
+    required this.description,
+    required this.phase,
+    required this.steps,
+    required this.estimatedDuration,
+    this.expectedOutcome,
+  });
   final String name;
   final String description;
   final TestingPhase phase;
@@ -22,35 +30,24 @@ class TestingProcedure {
   final String? expectedOutcome;
   final Duration estimatedDuration;
 
-  TestingProcedure({
-    required this.name,
-    required this.description,
-    required this.phase,
-    required this.steps,
-    this.expectedOutcome,
-    required this.estimatedDuration,
-  });
-
   @override
-  String toString() => 'TestingProcedure($name - ${phase.toString().split('.').last})';
+  String toString() =>
+      'TestingProcedure($name - ${phase.toString().split('.').last})';
 }
 
 /// Comprehensive testing procedures executor
 class TestingProcedures {
+  factory TestingProcedures() => _instance;
+
+  TestingProcedures._internal() {
+    _initializeProcedures();
+  }
   static final TestingProcedures _instance = TestingProcedures._internal();
 
   final _tracker = TestResultTracker();
   final _bugReporter = BugReportHelper();
   final _compatibilityTester = DeviceCompatibilityTester();
   final _procedures = <TestingProcedure>[];
-
-  factory TestingProcedures() {
-    return _instance;
-  }
-
-  TestingProcedures._internal() {
-    _initializeProcedures();
-  }
 
   /// Initialize standard testing procedures
   void _initializeProcedures() {
@@ -178,9 +175,8 @@ class TestingProcedures {
   }
 
   /// Get testing procedures by phase
-  List<TestingProcedure> getProceduresByPhase(TestingPhase phase) {
-    return _procedures.where((p) => p.phase == phase).toList();
-  }
+  List<TestingProcedure> getProceduresByPhase(TestingPhase phase) =>
+      _procedures.where((p) => p.phase == phase).toList();
 
   /// Get all testing procedures
   List<TestingProcedure> getAllProcedures() => List.unmodifiable(_procedures);
@@ -227,14 +223,17 @@ class TestingProcedures {
   Future<void> executePhase(TestingPhase phase) async {
     final procedures = getProceduresByPhase(phase);
 
-    debugPrint('[TestingProcedures] Starting phase: ${phase.toString().split('.').last}');
-    debugPrint('[TestingProcedures] Procedures to execute: ${procedures.length}');
+    debugPrint(
+        '[TestingProcedures] Starting phase: ${phase.toString().split('.').last}');
+    debugPrint(
+        '[TestingProcedures] Procedures to execute: ${procedures.length}');
 
     for (final procedure in procedures) {
       await executeProcedure(procedure);
     }
 
-    debugPrint('[TestingProcedures] Phase completed: ${phase.toString().split('.').last}');
+    debugPrint(
+        '[TestingProcedures] Phase completed: ${phase.toString().split('.').last}');
   }
 
   /// Run all testing procedures
@@ -319,7 +318,8 @@ class TestingProcedures {
     ''');
 
     for (int i = 0; i < procedure.steps.length; i++) {
-      debugPrint('║ ${(i + 1).toString()}. ${procedure.steps[i].padRight(57)}║');
+      debugPrint(
+          '║ ${(i + 1).toString()}. ${procedure.steps[i].padRight(57)}║');
     }
 
     if (procedure.expectedOutcome != null) {
@@ -330,7 +330,8 @@ class TestingProcedures {
       ''');
     }
 
-    debugPrint('╚══════════════════════════════════════════════════════════════════╝');
+    debugPrint(
+        '╚══════════════════════════════════════════════════════════════════╝');
   }
 
   /// Get device name

@@ -8,13 +8,6 @@ import 'dart:async';
 /// Tier 3: Firestore (cold data, authoritative)
 
 class ProviderCacheService<K, V> {
-  final String cacheKey;
-  final V Function(dynamic json)? fromJson;
-  final Map<String, dynamic> Function(V)? toJson;
-
-  // Tier 1: Memory cache
-  final Map<K, _CacheEntry<V>> _memoryCache = {};
-
   // Tier 2: Could integrate SQLite here
   // final Database? _localDb;
 
@@ -23,6 +16,12 @@ class ProviderCacheService<K, V> {
     this.fromJson,
     this.toJson,
   });
+  final String cacheKey;
+  final V Function(dynamic json)? fromJson;
+  final Map<String, dynamic> Function(V)? toJson;
+
+  // Tier 1: Memory cache
+  final Map<K, _CacheEntry<V>> _memoryCache = {};
 
   /// Get value from cache (memory tier only for speed)
   V? get(K key) {
@@ -89,25 +88,23 @@ class ProviderCacheService<K, V> {
 
 /// Cache entry with expiration
 class _CacheEntry<V> {
+  _CacheEntry(this.value, this.expiresAt);
   final V value;
   final DateTime expiresAt;
-
-  _CacheEntry(this.value, this.expiresAt);
 
   bool isExpired() => DateTime.now().isAfter(expiresAt);
 }
 
 /// Cache statistics
 class CacheStats {
-  final int totalEntries;
-  final int validEntries;
-  final int expiredEntries;
-
   CacheStats({
     required this.totalEntries,
     required this.validEntries,
     required this.expiredEntries,
   });
+  final int totalEntries;
+  final int validEntries;
+  final int expiredEntries;
 
   @override
   String toString() =>
@@ -124,34 +121,31 @@ class ProviderSelector<T> {
     R Function(T) selector, {
     R Function()? onLoading,
     R Function(Object, StackTrace)? onError,
-  }) {
-    return state.when(
-      data: selector,
-      loading: onLoading ?? (() => throw StateError('Loading')),
-      error: onError ?? ((e, st) => throw e),
-    );
-  }
+  }) =>
+      state.when(
+        data: selector,
+        loading: onLoading ?? (() => throw StateError('Loading')),
+        error: onError ?? ((e, st) => throw e),
+      );
 
   /// Safe select with default value for loading/error
   static R selectSafe<T, R>(
     AsyncValue<T> state,
     R Function(T) selector,
     R defaultValue,
-  ) {
-    return state.whenData(selector).value ?? defaultValue;
-  }
+  ) =>
+      state.whenData(selector).value ?? defaultValue;
 }
 
 /// Cached provider state notifier
 /// Automatically manages cache invalidation
 abstract class CachedAsyncNotifier<T> extends StateNotifier<AsyncValue<T>> {
-  final ProviderCacheService<String, T> cacheService;
-  final String cacheKey;
-
   CachedAsyncNotifier({
     required this.cacheKey,
   })  : cacheService = ProviderCacheService(cacheKey: cacheKey),
         super(const AsyncValue.loading());
+  final ProviderCacheService<String, T> cacheService;
+  final String cacheKey;
 
   /// Load data with automatic caching
   Future<void> load() async {
@@ -184,37 +178,30 @@ abstract class CachedAsyncNotifier<T> extends StateNotifier<AsyncValue<T>> {
 /// Optimized watch patterns for providers
 extension ProviderWatchExt<T> on ProviderListenable<AsyncValue<T>> {
   /// Watch only the data, ignore loading/error states for unchanged data
-  ProviderListenable<T?> selectData() {
-    return select((state) => state.whenData((data) => data).value);
-  }
+  ProviderListenable<T?> selectData() =>
+      select((state) => state.whenData((data) => data).value);
 
   /// Watch only if data exists (null-safe)
-  ProviderListenable<T?> selectDataOrNull() {
-    return select((state) => state.whenData((data) => data).value);
-  }
+  ProviderListenable<T?> selectDataOrNull() =>
+      select((state) => state.whenData((data) => data).value);
 
   /// Watch only error states
-  ProviderListenable<Object?> selectError() {
-    return select((state) => state.whenData((_) => null).error);
-  }
+  ProviderListenable<Object?> selectError() =>
+      select((state) => state.whenData((_) => null).error);
 
   /// Watch only if loading
-  ProviderListenable<bool> selectIsLoading() {
-    return select((state) => state.isLoading);
-  }
+  ProviderListenable<bool> selectIsLoading() =>
+      select((state) => state.isLoading);
 }
 
 /// Service for managing provider cache lifecycle
 class ProviderCacheLifecycle {
+  factory ProviderCacheLifecycle() => _instance;
+
+  ProviderCacheLifecycle._();
   static final ProviderCacheLifecycle _instance = ProviderCacheLifecycle._();
 
   final Map<String, ProviderCacheService> _caches = {};
-
-  ProviderCacheLifecycle._();
-
-  factory ProviderCacheLifecycle() {
-    return _instance;
-  }
 
   /// Register a cache service
   void register<K, V>(String name, ProviderCacheService<K, V> cache) {
@@ -222,9 +209,7 @@ class ProviderCacheLifecycle {
   }
 
   /// Get registered cache
-  ProviderCacheService? getCache(String name) {
-    return _caches[name];
-  }
+  ProviderCacheService? getCache(String name) => _caches[name];
 
   /// Invalidate all caches
   void invalidateAll() {

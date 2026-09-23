@@ -6,12 +6,11 @@ import '../../models/user.dart';
 import '../../models/game.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  final String? userId;
-
   const ProfileScreen({
     Key? key,
     this.userId,
   }) : super(key: key);
+  final String? userId;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -64,7 +63,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   // Profile header
                   Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: const EdgeInsets.all(24),
                     child: Column(
                       children: [
                         // Avatar
@@ -129,7 +128,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                   // Stats overview
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -164,7 +163,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                   // Tab navigation
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
                         Expanded(
@@ -217,16 +216,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildRatingBadge({
     required String label,
     required int rating,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        border: Border.all(color: Colors.blue.shade200),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
+  }) =>
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          border: Border.all(color: Colors.blue.shade200),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              rating.toString(),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _buildStatColumn({
+    required String label,
+    required String value,
+  }) =>
+      Column(
         children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
@@ -234,73 +266,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               color: Colors.grey.shade600,
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            rating.toString(),
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStatColumn({
-    required String label,
-    required String value,
-  }) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
-    );
-  }
+      );
 
   Widget _buildTabButton({
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: isSelected ? Colors.blue : Colors.transparent,
-              width: 3,
+  }) =>
+      GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? Colors.blue : Colors.transparent,
+                width: 3,
+              ),
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Colors.blue : Colors.grey.shade600,
             ),
           ),
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? Colors.blue : Colors.grey.shade600,
-          ),
-        ),
-      ),
-    );
-  }
+      );
 
   Widget _buildStatisticsTab(UserModel user) {
     final winRate = user.gamesPlayed > 0
@@ -308,7 +304,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         : '0.0';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -320,7 +316,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 12),
           _buildStatCard(
             title: 'Current Rating',
-            value: user.onlineRating?.toString() ?? '1600',
+            value: user.onlineRating.toString() ?? '1600',
             description: 'Online blitz rating',
           ),
           const SizedBox(height: 12),
@@ -335,45 +331,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildGamesTab(AsyncValue<List<GameModel>> gameHistory) {
-    return gameHistory.when(
-      loading: () => const Padding(
-        padding: EdgeInsets.all(24.0),
-        child: CircularProgressIndicator(),
-      ),
-      error: (error, stack) => Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Text('Error loading games: $error'),
-      ),
-      data: (games) {
-        if (games.isEmpty) {
+  Widget _buildGamesTab(AsyncValue<List<GameModel>> gameHistory) =>
+      gameHistory.when(
+        loading: () => const Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(),
+        ),
+        error: (error, stack) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text('Error loading games: $error'),
+        ),
+        data: (games) {
+          if (games.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  Icon(Icons.history, size: 48, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text('No games yet'),
+                ],
+              ),
+            );
+          }
+
           return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const Icon(Icons.history, size: 48, color: Colors.grey),
-                const SizedBox(height: 16),
-                const Text('No games yet'),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: games.length,
+              itemBuilder: (context, index) {
+                final game = games[index];
+                return _buildGameCard(game);
+              },
             ),
           );
-        }
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: games.length,
-            itemBuilder: (context, index) {
-              final game = games[index];
-              return _buildGameCard(game);
-            },
-          ),
-        );
-      },
-    );
-  }
+        },
+      );
 
   Widget _buildGameCard(GameModel game) {
     final isWhiteWin = game.result == 'white_win';
@@ -449,80 +444,77 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required String title,
     required String value,
     required String description,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
+  }) =>
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 
-  Widget _buildAchievementsTab() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.emoji_events, size: 48, color: Colors.amber),
-                const SizedBox(height: 16),
-                const Text(
-                  'Achievements Coming Soon',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+  Widget _buildAchievementsTab() => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.emoji_events, size: 48, color: Colors.amber),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Achievements Coming Soon',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Unlock achievements by completing milestones',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                  const SizedBox(height: 8),
+                  Text(
+                    'Unlock achievements by completing milestones',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

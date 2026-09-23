@@ -29,9 +29,8 @@ Color difficultyColor(DifficultyLevel level) {
 
 /// Small colored chip showing a lesson/pattern's difficulty level.
 class DifficultyBadge extends StatelessWidget {
+  const DifficultyBadge({required this.difficulty, Key? key}) : super(key: key);
   final DifficultyLevel difficulty;
-
-  const DifficultyBadge({Key? key, required this.difficulty}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

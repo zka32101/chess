@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:chess_tactics_master/src/services/performance_service.dart';
-import 'package:chess_tactics_master/src/models/rating_progression.dart';
-import 'package:chess_tactics_master/src/models/performance_stats.dart';
+import '../services/performance_service.dart';
+import '../models/rating_progression.dart';
+import '../models/performance_stats.dart';
 
 /// Provider for performance service
-final performanceServiceProvider = Provider((ref) {
-  return PerformanceService();
-});
+final performanceServiceProvider = Provider((ref) => PerformanceService());
 
 /// Provider for rating progression over a specific period
 final ratingProgressionProvider = StreamProvider.family<List<RatingProgression>,

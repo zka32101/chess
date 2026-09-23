@@ -1,23 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:chess/chess.dart' as chess_lib;
-import 'package:chess_tactics_master/src/models/board_theme.dart';
-import 'package:chess_tactics_master/src/widgets/captured_pieces.dart';
+import '../models/board_theme.dart';
+import 'captured_pieces.dart';
 
 /// Game container with board and controls
 class GameBoard extends StatefulWidget {
-  final chess_lib.Chess gameState;
-  final Function(String, String, {String? promotion})? onMove;
-  final Function()? onUndo;
-  final Function()? onResign;
-  final Function()? onDraw;
-  final List<chess_lib.Move> moveHistory;
-  final bool showMaterial;
-  final bool isPlayerTurn;
-  final BoardTheme theme;
-
   const GameBoard({
-    Key? key,
     required this.gameState,
+    Key? key,
     this.onMove,
     this.onUndo,
     this.onResign,
@@ -27,6 +17,15 @@ class GameBoard extends StatefulWidget {
     this.isPlayerTurn = true,
     this.theme = BoardThemeCatalog.classic,
   }) : super(key: key);
+  final chess_lib.Chess gameState;
+  final Function(String, String, {String? promotion})? onMove;
+  final Function()? onUndo;
+  final Function()? onResign;
+  final Function()? onDraw;
+  final List<chess_lib.Move> moveHistory;
+  final bool showMaterial;
+  final bool isPlayerTurn;
+  final BoardTheme theme;
 
   @override
   State<GameBoard> createState() => _GameBoardState();
@@ -46,7 +45,7 @@ class _GameBoardState extends State<GameBoard> {
           // Captured pieces display
           if (widget.showMaterial)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: CapturedPieces(
                 whiteCapturedPieces: _getWhiteCapturedPieces(),
                 blackCapturedPieces: _getBlackCapturedPieces(),
@@ -55,7 +54,7 @@ class _GameBoardState extends State<GameBoard> {
 
           // Turn indicator
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               widget.gameState.turn == chess_lib.Color.WHITE
                   ? 'White to Move'
@@ -71,14 +70,14 @@ class _GameBoardState extends State<GameBoard> {
 
           // Chess board
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: _buildBoard(),
           ),
 
           // Game controls
           if (!isMobile)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -208,14 +207,12 @@ class _GameBoardState extends State<GameBoard> {
     }
   }
 
-  List<String> _getLegalMovesForSquare(String square) {
-    return widget.gameState
-        .moves({'asObjects': true})
-        .cast<chess_lib.Move>()
-        .where((move) => move.fromAlgebraic == square)
-        .map((move) => move.toAlgebraic)
-        .toList();
-  }
+  List<String> _getLegalMovesForSquare(String square) => widget.gameState
+      .moves({'asObjects': true})
+      .cast<chess_lib.Move>()
+      .where((move) => move.fromAlgebraic == square)
+      .map((move) => move.toAlgebraic)
+      .toList();
 
   // Not `const`: PieceType overrides hashCode/==, which Dart disallows for
   // constant map keys.
@@ -227,13 +224,11 @@ class _GameBoardState extends State<GameBoard> {
     chess_lib.PieceType.QUEEN: 1,
   };
 
-  List<chess_lib.Piece> _getWhiteCapturedPieces() {
-    return _getCapturedPieces(chess_lib.Color.WHITE);
-  }
+  List<chess_lib.Piece> _getWhiteCapturedPieces() =>
+      _getCapturedPieces(chess_lib.Color.WHITE);
 
-  List<chess_lib.Piece> _getBlackCapturedPieces() {
-    return _getCapturedPieces(chess_lib.Color.BLACK);
-  }
+  List<chess_lib.Piece> _getBlackCapturedPieces() =>
+      _getCapturedPieces(chess_lib.Color.BLACK);
 
   List<chess_lib.Piece> _getCapturedPieces(chess_lib.Color color) {
     final captured = <chess_lib.Piece>[];
@@ -263,72 +258,68 @@ class _GameBoardState extends State<GameBoard> {
     return counts;
   }
 
-  Widget _buildBoard() {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final boardSize = constraints.maxWidth;
-          final squareSize = boardSize / 8;
+  Widget _buildBoard() => AspectRatio(
+        aspectRatio: 1,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final boardSize = constraints.maxWidth;
+            final squareSize = boardSize / 8;
 
-          return GestureDetector(
-            onTapDown: (details) {
-              final file = (details.localPosition.dx / squareSize).floor();
-              final rank = (details.localPosition.dy / squareSize).floor();
-              if (file < 0 || file > 7 || rank < 0 || rank > 7) return;
-              _handleSquareTap(_squareFromIndices(rank, file));
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400, width: 2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Stack(
-                children: [
-                  CustomPaint(
-                    painter: _GameBoardPainter(
-                      size: boardSize,
-                      theme: widget.theme,
-                      selectedSquare: _selectedSquare,
-                      legalMoveSquares: _availableMoves,
+            return GestureDetector(
+              onTapDown: (details) {
+                final file = (details.localPosition.dx / squareSize).floor();
+                final rank = (details.localPosition.dy / squareSize).floor();
+                if (file < 0 || file > 7 || rank < 0 || rank > 7) return;
+                _handleSquareTap(_squareFromIndices(rank, file));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Stack(
+                  children: [
+                    CustomPaint(
+                      painter: _GameBoardPainter(
+                        size: boardSize,
+                        theme: widget.theme,
+                        selectedSquare: _selectedSquare,
+                        legalMoveSquares: _availableMoves,
+                      ),
+                      size: Size(boardSize, boardSize),
                     ),
-                    size: Size(boardSize, boardSize),
-                  ),
-                  for (var rank = 0; rank < 8; rank++)
-                    for (var file = 0; file < 8; file++)
-                      if (widget.gameState.get(_squareFromIndices(rank, file))
-                          case final piece?)
-                        Positioned(
-                          left: file * squareSize,
-                          top: rank * squareSize,
-                          width: squareSize,
-                          height: squareSize,
-                          child: Center(
-                            child: Text(
-                              _pieceSymbol(piece),
-                              style: TextStyle(
-                                fontSize: squareSize * 0.6,
-                                fontWeight: FontWeight.bold,
-                                color: piece.color == chess_lib.Color.WHITE
-                                    ? widget.theme.whitePieceColor
-                                    : widget.theme.blackPieceColor,
+                    for (var rank = 0; rank < 8; rank++)
+                      for (var file = 0; file < 8; file++)
+                        if (widget.gameState.get(_squareFromIndices(rank, file))
+                            case final piece?)
+                          Positioned(
+                            left: file * squareSize,
+                            top: rank * squareSize,
+                            width: squareSize,
+                            height: squareSize,
+                            child: Center(
+                              child: Text(
+                                _pieceSymbol(piece),
+                                style: TextStyle(
+                                  fontSize: squareSize * 0.6,
+                                  fontWeight: FontWeight.bold,
+                                  color: piece.color == chess_lib.Color.WHITE
+                                      ? widget.theme.whitePieceColor
+                                      : widget.theme.blackPieceColor,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    );
-  }
+            );
+          },
+        ),
+      );
 
-  String _squareFromIndices(int rank, int file) {
-    return String.fromCharCode('a'.codeUnitAt(0) + file) +
-        (8 - rank).toString();
-  }
+  String _squareFromIndices(int rank, int file) =>
+      String.fromCharCode('a'.codeUnitAt(0) + file) + (8 - rank).toString();
 
   String _pieceSymbol(chess_lib.Piece piece) {
     final whiteSymbols = {
@@ -358,17 +349,16 @@ class _GameBoardState extends State<GameBoard> {
 /// one is private to its own library and this widget is driven by a raw
 /// `chess_lib.Chess` rather than a `ChessEngineService`.
 class _GameBoardPainter extends CustomPainter {
-  final double size;
-  final BoardTheme theme;
-  final String? selectedSquare;
-  final List<String> legalMoveSquares;
-
   _GameBoardPainter({
     required this.size,
     required this.theme,
     required this.selectedSquare,
     required this.legalMoveSquares,
   });
+  final double size;
+  final BoardTheme theme;
+  final String? selectedSquare;
+  final List<String> legalMoveSquares;
 
   @override
   void paint(Canvas canvas, Size canvasSize) {
@@ -419,10 +409,9 @@ class _GameBoardPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GameBoardPainter oldDelegate) {
-    return oldDelegate.size != size ||
-        oldDelegate.theme != theme ||
-        oldDelegate.selectedSquare != selectedSquare ||
-        oldDelegate.legalMoveSquares != legalMoveSquares;
-  }
+  bool shouldRepaint(_GameBoardPainter oldDelegate) =>
+      oldDelegate.size != size ||
+      oldDelegate.theme != theme ||
+      oldDelegate.selectedSquare != selectedSquare ||
+      oldDelegate.legalMoveSquares != legalMoveSquares;
 }

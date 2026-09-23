@@ -59,8 +59,8 @@ class AppVersion with _$AppVersion {
     required bool isCritical,
     required List<ChangelogEntry> changelog,
     required String downloadUrl,
-    String? installationGuide,
     required List<String> knownIssues,
+    String? installationGuide,
   }) = _AppVersion;
 
   factory AppVersion.fromJson(Map<String, dynamic> json) =>
@@ -77,8 +77,8 @@ class UpdateNotification with _$UpdateNotification {
     required String title,
     required String message,
     required DateTime sentDate,
-    DateTime? viewedDate,
     required bool actionTaken,
+    DateTime? viewedDate,
     ActionType? actionType,
   }) = _UpdateNotification;
 

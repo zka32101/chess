@@ -41,8 +41,8 @@ class UserEngagementMetrics with _$UserEngagementMetrics {
     required int sessionsCount,
     required Duration totalPlayTime,
     required DateTime lastActive,
-    @Default({}) Map<String, int> featureUsage,
     required bool churnedUser,
+    @Default({}) Map<String, int> featureUsage,
   }) = _UserEngagementMetrics;
 
   factory UserEngagementMetrics.fromJson(Map<String, dynamic> json) =>
@@ -72,8 +72,8 @@ class CompetitiveFeatureStats with _$CompetitiveFeatureStats {
     required int activeUsers,
     required int totalInteractions,
     required double adoptionRate,
-    @Default({}) Map<String, dynamic> topMetrics,
     required DateTime period,
+    @Default({}) Map<String, dynamic> topMetrics,
   }) = _CompetitiveFeatureStats;
 
   factory CompetitiveFeatureStats.fromJson(Map<String, dynamic> json) =>
@@ -85,10 +85,10 @@ class RetentionMetrics with _$RetentionMetrics {
   const factory RetentionMetrics({
     required String cohortDate,
     required int cohortSize,
-    @Default({}) Map<String, int> retentionByDay,
     required double day1Retention,
     required double day7Retention,
     required double day30Retention,
+    @Default({}) Map<String, int> retentionByDay,
   }) = _RetentionMetrics;
 
   factory RetentionMetrics.fromJson(Map<String, dynamic> json) =>

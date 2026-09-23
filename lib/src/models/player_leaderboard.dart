@@ -62,7 +62,7 @@ class PlayerStatistics with _$PlayerStatistics {
 
   /// Calculate win rate from wins and total games
   static double calculateWinRate(int wins, int total) {
-    if (total == 0) return 0.0;
+    if (total == 0) return 0;
     return (wins / total) * 100;
   }
 
@@ -94,14 +94,13 @@ class PlayerStatistics with _$PlayerStatistics {
 /// Leaderboard data with entries
 @freezed
 class Leaderboard with _$Leaderboard {
-  const Leaderboard._();
-
   const factory Leaderboard({
     required List<LeaderboardEntry> entries,
     required LeaderboardFilter filter,
     required int totalPlayers,
     required DateTime updatedAt,
   }) = _Leaderboard;
+  const Leaderboard._();
 
   factory Leaderboard.fromJson(Map<String, dynamic> json) =>
       _$LeaderboardFromJson(json);

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 /// Service for managing feature gates and daily action limits
 class FeatureGatingService {
+  FeatureGatingService._();
   static final FeatureGatingService _instance = FeatureGatingService._();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -24,12 +25,11 @@ class FeatureGatingService {
     'games': 2,
   };
 
-  FeatureGatingService._();
-
   static FeatureGatingService get instance => _instance;
 
   /// Check if user has access to a premium feature
-  Future<bool> hasFeatureAccess(String featureName, String subscriptionTier) async {
+  Future<bool> hasFeatureAccess(
+      String featureName, String subscriptionTier) async {
     if (subscriptionTier == 'free') {
       return FEATURE_TIERS[featureName]?.isEmpty ?? true;
     }
@@ -37,7 +37,8 @@ class FeatureGatingService {
   }
 
   /// Get user's remaining daily attempts for an action
-  Future<int> getRemainingDailyAttempts(String action, String subscriptionTier) async {
+  Future<int> getRemainingDailyAttempts(
+      String action, String subscriptionTier) async {
     final user = _auth.currentUser;
     if (user == null) return 0;
 
@@ -48,7 +49,8 @@ class FeatureGatingService {
 
     try {
       final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       final doc = await _firestore
           .collection('users')
@@ -84,7 +86,8 @@ class FeatureGatingService {
 
     try {
       final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       await _firestore
           .collection('users')
@@ -124,7 +127,8 @@ class FeatureGatingService {
   Future<void> resetDailyLimits(String userId) async {
     try {
       final today = DateTime.now();
-      final dateKey = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final dateKey =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
 
       await _firestore
           .collection('users')

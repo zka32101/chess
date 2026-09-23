@@ -3,11 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Utility class for Firestore query optimization
 /// Eliminates N+1 queries through batching and caching
 class FirestoreQueryOptimizer {
-  final FirebaseFirestore _firestore;
-  final Map<String, dynamic> _queryCache = {};
-
   FirestoreQueryOptimizer({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore;
+  final Map<String, dynamic> _queryCache = {};
 
   /// Fetch multiple documents by IDs in a single batch read
   /// Replaces N separate .doc(id).get() calls with one whereIn query
@@ -94,7 +93,7 @@ class FirestoreQueryOptimizer {
     DocumentSnapshot? nextCursor;
 
     for (int i = 0; i < snapshot.docs.length && i < pageSize; i++) {
-      results.add(fromJson(snapshot.docs[i].data() as Map<String, dynamic>));
+      results.add(fromJson(snapshot.docs[i].data()! as Map<String, dynamic>));
     }
 
     // Check if there are more results
@@ -152,38 +151,33 @@ class FirestoreQueryOptimizer {
 
 /// Model for paginated results
 class PaginatedResults<T> {
+  PaginatedResults({
+    required this.data,
+    required this.hasMore,
+    this.nextCursor,
+  });
   final List<T> data;
   final DocumentSnapshot? nextCursor;
   final bool hasMore;
-
-  PaginatedResults({
-    required this.data,
-    this.nextCursor,
-    required this.hasMore,
-  });
 }
 
 /// Internal cached value wrapper
 class _CachedValue<T> {
+  _CachedValue(this.value, this.timestamp);
   final T value;
   final DateTime timestamp;
-
-  _CachedValue(this.value, this.timestamp);
 }
 
 /// Singleton instance of query optimizer
 class FirestoreQueryOptimizerService {
-  static final FirestoreQueryOptimizerService _instance =
-      FirestoreQueryOptimizerService._();
-  late final FirestoreQueryOptimizer _optimizer;
+  factory FirestoreQueryOptimizerService() => _instance;
 
   FirestoreQueryOptimizerService._() {
     _optimizer = FirestoreQueryOptimizer();
   }
-
-  factory FirestoreQueryOptimizerService() {
-    return _instance;
-  }
+  static final FirestoreQueryOptimizerService _instance =
+      FirestoreQueryOptimizerService._();
+  late final FirestoreQueryOptimizer _optimizer;
 
   FirestoreQueryOptimizer get optimizer => _optimizer;
 }

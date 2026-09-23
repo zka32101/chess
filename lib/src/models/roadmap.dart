@@ -29,8 +29,8 @@ class RoadmapItem with _$RoadmapItem {
     required String targetVersion,
     required int complexity,
     required DateTime createdDate,
-    DateTime? completedDate,
     required List<String> relatedFeatureRequests,
+    DateTime? completedDate,
   }) = _RoadmapItem;
 
   factory RoadmapItem.fromJson(Map<String, dynamic> json) =>
@@ -84,17 +84,16 @@ class ABTest with _$ABTest {
     required String name,
     required String description,
     required DateTime startDate,
-    DateTime? endDate,
     required TestStatus status,
     required List<Variant> variants,
     required List<String> targetMetrics,
     required int sampleSize,
     required double confidenceLevel,
+    required TestResult? results,
+    DateTime? endDate,
     String? winner,
     double? statisticalSignificance,
-    required TestResult? results,
   }) = _ABTest;
 
-  factory ABTest.fromJson(Map<String, dynamic> json) =>
-      _$ABTestFromJson(json);
+  factory ABTest.fromJson(Map<String, dynamic> json) => _$ABTestFromJson(json);
 }

@@ -3,13 +3,6 @@ import 'dart:async';
 
 /// Performance metric
 class PerformanceMetric {
-  final String name;
-  final double value;
-  final String unit;
-  final double? threshold;
-  final DateTime measuredAt;
-  bool get passesThreshold => threshold == null || value <= threshold!;
-
   PerformanceMetric({
     required this.name,
     required this.value,
@@ -17,6 +10,12 @@ class PerformanceMetric {
     this.threshold,
     DateTime? measuredAt,
   }) : measuredAt = measuredAt ?? DateTime.now();
+  final String name;
+  final double value;
+  final String unit;
+  final double? threshold;
+  final DateTime measuredAt;
+  bool get passesThreshold => threshold == null || value <= threshold!;
 
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -34,10 +33,7 @@ class PerformanceMetric {
 
 /// Performance optimization recommendations
 class OptimizationRecommendation {
-  final String area;
-  final String issue;
-  final String recommendation;
-  final double potentialImprovement; // percentage
+  // percentage
 
   OptimizationRecommendation({
     required this.area,
@@ -45,23 +41,26 @@ class OptimizationRecommendation {
     required this.recommendation,
     required this.potentialImprovement,
   });
+  final String area;
+  final String issue;
+  final String recommendation;
+  final double potentialImprovement;
 
   @override
-  String toString() => '$area: $recommendation (potential: ${potentialImprovement.toStringAsFixed(1)}%)';
+  String toString() =>
+      '$area: $recommendation (potential: ${potentialImprovement.toStringAsFixed(1)}%)';
 }
 
 /// Performance optimizer
 class PerformanceOptimizer {
-  static final PerformanceOptimizer _instance = PerformanceOptimizer._internal();
+  factory PerformanceOptimizer() => _instance;
+
+  PerformanceOptimizer._internal();
+  static final PerformanceOptimizer _instance =
+      PerformanceOptimizer._internal();
 
   final _metrics = <PerformanceMetric>[];
   final _recommendations = <OptimizationRecommendation>[];
-
-  factory PerformanceOptimizer() {
-    return _instance;
-  }
-
-  PerformanceOptimizer._internal();
 
   /// Run comprehensive performance analysis
   Future<void> runPerformanceAnalysis() async {
@@ -115,13 +114,15 @@ class PerformanceOptimizer {
           OptimizationRecommendation(
             area: 'Startup Performance',
             issue: 'App startup time exceeds target',
-            recommendation: 'Optimize initialization, lazy-load features, reduce main thread work',
-            potentialImprovement: 15.0,
+            recommendation:
+                'Optimize initialization, lazy-load features, reduce main thread work',
+            potentialImprovement: 15,
           ),
         );
       }
 
-      debugPrint('[PerformanceOptimizer] Startup time: ${startupTime.toStringAsFixed(0)}ms');
+      debugPrint(
+          '[PerformanceOptimizer] Startup time: ${startupTime.toStringAsFixed(0)}ms');
     } catch (e) {
       debugPrint('[PerformanceOptimizer] Error analyzing startup time: $e');
     }
@@ -150,13 +151,15 @@ class PerformanceOptimizer {
           OptimizationRecommendation(
             area: 'Memory Management',
             issue: 'Memory usage is good, but monitor for leaks',
-            recommendation: 'Monitor long-running sessions, implement proper disposal patterns',
-            potentialImprovement: 5.0,
+            recommendation:
+                'Monitor long-running sessions, implement proper disposal patterns',
+            potentialImprovement: 5,
           ),
         );
       }
 
-      debugPrint('[PerformanceOptimizer] Memory usage: ${estimatedMemory.toStringAsFixed(1)}MB');
+      debugPrint(
+          '[PerformanceOptimizer] Memory usage: ${estimatedMemory.toStringAsFixed(1)}MB');
     } catch (e) {
       debugPrint('[PerformanceOptimizer] Error analyzing memory: $e');
     }
@@ -182,12 +185,14 @@ class PerformanceOptimizer {
         OptimizationRecommendation(
           area: 'App Size',
           issue: 'App size could be optimized',
-          recommendation: 'Use code splitting, compress assets, remove unused dependencies',
-          potentialImprovement: 10.0,
+          recommendation:
+              'Use code splitting, compress assets, remove unused dependencies',
+          potentialImprovement: 10,
         ),
       );
 
-      debugPrint('[PerformanceOptimizer] App size: ${estimatedSize.toStringAsFixed(1)}MB');
+      debugPrint(
+          '[PerformanceOptimizer] App size: ${estimatedSize.toStringAsFixed(1)}MB');
     } catch (e) {
       debugPrint('[PerformanceOptimizer] Error analyzing app size: $e');
     }
@@ -214,15 +219,18 @@ class PerformanceOptimizer {
           OptimizationRecommendation(
             area: 'Animation Performance',
             issue: 'Animation frame rate below target',
-            recommendation: 'Simplify animations, reduce transparency layers, optimize repaints',
-            potentialImprovement: 8.0,
+            recommendation:
+                'Simplify animations, reduce transparency layers, optimize repaints',
+            potentialImprovement: 8,
           ),
         );
       }
 
-      debugPrint('[PerformanceOptimizer] Animation FPS: ${measuredFPS.toStringAsFixed(1)}');
+      debugPrint(
+          '[PerformanceOptimizer] Animation FPS: ${measuredFPS.toStringAsFixed(1)}');
     } catch (e) {
-      debugPrint('[PerformanceOptimizer] Error analyzing animation performance: $e');
+      debugPrint(
+          '[PerformanceOptimizer] Error analyzing animation performance: $e');
     }
   }
 
@@ -234,8 +242,9 @@ class PerformanceOptimizer {
         OptimizationRecommendation(
           area: 'Network Efficiency',
           issue: 'Network requests could be optimized',
-          recommendation: 'Implement request batching, caching, compression, and connection reuse',
-          potentialImprovement: 20.0,
+          recommendation:
+              'Implement request batching, caching, compression, and connection reuse',
+          potentialImprovement: 20,
         ),
       );
 
@@ -247,13 +256,15 @@ class PerformanceOptimizer {
           name: 'Cache Hit Rate',
           value: cacheHitRate,
           unit: '%',
-          threshold: 80.0,
+          threshold: 80,
         ),
       );
 
-      debugPrint('[PerformanceOptimizer] Cache hit rate: ${cacheHitRate.toStringAsFixed(1)}%');
+      debugPrint(
+          '[PerformanceOptimizer] Cache hit rate: ${cacheHitRate.toStringAsFixed(1)}%');
     } catch (e) {
-      debugPrint('[PerformanceOptimizer] Error analyzing network efficiency: $e');
+      debugPrint(
+          '[PerformanceOptimizer] Error analyzing network efficiency: $e');
     }
   }
 
@@ -313,7 +324,8 @@ class PerformanceOptimizer {
 
     for (final metric in _metrics) {
       final status = metric.passesThreshold ? '✓' : '✗';
-      buffer.writeln('║ $status ${metric.name}${' '.padRight(30 - metric.name.length)}: ${metric.value.toStringAsFixed(2)}${metric.unit}');
+      buffer.writeln(
+          '║ $status ${metric.name}${' '.padRight(30 - metric.name.length)}: ${metric.value.toStringAsFixed(2)}${metric.unit}');
       if (metric.threshold != null) {
         buffer.writeln(
           '║   Threshold: ${metric.threshold!.toStringAsFixed(2)}${metric.unit}${' '.padRight(40 - metric.threshold!.toStringAsFixed(2).length)}║',
@@ -336,7 +348,8 @@ class PerformanceOptimizer {
       );
     }
 
-    buffer.writeln('╚══════════════════════════════════════════════════════════════════╝');
+    buffer.writeln(
+        '╚══════════════════════════════════════════════════════════════════╝');
     return buffer.toString();
   }
 

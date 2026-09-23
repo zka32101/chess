@@ -1,15 +1,5 @@
-import 'package:flutter/foundation.dart';
-
 /// Checklist item
 class ChecklistItem {
-  final String id;
-  final String title;
-  final String description;
-  bool isCompleted;
-  String? notes;
-  final DateTime createdAt;
-  DateTime? completedAt;
-
   ChecklistItem({
     required this.title,
     required this.description,
@@ -18,6 +8,13 @@ class ChecklistItem {
     DateTime? createdAt,
   })  : id = 'ITEM_${DateTime.now().millisecondsSinceEpoch}',
         createdAt = createdAt ?? DateTime.now();
+  final String id;
+  final String title;
+  final String description;
+  bool isCompleted;
+  String? notes;
+  final DateTime createdAt;
+  DateTime? completedAt;
 
   void complete({String? note}) {
     isCompleted = true;
@@ -46,14 +43,13 @@ class ChecklistItem {
 
 /// Checklist category
 class ChecklistCategory {
-  final String name;
-  final String description;
-  final List<ChecklistItem> items = [];
-
   ChecklistCategory({
     required this.name,
     required this.description,
   });
+  final String name;
+  final String description;
+  final List<ChecklistItem> items = [];
 
   int get totalItems => items.length;
   int get completedItems => items.where((i) => i.isCompleted).length;
@@ -66,17 +62,15 @@ class ChecklistCategory {
 
 /// Pre-submission verification checker
 class PreSubmissionChecker {
-  static final PreSubmissionChecker _instance = PreSubmissionChecker._internal();
-
-  final _categories = <ChecklistCategory>[];
-
-  factory PreSubmissionChecker() {
-    return _instance;
-  }
+  factory PreSubmissionChecker() => _instance;
 
   PreSubmissionChecker._internal() {
     _initializeChecklists();
   }
+  static final PreSubmissionChecker _instance =
+      PreSubmissionChecker._internal();
+
+  final _categories = <ChecklistCategory>[];
 
   /// Initialize all checklists
   void _initializeChecklists() {
@@ -369,8 +363,8 @@ class PreSubmissionChecker {
   List<ChecklistCategory> getAllCategories() => List.unmodifiable(_categories);
 
   /// Get category by name
-  ChecklistCategory? getCategoryByName(String name) =>
-      _categories.firstWhere((c) => c.name == name, orElse: () => null as dynamic);
+  ChecklistCategory? getCategoryByName(String name) => _categories
+      .firstWhere((c) => c.name == name, orElse: () => null as dynamic);
 
   /// Get all incomplete items
   List<ChecklistItem> getIncompleteItems() {
@@ -434,8 +428,7 @@ class PreSubmissionChecker {
   }
 
   /// Generate sign-off document
-  String generateSignOff() {
-    return '''
+  String generateSignOff() => '''
 ═══════════════════════════════════════════════════════════════════
                     PHASE D SIGN-OFF DOCUMENT
 ═══════════════════════════════════════════════════════════════════
@@ -467,7 +460,6 @@ NEXT PHASE
 
 ═══════════════════════════════════════════════════════════════════
 ''';
-  }
 
   /// Clear all items
   void clear() {
