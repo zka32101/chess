@@ -45,8 +45,8 @@ final performanceByTimeControlProvider =
 );
 
 /// Provider for streak information
-final streakInfoProvider = FutureProvider.family(
-  (ref, String playerId) async {
+final streakInfoProvider = FutureProvider.family<StreakInfo, String>(
+  (ref, playerId) async {
     final service = ref.watch(performanceServiceProvider);
     return service.getStreakInfo(playerId);
   },
