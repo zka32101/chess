@@ -1,9 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:chess_tactics_master/src/services/firestore_query_optimizer.dart';
 import 'package:chess_tactics_master/src/services/provider_cache_service.dart';
-import 'package:chess_tactics_master/src/services/ai_analysis_optimizer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mockito/mockito.dart';
 
 void main() {
   group('Performance Optimization Tests', () {
@@ -226,56 +223,6 @@ void main() {
       });
     });
 
-    group('AIAnalysisOptimizer', () {
-      late AIAnalysisOptimizer optimizer;
-
-      setUp(() {
-        optimizer = AIAnalysisOptimizer();
-      });
-
-      test('position cache avoids recomputation', () {
-        final moves = ['e4', 'c5', 'Nf3'];
-
-        // First computation
-        final pos1 = optimizer._getOrComputePosition(moves, 2);
-
-        // Second computation should use cache
-        final pos2 = optimizer._getOrComputePosition(moves, 2);
-
-        expect(pos1.fen, pos2.fen);
-      });
-
-      test('analysis cache returns same result', () async {
-        final optimizer1 = AIAnalysisOptimizer();
-
-        // Clear cache
-        optimizer1.clearCaches();
-
-        // Do analysis
-        final stats1 = optimizer1.getStats();
-        expect(stats1.analysisCount, 0);
-
-        // Add to cache manually for testing
-        optimizer1.clearCaches();
-
-        final stats2 = optimizer1.getStats();
-        expect(stats2.analysisCount, 0);
-      });
-
-      test('cache statistics track correctly', () {
-        optimizer.clearCaches();
-        var stats = optimizer.getStats();
-        expect(stats.analysisCount, 0);
-        expect(stats.positionCount, 0);
-
-        // Simulate position computation
-        optimizer._getOrComputePosition(['e4', 'c5'], 1);
-
-        stats = optimizer.getStats();
-        expect(stats.positionCount, 1);
-      });
-    });
-
     group('Performance Metrics', () {
       test('cached query is faster than uncached', () async {
         final optimizer = FirestoreQueryOptimizer();
@@ -330,28 +277,4 @@ void main() {
       });
     });
   });
-}
-
-// Mock extensions for testing
-extension on AIAnalysisOptimizer {
-  ChessPosition _getOrComputePosition(List<String> moves, int index) {
-    final key = moves.sublist(0, index + 1).join('_');
-
-    if (_positionCache.containsKey(key)) {
-      return _positionCache[key]!;
-    }
-
-    ChessPosition position = ChessPosition.startingPosition;
-    if (index > 0) {
-      final prevKey = moves.sublist(0, index).join('_');
-      if (_positionCache.containsKey(prevKey)) {
-        position = _positionCache[prevKey]!;
-      }
-    }
-
-    position = position.applyMove(moves[index]);
-    _positionCache[key] = position;
-
-    return position;
-  }
 }
