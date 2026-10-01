@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/online_game.dart';
+import '../../services/chess_engine_service.dart';
+import '../../services/stockfish_engine_service.dart';
+import '../../widgets/game_analysis_bar.dart';
+import '../../widgets/game_board.dart';
+
+const _standardStartingFen =
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 /// Screen for reviewing/replaying completed games
 class GameReviewScreen extends ConsumerStatefulWidget {
@@ -21,12 +28,61 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
   late bool isAutoPlaying;
   late int autoPlaySpeed; // milliseconds between moves
 
+  final _chess = ChessEngineService();
+  int? _evaluation;
+  bool _isEvaluating = false;
+  int _evalRequestId = 0;
+
+  List<Map<String, dynamic>> get _movesAsMaps => widget.game.moves
+      .map((m) => {'from': m.from, 'to': m.to, 'promotion': m.promotion})
+      .toList();
+
   @override
   void initState() {
     super.initState();
     currentMoveIndex = -1; // Start before first move
     isAutoPlaying = false;
     autoPlaySpeed = 1000;
+    _chess.loadFromFenAndMoves(_standardStartingFen, const []);
+    // Defer the first evaluation request until after the initial build, so
+    // its setState call doesn't race the widget still being mounted.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _requestEvaluation());
+  }
+
+  /// Replays the game from the start up to [currentMoveIndex] and kicks off
+  /// a fresh Stockfish evaluation of the resulting position.
+  void _updatePosition() {
+    _chess.loadFromFenAndMoves(
+      _standardStartingFen,
+      _movesAsMaps.sublist(0, currentMoveIndex + 1),
+    );
+    _requestEvaluation();
+  }
+
+  Future<void> _requestEvaluation() async {
+    final requestId = ++_evalRequestId;
+    setState(() => _isEvaluating = true);
+
+    final fen = _chess.getCurrentFen();
+    final whiteToMove = _chess.isWhiteTurn();
+    final score = await StockfishEngineService.instance.evaluatePosition(fen);
+
+    if (!mounted || requestId != _evalRequestId) return;
+    setState(() {
+      // Stockfish reports the score from the side-to-move's perspective;
+      // normalize to White's perspective for the evaluation bar.
+      _evaluation = score == null ? null : (whiteToMove ? score : -score);
+      _isEvaluating = false;
+    });
+  }
+
+  /// Moves to [index] (clamped to the game's move range), updating the
+  /// replayed position and triggering a new evaluation.
+  void _seekTo(int index) {
+    setState(() {
+      currentMoveIndex = index.clamp(-1, widget.game.moves.length - 1);
+    });
+    _updatePosition();
   }
 
   @override
@@ -162,7 +218,8 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
         ],
       );
 
-  /// Build chess board placeholder
+  /// Build the chess board at [currentMoveIndex], with a live Stockfish
+  /// evaluation bar above it.
   Widget _buildChessBoard() => Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(16),
@@ -172,39 +229,12 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
         ),
         child: Column(
           children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.brown[100],
-                  border: Border.all(color: Colors.brown, width: 2),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: List.generate(
-                      8,
-                      (row) => Expanded(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: List.generate(8, (col) {
-                                final isLight = (row + col) % 2 == 0;
-                                final backgroundColor = isLight
-                                    ? Colors.amber[100]
-                                    : Colors.amber[700];
-
-                                return Expanded(
-                                  child: Container(
-                                    color: backgroundColor,
-                                    child: Center(
-                                      child: _buildSquareContent(row, col),
-                                    ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          )),
-                ),
-              ),
+            _buildEvaluationBar(),
+            const SizedBox(height: 8),
+            GameBoard(
+              gameState: _chess.rawChess,
+              isPlayerTurn: false,
+              showMaterial: false,
             ),
             const SizedBox(height: 8),
             Text(
@@ -215,10 +245,22 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
         ),
       );
 
-  /// Build square content
-  Widget _buildSquareContent(int row, int col) {
-    // Placeholder - in real implementation, would show chess pieces
-    return const SizedBox();
+  Widget _buildEvaluationBar() {
+    if (_evaluation == null) {
+      return SizedBox(
+        height: 30,
+        child: _isEvaluating
+            ? const Center(
+                child: SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            : null,
+      );
+    }
+    return EvaluationBar(evaluation: _evaluation!);
   }
 
   /// Build control buttons
@@ -263,12 +305,10 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
             Slider(
               value: currentMoveIndex.toDouble(),
               min: -1,
-              max: (widget.game.moves.length - 1).toDouble(),
-              onChanged: (value) {
-                setState(() {
-                  currentMoveIndex = value.toInt();
-                });
-              },
+              max: (widget.game.moves.length - 1)
+                  .toDouble()
+                  .clamp(-1, double.infinity),
+              onChanged: (value) => _seekTo(value.toInt()),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -342,11 +382,7 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
         final isSelected = index == currentMoveIndex;
 
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              currentMoveIndex = index;
-            });
-          },
+          onTap: () => _seekTo(index),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
@@ -371,33 +407,25 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
 
   // Control callbacks
   void _goToStart() {
-    setState(() {
-      currentMoveIndex = -1;
-      isAutoPlaying = false;
-    });
+    setState(() => isAutoPlaying = false);
+    _seekTo(-1);
   }
 
   void _previousMove() {
-    setState(() {
-      if (currentMoveIndex > -1) {
-        currentMoveIndex--;
-      }
-    });
+    if (currentMoveIndex > -1) {
+      _seekTo(currentMoveIndex - 1);
+    }
   }
 
   void _nextMove() {
-    setState(() {
-      if (currentMoveIndex < widget.game.moves.length - 1) {
-        currentMoveIndex++;
-      }
-    });
+    if (currentMoveIndex < widget.game.moves.length - 1) {
+      _seekTo(currentMoveIndex + 1);
+    }
   }
 
   void _goToEnd() {
-    setState(() {
-      currentMoveIndex = widget.game.moves.length - 1;
-      isAutoPlaying = false;
-    });
+    setState(() => isAutoPlaying = false);
+    _seekTo(widget.game.moves.length - 1);
   }
 
   void _toggleAutoPlay() {
@@ -413,14 +441,11 @@ class _GameReviewScreenState extends ConsumerState<GameReviewScreen> {
   Future<void> _playMoves() async {
     while (isAutoPlaying && currentMoveIndex < widget.game.moves.length - 1) {
       await Future.delayed(Duration(milliseconds: autoPlaySpeed));
-      if (mounted) {
-        setState(() {
-          if (currentMoveIndex < widget.game.moves.length - 1) {
-            currentMoveIndex++;
-          } else {
-            isAutoPlaying = false;
-          }
-        });
+      if (!mounted) return;
+      if (currentMoveIndex < widget.game.moves.length - 1) {
+        _seekTo(currentMoveIndex + 1);
+      } else {
+        setState(() => isAutoPlaying = false);
       }
     }
   }
