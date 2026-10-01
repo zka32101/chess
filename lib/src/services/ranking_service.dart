@@ -166,9 +166,7 @@ class RankingService {
   }) async {
     try {
       final snapshot = await _firestore
-          .collection('rankings')
-          .doc('global')
-          .collection('players')
+          .collection('users')
           .orderBy('rating', descending: true)
           .limit(limit + offset)
           .get();
@@ -178,8 +176,10 @@ class RankingService {
           .toList()
           .asMap()
           .entries
-          .map((e) =>
-              RankingEntry.fromJson(e.value.data(), rank: offset + e.key + 1))
+          .map((e) => RankingEntry.fromJson(
+                {...e.value.data(), 'userId': e.value.id},
+                rank: offset + e.key + 1,
+              ))
           .toList();
     } catch (e) {
       print('Error fetching global ranking: $e');
@@ -248,9 +248,7 @@ class RankingService {
   Future<int?> getUserRank(String uid) async {
     try {
       final snapshot = await _firestore
-          .collection('rankings')
-          .doc('global')
-          .collection('players')
+          .collection('users')
           .orderBy('rating', descending: true)
           .get();
 
@@ -270,9 +268,7 @@ class RankingService {
   }) async {
     try {
       final snapshot = await _firestore
-          .collection('rankings')
-          .doc('global')
-          .collection('players')
+          .collection('users')
           .orderBy('rating', descending: true)
           .get();
 
@@ -287,8 +283,10 @@ class RankingService {
           .sublist(start, end)
           .asMap()
           .entries
-          .map((e) =>
-              RankingEntry.fromJson(e.value.data(), rank: start + e.key + 1))
+          .map((e) => RankingEntry.fromJson(
+                {...e.value.data(), 'userId': e.value.id},
+                rank: start + e.key + 1,
+              ))
           .toList();
     } catch (e) {
       print('Error fetching nearby rankings: $e');
@@ -299,38 +297,34 @@ class RankingService {
   /// Real-time stream of the global ranking's top [limit] entries.
   Stream<List<RankingEntry>> watchGlobalRanking({required int limit}) =>
       _firestore
-          .collection('rankings')
-          .doc('global')
-          .collection('players')
+          .collection('users')
           .orderBy('rating', descending: true)
           .limit(limit)
           .snapshots()
           .map((snapshot) => snapshot.docs
               .asMap()
               .entries
-              .map(
-                  (e) => RankingEntry.fromJson(e.value.data(), rank: e.key + 1))
+              .map((e) => RankingEntry.fromJson(
+                    {...e.value.data(), 'userId': e.value.id},
+                    rank: e.key + 1,
+                  ))
               .toList());
 
   /// Real-time stream of a single user's own ranking entry.
   Stream<RankingEntry?> watchUserRanking(String uid) => _firestore
-      .collection('rankings')
-      .doc('global')
-      .collection('players')
+      .collection('users')
       .doc(uid)
       .snapshots()
-      .map((doc) => doc.exists ? RankingEntry.fromJson(doc.data()!) : null);
+      .map((doc) => doc.exists
+          ? RankingEntry.fromJson({...doc.data()!, 'userId': doc.id})
+          : null);
 
   /// Aggregate stats over the whole global ranking (used by the leaderboard
   /// screen's summary header). Distinct from [getRankingStatistics], which
   /// also buckets players into a rating [RatingDistribution].
   Future<RankingStats> getRankingStats() async {
     try {
-      final snapshot = await _firestore
-          .collection('rankings')
-          .doc('global')
-          .collection('players')
-          .get();
+      final snapshot = await _firestore.collection('users').get();
 
       final ratings = snapshot.docs
           .map((doc) => (doc['rating'] as num?)?.toInt() ?? 0)
@@ -481,14 +475,19 @@ class RankingEntry {
   factory RankingEntry.fromJson(Map<String, dynamic> json, {int rank = 0}) {
     final wins = json['wins'] ?? 0;
     final losses = json['losses'] ?? 0;
+    final gamesPlayed = json['gamesPlayed'] ?? (wins + losses) as int;
     return RankingEntry(
       uid: json['userId'] ?? '',
       displayName: json['displayName'] ?? json['username'] ?? '',
-      shogiRankString: json['shogiRank'] ?? '',
+      // `shogiRank` on a `users` doc is a nested object (see
+      // UserModel._ShogiRankConverter), not the plain string this field
+      // expects, so only accept it when it's actually a string.
+      shogiRankString: json['shogiRank'] is String ? json['shogiRank'] : '',
       rating: json['rating'] ?? 1000,
       rank: rank,
-      gamesPlayed: json['gamesPlayed'] ?? (wins + losses) as int,
-      winRate: (json['winRate'] ?? 0.0).toDouble(),
+      gamesPlayed: gamesPlayed,
+      winRate: (json['winRate'] ?? (gamesPlayed > 0 ? wins / gamesPlayed : 0.0))
+          .toDouble(),
       lastGameAt: json['updatedAt'] != null
           ? (json['updatedAt'] as Timestamp).toDate()
           : null,
