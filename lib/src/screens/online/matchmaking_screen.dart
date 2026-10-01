@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/online_game_provider.dart';
 import 'online_game_screen.dart';
 
@@ -321,10 +322,12 @@ class _MatchmakingScreenState extends ConsumerState<MatchmakingScreen> {
         try {
           setState(() => _isSearching = true);
 
+          final userProfile = ref.read(currentUserProvider).value;
+
           final entry = await notifier.joinQueue(
             playerId: user.uid,
             playerName: user.displayName ?? 'Anonymous',
-            currentRating: 1600, // TODO: Get from user profile
+            currentRating: userProfile?.rating ?? 1500,
             timeControlType: _selectedTimeControl,
             color: _selectedColor,
           );

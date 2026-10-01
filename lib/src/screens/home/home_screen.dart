@@ -11,7 +11,7 @@ import '../online/matchmaking_screen.dart';
 import '../game/cpu_game_selection_screen.dart';
 import '../premium/premium_screen.dart';
 import '../notifications_screen.dart';
-import '../leaderboard_screen.dart';
+import '../ranking/leaderboard_screen.dart';
 import '../learn/learn_hub_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
