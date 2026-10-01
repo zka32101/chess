@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/game_provider.dart';
+import '../../providers/online_game_provider.dart';
 import '../../models/user.dart';
-import '../../models/game.dart';
+import '../../models/online_game.dart';
+import '../online/game_review_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({
@@ -22,7 +23,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    final gameHistory = ref.watch(gameHistoryProvider);
+    final gameHistory = ref.watch(userRecentGamesProvider).whenData(
+          (games) => games.where((g) => g.status == 'completed').toList(),
+        );
 
     // If userId is provided, fetch that user's profile (TODO)
     // For now, show current user's profile
@@ -331,7 +334,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildGamesTab(AsyncValue<List<GameModel>> gameHistory) =>
+  Widget _buildGamesTab(AsyncValue<List<OnlineGame>> gameHistory) =>
       gameHistory.when(
         loading: () => const Padding(
           padding: EdgeInsets.all(24),
@@ -370,72 +373,79 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         },
       );
 
-  Widget _buildGameCard(GameModel game) {
+  Widget _buildGameCard(OnlineGame game) {
     final isWhiteWin = game.result == 'white_win';
     final isBlackWin = game.result == 'black_win';
     final isDraw = game.result == 'draw';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => GameReviewScreen(gameId: game.gameId, game: game),
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${game.whitePlayerName} vs ${game.blackPlayerName}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${game.whitePlayerName} vs ${game.blackPlayerName}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  game.timeControl ?? '5+3',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
+                  const SizedBox(height: 4),
+                  Text(
+                    game.timeControl,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: isDraw
-                  ? Colors.grey.shade100
-                  : isWhiteWin
-                      ? Colors.green.shade100
-                      : Colors.red.shade100,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              isDraw
-                  ? 'Draw'
-                  : isWhiteWin
-                      ? '1-0'
-                      : '0-1',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isDraw
-                    ? Colors.grey.shade700
-                    : isWhiteWin
-                        ? Colors.green.shade700
-                        : Colors.red.shade700,
+                ],
               ),
             ),
-          ),
-        ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: isDraw
+                    ? Colors.grey.shade100
+                    : isWhiteWin
+                        ? Colors.green.shade100
+                        : Colors.red.shade100,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                isDraw
+                    ? 'Draw'
+                    : isWhiteWin
+                        ? '1-0'
+                        : '0-1',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDraw
+                      ? Colors.grey.shade700
+                      : isWhiteWin
+                          ? Colors.green.shade700
+                          : Colors.red.shade700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

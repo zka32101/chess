@@ -153,6 +153,52 @@ class StockfishEngineService {
     }
   }
 
+  /// Evaluates [fen] for up to [moveTimeMs] milliseconds and returns the
+  /// score in centipawns from White's perspective (positive favors White),
+  /// or null if no score was reported before the engine settled on a move.
+  /// A forced mate is reported as a large magnitude score (±100000, further
+  /// reduced by however many moves away the mate is) so it still sorts
+  /// correctly against ordinary centipawn scores.
+  Future<int?> evaluatePosition(String fen, {int moveTimeMs = 500}) async {
+    await initialize();
+
+    final completer = Completer<int?>();
+    int? lastScore;
+    StreamSubscription<String>? sub;
+    sub = _stockfish!.stdout.listen((line) {
+      final trimmed = line.trim();
+      if (trimmed.startsWith('info') && trimmed.contains('score')) {
+        final cpMatch = RegExp(r'score cp (-?\d+)').firstMatch(trimmed);
+        final mateMatch = RegExp(r'score mate (-?\d+)').firstMatch(trimmed);
+        if (cpMatch != null) {
+          lastScore = int.parse(cpMatch.group(1)!);
+        } else if (mateMatch != null) {
+          final movesToMate = int.parse(mateMatch.group(1)!);
+          lastScore =
+              movesToMate >= 0 ? 100000 - movesToMate : -100000 - movesToMate;
+        }
+      }
+      if (trimmed.startsWith('bestmove') && !completer.isCompleted) {
+        completer.complete(lastScore);
+      }
+    });
+
+    _send('position fen $fen');
+    _send('go movetime $moveTimeMs');
+
+    try {
+      return await completer.future.timeout(
+        Duration(milliseconds: moveTimeMs + 5000),
+        onTimeout: () {
+          _send('stop');
+          return lastScore;
+        },
+      );
+    } finally {
+      await sub.cancel();
+    }
+  }
+
   void _send(String command) {
     if (_stockfish == null) return;
     _stockfish!.stdin = command;
