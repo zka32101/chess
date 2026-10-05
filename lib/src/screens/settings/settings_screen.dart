@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/user_preferences_provider.dart';
 import 'sound_preferences_screen.dart';
 import 'legal_documents_screen.dart';
@@ -129,6 +130,14 @@ class SettingsScreen extends ConsumerWidget {
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
                         _showResetDialog(context, preferencesService);
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('Sign Out'),
+                      onTap: () {
+                        _showSignOutDialog(context, ref);
                       },
                     ),
                   ],
@@ -496,6 +505,37 @@ class SettingsScreen extends ConsumerWidget {
               );
             },
             child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await ref.read(authStateNotifierProvider.notifier).signOut();
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error signing out: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Sign Out'),
           ),
         ],
       ),
