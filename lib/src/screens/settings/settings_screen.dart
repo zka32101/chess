@@ -243,6 +243,8 @@ class SettingsScreen extends ConsumerWidget {
                         : null,
                     onTap: () {
                       service.setThemeMode(ThemeMode.light);
+                      ref.read(themeModeProvider.notifier).state =
+                          ThemeMode.light;
                       Navigator.pop(context);
                     },
                   ),
@@ -253,6 +255,8 @@ class SettingsScreen extends ConsumerWidget {
                         : null,
                     onTap: () {
                       service.setThemeMode(ThemeMode.dark);
+                      ref.read(themeModeProvider.notifier).state =
+                          ThemeMode.dark;
                       Navigator.pop(context);
                     },
                   ),
@@ -263,6 +267,8 @@ class SettingsScreen extends ConsumerWidget {
                         : null,
                     onTap: () {
                       service.setThemeMode(ThemeMode.system);
+                      ref.read(themeModeProvider.notifier).state =
+                          ThemeMode.system;
                       Navigator.pop(context);
                     },
                   ),
