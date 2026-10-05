@@ -94,6 +94,8 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
           onTimeExpired: () => _handlePlayerTimeout(game),
         ),
 
+        _buildDrawOfferBanner(game),
+
         // Move/Action buttons
         if (isBoardActive) _buildGameActions(context, game),
       ],
@@ -231,6 +233,46 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
           ],
         ),
       );
+
+  /// Build a banner offering Accept/Decline when the opponent has an
+  /// outstanding draw offer pending for the local player to respond to.
+  Widget _buildDrawOfferBanner(OnlineGame game) {
+    if (game.status != 'active') return const SizedBox.shrink();
+
+    final hasIncomingOffer =
+        ref.watch(drawOfferStreamProvider(_gameId)).value ?? false;
+    if (!hasIncomingOffer) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.1),
+        border: Border.all(color: Colors.amber),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.handshake, color: Colors.amber),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Opponent offered a draw',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: _acceptDraw,
+            child: const Text('Accept'),
+          ),
+          TextButton(
+            onPressed: _declineDraw,
+            child: const Text('Decline'),
+          ),
+        ],
+      ),
+    );
+  }
 
   /// Build error state
   Widget _buildErrorState(Object error) => Center(
@@ -474,6 +516,37 @@ class _OnlineGameScreenState extends ConsumerState<OnlineGameScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error offering draw: $e')),
+        );
+      }
+    }
+  }
+
+  /// Accept the opponent's outstanding draw offer
+  Future<void> _acceptDraw() async {
+    try {
+      await ref.read(onlineGameServiceProvider).acceptDraw(_gameId);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error accepting draw: $e')),
+        );
+      }
+    }
+  }
+
+  /// Decline the opponent's outstanding draw offer
+  Future<void> _declineDraw() async {
+    try {
+      await ref.read(onlineGameServiceProvider).declineDraw(_gameId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Draw offer declined')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error declining draw: $e')),
         );
       }
     }
