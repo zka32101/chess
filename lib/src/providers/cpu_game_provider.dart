@@ -1,5 +1,7 @@
+import 'dart:math' show pow;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:chess/chess.dart' as chess_lib;
 import '../models/game.dart';
 import '../models/cpu_game_state.dart';
@@ -560,6 +562,7 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
       endReason: 'resignation',
       endTime: DateTime.now(),
     );
+    _recordResult('loss');
   }
 
   /// Offer a draw (simplified - auto-accept)
@@ -572,6 +575,7 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
       endReason: 'draw_agreement',
       endTime: DateTime.now(),
     );
+    _recordResult('draw');
   }
 
   /// Reset the game
@@ -622,6 +626,51 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
       endReason: endReason,
       endTime: DateTime.now(),
     );
+
+    if (result != null) {
+      final playerWon = (result == 'white_win') == state.playerIsWhite;
+      _recordResult(result == 'draw' ? 'draw' : (playerWon ? 'win' : 'loss'));
+    }
+  }
+
+  /// Updates the signed-in user's rating/win-loss-draw stats after a CPU
+  /// game, via a standard ELO update against the difficulty's virtual
+  /// rating (the same scale as [AIDifficultyStockfishExt.stockfishElo]).
+  /// Best-effort: CPU games aren't otherwise persisted anywhere, so a
+  /// failure here is swallowed rather than surfaced to the player.
+  Future<void> _recordResult(String playerResult) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(
+            user.uid,
+          );
+      final userDoc = await userRef.get();
+      final currentRating =
+          (userDoc.data()?['rating'] as num?)?.toInt() ?? 1500;
+
+      final actualScore = switch (playerResult) {
+        'win' => 1.0,
+        'draw' => 0.5,
+        _ => 0.0,
+      };
+      final opponentElo = state.difficulty.stockfishElo;
+      final expectedScore =
+          1 / (1 + pow(10, (opponentElo - currentRating) / 400));
+      const kFactor = 32;
+      final ratingDelta = (kFactor * (actualScore - expectedScore)).round();
+
+      await userRef.update({
+        'rating': FieldValue.increment(ratingDelta),
+        'gamesPlayed': FieldValue.increment(1),
+        if (playerResult == 'win') 'wins': FieldValue.increment(1),
+        if (playerResult == 'loss') 'losses': FieldValue.increment(1),
+        if (playerResult == 'draw') 'draws': FieldValue.increment(1),
+      });
+    } catch (_) {
+      // Best-effort; don't block the UI on a stats-persistence failure.
+    }
   }
 }
 
