@@ -1,7 +1,23 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'phase_k_models.freezed.dart';
 part 'phase_k_models.g.dart';
+
+/// Every timestamp field below is written to Firestore via
+/// `FieldValue.serverTimestamp()` (see friend_service.dart), which reads
+/// back as a [Timestamp], not the ISO-8601 string json_serializable's
+/// default `DateTime` handling expects. Used as a `@JsonKey(fromJson:)`
+/// converter on those fields so `fromJson` doesn't throw on real data.
+DateTime? _dateTimeFromTimestamp(Object? json) {
+  if (json == null) return null;
+  if (json is Timestamp) return json.toDate();
+  if (json is String) return DateTime.parse(json);
+  return null;
+}
+
+DateTime _requiredDateTimeFromTimestamp(Object? json) =>
+    (json is Timestamp) ? json.toDate() : DateTime.parse(json as String);
 
 // ========== Leaderboard Models ==========
 
@@ -64,9 +80,12 @@ class Friend with _$Friend {
     required String friendId,
     required String friendUsername,
     required String friendAvatar,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime connectedAt,
     required bool isOnline,
-    required DateTime? lastSeen,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _dateTimeFromTimestamp) required DateTime? lastSeen,
     required int friendRating,
     @Default(0) int mutualChallenges,
   }) = _Friend;
@@ -81,9 +100,11 @@ class FriendRequest with _$FriendRequest {
     required String fromUserId,
     required String fromUsername,
     required String fromAvatar,
-    required DateTime sentAt,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp) required DateTime sentAt,
     required String status, // 'pending', 'accepted', 'rejected', 'cancelled'
-    required DateTime? respondedAt,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _dateTimeFromTimestamp) required DateTime? respondedAt,
   }) = _FriendRequest;
 
   factory FriendRequest.fromJson(Map<String, dynamic> json) =>

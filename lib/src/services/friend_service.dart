@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/phase_k_models.dart';
+import '../models/user.dart';
 
 class FriendService {
   factory FriendService() => _instance;
@@ -33,6 +34,35 @@ class FriendService {
       return friends;
     } catch (e) {
       debugPrint('Error fetching friends: $e');
+      return [];
+    }
+  }
+
+  /// Find users whose display name starts with [query], for the "add
+  /// friend" search flow. Case-sensitive prefix match (Firestore has no
+  /// case-insensitive query support without a denormalized lowercase
+  /// field, which no user doc has).
+  Future<List<UserModel>> searchUsersByDisplayName(
+    String query, {
+    int limit = 10,
+  }) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return [];
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .orderBy('displayName')
+          .startAt([trimmed])
+          .endAt(['$trimmed'])
+          .limit(limit)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => UserModel.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      debugPrint('Error searching users: $e');
       return [];
     }
   }
@@ -130,8 +160,11 @@ class FriendService {
                 .doc(userId),
             {
               'friendId': userId,
-              'friendUsername': userData['username'] ?? 'Unknown',
-              'friendAvatar': userData['avatar'] ?? '',
+              // UserModel's fields are `displayName`/`photoUrl`, not
+              // `username`/`avatar` -- those never existed on a real user
+              // doc, so this always fell back to 'Unknown'/''.
+              'friendUsername': userData['displayName'] ?? 'Unknown',
+              'friendAvatar': userData['photoUrl'] ?? '',
               'connectedAt': FieldValue.serverTimestamp(),
               'isOnline': false,
               'lastSeen': FieldValue.serverTimestamp(),
