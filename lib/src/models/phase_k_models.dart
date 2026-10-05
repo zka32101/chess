@@ -209,7 +209,11 @@ class Tournament with _$Tournament {
     required String description,
     required String
         status, // 'registration', 'in-progress', 'completed', 'cancelled'
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime startDate,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime endDate,
     required String
         format, // 'single-elimination', 'double-elimination', 'round-robin', 'swiss'
@@ -234,6 +238,8 @@ class TournamentParticipant with _$TournamentParticipant {
     required String userId,
     required String username,
     required int seedRating,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime joinedAt,
     required String status, // 'registered', 'active', 'eliminated', 'withdrew'
     required int points,
@@ -256,9 +262,13 @@ class TournamentMatch with _$TournamentMatch {
     required String player1Id,
     required String player2Id,
     required String status, // 'scheduled', 'in-progress', 'completed'
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime scheduledAt,
-    required DateTime? startedAt,
-    required DateTime? completedAt,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _dateTimeFromTimestamp) required DateTime? startedAt,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _dateTimeFromTimestamp) required DateTime? completedAt,
     required String? winnerId,
     required String? loserId,
     required String? gameId,

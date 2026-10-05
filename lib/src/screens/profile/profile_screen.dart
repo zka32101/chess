@@ -6,6 +6,7 @@ import '../../models/user.dart';
 import '../../models/online_game.dart';
 import '../online/game_review_screen.dart';
 import '../friends/friends_screen.dart';
+import '../tournaments/tournaments_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({
@@ -38,6 +39,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          if (widget.userId == null) // Only shown for own profile
+            IconButton(
+              icon: const Icon(Icons.emoji_events_outlined),
+              tooltip: 'Tournaments',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const TournamentsScreen()),
+              ),
+            ),
           if (widget.userId == null) // Only shown for own profile
             IconButton(
               icon: const Icon(Icons.people_outline),

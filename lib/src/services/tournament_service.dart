@@ -201,6 +201,23 @@ class TournamentService {
     required String gameId,
   }) async {
     try {
+      // Participants are keyed by a generated participantId, not by
+      // userId, so the winner/loser doc refs have to be looked up by
+      // their `userId` field before they can be updated.
+      final participantsRef = _firestore
+          .collection('tournaments')
+          .doc(tournamentId)
+          .collection('participants');
+
+      final winnerSnapshot = await participantsRef
+          .where('userId', isEqualTo: winnerId)
+          .limit(1)
+          .get();
+      final loserSnapshot = await participantsRef
+          .where('userId', isEqualTo: loserId)
+          .limit(1)
+          .get();
+
       await _firestore.runTransaction((transaction) async {
         // Update match
         transaction.update(
@@ -218,27 +235,19 @@ class TournamentService {
             });
 
         // Update winner stats
-        transaction.update(
-            _firestore
-                .collection('tournaments')
-                .doc(tournamentId)
-                .collection('participants')
-                .doc(winnerId),
-            {
-              'wins': FieldValue.increment(1),
-              'points': FieldValue.increment(3),
-            });
+        if (winnerSnapshot.docs.isNotEmpty) {
+          transaction.update(winnerSnapshot.docs.first.reference, {
+            'wins': FieldValue.increment(1),
+            'points': FieldValue.increment(3),
+          });
+        }
 
         // Update loser stats
-        transaction.update(
-            _firestore
-                .collection('tournaments')
-                .doc(tournamentId)
-                .collection('participants')
-                .doc(loserId),
-            {
-              'losses': FieldValue.increment(1),
-            });
+        if (loserSnapshot.docs.isNotEmpty) {
+          transaction.update(loserSnapshot.docs.first.reference, {
+            'losses': FieldValue.increment(1),
+          });
+        }
       });
 
       _matchCache.remove(tournamentId);
@@ -373,10 +382,10 @@ class TournamentService {
         final ranking = standings.rankings[i];
         final prizeAmount = prizeDistribution[i];
 
-        await _firestore.collection('user_rewards').doc(ranking.userId).update({
+        await _firestore.collection('user_rewards').doc(ranking.userId).set({
           'totalPrizeWinnings': FieldValue.increment(prizeAmount),
           'tournaments': FieldValue.increment(1),
-        });
+        }, SetOptions(merge: true));
       }
 
       // Mark tournament as completed
@@ -417,65 +426,4 @@ class TournamentService {
     _matchCache.clear();
     _standingsCache.clear();
   }
-}
-
-// Extension methods for Tournament.fromJson
-extension TournamentFromJson on Tournament {
-  static Tournament fromJson(Map<String, dynamic> json) => Tournament(
-        tournamentId: json['tournamentId'] as String,
-        name: json['name'] as String,
-        description: json['description'] as String,
-        status: json['status'] as String,
-        startDate: (json['startDate'] as Timestamp).toDate(),
-        endDate: (json['endDate'] as Timestamp).toDate(),
-        format: json['format'] as String,
-        maxParticipants: json['maxParticipants'] as int,
-        currentParticipants: json['currentParticipants'] as int,
-        timeControl: json['timeControl'] as String,
-        entryFee: json['entryFee'] as int,
-        prizePool: json['prizePool'] as int,
-        createdBy: json['createdBy'] as String,
-        participantIds: List<String>.from(json['participantIds'] as List),
-      );
-}
-
-// Extension methods for TournamentParticipant.fromJson
-extension TournamentParticipantFromJson on TournamentParticipant {
-  static TournamentParticipant fromJson(Map<String, dynamic> json) =>
-      TournamentParticipant(
-        participantId: json['participantId'] as String,
-        tournamentId: json['tournamentId'] as String,
-        userId: json['userId'] as String,
-        username: json['username'] as String,
-        seedRating: json['seedRating'] as int,
-        joinedAt: (json['joinedAt'] as Timestamp).toDate(),
-        status: json['status'] as String,
-        points: json['points'] as int? ?? 0,
-        wins: json['wins'] as int? ?? 0,
-        losses: json['losses'] as int? ?? 0,
-        draws: json['draws'] as int? ?? 0,
-        opponentIds: List<String>.from(json['opponentIds'] as List? ?? []),
-      );
-}
-
-// Extension methods for TournamentMatch.fromJson
-extension TournamentMatchFromJson on TournamentMatch {
-  static TournamentMatch fromJson(Map<String, dynamic> json) => TournamentMatch(
-        matchId: json['matchId'] as String,
-        tournamentId: json['tournamentId'] as String,
-        round: json['round'] as int,
-        player1Id: json['player1Id'] as String,
-        player2Id: json['player2Id'] as String,
-        status: json['status'] as String,
-        scheduledAt: (json['scheduledAt'] as Timestamp).toDate(),
-        startedAt: json['startedAt'] != null
-            ? (json['startedAt'] as Timestamp).toDate()
-            : null,
-        completedAt: json['completedAt'] != null
-            ? (json['completedAt'] as Timestamp).toDate()
-            : null,
-        winnerId: json['winnerId'] as String?,
-        loserId: json['loserId'] as String?,
-        gameId: json['gameId'] as String?,
-      );
 }
