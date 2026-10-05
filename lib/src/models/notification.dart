@@ -1,7 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'notification.freezed.dart';
 part 'notification.g.dart';
+
+/// `createdAt` is written via `FieldValue.serverTimestamp()` (see
+/// `NotificationServiceProvider.createNotification` in
+/// notification_provider.dart), which reads back as a [Timestamp], not the
+/// ISO-8601 string json_serializable's default `DateTime` handling expects.
+DateTime _requiredDateTimeFromTimestamp(Object? json) =>
+    (json is Timestamp) ? json.toDate() : DateTime.parse(json as String);
 
 /// Notification type enum
 enum NotificationType {
@@ -30,6 +38,8 @@ class AppNotification with _$AppNotification {
     required NotificationType type,
     required String title,
     required String body,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime createdAt,
     required bool isRead,
     String? opponentName,
