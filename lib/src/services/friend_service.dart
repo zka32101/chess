@@ -111,6 +111,26 @@ class FriendService {
           'status': 'pending',
           'respondedAt': null,
         });
+
+        final notificationId =
+            '${DateTime.now().millisecondsSinceEpoch}_request';
+        transaction.set(
+            _firestore
+                .collection('users')
+                .doc(toUserId)
+                .collection('notifications')
+                .doc(notificationId),
+            {
+              'notificationId': notificationId,
+              'userId': toUserId,
+              'type': 'friendRequest',
+              'title': 'Friend Request',
+              'body': '$fromUsername sent you a friend request',
+              'createdAt': FieldValue.serverTimestamp(),
+              'isRead': false,
+              'actionUrl': '/friends',
+              'priority': 'normal',
+            });
       });
 
       _requestsCache.remove(toUserId);
@@ -193,6 +213,27 @@ class FriendService {
             {
               'status': 'accepted',
               'respondedAt': FieldValue.serverTimestamp(),
+            });
+
+        final accepterName = userData['displayName'] ?? 'Someone';
+        final notificationId =
+            '${DateTime.now().millisecondsSinceEpoch}_accepted';
+        transaction.set(
+            _firestore
+                .collection('users')
+                .doc(friendId)
+                .collection('notifications')
+                .doc(notificationId),
+            {
+              'notificationId': notificationId,
+              'userId': friendId,
+              'type': 'friendRequest',
+              'title': 'Friend Request Accepted',
+              'body': '$accepterName accepted your friend request',
+              'createdAt': FieldValue.serverTimestamp(),
+              'isRead': false,
+              'actionUrl': '/friends',
+              'priority': 'normal',
             });
       });
 
