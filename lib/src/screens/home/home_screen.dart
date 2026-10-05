@@ -168,21 +168,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () async {
-              try {
-                await ref.read(authStateNotifierProvider.notifier).signOut();
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error signing out: $e')),
-                  );
-                }
-              }
-            },
-            label: const Text('Sign Out'),
-            icon: const Icon(Icons.logout),
-          ),
         );
       },
     );
