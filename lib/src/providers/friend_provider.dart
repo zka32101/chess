@@ -30,6 +30,13 @@ final userSearchProvider =
   return ref.watch(friendServiceProvider).searchUsersByDisplayName(query);
 });
 
+/// Recent activity (game results) from the signed-in user's friends.
+final activityFeedProvider = FutureProvider<List<FriendActivity>>((ref) async {
+  final user = ref.watch(currentUserProvider).value;
+  if (user == null) return [];
+  return ref.watch(friendServiceProvider).getActivityFeed(user.uid);
+});
+
 /// Mutating friend actions (send/accept/reject/remove), refreshing the
 /// list/request providers afterward so the UI reflects the change.
 class FriendActionsNotifier extends StateNotifier<AsyncValue<void>> {
