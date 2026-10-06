@@ -3,6 +3,7 @@ import 'dart:math' show pow;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/online_game.dart';
+import 'friend_service.dart';
 
 /// Manages online multiplayer games in real-time
 class OnlineGameService {
@@ -224,9 +225,63 @@ class OnlineGameService {
       });
 
       _logger.i('Game completed: $gameId - $result ($resultReason)');
+
+      await _logGameEndActivity(
+        gameId: gameId,
+        game: game,
+        result: result,
+        resultReason: resultReason,
+      );
     } catch (e, st) {
       _logger.e('Failed to end game', error: e, stackTrace: st);
       rethrow;
+    }
+  }
+
+  /// Posts a "I won/lost/drew" activity to each player's friends' feeds.
+  /// Best-effort: a failure here shouldn't be treated as the game itself
+  /// failing to end, so errors are swallowed (logActivity already does
+  /// this internally too).
+  Future<void> _logGameEndActivity({
+    required String gameId,
+    required OnlineGame game,
+    required String result,
+    required String resultReason,
+  }) async {
+    try {
+      Future<void> log(String userId, String opponentName, String outcome) {
+        final title = outcome == 'win'
+            ? 'Game won!'
+            : outcome == 'loss'
+                ? 'Game lost'
+                : 'Game drawn';
+        final description = outcome == 'win'
+            ? 'Won against $opponentName ($resultReason)'
+            : outcome == 'loss'
+                ? 'Lost against $opponentName ($resultReason)'
+                : 'Drew against $opponentName ($resultReason)';
+
+        return FriendService.instance.logActivity(
+          userId,
+          outcome,
+          title,
+          description,
+          {'gameId': gameId, 'opponentName': opponentName, 'result': result},
+        );
+      }
+
+      if (result == 'white_win') {
+        await log(game.whitePlayerId, game.blackPlayerName, 'win');
+        await log(game.blackPlayerId, game.whitePlayerName, 'loss');
+      } else if (result == 'black_win') {
+        await log(game.blackPlayerId, game.whitePlayerName, 'win');
+        await log(game.whitePlayerId, game.blackPlayerName, 'loss');
+      } else {
+        await log(game.whitePlayerId, game.blackPlayerName, 'draw');
+        await log(game.blackPlayerId, game.whitePlayerName, 'draw');
+      }
+    } catch (e) {
+      _logger.w('Failed to log game-end activity for $gameId: $e');
     }
   }
 

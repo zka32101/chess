@@ -132,6 +132,8 @@ class FriendActivity with _$FriendActivity {
     required String
         activityType, // 'win', 'loss', 'achievement', 'online', 'challenge'
     required String description,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime timestamp,
     required Map<String, dynamic> metadata,
   }) = _FriendActivity;

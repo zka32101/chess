@@ -18,12 +18,13 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
     final requestCount = pendingRequests.value?.length ?? 0;
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Friends'),
           centerTitle: true,
           bottom: TabBar(
+            isScrollable: true,
             tabs: [
               const Tab(text: 'Friends'),
               Tab(
@@ -31,6 +32,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                       ? 'Requests ($requestCount)'
                       : 'Requests'),
               const Tab(text: 'Add Friend'),
+              const Tab(text: 'Activity'),
             ],
           ),
         ),
@@ -39,6 +41,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
             _FriendsListTab(),
             _RequestsTab(),
             _AddFriendTab(),
+            _ActivityFeedTab(),
           ],
         ),
       ),
@@ -277,5 +280,68 @@ class _AddFriendTabState extends ConsumerState<_AddFriendTab> {
         ],
       ),
     );
+  }
+}
+
+class _ActivityFeedTab extends ConsumerWidget {
+  const _ActivityFeedTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activity = ref.watch(activityFeedProvider);
+
+    return activity.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+      data: (list) {
+        if (list.isEmpty) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'No activity yet. Games your friends finish will show up here.',
+              ),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: list.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final activity = list[index];
+            return Card(
+              child: ListTile(
+                leading: Icon(_iconFor(activity.activityType)),
+                title: Text(activity.description),
+                subtitle: Text(_timeAgo(activity.timestamp)),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  IconData _iconFor(String activityType) {
+    switch (activityType) {
+      case 'win':
+        return Icons.emoji_events;
+      case 'loss':
+        return Icons.sentiment_dissatisfied;
+      case 'draw':
+        return Icons.handshake;
+      default:
+        return Icons.info_outline;
+    }
+  }
+
+  String _timeAgo(DateTime timestamp) {
+    final diff = DateTime.now().difference(timestamp);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inHours < 1) return '${diff.inMinutes}m ago';
+    if (diff.inDays < 1) return '${diff.inHours}h ago';
+    return '${diff.inDays}d ago';
   }
 }
