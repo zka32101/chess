@@ -168,13 +168,50 @@ class AchievementService {
         case 'five_wins':
           return userDoc['wins'] ?? 0;
         case 'puzzle_master':
-          return userDoc['puzzlesCompleted'] ?? 0;
+          // UserModel's field is `puzzlesSolved`, not `puzzlesCompleted` --
+          // the latter never existed on a real user doc.
+          return userDoc['puzzlesSolved'] ?? 0;
         default:
           return 0;
       }
     } catch (e) {
       print('Error calculating progress: $e');
       return 0;
+    }
+  }
+
+  /// Checks the milestone achievements this service knows how to evaluate
+  /// ([_calculateCurrentProgress]'s cases) against [userId]'s current
+  /// stats, and unlocks any that have newly been reached. Best-effort:
+  /// call this after any event that moves wins/puzzlesSolved (a game
+  /// ending, a puzzle solve) -- a failure here shouldn't block that event.
+  Future<void> checkAndUnlockMilestones(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final wins = (userDoc.data()?['wins'] as num?)?.toInt() ?? 0;
+      final puzzlesSolved =
+          (userDoc.data()?['puzzlesSolved'] as num?)?.toInt() ?? 0;
+
+      final reached = <String, bool>{
+        'first_win': wins >= 1,
+        'five_wins': wins >= 5,
+        'puzzle_master': puzzlesSolved >= 50,
+      };
+
+      final userAchievements = _firestore
+          .collection('achievements')
+          .doc('user_achievements')
+          .collection(userId);
+
+      for (final entry in reached.entries) {
+        if (!entry.value) continue;
+        final existing = await userAchievements.doc(entry.key).get();
+        if (!existing.exists) {
+          await unlockAchievement(userId, entry.key);
+        }
+      }
+    } catch (e) {
+      print('Error checking achievement milestones: $e');
     }
   }
 }

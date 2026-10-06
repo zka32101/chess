@@ -3,6 +3,7 @@ import 'dart:math' show pow;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
 import '../models/online_game.dart';
+import 'achievement_service.dart';
 
 /// Manages online multiplayer games in real-time
 class OnlineGameService {
@@ -224,6 +225,11 @@ class OnlineGameService {
       });
 
       _logger.i('Game completed: $gameId - $result ($resultReason)');
+
+      // Best-effort: re-check milestone achievements for both players
+      // now that this game's result has been recorded.
+      await AchievementService().checkAndUnlockMilestones(game.whitePlayerId);
+      await AchievementService().checkAndUnlockMilestones(game.blackPlayerId);
     } catch (e, st) {
       _logger.e('Failed to end game', error: e, stackTrace: st);
       rethrow;
