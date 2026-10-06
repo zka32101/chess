@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/phase_k_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/friend_provider.dart';
+import '../../providers/challenge_provider.dart';
 
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -84,10 +85,20 @@ class _FriendsListTab extends ConsumerWidget {
                 ),
                 title: Text(friend.friendUsername),
                 subtitle: Text('Rating: ${friend.friendRating}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.person_remove_outlined),
-                  tooltip: 'Remove friend',
-                  onPressed: () => _confirmRemove(context, ref, friend),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.bolt_outlined),
+                      tooltip: 'Challenge',
+                      onPressed: () => _sendChallenge(context, ref, friend),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.person_remove_outlined),
+                      tooltip: 'Remove friend',
+                      onPressed: () => _confirmRemove(context, ref, friend),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -95,6 +106,22 @@ class _FriendsListTab extends ConsumerWidget {
         );
       },
     );
+  }
+
+  Future<void> _sendChallenge(
+    BuildContext context,
+    WidgetRef ref,
+    Friend friend,
+  ) async {
+    await ref.read(challengeActionsProvider.notifier).sendChallenge(
+          toUserId: friend.friendId,
+          toUsername: friend.friendUsername,
+        );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Challenge sent to ${friend.friendUsername}')),
+      );
+    }
   }
 
   void _confirmRemove(BuildContext context, WidgetRef ref, Friend friend) {

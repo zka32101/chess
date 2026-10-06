@@ -145,8 +145,37 @@ class FriendChallengeService {
   }) async {
     try {
       final resultId = DateTime.now().millisecondsSinceEpoch.toString();
+      final winnerStreakRef =
+          _firestore.collection('challenge_streaks').doc(winnerId);
+      final loserStreakRef =
+          _firestore.collection('challenge_streaks').doc(loserId);
 
       await _firestore.runTransaction((transaction) async {
+        // Firestore transactions require every read before any write, so
+        // the streak docs (which may not exist yet) are read here and
+        // written with set(), never update() -- update() throws NOT_FOUND
+        // on a doc nothing has created before.
+        final winnerSnapshot = await transaction.get(winnerStreakRef);
+        final loserSnapshot = await transaction.get(loserStreakRef);
+
+        final winnerData = winnerSnapshot.data() ?? const {};
+        final winnerCurrentStreak =
+            ((winnerData['currentStreak'] as num?)?.toInt() ?? 0) + 1;
+        final winnerBestStreak =
+            (winnerData['bestStreak'] as num?)?.toInt() ?? 0;
+        final winnerWon =
+            ((winnerData['totalChallengesWon'] as num?)?.toInt() ?? 0) + 1;
+        final winnerLost =
+            (winnerData['totalChallengesLost'] as num?)?.toInt() ?? 0;
+        final winnerTotal = winnerWon + winnerLost;
+
+        final loserData = loserSnapshot.data() ?? const {};
+        final loserWon =
+            (loserData['totalChallengesWon'] as num?)?.toInt() ?? 0;
+        final loserLost =
+            ((loserData['totalChallengesLost'] as num?)?.toInt() ?? 0) + 1;
+        final loserTotal = loserWon + loserLost;
+
         // Update challenge status
         transaction.update(
             _firestore
@@ -174,19 +203,28 @@ class FriendChallengeService {
           'moveCount': moveCount,
         });
 
-        // Update winner's streak
-        transaction
-            .update(_firestore.collection('challenge_streaks').doc(winnerId), {
-          'currentStreak': FieldValue.increment(1),
-          'totalChallengesWon': FieldValue.increment(1),
-          'streakStartDate': FieldValue.serverTimestamp(),
+        transaction.set(winnerStreakRef, {
+          'userId': winnerId,
+          'currentStreak': winnerCurrentStreak,
+          'bestStreak': winnerCurrentStreak > winnerBestStreak
+              ? winnerCurrentStreak
+              : winnerBestStreak,
+          'totalChallengesWon': winnerWon,
+          'totalChallengesLost': winnerLost,
+          'winRate': winnerTotal == 0 ? 0.0 : winnerWon / winnerTotal,
+          'streakStartDate':
+              winnerData['streakStartDate'] ?? FieldValue.serverTimestamp(),
         });
 
-        // Reset loser's streak
-        transaction
-            .update(_firestore.collection('challenge_streaks').doc(loserId), {
+        transaction.set(loserStreakRef, {
+          'userId': loserId,
           'currentStreak': 0,
-          'totalChallengesLost': FieldValue.increment(1),
+          'bestStreak': loserData['bestStreak'] ?? 0,
+          'totalChallengesWon': loserWon,
+          'totalChallengesLost': loserLost,
+          'winRate': loserTotal == 0 ? 0.0 : loserWon / loserTotal,
+          'streakStartDate':
+              loserData['streakStartDate'] ?? FieldValue.serverTimestamp(),
         });
       });
 

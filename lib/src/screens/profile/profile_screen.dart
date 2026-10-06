@@ -7,6 +7,7 @@ import '../../models/online_game.dart';
 import '../online/game_review_screen.dart';
 import '../friends/friends_screen.dart';
 import '../tournaments/tournaments_screen.dart';
+import '../challenges/challenges_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({
@@ -53,6 +54,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               tooltip: 'Friends',
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const FriendsScreen()),
+              ),
+            ),
+          if (widget.userId == null) // Only shown for own profile
+            IconButton(
+              icon: const Icon(Icons.bolt_outlined),
+              tooltip: 'Challenges',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChallengesScreen()),
               ),
             ),
           if (widget.userId == null) // Only show edit for own profile

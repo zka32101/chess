@@ -132,6 +132,8 @@ class FriendActivity with _$FriendActivity {
     required String
         activityType, // 'win', 'loss', 'achievement', 'online', 'challenge'
     required String description,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime timestamp,
     required Map<String, dynamic> metadata,
   }) = _FriendActivity;
@@ -150,15 +152,19 @@ class Challenge with _$Challenge {
     required String challengerUsername,
     required String challengeeUserId,
     required String challengeeUsername,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime createdAt,
     required String
         status, // 'pending', 'accepted', 'rejected', 'completed', 'cancelled'
     required String timeControl, // 'blitz', 'rapid', 'classical'
     required int wagerPoints,
-    required DateTime? respondedAt,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _dateTimeFromTimestamp) required DateTime? respondedAt,
     required String? winnerId,
     required String? gameId,
-    required DateTime? completedAt,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _dateTimeFromTimestamp) required DateTime? completedAt,
   }) = _Challenge;
 
   factory Challenge.fromJson(Map<String, dynamic> json) =>
@@ -171,6 +177,8 @@ class ChallengeStreak with _$ChallengeStreak {
     required String userId,
     required int currentStreak,
     required int bestStreak,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime streakStartDate,
     required int totalChallengesWon,
     required int totalChallengesLost,
@@ -190,6 +198,8 @@ class ChallengeResult with _$ChallengeResult {
     required String loserId,
     required int winnerRatingGain,
     required int loserRatingLoss,
+    // ignore: invalid_annotation_target
+    @JsonKey(fromJson: _requiredDateTimeFromTimestamp)
     required DateTime completedAt,
     required String gameMode, // 'white', 'black', 'random'
     @Default(0) int moveCount,
