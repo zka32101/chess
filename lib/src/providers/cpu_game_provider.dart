@@ -8,6 +8,7 @@ import '../models/cpu_game_state.dart';
 import '../services/chess_engine_service.dart';
 import '../services/ai_opponent_engine.dart';
 import '../services/stockfish_engine_service.dart';
+import '../services/achievement_service.dart';
 
 /// CPU game state
 class CPUGameState {
@@ -668,6 +669,8 @@ class CpuGameNotifier extends StateNotifier<CpuGameState> {
         if (playerResult == 'loss') 'losses': FieldValue.increment(1),
         if (playerResult == 'draw') 'draws': FieldValue.increment(1),
       });
+
+      await AchievementService().checkAndUnlockMilestones(user.uid);
     } catch (_) {
       // Best-effort; don't block the UI on a stats-persistence failure.
     }

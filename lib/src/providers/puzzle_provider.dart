@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/puzzle.dart';
+import '../services/achievement_service.dart';
 
 // Puzzle provider for loading and tracking puzzle solving
 class PuzzleService {
@@ -98,6 +99,7 @@ class PuzzleService {
         await _firestore.collection('users').doc(user.uid).update({
           'puzzlesSolved': FieldValue.increment(1),
         });
+        await AchievementService().checkAndUnlockMilestones(user.uid);
       }
     } catch (e) {
       print('Error recording puzzle attempt: $e');

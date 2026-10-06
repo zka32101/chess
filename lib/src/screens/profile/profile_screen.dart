@@ -7,6 +7,7 @@ import '../../models/online_game.dart';
 import '../online/game_review_screen.dart';
 import '../friends/friends_screen.dart';
 import '../tournaments/tournaments_screen.dart';
+import '../../providers/phase_t_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({
@@ -222,7 +223,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   else if (_selectedTab == 1)
                     _buildGamesTab(gameHistory)
                   else
-                    _buildAchievementsTab(),
+                    _buildAchievementsTab(user.uid),
 
                   const SizedBox(height: 24),
                 ],
@@ -510,39 +511,76 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       );
 
-  Widget _buildAchievementsTab() => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  const Icon(Icons.emoji_events, size: 48, color: Colors.amber),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Achievements Coming Soon',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+  Widget _buildAchievementsTab(String uid) {
+    final allAchievements = ref.watch(allAchievementsProvider);
+    final unlocked = ref.watch(playerAchievementsProvider(uid));
+
+    return allAchievements.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('Error: $error')),
+      data: (definitions) {
+        if (definitions.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(24),
+            child: Text('No achievements defined yet.'),
+          );
+        }
+
+        final unlockedIds =
+            unlocked.value?.map((a) => a.achievementId).toSet() ?? {};
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            children: definitions.map((achievement) {
+              final isUnlocked =
+                  unlockedIds.contains(achievement.achievementId);
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color:
+                      isUnlocked ? Colors.amber.shade50 : Colors.grey.shade100,
+                  border: Border.all(
+                    color: isUnlocked ? Colors.amber : Colors.grey.shade300,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Unlock achievements by completing milestones',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      isUnlocked ? Icons.emoji_events : Icons.lock_outline,
+                      color: isUnlocked ? Colors.amber.shade700 : Colors.grey,
+                      size: 32,
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            achievement.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            achievement.description,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text('${achievement.points} pts'),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
 }
