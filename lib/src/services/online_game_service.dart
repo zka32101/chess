@@ -224,9 +224,53 @@ class OnlineGameService {
       });
 
       _logger.i('Game completed: $gameId - $result ($resultReason)');
+
+      await _syncPlayerProfiles(
+        game: game,
+        result: result,
+        whiteRatingDelta: whiteRatingDelta,
+        blackRatingDelta: blackRatingDelta,
+      );
     } catch (e, st) {
       _logger.e('Failed to end game', error: e, stackTrace: st);
       rethrow;
+    }
+  }
+
+  /// Updates both players' users/{uid} profile docs after an online game
+  /// ends. Mirrors CpuGameNotifier._recordResult's update shape so rating/
+  /// stats stay consistent across game modes -- without this, an online
+  /// game's rating change only ever lived on the game document itself
+  /// (used for the post-game result screen) and never reached the
+  /// player's actual profile, so the leaderboard and profile stats never
+  /// moved for online play. Best-effort: a failure here shouldn't be
+  /// treated as the game itself failing to end.
+  Future<void> _syncPlayerProfiles({
+    required OnlineGame game,
+    required String result,
+    required int whiteRatingDelta,
+    required int blackRatingDelta,
+  }) async {
+    try {
+      final usersCollection = _firestore.collection('users');
+
+      await usersCollection.doc(game.whitePlayerId).update({
+        'rating': FieldValue.increment(whiteRatingDelta),
+        'gamesPlayed': FieldValue.increment(1),
+        if (result == 'white_win') 'wins': FieldValue.increment(1),
+        if (result == 'black_win') 'losses': FieldValue.increment(1),
+        if (result == 'draw') 'draws': FieldValue.increment(1),
+      });
+
+      await usersCollection.doc(game.blackPlayerId).update({
+        'rating': FieldValue.increment(blackRatingDelta),
+        'gamesPlayed': FieldValue.increment(1),
+        if (result == 'black_win') 'wins': FieldValue.increment(1),
+        if (result == 'white_win') 'losses': FieldValue.increment(1),
+        if (result == 'draw') 'draws': FieldValue.increment(1),
+      });
+    } catch (e) {
+      _logger.w('Failed to sync player profiles for game ${game.gameId}: $e');
     }
   }
 
